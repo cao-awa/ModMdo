@@ -1,0 +1,22 @@
+{
+    "Chinese": {
+        "overworld": "主世界(overworld)",
+        "the_nether": "下界(the_nether)",
+        "the_end": "末地(the_end)",
+        "here_start" : "%s 给你发送了一条坐标信息\n",
+        "command_here": "%s%s §e在 %s: \n %s",
+        "command_dhere": "%s%s §e在 %s: \n %s\n§d转换%s 坐标为 \n %s",
+        "command_here_feedback": "将 %s 的位置信息发送到所有玩家",
+        "command_here_failed_feedback": "§c无法将位置信息发送到其他玩家"
+    },
+    "English": {
+        "overworld": "overworld(主世界)",
+        "the_nether": "the_nether(下界)",
+        "the_end": "the_end(末地)",
+        "here_start" : "%s send a position message to you\n",
+        "command_here": "%s%s §eat %s: \n %s",
+        "command_dhere": "%s%s §eat %s: \n %s\n§dConvert %s coordinate is \n %s",
+        "command_here_feedback": "sent position of %s to all player",
+        "command_here_failed_feedback": "§ccannot send position to other player"
+    }
+}

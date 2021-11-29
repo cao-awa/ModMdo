@@ -1,27 +1,28 @@
 package com.github.zhuaidadaya.modMdo;
 
-import com.github.zhuaidadaya.modMdo.commands.DimensionHereCommand;
+import com.github.zhuaidadaya.MCH.Utils.Config.ConfigUtil;
+import com.github.zhuaidadaya.modMdo.Commands.DimensionHereCommand;
+import com.github.zhuaidadaya.modMdo.Commands.HereCommand;
+import com.github.zhuaidadaya.modMdo.Commands.ProjectCommand;
+import com.github.zhuaidadaya.modMdo.Lang.LanguageDictionary;
 import net.fabricmc.api.ModInitializer;
-import com.github.zhuaidadaya.modMdo.commands.HereCommand;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static com.github.zhuaidadaya.modMdo.Storage.Variables.config;
+import static com.github.zhuaidadaya.modMdo.Storage.Variables.languageDictionary;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ModMdo implements ModInitializer {
-    // This logger is used to write text to the console and the log file.
-    // It is considered best practice to use your mod id as the logger's name.
-    // That way, it's clear which mod wrote info, warnings, and errors.
-    public static final Logger LOGGER = LogManager.getLogger("modid");
+    public static final Logger LOGGER = LogManager.getLogger("ModMdo");
 
     @Override
     public void onInitialize() {
-        // This code runs as soon as Minecraft is in a mod-load-ready state.
-        // However, some things (like resources) may still be uninitialized.
-        // Proceed with mild caution.
+        LOGGER.info("loading for ModMdo");
 
-        LOGGER.info("Hello Fabric world!");
+        config = new ConfigUtil("config/","ModMdo.mhf","ModMdo");
+        languageDictionary = new LanguageDictionary("/format/format.json");
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("here").executes(context -> {
@@ -31,5 +32,7 @@ public class ModMdo implements ModInitializer {
                 return new DimensionHereCommand().dhere(context);
             }));
         });
+
+        new ProjectCommand().project();
     }
 }

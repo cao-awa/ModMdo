@@ -1,11 +1,11 @@
-package com.github.zhuaidadaya.modMdo.commands;
+package com.github.zhuaidadaya.modMdo.Commands;
 
 public class XYZ {
     private double X;
     private double Y;
     private double Z;
 
-    public XYZ(double X,double Y,double Z) {
+    public XYZ(double X, double Y, double Z) {
         this.X = X;
         this.Y = Y;
         this.Z = Z;
@@ -57,7 +57,7 @@ public class XYZ {
     }
 
 
-    public XYZ multiplyXZ(double multiplyX,double multiplyZ) {
+    public XYZ multiplyXZ(double multiplyX, double multiplyZ) {
         X *= multiplyX;
         Z *= multiplyZ;
         return this;
@@ -76,7 +76,7 @@ public class XYZ {
     }
 
 
-    public XYZ divideXZ(double divideX,double divideZ) {
+    public XYZ divideXZ(double divideX, double divideZ) {
         X /= divideX;
         Z /= divideZ;
         return this;
@@ -85,6 +85,17 @@ public class XYZ {
     public XYZ divideY(double divide) {
         Y /= divide;
         return this;
+    }
+
+    public XYZ getIntegerXYZ() {
+        int x = (int) getX();
+        int y = (int) getY();
+        int z = (int) getZ();
+        return new XYZ(x, y, z);
+    }
+
+    public XYZ clone() {
+        return new XYZ(getX(), getY(), getZ());
     }
 }
 

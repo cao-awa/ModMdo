@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "moo",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "ModMdo",
+  "description": "...",
   "authors": [
-    "Me!"
+    "zhuaidadaya"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.17",
+    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17"
   },
 
   "license": "CC0-1.0",
