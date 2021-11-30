@@ -2,13 +2,17 @@ package com.github.zhuaidadaya.modMdo.Lang;
 
 import com.github.zhuaidadaya.modMdo.Reads.FileReads;
 import com.github.zhuaidadaya.modMdo.ResourceLoader.Resources;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
 
 public class LanguageDictionary {
+    Logger logger = LogManager.getLogger("ModMdo");
     private final LinkedHashMap<Language, JSONObject> languages = new LinkedHashMap<>();
 
     public LanguageDictionary(String... initFrom) {
@@ -16,7 +20,7 @@ public class LanguageDictionary {
     }
 
     public static void main(String[] args) {
-        ;
+
     }
 
     public String getWord(Language language, String word) {
@@ -26,7 +30,13 @@ public class LanguageDictionary {
 
     public void appendResource(String[] resources) {
         for(String s : resources) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(Resources.getResource(s, getClass())));
+            logger.info("loading language dictionary: " + s);
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new InputStreamReader(Resources.getResource(s, getClass()),"GBK"));
+            } catch (UnsupportedEncodingException e) {
+
+            }
             String resource = FileReads.read(reader);
 
             JSONObject languageJson = new JSONObject(resource);

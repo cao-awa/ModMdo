@@ -1,7 +1,8 @@
 package com.github.zhuaidadaya.modMdo.Commands;
 
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.language;
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.languageDictionary;
+import com.github.zhuaidadaya.modMdo.Lang.Language;
+
+import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
 
 public class DimensionTips {
     public String getDimensionColor(String dimension) {
@@ -15,12 +16,13 @@ public class DimensionTips {
         return result;
     }
 
-    public String getDimensionName(String dimension) {
+    public String getDimensionName(Language getLang,String dimension) {
         String result;
+        getLang = getLanguage(getLang);
         switch(dimension) {
-            case "overworld" -> result = languageDictionary.getWord(language,"overworld");
-            case "the_nether" -> result = languageDictionary.getWord(language,"the_nether");
-            case "the_end" -> result = languageDictionary.getWord(language,"the_end");
+            case "overworld" -> result = languageDictionary.getWord(getLang,"dimension.overworld");
+            case "the_nether" -> result = languageDictionary.getWord(getLang,"dimension.the_nether");
+            case "the_end" -> result = languageDictionary.getWord(getLang,"dimension.the_end");
             default -> result = "";
         }
         return result;

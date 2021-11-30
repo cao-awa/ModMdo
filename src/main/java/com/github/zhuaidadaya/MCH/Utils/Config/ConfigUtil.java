@@ -15,12 +15,12 @@ public class ConfigUtil {
     /**
      *
      */
-    private Logger logger;
+    private final LinkedHashMap<Object, Config<Object, Object>> configs = new LinkedHashMap<>();
+    private final LinkedHashMap<Object, Object> utilConfigs = new LinkedHashMap<>();
     /**
      *
      */
-    private final LinkedHashMap<Object, Config<Object, Object>> configs = new LinkedHashMap<>();
-    private final LinkedHashMap<Object, Object> utilConfigs = new LinkedHashMap<>();
+    private Logger logger;
     private boolean encryption = false;
     /**
      * if true
@@ -37,7 +37,19 @@ public class ConfigUtil {
         readConfig(true);
     }
 
-    public ConfigUtil(String configPath,String entrust) {
+    public ConfigUtil(String entrust,boolean storage) {
+        if(storage) {
+            utilConfigs.put("path", System.getProperty("user.dir"));
+            utilConfigs.put("name", "settings.conf");
+            utilConfigs.put("version", "1.1");
+            logger = LogManager.getLogger("ConfigUtil/" + entrust);
+            readConfig(true);
+        } else {
+
+        }
+    }
+
+    public ConfigUtil(String configPath, String entrust) {
         utilConfigs.put("path", configPath);
         utilConfigs.put("name", "settings.conf");
         utilConfigs.put("version", "1.1");
@@ -45,7 +57,7 @@ public class ConfigUtil {
         readConfig(true);
     }
 
-    public ConfigUtil(String configPath, String configName,String entrust) {
+    public ConfigUtil(String configPath, String configName, String entrust) {
         utilConfigs.put("path", configPath);
         utilConfigs.put("name", configName);
         utilConfigs.put("version", "1.1");
@@ -54,7 +66,7 @@ public class ConfigUtil {
         readConfig(true);
     }
 
-    public ConfigUtil(String configPath, String configName, String configVersion,String entrust) {
+    public ConfigUtil(String configPath, String configName, String configVersion, String entrust) {
         utilConfigs.put("path", configPath);
         utilConfigs.put("name", configName);
         utilConfigs.put("version", configVersion);
@@ -105,6 +117,7 @@ public class ConfigUtil {
     }
 
     public void readConfig(boolean log) {
+        int configSize = 0;
         try {
             logger.info("loading config from: " + utilConfigs.get("name").toString());
 
@@ -134,12 +147,13 @@ public class ConfigUtil {
                     s1.append((char) (Integer.parseInt(o.toString()) - lim - checkCode));
 
                 configs = new JSONObject(s1.toString()).getJSONArray("configs");
-
+                configSize = s1.length();
             } else {
                 while((cache = br.readLine()) != null)
                     builder.append(cache);
 
                 configs = new JSONArray(new JSONObject(builder.toString()).getJSONArray("configs"));
+                configSize = builder.length();
             }
 
             for(Object o : configs) {
@@ -164,7 +178,7 @@ public class ConfigUtil {
         } catch (Exception e) {
             logger.error("failed to load config: " + utilConfigs.get("name").toString());
             File configFile = new File(utilConfigs.get("path").toString() + "/" + utilConfigs.get("name").toString());
-            if(!configFile.isFile() || configFile.length() == 0) {
+            if(! configFile.isFile() || configFile.length() == 0 || configSize == 0) {
                 try {
                     configFile.createNewFile();
                     writeConfig();

@@ -51,72 +51,80 @@ public class Config<K, V> {
     }
 
     public JSONObject toJSONObject() {
-        JSONObject json = new JSONObject();
-        JSONObject values = new JSONObject();
-        Object[] configValues = (Object[]) configValue;
-        if(configValues.length == 1) {
-            JSONObject inJ = new JSONObject();
-            inJ.put("listTag", listTag);
-            if(listTag)
-                inJ.put("values", configValues);
-            else
-                inJ.put("value", configValues[0]);
-            json.put(getKey(), inJ);
-        } else {
-            if(! listTag) {
-                int index = 0;
-                Object cacheObject = new Object();
-                Object cacheObject2 = new Object();
-                for(Object o : configValues) {
-                    if(index == 1) {
-                        cacheObject2 = o;
-                        values.put(cacheObject.toString(), cacheObject2.toString());
-                        index = 0;
-                    } else {
-                        cacheObject = o;
-                        index++;
-                    }
-                }
-
-                if(index % 2 != 0) {
-                    json.put(getKey(), new JSONObject().put("listTag", false).put("value", configValues));
-                } else {
-                    values.put(cacheObject.toString(), cacheObject2.toString());
-                    json.put(getKey(), new JSONObject().put("listTag", false).put("value", values));
-                }
+        if(configValue != null) {
+            JSONObject json = new JSONObject();
+            JSONObject values = new JSONObject();
+            Object[] configValues = (Object[]) configValue;
+            if(configValues.length == 1) {
+                JSONObject inJ = new JSONObject();
+                inJ.put("listTag", listTag);
+                if(listTag)
+                    inJ.put("values", configValues);
+                else
+                    inJ.put("value", configValues[0]);
+                json.put(getKey(), inJ);
             } else {
-                json.put(getKey(), new JSONObject().put("listTag", true).put("values", configValues).put("totalSize", configValues.length));
+                if(! listTag) {
+                    int index = 0;
+                    Object cacheObject = new Object();
+                    Object cacheObject2 = new Object();
+                    for(Object o : configValues) {
+                        if(index == 1) {
+                            cacheObject2 = o;
+                            values.put(cacheObject.toString(), cacheObject2.toString());
+                            index = 0;
+                        } else {
+                            cacheObject = o;
+                            index++;
+                        }
+                    }
+
+                    if(index % 2 != 0) {
+                        json.put(getKey(), new JSONObject().put("listTag", false).put("value", configValues));
+                    } else {
+                        values.put(cacheObject.toString(), cacheObject2.toString());
+                        json.put(getKey(), new JSONObject().put("listTag", false).put("value", values));
+                    }
+                } else {
+                    json.put(getKey(), new JSONObject().put("listTag", true).put("values", configValues).put("totalSize", configValues.length));
+                }
             }
+            return json;
+        } else {
+            return new JSONObject();
         }
-        return json;
     }
 
     public String toString() {
-        if(((Object[]) configValue).length == 1) {
-            return "Config(" + configKey + "=" + ((Object[]) configValue)[0] + ")";
-        } else {
-            if(! listTag) {
-                StringBuilder builder = new StringBuilder();
-                Object cacheObject1 = new Object();
-                Object cacheObject2;
-                int index = 0;
-                for(Object o : (Object[]) configValue) {
-                    if(index == 1) {
-                        cacheObject2 = o.toString();
-                        builder.append(cacheObject1.toString()).append("=").append(cacheObject2.toString()).append(", ");
-                        index = 0;
-                    } else {
-                        cacheObject1 = o.toString();
-                        index++;
-                    }
-                }
-
-                builder.replace(builder.length() - 2, builder.length(), "");
-
-                return "Config(" + configKey + "={" + builder + "})";
+        if(configValue != null) {
+            if(((Object[]) configValue).length == 1) {
+                return "Config(" + configKey + "=" + ((Object[]) configValue)[0] + ")";
             } else {
-                return "Config(" + configKey + "=" + Arrays.toString(((Object[]) configValue)) + ")";
+                if(! listTag) {
+                    StringBuilder builder = new StringBuilder();
+                    Object cacheObject1 = new Object();
+                    Object cacheObject2;
+                    int index = 0;
+                    for(Object o : (Object[]) configValue) {
+                        if(index == 1) {
+                            cacheObject2 = o.toString();
+                            builder.append(cacheObject1.toString()).append("=").append(cacheObject2.toString()).append(", ");
+                            index = 0;
+                        } else {
+                            cacheObject1 = o.toString();
+                            index++;
+                        }
+                    }
+
+                    builder.replace(builder.length() - 2, builder.length(), "");
+
+                    return "Config(" + configKey + "={" + builder + "})";
+                } else {
+                    return "Config(" + configKey + "=" + Arrays.toString(((Object[]) configValue)) + ")";
+                }
             }
+        } else {
+            return "";
         }
     }
 }

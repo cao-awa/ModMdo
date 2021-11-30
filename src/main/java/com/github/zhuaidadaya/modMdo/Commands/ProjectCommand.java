@@ -1,32 +1,17 @@
 package com.github.zhuaidadaya.modMdo.Commands;
 
-import com.mojang.brigadier.Command;
+import com.github.zhuaidadaya.MCH.Utils.Config.Config;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.network.MessageType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import org.json.JSONObject;
 
-import java.io.File;
-
+import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ProjectCommand {
-    public static int broadcast(ServerCommandSource source, Formatting formatting, String message) {
-        try {
-            final Text text = new LiteralText(message).formatted(formatting);
-
-            source.getServer().getPlayerManager().broadcastChatMessage(text, MessageType.CHAT, source.getPlayer().getUuid());
-            return Command.SINGLE_SUCCESS;
-        } catch (Exception e) {
-            return - 1;
-        }
-    }
-
     public void project() {
+        initProject();
         //        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
         //            dispatcher.register(literal("broadcast")
         //                    .requires(source -> source.hasPermissionLevel(2)) // Must be a game master to use the command. Command will not show up in tab completion or execute to non operators or any operator that is permission level 1.
@@ -53,6 +38,13 @@ public class ProjectCommand {
     }
 
     public void initProject() {
-        new File("projects/project.mhf");
+        LOGGER.info("initializing projects");
+        Config<Object, Object> projectConf = config.getConfig("projects");
+        if(projectConf != null) {
+            projects = new JSONObject(projectConf.getValue());
+        } else {
+            config.set("projects",new JSONObject());
+        }
+        LOGGER.info("initialized projects");
     }
 }

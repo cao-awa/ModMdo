@@ -1,7 +1,9 @@
 package com.github.zhuaidadaya.modMdo.Commands;
 
+import net.minecraft.server.network.ServerPlayerEntity;
+
 public interface Here {
-    String formatHereTip(String dimension, XYZ xyz, String playerName,DimensionTips dimensionTips);
-    String formatHereFeedBack(String playerName);
-    String formatHereFailedFeedBack();
+    String formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity player, DimensionTips dimensionTips);
+    String formatHereFeedBack(ServerPlayerEntity player);
+    String formatHereFailedFeedBack(ServerPlayerEntity player);
 }

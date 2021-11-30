@@ -11,6 +11,12 @@ public class XYZ {
         this.Z = Z;
     }
 
+    public XYZ(XYZ xyz) {
+        this.X = xyz.getX();
+        this.Y = xyz.getY();
+        this.Z = xyz.getZ();
+    }
+
     public double getX() {
         return X;
     }
@@ -95,7 +101,11 @@ public class XYZ {
     }
 
     public XYZ clone() {
-        return new XYZ(getX(), getY(), getZ());
+        try {
+            return (XYZ) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return new XYZ(this);
+        }
     }
 }
 
