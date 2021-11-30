@@ -32,6 +32,10 @@ public class Variables {
     }
 
     public static Language getUserLanguage(UUID userUUID) {
-        return getLanguage(Language.getLanguageForName(users.getUserConfig(userUUID,"language").toString()));
+        try {
+            return getLanguage(Language.getLanguageForName(users.getUserConfig(userUUID, "language").toString()));
+        } catch (Exception e) {
+            return language;
+        }
     }
 }

@@ -7,6 +7,10 @@ import java.util.LinkedHashMap;
 public class UserUtil {
     private final LinkedHashMap<Object, JSONObject> users = new LinkedHashMap<>();
 
+    public UserUtil() {
+
+    }
+
     public UserUtil(JSONObject json) {
         for(Object o : json.keySet())
             users.put(o.toString(), json.getJSONObject(o.toString()));
@@ -23,6 +27,8 @@ public class UserUtil {
     }
 
     public Object getUserConfig(Object target, Object config) {
+        if(users.get(target.toString()) == null)
+            throw new IllegalStateException();
         return users.get(target.toString()).get(config.toString()).toString();
     }
 

@@ -55,6 +55,7 @@ public class ModMdoUserCommand {
         if(projectConf != null) {
             users = new UserUtil(new JSONObject(projectConf.getValue()));
         } else {
+            users = new UserUtil();
             config.set("user_profiles", new JSONObject());
         }
 
