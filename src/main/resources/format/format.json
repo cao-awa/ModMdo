@@ -1,28 +1,28 @@
 {
     "Chinese": {
-        "languages.Chinese": "ÖĞÎÄ",
-        "languages.English": "Ó¢ÎÄ",
-        "language.change": "½«ModMdoÓïÑÔÇĞ»»Îª %s",
-        "dimension.overworld": "Ö÷ÊÀ½ç(overworld)",
-        "dimension.the_nether": "ÏÂ½ç(the_nether)",
-        "dimension.the_end": "Ä©µØ(the_end)",
-        "command.here.startWith": "%s ¸øÄã·¢ËÍÁËÒ»Ìõ×ø±êĞÅÏ¢\n",
-        "command.here": "%s%s ¡ìeÔÚ %s: \n %s",
-        "command.dhere": "%s%s ¡ìeÔÚ %s: \n %s\n¡ìd×ª»»%s ×ø±êÎª \n %s",
-        "command.here.feedback": "½« %s µÄÎ»ÖÃĞÅÏ¢·¢ËÍµ½ËùÓĞÍæ¼Ò",
-        "command.here.failed.feedback": "¡ìcÎŞ·¨½«Î»ÖÃĞÅÏ¢·¢ËÍµ½ÆäËûÍæ¼Ò"
+        "languages.Chinese": "ä¸­æ–‡",
+        "languages.English": "è‹±æ–‡",
+        "language.change": "å°†ModMdoè¯­è¨€åˆ‡æ¢ä¸º %s",
+        "dimension.overworld": "ä¸»ä¸–ç•Œ(overworld)",
+        "dimension.the_nether": "ä¸‹ç•Œ(the_nether)",
+        "dimension.the_end": "æœ«åœ°(the_end)",
+        "command.here.startWith": "%s ç»™ä½ å‘é€äº†ä¸€æ¡åæ ‡ä¿¡æ¯\n",
+        "command.here": "%s%s Â§eåœ¨ %s: \n %s",
+        "command.dhere": "%s%s Â§eåœ¨ %s: \n %s\nÂ§dè½¬æ¢%s åæ ‡ä¸º \n %s",
+        "command.here.feedback": "å°† %s çš„ä½ç½®ä¿¡æ¯å‘é€åˆ°æ‰€æœ‰ç©å®¶",
+        "command.here.failed.feedback": "Â§cæ— æ³•å°†ä½ç½®ä¿¡æ¯å‘é€åˆ°å…¶ä»–ç©å®¶"
     },
     "English": {
         "languages.Chinese": "chinese",
         "languages.English": "english",
         "language.change": "change the ModMdo language to %s",
-        "dimension.overworld": "overworld(Ö÷ÊÀ½ç)",
-        "dimension.the_nether": "the_nether(ÏÂ½ç)",
-        "dimension.the_end": "the_end(Ä©µØ)",
+        "dimension.overworld": "overworld(ä¸»ä¸–ç•Œ)",
+        "dimension.the_nether": "the_nether(ä¸‹ç•Œ)",
+        "dimension.the_end": "the_end(æœ«åœ°)",
         "command.here.startWith": "%s send a position message to you\n",
-        "command.here": "%s%s ¡ìeat %s: \n %s",
-        "command.dhere": "%s%s ¡ìeat %s: \n %s\n¡ìdConvert %s coordinate is \n %s",
+        "command.here": "%s%s Â§eat %s: \n %s",
+        "command.dhere": "%s%s Â§eat %s: \n %s\nÂ§dConvert %s coordinate is \n %s",
         "command.here.feedback": "sent position of %s to all player",
-        "command.here.failed.feedback": "¡ìccannot send position to other player"
+        "command.here.failed.feedback": "Â§ccannot send position to other player"
     }
 }

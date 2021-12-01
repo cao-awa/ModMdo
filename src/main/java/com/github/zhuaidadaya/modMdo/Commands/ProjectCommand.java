@@ -1,7 +1,11 @@
 package com.github.zhuaidadaya.modMdo.Commands;
 
 import com.github.zhuaidadaya.MCH.Utils.Config.Config;
+import com.github.zhuaidadaya.modMdo.Projects.Project;
+import com.github.zhuaidadaya.modMdo.Projects.ProjectUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import org.json.JSONObject;
 
 import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
@@ -23,28 +27,45 @@ public class ProjectCommand {
         //        });
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("projects").then(literal("start").then(argument("projectName", string()).executes(ctx -> {
-                System.out.println(getString(ctx, "projectName"));
+            dispatcher.register(literal("projects").then(literal("start").then(argument("projectName", string()).executes(start -> {
+                ServerPlayerEntity player = start.getSource().getPlayer();
+                Project project = new Project(getString(start, "projectName"), users.getUser(player));
+                startProject(project);
                 return 1;
-            }).then(argument("projectNote",greedyString()).executes(c-> {
+            }).then(argument("projectNote", greedyString()).executes(c -> {
                 System.out.println("project note");
                 return 2;
-            })))).then(literal("test").executes(c -> {
-                System.out.println("test");
+            })))).then(literal("detailed").then(argument("projects", ProjectListArgument.projectList()).executes(projectsInfo -> {
+                String[] input = projectsInfo.getInput().split(" ");
+                System.out.println(input[2]);
+                return 3;
+            }).then(literal("initiator").executes(initiator -> {
+                String[] input = initiator.getInput().split(" ");
+                System.out.println(input[2]);
+                initiator.getSource().sendFeedback(Text.of(initiator.getLastChild().getInput()),true );
                 return 0;
-            })));
+            })))));
         });
+    }
 
+    public void startProject(Project project) {
+        projects.addProject(project);
+
+        updateUserProfiles();
+        updateProjects();
     }
 
     public void initProject() {
         LOGGER.info("initializing projects");
         Config<Object, Object> projectConf = config.getConfig("projects");
         if(projectConf != null) {
-            projects = new JSONObject(projectConf.getValue());
+            projects = new ProjectUtil(new JSONObject(projectConf.getValue()));
         } else {
-            config.set("projects",new JSONObject());
+            projects = new ProjectUtil();
+            config.set("projects", new JSONObject());
         }
         LOGGER.info("initialized projects");
+
+        updateProjects();
     }
 }

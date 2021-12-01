@@ -1,8 +1,10 @@
 package com.github.zhuaidadaya.modMdo.Usr;
 
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.json.JSONObject;
 
 import java.util.LinkedHashMap;
+import java.util.UUID;
 
 public class UserUtil {
     private final LinkedHashMap<Object, JSONObject> users = new LinkedHashMap<>();
@@ -37,5 +39,25 @@ public class UserUtil {
         for(Object o : users.keySet())
             json.put(o.toString(), users.get(o.toString()));
         return json;
+    }
+
+    public User[] getUsers() {
+        User[] userList = new User[users.size()];
+        int i = 0;
+        for(Object o : users.keySet()) {
+            JSONObject userJSON = users.get(o.toString());
+            userList[i++] = new User(userJSON);
+        }
+        return userList;
+    }
+
+    public User getUser(ServerPlayerEntity player) {
+        if(users.get(player.getUuid()) == null)
+            put(player.getUuid(), new User(player.getName().asString(), player.getUuid()).toJSONObject());
+        return new User(users.get(player.getUuid()));
+    }
+
+    public User getUser(UUID uuid) {
+        return new User(users.get(uuid.toString()));
     }
 }

@@ -59,6 +59,8 @@ public class ModMdoUserCommand {
             config.set("user_profiles", new JSONObject());
         }
 
+        updateUserProfiles();
+
         LOGGER.info("initialized user profiles");
     }
 }

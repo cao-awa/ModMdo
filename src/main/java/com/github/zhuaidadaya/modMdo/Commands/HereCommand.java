@@ -29,7 +29,7 @@ public class HereCommand implements Here {
             return 1;
         } catch (Exception e) {
             try {
-                context.getSource().sendFeedback(Text.of(formatHereFailedFeedBack(context.getSource().getPlayer())), false);
+                context.getSource().sendError(Text.of(formatHereFailedFeedBack(context.getSource().getPlayer())));
             } catch (CommandSyntaxException ex) {
 
             }
