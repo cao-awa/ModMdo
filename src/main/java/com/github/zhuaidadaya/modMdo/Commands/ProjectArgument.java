@@ -1,13 +1,21 @@
 package com.github.zhuaidadaya.modMdo.Commands;
 
+import java.util.Collection;
+import java.util.List;
+
 import static com.github.zhuaidadaya.modMdo.Storage.Variables.projects;
 
 public class ProjectArgument {
-    public static int getProjectId(String name) {
-        return projects.getID(name);
+    public int getProjectId(String name) {
+        System.out.println(projects.toJSONObject());
+        try {
+            return projects.getID(name);
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
-    public static String getProjectName(int operationID) {
+    public String getProjectName(int operationID) {
         return switch(operationID) {
             case 0 -> "list";
             case 1 -> "start";
@@ -19,11 +27,14 @@ public class ProjectArgument {
         };
     }
 
-    public static String[] getProjectsName() {
-        String[] displayOperationNames = new String[projects.size()];
+    public Collection<String> getProjectsName() {
+        if(projects.size() == 0) {
+            return List.of("example");
+        }
+        Collection<String> displayOperationNames = new java.util.ArrayList<>(List.of());
 
         for(int i = 0; i < projects.size(); ++ i) {
-            displayOperationNames[i] = projects.getFromIndex(i).getName();
+            displayOperationNames.add(projects.getFromIndex(i).getName());
         }
 
         return displayOperationNames;

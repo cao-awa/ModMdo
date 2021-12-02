@@ -31,7 +31,7 @@ public class LanguageDictionary {
     public void appendResource(String[] resources) {
         for(String s : resources) {
             logger.info("loading language dictionary: " + s);
-            BufferedReader reader = null;
+            BufferedReader reader;
             reader = new BufferedReader(new InputStreamReader(Resources.getResource(s, getClass()), StandardCharsets.UTF_8));
             String resource = FileReads.read(reader);
 

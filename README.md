@@ -1,5 +1,5 @@
 # ModMdo
-a mod in minecraft server
+a mod for minecraft server
 
 ## use
 ModMdo supported some command

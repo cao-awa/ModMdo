@@ -7,9 +7,7 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 
 public class ConfigUtil {
     /**
@@ -28,6 +26,7 @@ public class ConfigUtil {
      */
     private boolean autoWrite = true;
     private String entrust;
+    private String note;
 
     public ConfigUtil(String entrust) {
         utilConfigs.put("path", System.getProperty("user.dir"));
@@ -37,7 +36,7 @@ public class ConfigUtil {
         readConfig(true);
     }
 
-    public ConfigUtil(String entrust,boolean storage) {
+    public ConfigUtil(String entrust, boolean storage) {
         if(storage) {
             utilConfigs.put("path", System.getProperty("user.dir"));
             utilConfigs.put("name", "settings.conf");
@@ -83,6 +82,11 @@ public class ConfigUtil {
 
     public ConfigUtil setAutoWrite(boolean autoWrite) {
         this.autoWrite = autoWrite;
+        return this;
+    }
+
+    public ConfigUtil setNote(String note) {
+        this.note = note;
         return this;
     }
 
@@ -136,7 +140,8 @@ public class ConfigUtil {
                 checkCode = Integer.parseInt(String.valueOf(br.readLine().chars().toArray()[0]));
 
                 while((cache = br.readLine()) != null) {
-                    builder.append(cache);
+                    if(! cache.startsWith("/**") & ! cache.startsWith(" *") & ! cache.startsWith(" */"))
+                        builder.append(cache);
                 }
 
                 StringBuilder s1 = new StringBuilder();
@@ -149,8 +154,17 @@ public class ConfigUtil {
                 configs = new JSONObject(s1.toString()).getJSONArray("configs");
                 configSize = s1.length();
             } else {
-                while((cache = br.readLine()) != null)
-                    builder.append(cache);
+                while(true) {
+                    String startWith = br.readLine();
+                    if(startWith.replace(" ","").startsWith("{")) {
+                        builder.append(startWith);
+                        break;
+                    }
+                }
+                while((cache = br.readLine()) != null) {
+                    if(! cache.startsWith("/**") & ! cache.startsWith(" *") & ! cache.startsWith(" */"))
+                        builder.append(cache);
+                }
 
                 configs = new JSONArray(new JSONObject(builder.toString()).getJSONArray("configs"));
                 configSize = builder.length();
@@ -199,7 +213,8 @@ public class ConfigUtil {
         int checkingCodeMax = 1024 * 8;
         int checkingCodeRange = r.nextInt(checkingCodeMax);
         int checkingCode = r.nextInt((checkingCodeRange / 8) > 0 ? checkingCodeRange / 8 : 16);
-        writer.write(encryption ? "encryption: [check code = " + checkingCode + ", range = " + checkingCodeRange + ", config size = " + write.length() + ", config version = " + utilConfigs.get("version") + "]\n" : "no encryption config: [config size = " + write.length() + ", config version = " + utilConfigs.get("version") + "]\n");
+        writer.write(encryption ? "encryption: [check_code=" + checkingCode + ", range=" + checkingCodeRange + ", config_size=" + write.length() + ", config_version=" + utilConfigs.get("version") + "]\n" : "no encryption config: [config_size=" + write.length() + ", config_version=" + utilConfigs.get("version") + "]\n");
+        writer.write(formatNote() + "\n\n");
         if(encryption) {
             writer.write(checkingCodeRange);
             writer.write("\n");
@@ -293,5 +308,25 @@ public class ConfigUtil {
 
     public boolean equal(ConfigUtil configUtil) {
         return configUtil.toString().equals(this.toString());
+    }
+
+    public String formatNote() {
+        if(note != null) {
+            try {
+                BufferedReader reader = new BufferedReader(new StringReader(note));
+                StringBuilder builder = new StringBuilder("/**\n");
+
+                String cache;
+                while((cache = reader.readLine()) != null)
+                    builder.append(" * ").append(cache).append("\n");
+                builder.append(" */");
+
+                return builder.toString();
+            } catch (Exception e) {
+                return "";
+            }
+        } else {
+            return "";
+        }
     }
 }

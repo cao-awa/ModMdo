@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modMdo.Commands;
 
+import com.github.zhuaidadaya.modMdo.Projects.Project;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -11,13 +12,13 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class ProjectListArgument implements ArgumentType<Integer> {
-    private static final Collection<String> EXAMPLES = Arrays.asList("sidebar", "foo.bar");
-    public static final DynamicCommandExceptionType INVALID_SLOT_EXCEPTION = new DynamicCommandExceptionType((name) -> {
+public class ProjectListArgument implements ArgumentType<String> {
+    private static final Collection<String> EXAMPLES = List.of("a", "b");
+    public static final DynamicCommandExceptionType INVALID_NAME_EXCEPTION = new DynamicCommandExceptionType((name) -> {
         return new TranslatableText("argument.projectName.invalid", name);
     });
 
@@ -28,24 +29,28 @@ public class ProjectListArgument implements ArgumentType<Integer> {
         return new ProjectListArgument();
     }
 
-    public static int getScoreboardSlot(CommandContext<ServerCommandSource> context, String name) {
-        return (Integer)context.getArgument(name, Integer.class);
+    public static Project getProject(CommandContext<ServerCommandSource> context, String name) {
+        return context.getArgument(name, Project.class);
     }
 
-    public Integer parse(StringReader stringReader) throws CommandSyntaxException {
+    @Override
+    public String parse(StringReader stringReader) throws CommandSyntaxException {
         String string = stringReader.readUnquotedString();
-        int i = ProjectArgument.getProjectId(string);
+        int i = new ProjectArgument().getProjectId(string);
         if (i == -1) {
-            throw INVALID_SLOT_EXCEPTION.create(string);
+            throw INVALID_NAME_EXCEPTION.create(string);
         } else {
-            return i;
+            return string;
         }
     }
 
+    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(ProjectArgument.getProjectsName(), builder);
+        return CommandSource.suggestMatching(new ProjectArgument().getProjectsName(), builder);
     }
 
+
+    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

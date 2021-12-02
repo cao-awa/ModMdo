@@ -17,15 +17,19 @@ public class HereCommand implements Here {
     public int here(CommandContext<ServerCommandSource> context) {
         try {
             DimensionTips dimensionTips = new DimensionTips();
+            ServerPlayerEntity whoUseHere = context.getSource().getPlayer();
             PlayerManager p = context.getSource().getServer().getPlayerManager();
+            XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
+            String dimension = whoUseHere.getEntityWorld().getDimension().getEffects().getPath();
             for(String o : p.getPlayerNames()) {
                 ServerPlayerEntity player = p.getPlayer(o);
-                XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
-                String dimension = player.getEntityWorld().getDimension().getEffects().getPath();
-                player.sendMessage(new LiteralText(formatHereTip(dimension, xyz, player, dimensionTips)), false);
-                player.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), player);
+                LiteralText hereMessage = new LiteralText(formatHereTip(dimension, xyz, player, dimensionTips,whoUseHere));
+                if(getUserHereReceive(player.getUuid())) {
+                    player.sendMessage(hereMessage, false);
+                }
             }
-            context.getSource().sendFeedback(Text.of(formatHereFeedBack(context.getSource().getPlayer())), true);
+            whoUseHere.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), whoUseHere);
+            context.getSource().sendFeedback(Text.of(formatHereFeedBack(whoUseHere)), true);
             return 1;
         } catch (Exception e) {
             try {
@@ -38,12 +42,13 @@ public class HereCommand implements Here {
     }
 
     @Override
-    public String formatHereTip(String dimension, XYZ xyz,ServerPlayerEntity player, DimensionTips dimensionTips) {
+    public String formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity player, DimensionTips dimensionTips,ServerPlayerEntity whoUseHere) {
         String playerName = player.getName().asString();
+        String useHerePlayerName = whoUseHere.getName().asString();
         Language getLang = getUserLanguage(player.getUuid());
         String format = languageDictionary.getWord(getLang, "command.here");
         String format_startWith = languageDictionary.getWord(getLang, "command.here.startWith");
-        return String.format(format_startWith, playerName) + String.format(format, dimensionTips.getDimensionColor(dimension), playerName, dimensionTips.getDimensionName(getLang,dimension), xyz.getIntegerXYZ());
+        return String.format(format_startWith, useHerePlayerName) + String.format(format, dimensionTips.getDimensionColor(dimension), useHerePlayerName, dimensionTips.getDimensionName(getLang, dimension), xyz.getIntegerXYZ());
     }
 
     @Override

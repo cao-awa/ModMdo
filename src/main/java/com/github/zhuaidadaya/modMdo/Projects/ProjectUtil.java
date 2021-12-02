@@ -22,15 +22,23 @@ public class ProjectUtil {
         for(Object o : projects.keySet()) {
             JSONObject projectJson = projects.getJSONObject(o.toString());
 
-            Project project = new Project(projectJson.get("name").toString(), new User(projectJson.getJSONObject("initiator")), new UserUtil(projectJson.getJSONObject("contributors")).getUsers());
+            Project project = new Project(projectJson.get("name").toString(),
+                    new User(projectJson.getJSONObject("initiator")),
+                    new UserUtil(projectJson.getJSONObject("contributors")).getUsers()
+            ).setStartTime(projectJson.get("time_start").toString())
+                    .setStatus(ProjectStatus.getStatusFromString(projectJson.get("status").toString()))
+                    .setID(projectJson.getInt("id"));
 
             this.projects.put(o.toString(), project.setID(projects.length()));
         }
     }
 
     public ProjectUtil addProject(Project... projects) {
-        for(Project p : projects)
+        for(Project p : projects) {
+            if(p.getID() == -1)
+                p.setID(size());
             this.projects.put(p.getName(), p);
+        }
         return this;
     }
 
@@ -54,6 +62,8 @@ public class ProjectUtil {
     }
 
     public int getID(String project) {
+        if(projects.get(project) == null)
+            throw new NullPointerException();
         return projects.get(project).getID();
     }
 }

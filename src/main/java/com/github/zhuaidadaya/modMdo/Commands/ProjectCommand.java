@@ -14,7 +14,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ProjectCommand {
-    public void project() {
+    public void register() {
         initProject();
         //        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
         //            dispatcher.register(literal("broadcast")
@@ -31,6 +31,9 @@ public class ProjectCommand {
                 ServerPlayerEntity player = start.getSource().getPlayer();
                 Project project = new Project(getString(start, "projectName"), users.getUser(player));
                 startProject(project);
+
+                new ArgumentInit().init();
+
                 return 1;
             }).then(argument("projectNote", greedyString()).executes(c -> {
                 System.out.println("project note");
@@ -42,7 +45,7 @@ public class ProjectCommand {
             }).then(literal("initiator").executes(initiator -> {
                 String[] input = initiator.getInput().split(" ");
                 System.out.println(input[2]);
-                initiator.getSource().sendFeedback(Text.of(initiator.getLastChild().getInput()),true );
+                initiator.getSource().sendFeedback(Text.of(initiator.getLastChild().getInput()), true);
                 return 0;
             })))));
         });

@@ -1,10 +1,7 @@
 package com.github.zhuaidadaya.modMdo;
 
 import com.github.zhuaidadaya.MCH.Utils.Config.ConfigUtil;
-import com.github.zhuaidadaya.modMdo.Commands.DimensionHereCommand;
-import com.github.zhuaidadaya.modMdo.Commands.HereCommand;
-import com.github.zhuaidadaya.modMdo.Commands.ModMdoUserCommand;
-import com.github.zhuaidadaya.modMdo.Commands.ProjectCommand;
+import com.github.zhuaidadaya.modMdo.Commands.*;
 import com.github.zhuaidadaya.modMdo.Lang.LanguageDictionary;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -17,9 +14,17 @@ public class ModMdo implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("loading for ModMdo");
 
-        config = new ConfigUtil("config/","ModMdo.mhf",entrust);
+        config = new ConfigUtil("config/","ModMdo.mhf",entrust).setNote("""
+                this file is database file of "ModMdo"
+                not configs only
+                so this file maybe get large and large
+                but usually, it will smaller than 1MB
+                
+                """);
 
         languageDictionary = new LanguageDictionary("/format/format.json");
+
+        new ArgumentInit().init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("here").executes(context -> {
@@ -30,7 +35,7 @@ public class ModMdo implements ModInitializer {
             }));
         });
 
-        new ProjectCommand().project();
-        new ModMdoUserCommand().user();
+        new ProjectCommand().register();
+        new ModMdoUserCommand().register();
     }
 }

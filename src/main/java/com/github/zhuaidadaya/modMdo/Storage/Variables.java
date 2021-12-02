@@ -15,6 +15,7 @@ public class Variables {
     public static String entrust = "ModMdo";
     public static Language language = Language.CHINESE;
     public static LanguageDictionary languageDictionary;
+    public static boolean enableHereCommand = true;
     public static ConfigUtil config;
     public static ProjectUtil projects;
     public static UserUtil users;
@@ -40,6 +41,14 @@ public class Variables {
             return getLanguage(Language.getLanguageForName(users.getUserConfig(userUUID, "language").toString()));
         } catch (Exception e) {
             return language;
+        }
+    }
+
+    public static boolean getUserHereReceive(UUID userUUID) {
+        try {
+            return users.getUserConfig(userUUID, "receiveHereMessage").toString().equals("receive");
+        } catch (Exception e) {
+            return enableHereCommand;
         }
     }
 }

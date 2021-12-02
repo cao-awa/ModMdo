@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 
 public class Project {
-    private final String startTime;
+    private String startTime;
     private final String name;
     private final User initiator;
     private final LinkedHashSet<User> contributors = new LinkedHashSet<>();
@@ -44,6 +44,11 @@ public class Project {
 
     public Project setID(int id) {
         this.id = id;
+        return this;
+    }
+
+    public Project setStartTime(String startTime) {
+        this.startTime = startTime;
         return this;
     }
 

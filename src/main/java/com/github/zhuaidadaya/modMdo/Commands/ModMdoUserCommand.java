@@ -13,7 +13,7 @@ import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ModMdoUserCommand {
-    public void user() {
+    public void register() {
         initUserProfile();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
@@ -28,7 +28,27 @@ public class ModMdoUserCommand {
                 chinese.getSource().sendFeedback(Text.of(formatChangeLanguage(Language.CHINESE)), false);
                 return 0;
             }))));
+
+            dispatcher.register(literal("user").then(literal("receiveHereMessage").then(literal("receive").executes(receive -> {
+                ServerPlayerEntity player = receive.getSource().getPlayer();
+                setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "receive");
+                receive.getSource().sendFeedback(Text.of(receiveHereMessage(getUserLanguage(player.getUuid()))), false);
+                return 1;
+            })).then(literal("rejection").executes(rejection -> {
+                ServerPlayerEntity player = rejection.getSource().getPlayer();
+                setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "rejection");
+                rejection.getSource().sendFeedback(Text.of(rejectionHereMessage(getUserLanguage(player.getUuid()))), false);
+                return 0;
+            }))));
         });
+    }
+
+    public String rejectionHereMessage(Language feedbackLanguage) {
+        return languageDictionary.getWord(feedbackLanguage,"command.here.rejection");
+    }
+
+    public String receiveHereMessage(Language feedbackLanguage) {
+        return languageDictionary.getWord(feedbackLanguage,"command.here.receive");
     }
 
     public String formatChangeLanguage(Language feedbackLanguage) {
