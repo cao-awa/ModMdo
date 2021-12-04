@@ -1,5 +1,6 @@
 {
     "Chinese": {
+        "profile.feedback": "用户设定 \"%s\" 为: %s",
         "dead.receive": "死亡时将收到当时的维度及坐标信息",
         "dead.rejection": "不再接收死亡时的坐标记录信息",
         "dead.deadIn": "你在 %s%s §r死亡: \n §e%s",
@@ -18,6 +19,7 @@
         "command.here.failed.feedback": "§c无法将位置信息发送到其他玩家"
     },
     "English": {
+        "profile.feedback": "user profile \"%s\" is: %s",
         "dead.receive": "receive dimension and position info when dead",
         "dead.rejection": "rejected death record message when dead",
         "dead.deadIn": "you dead in %s%s§r: \n §e%s",

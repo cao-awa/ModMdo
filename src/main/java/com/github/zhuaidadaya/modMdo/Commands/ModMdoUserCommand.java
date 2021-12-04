@@ -19,7 +19,7 @@ public class ModMdoUserCommand {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("user").then(literal("language").executes(getLang -> {
                 ServerPlayerEntity player = getLang.getSource().getPlayer();
-                getLang.getSource().sendFeedback(Text.of(getUserLanguage(player.getUuid()).toString()),false);
+                getLang.getSource().sendFeedback(Text.of(formatProfileReturnMessage(getUserLanguage(player.getUuid()), "language", getUserLanguage(player.getUuid()).toString())), false);
 
                 return 2;
             }).then(literal("english").executes(english -> {
@@ -38,7 +38,7 @@ public class ModMdoUserCommand {
 
             dispatcher.register(literal("user").then(literal("receiveHereMessage").executes(getHereReceive -> {
                 ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
-                getHereReceive.getSource().sendFeedback(Text.of(getUserHereReceive(player.getUuid())),false);
+                getHereReceive.getSource().sendFeedback(Text.of(formatProfileReturnMessage(getUserLanguage(player.getUuid()), "receiveHereMessage", getUserHereReceive(player.getUuid()))), false);
 
                 return 2;
             }).then(literal("receive").executes(receive -> {
@@ -57,7 +57,7 @@ public class ModMdoUserCommand {
 
             dispatcher.register(literal("user").then(literal("receiveDeadMessage").executes(getHereReceive -> {
                 ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
-                getHereReceive.getSource().sendFeedback(Text.of(getUserDeadMessageReceive(player.getUuid())),false);
+                getHereReceive.getSource().sendFeedback(Text.of(formatProfileReturnMessage(getUserLanguage(player.getUuid()), "receiveDeadMessage", getUserDeadMessageReceive(player.getUuid()))), false);
 
                 return 2;
             }).then(literal("receive").executes(receive -> {
@@ -76,20 +76,24 @@ public class ModMdoUserCommand {
         });
     }
 
+    public String formatProfileReturnMessage(Language feedBackLanguage, String profileKey, String profileValue) {
+        return String.format(languageDictionary.getWord(feedBackLanguage, "profile.feedback"), profileKey, profileValue);
+    }
+
     public String rejectionHereMessage(Language feedbackLanguage) {
-        return languageDictionary.getWord(feedbackLanguage,"command.here.rejection");
+        return languageDictionary.getWord(feedbackLanguage, "command.here.rejection");
     }
 
     public String receiveHereMessage(Language feedbackLanguage) {
-        return languageDictionary.getWord(feedbackLanguage,"command.here.receive");
+        return languageDictionary.getWord(feedbackLanguage, "command.here.receive");
     }
 
     public String rejectionDeadMessage(Language feedbackLanguage) {
-        return languageDictionary.getWord(feedbackLanguage,"dead.rejection");
+        return languageDictionary.getWord(feedbackLanguage, "dead.rejection");
     }
 
     public String receiveDeadMessage(Language feedbackLanguage) {
-        return languageDictionary.getWord(feedbackLanguage,"dead.receive");
+        return languageDictionary.getWord(feedbackLanguage, "dead.receive");
     }
 
     public String formatChangeLanguage(Language feedbackLanguage) {
