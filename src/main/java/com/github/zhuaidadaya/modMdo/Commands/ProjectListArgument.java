@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ProjectListArgument implements ArgumentType<String> {
-    private static final Collection<String> EXAMPLES = List.of("a", "b");
     public static final DynamicCommandExceptionType INVALID_NAME_EXCEPTION = new DynamicCommandExceptionType((name) -> {
         return new TranslatableText("argument.projectName.invalid", name);
     });
+    private static final Collection<String> EXAMPLES = List.of("a", "b");
 
     private ProjectListArgument() {
     }
@@ -37,7 +37,7 @@ public class ProjectListArgument implements ArgumentType<String> {
     public String parse(StringReader stringReader) throws CommandSyntaxException {
         String string = stringReader.readUnquotedString();
         int i = new ProjectArgument().getProjectId(string);
-        if (i == -1) {
+        if(i == - 1) {
             throw INVALID_NAME_EXCEPTION.create(string);
         } else {
             return string;

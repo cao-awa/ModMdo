@@ -24,7 +24,7 @@ public class HereCommand implements Here {
             for(String o : p.getPlayerNames()) {
                 ServerPlayerEntity player = p.getPlayer(o);
                 LiteralText hereMessage = new LiteralText(formatHereTip(dimension, xyz, player, dimensionTips,whoUseHere));
-                if(getUserHereReceive(player.getUuid())) {
+                if(isUserHereReceive(player.getUuid())) {
                     player.sendMessage(hereMessage, false);
                 }
             }

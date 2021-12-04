@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modMdo.Commands;
 
 import com.github.zhuaidadaya.modMdo.Lang.Language;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
 
@@ -26,5 +27,9 @@ public class DimensionTips {
             default -> result = "";
         }
         return result;
+    }
+
+    public String getDimension(ServerPlayerEntity player) {
+        return player.getEntityWorld().getDimension().getEffects().getPath();
     }
 }

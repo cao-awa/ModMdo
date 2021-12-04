@@ -17,27 +17,60 @@ public class ModMdoUserCommand {
         initUserProfile();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("user").then(literal("language").then(literal("english").executes(english -> {
+            dispatcher.register(literal("user").then(literal("language").executes(getLang -> {
+                ServerPlayerEntity player = getLang.getSource().getPlayer();
+                getLang.getSource().sendFeedback(Text.of(getUserLanguage(player.getUuid()).toString()),false);
+
+                return 2;
+            }).then(literal("english").executes(english -> {
                 ServerPlayerEntity player = english.getSource().getPlayer();
                 setUserProfile(new User(player.getName().asString(), player.getUuid()), "language", "English");
                 english.getSource().sendFeedback(Text.of(formatChangeLanguage(Language.ENGLISH)), false);
+
                 return 1;
             })).then(literal("chinese").executes(chinese -> {
                 ServerPlayerEntity player = chinese.getSource().getPlayer();
                 setUserProfile(new User(player.getName().asString(), player.getUuid()), "language", "Chinese");
                 chinese.getSource().sendFeedback(Text.of(formatChangeLanguage(Language.CHINESE)), false);
+
                 return 0;
             }))));
 
-            dispatcher.register(literal("user").then(literal("receiveHereMessage").then(literal("receive").executes(receive -> {
+            dispatcher.register(literal("user").then(literal("receiveHereMessage").executes(getHereReceive -> {
+                ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
+                getHereReceive.getSource().sendFeedback(Text.of(getUserHereReceive(player.getUuid())),false);
+
+                return 2;
+            }).then(literal("receive").executes(receive -> {
                 ServerPlayerEntity player = receive.getSource().getPlayer();
                 setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "receive");
                 receive.getSource().sendFeedback(Text.of(receiveHereMessage(getUserLanguage(player.getUuid()))), false);
+
                 return 1;
             })).then(literal("rejection").executes(rejection -> {
                 ServerPlayerEntity player = rejection.getSource().getPlayer();
                 setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "rejection");
                 rejection.getSource().sendFeedback(Text.of(rejectionHereMessage(getUserLanguage(player.getUuid()))), false);
+
+                return 0;
+            }))));
+
+            dispatcher.register(literal("user").then(literal("receiveDeadMessage").executes(getHereReceive -> {
+                ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
+                getHereReceive.getSource().sendFeedback(Text.of(getUserDeadMessageReceive(player.getUuid())),false);
+
+                return 2;
+            }).then(literal("receive").executes(receive -> {
+                ServerPlayerEntity player = receive.getSource().getPlayer();
+                setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveDeadMessage", "receive");
+                receive.getSource().sendFeedback(Text.of(receiveDeadMessage(getUserLanguage(player.getUuid()))), false);
+
+                return 1;
+            })).then(literal("rejection").executes(rejection -> {
+                ServerPlayerEntity player = rejection.getSource().getPlayer();
+                setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveDeadMessage", "rejection");
+                rejection.getSource().sendFeedback(Text.of(rejectionDeadMessage(getUserLanguage(player.getUuid()))), false);
+
                 return 0;
             }))));
         });
@@ -49,6 +82,14 @@ public class ModMdoUserCommand {
 
     public String receiveHereMessage(Language feedbackLanguage) {
         return languageDictionary.getWord(feedbackLanguage,"command.here.receive");
+    }
+
+    public String rejectionDeadMessage(Language feedbackLanguage) {
+        return languageDictionary.getWord(feedbackLanguage,"dead.rejection");
+    }
+
+    public String receiveDeadMessage(Language feedbackLanguage) {
+        return languageDictionary.getWord(feedbackLanguage,"dead.receive");
     }
 
     public String formatChangeLanguage(Language feedbackLanguage) {

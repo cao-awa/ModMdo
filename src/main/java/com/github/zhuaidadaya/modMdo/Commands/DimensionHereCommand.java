@@ -19,11 +19,11 @@ public class DimensionHereCommand implements Here {
             ServerPlayerEntity whoUseHere = context.getSource().getPlayer();
             PlayerManager p = context.getSource().getServer().getPlayerManager();
             XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
-            String dimension = whoUseHere.getEntityWorld().getDimension().getEffects().getPath();
+            String dimension = dimensionTips.getDimension(whoUseHere);
             for(String o : p.getPlayerNames()) {
                 ServerPlayerEntity player = p.getPlayer(o);
                 LiteralText hereMessage = new LiteralText(formatHereTip(dimension, xyz, player, dimensionTips,whoUseHere));
-                if(getUserHereReceive(player.getUuid())) {
+                if(isUserHereReceive(player.getUuid())) {
                     player.sendMessage(hereMessage, false);
                 }
             }

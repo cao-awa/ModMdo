@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -153,11 +152,9 @@ public class ArgumentTypes {
         }
 
         JsonObject jsonObject2 = new JsonObject();
-        Iterator var4 = commandNode.getChildren().iterator();
 
-        while(var4.hasNext()) {
-            CommandNode<S> commandNode2 = (CommandNode) var4.next();
-            jsonObject2.add(commandNode2.getName(), toJson(dispatcher, commandNode2));
+        for(CommandNode<S> sCommandNode : commandNode.getChildren()) {
+            jsonObject2.add(sCommandNode.getName(), toJson(dispatcher, sCommandNode));
         }
 
         if(jsonObject2.size() > 0) {
@@ -172,10 +169,8 @@ public class ArgumentTypes {
             Collection<String> collection = dispatcher.getPath(commandNode.getRedirect());
             if(! collection.isEmpty()) {
                 JsonArray commandNode2 = new JsonArray();
-                Iterator var6 = collection.iterator();
 
-                while(var6.hasNext()) {
-                    String string = (String) var6.next();
+                for(String string : collection) {
                     commandNode2.add(string);
                 }
 

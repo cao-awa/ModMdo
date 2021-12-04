@@ -5,6 +5,7 @@ import com.github.zhuaidadaya.modMdo.Lang.Language;
 import com.github.zhuaidadaya.modMdo.Lang.LanguageDictionary;
 import com.github.zhuaidadaya.modMdo.Projects.ProjectUtil;
 import com.github.zhuaidadaya.modMdo.Usr.UserUtil;
+import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,9 +17,13 @@ public class Variables {
     public static Language language = Language.CHINESE;
     public static LanguageDictionary languageDictionary;
     public static boolean enableHereCommand = true;
+    public static boolean enableDeadMessage = true;
     public static ConfigUtil config;
     public static ProjectUtil projects;
     public static UserUtil users;
+    public static String motd = "";
+    public static MinecraftServer server;
+    public static boolean backing = false;
 
     public static void updateUserProfiles() {
         config.set("user_profiles", users.toJSONObject());
@@ -44,11 +49,35 @@ public class Variables {
         }
     }
 
-    public static boolean getUserHereReceive(UUID userUUID) {
+    public static boolean isUserHereReceive(UUID userUUID) {
         try {
             return users.getUserConfig(userUUID, "receiveHereMessage").toString().equals("receive");
         } catch (Exception e) {
             return enableHereCommand;
+        }
+    }
+
+    public static String getUserHereReceive(UUID userUUID) {
+        try {
+            return users.getUserConfig(userUUID, "receiveHereMessage").toString();
+        } catch (Exception e) {
+            return enableHereCommand ? "receive" : "rejected";
+        }
+    }
+
+    public static boolean isUserDeadMessageReceive(UUID userUUID) {
+        try {
+            return users.getUserConfig(userUUID, "receiveDeadMessage").toString().equals("receive");
+        } catch (Exception e) {
+            return enableDeadMessage;
+        }
+    }
+
+    public static String getUserDeadMessageReceive(UUID userUUID) {
+        try {
+            return users.getUserConfig(userUUID, "receiveDeadMessage").toString();
+        } catch (Exception e) {
+            return enableDeadMessage ? "receive": "rejected";
         }
     }
 }
