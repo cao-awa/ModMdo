@@ -1,4 +1,4 @@
-# modMdo
+# ModMdo
 a fabric mod for minecraft server<br>
 and minecraft client
 
