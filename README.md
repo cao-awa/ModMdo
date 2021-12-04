@@ -1,8 +1,8 @@
 # modMdo
-a fabric mod for minecraft server
+a fabric mod for minecraft server<br>
 and minecraft client
 
 # indexes
 
-for minecraft 1.18
+for minecraft 1.18<br>
 (Branch-1.18)[https://github.com/zhuaidadaya/modMdo/tree/1.18]
