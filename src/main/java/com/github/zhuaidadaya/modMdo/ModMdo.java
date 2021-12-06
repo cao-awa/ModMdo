@@ -13,6 +13,7 @@ import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ModMdo implements ModInitializer {
+
     @Override
     public void onInitialize() {
         LOGGER.info("loading for ModMdo");
