@@ -16,7 +16,7 @@ public class StopServerMixin {
     /**
      * @author
      */
-    @Inject(at = @At("HEAD"),method = "stop")
+    @Inject(at = @At("HEAD"),method = "stop", cancellable = true)
     public void stop(CallbackInfo ci) {
         boolean in = false;
         if(server.isRunning()) {
