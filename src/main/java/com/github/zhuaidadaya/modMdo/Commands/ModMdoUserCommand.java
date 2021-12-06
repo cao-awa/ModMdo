@@ -100,19 +100,6 @@ public class ModMdoUserCommand {
         return String.format(languageDictionary.getWord(feedbackLanguage, "language.change"), languageDictionary.getWord(feedbackLanguage, "languages." + feedbackLanguage.getName()));
     }
 
-    public void setUserProfile(User user, String changeKey, String changeValue) {
-        JSONObject userInfo;
-        try {
-            userInfo = users.getJSONObject(user.getID());
-        } catch (Exception e) {
-            userInfo = new JSONObject().put("uuid", user.getID()).put("name", user.getName());
-        }
-        userInfo.put(changeKey, changeValue);
-        users.put(user.getID(), userInfo);
-
-        updateUserProfiles();
-    }
-
     public void initUserProfile() {
         LOGGER.info("initializing user profiles");
 

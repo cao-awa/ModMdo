@@ -6,11 +6,13 @@
   "name": "ModMdo",
   "description": "This Mod are Testing",
   "authors": [
+    "草awa",
     "zhuaidadaya"
   ],
   "contact": {
     "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.18",
-    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.18"
+    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.18",
+    "wiki": ""
   },
 
   "license": "CC0-1.0",

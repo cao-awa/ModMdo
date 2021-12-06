@@ -28,10 +28,10 @@ public class UserUtil {
         return users.get(target.toString());
     }
 
-    public Object getUserConfig(Object target, Object config) {
-        if(users.get(target.toString()) == null)
+    public Object getUserConfig(Object targetUuid, Object getConfig) {
+        if(users.get(targetUuid.toString()) == null)
             throw new IllegalStateException();
-        return users.get(target.toString()).get(config.toString()).toString();
+        return users.get(targetUuid.toString()).get(getConfig.toString()).toString();
     }
 
     public JSONObject toJSONObject() {

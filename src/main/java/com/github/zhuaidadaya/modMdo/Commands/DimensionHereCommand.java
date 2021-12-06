@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.server.PlayerManager;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -16,32 +17,43 @@ public class DimensionHereCommand implements Here {
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("dhere").executes(context -> {
-                try {
-                    DimensionTips dimensionTips = new DimensionTips();
-                    ServerPlayerEntity whoUseHere = context.getSource().getPlayer();
-                    PlayerManager p = context.getSource().getServer().getPlayerManager();
-                    XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
-                    String dimension = dimensionTips.getDimension(whoUseHere);
-                    for(String o : p.getPlayerNames()) {
-                        ServerPlayerEntity player = p.getPlayer(o);
-                        LiteralText hereMessage = new LiteralText(formatHereTip(dimension, xyz, player, dimensionTips, whoUseHere));
-                        if(isUserHereReceive(player.getUuid())) {
-                            player.sendMessage(hereMessage, false);
-                        }
-                    }
-                    whoUseHere.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), whoUseHere);
-                    context.getSource().sendFeedback(Text.of(formatHereFeedBack(context.getSource().getPlayer())), true);
-                    return 1;
-                } catch (Exception e) {
+                ServerCommandSource source = context.getSource();
+                if(enableHereCommand) {
                     try {
-                        context.getSource().sendError(Text.of(formatHereFailedFeedBack(context.getSource().getPlayer())));
-                    } catch (Exception ex) {
+                        DimensionTips dimensionTips = new DimensionTips();
+                        ServerPlayerEntity whoUseHere = source.getPlayer();
+                        PlayerManager p = source.getServer().getPlayerManager();
+                        XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
+                        String dimension = dimensionTips.getDimension(whoUseHere);
+                        for(String o : p.getPlayerNames()) {
+                            ServerPlayerEntity player = p.getPlayer(o);
+                            LiteralText hereMessage = new LiteralText(formatHereTip(dimension, xyz, player, dimensionTips, whoUseHere));
+                            if(isUserHereReceive(player.getUuid())) {
+                                player.sendMessage(hereMessage, false);
+                            }
+                        }
+                        whoUseHere.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), whoUseHere);
+                        source.sendFeedback(Text.of(formatHereFeedBack(source.getPlayer())), true);
+                        return 1;
+                    } catch (Exception e) {
+                        try {
+                            source.sendError(Text.of(formatHereFailedFeedBack(source.getPlayer())));
+                        } catch (Exception ex) {
 
+                        }
+                        return - 1;
                     }
-                    return - 1;
+                } else {
+                    source.sendError(Text.of(formatHereDisabled(source.getPlayer())));
                 }
+
+                return 0;
             }));
         });
+    }
+
+    public String formatHereDisabled(ServerPlayerEntity player) {
+        return languageDictionary.getWord(getUserLanguage(player), "here.disabled");
     }
 
     @Override
@@ -56,7 +68,7 @@ public class DimensionHereCommand implements Here {
                 throw new IllegalArgumentException();
             }
         }
-        Language getLang = getUserLanguage(player.getUuid());
+        Language getLang = getUserLanguage(player);
         String format = languageDictionary.getWord(getLang, "command.dhere");
         String format_startWith = languageDictionary.getWord(getLang, "command.here.startWith");
         XYZ convertXYZ = xyz.clone();
