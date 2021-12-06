@@ -18,7 +18,9 @@ public class StopServerMixin {
      */
     @Inject(at = @At("HEAD"),method = "stop")
     public void stop(CallbackInfo ci) {
+        boolean in = false;
         if(server.isRunning()) {
+            in = true;
             if(server.getThread() != null) {
                 int i = 0;
 
@@ -39,5 +41,11 @@ public class StopServerMixin {
                 }
             }
         }
+
+        if(in) {
+            Runtime.getRuntime().exit(0);
+            LOGGER.info("ModMdo cannot stop server! it will waiting for a long time!");
+        }
+        ci.cancel();
     }
 }
