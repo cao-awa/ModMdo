@@ -1,11 +1,14 @@
 package com.github.zhuaidadaya.modMdo;
 
-import com.github.zhuaidadaya.modMdo.Commands.ArgumentInit;
 import net.fabricmc.api.ClientModInitializer;
+
+import static com.github.zhuaidadaya.modMdo.Storage.Variables.LOGGER;
 
 public class ModMdoClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        new ArgumentInit().init();
+        LOGGER.info("loading for ModMdo Server");
+
+        new ModMdoStdInit().init();
     }
 }

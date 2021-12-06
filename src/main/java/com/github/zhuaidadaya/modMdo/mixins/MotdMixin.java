@@ -13,6 +13,7 @@ import static com.github.zhuaidadaya.modMdo.Storage.Variables.server;
 
 @Mixin(ServerMetadata.class)
 public class MotdMixin {
+
     @Inject(method = "getDescription", at = @At("HEAD"), cancellable = true)
     private void getDescription(CallbackInfoReturnable<Text> callbackInfoReturnable) {
         if(server != null) {

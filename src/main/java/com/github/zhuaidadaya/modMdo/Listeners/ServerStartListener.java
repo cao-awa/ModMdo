@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
 
 public class ServerStartListener {
-    public void serverStart() {
+    public void listener() {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             motd = server.getServerMotd();
             Variables.server = server;

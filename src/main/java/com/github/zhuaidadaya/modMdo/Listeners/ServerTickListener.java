@@ -14,26 +14,39 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
 
 public class ServerTickListener {
-    public void serverTickL() {
-        AtomicInteger tick = new AtomicInteger(20);
+    public void listener() {
+        AtomicInteger tick = new AtomicInteger();
+        AtomicInteger secs = new AtomicInteger();
+
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            try {
-                PlayerManager players = Variables.server.getPlayerManager();
-
-                for(ServerPlayerEntity player : players.getPlayerList()) {
-                    if(isUserDeadMessageReceive(player.getUuid())) {
-                        if(player.deathTime == 1) {
-                            DimensionTips dimensionTips = new DimensionTips();
-                            XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
-                            player.sendMessage(Text.of(formatDeathMessage(player, dimensionTips, xyz)), false);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-
+            if(enableDeadMessage) {
+                detectPlayerDead();
             }
 
+            tick.addAndGet(1);
+            if(tick.get() % 20 == 0) {
+                secs.addAndGet(1);
+                System.out.println(tick.get() / secs.get() + " / per");
+            }
         });
+    }
+
+    public void detectPlayerDead() {
+        try {
+            PlayerManager players = Variables.server.getPlayerManager();
+
+            for(ServerPlayerEntity player : players.getPlayerList()) {
+                if(isUserDeadMessageReceive(player.getUuid())) {
+                    if(player.deathTime == 1) {
+                        DimensionTips dimensionTips = new DimensionTips();
+                        XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
+                        player.sendMessage(Text.of(formatDeathMessage(player, dimensionTips, xyz)), false);
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        }
     }
 
     public String formatDeathMessage(ServerPlayerEntity player, DimensionTips dimensionTips, XYZ xyz) {
