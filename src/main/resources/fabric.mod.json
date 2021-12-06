@@ -4,13 +4,13 @@
   "version": "${version}",
 
   "name": "ModMdo",
-  "description": "...",
+  "description": "This Mod are Testing",
   "authors": [
     "zhuaidadaya"
   ],
   "contact": {
-    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.17",
-    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17"
+    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.18",
+    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.18"
   },
 
   "license": "CC0-1.0",
