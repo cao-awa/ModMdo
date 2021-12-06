@@ -16,9 +16,11 @@ public class StopServerMixin {
     /**
      * @author
      */
-    @Inject(at = @At("HEAD"),method = "stop")
+    @Inject(at = @At("HEAD"), method = "stop", cancellable = true)
     public void stop(CallbackInfo ci) {
+        boolean in = false;
         if(server.isRunning()) {
+            in = true;
             if(server.getThread() != null) {
                 int i = 0;
 
@@ -30,14 +32,20 @@ public class StopServerMixin {
                         i++;
 
                         if(i > 5) {
-                            Runtime.getRuntime().exit(0);
+                            Runtime.getRuntime().exit(- 1);
                             LOGGER.info("failed to stop server in 5 times try, ModMdo trying force stop task");
                         }
-                    } catch(Exception ex) {
+                    } catch (Exception ex) {
 
                     }
                 }
             }
         }
+
+        if(in) {
+            Runtime.getRuntime().exit(0);
+            LOGGER.info("ModMdo cannot stop server! it will waiting for a long time!");
+        }
+        ci.cancel();
     }
 }
