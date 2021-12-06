@@ -25,37 +25,39 @@ public class User {
         this.uuid = UUID.fromString(uuid);
     }
 
+    public User(JSONObject json) {
+        String name = json.get("name").toString();
+        String uuid = json.get("uuid").toString();
+
+        this.name = name;
+        this.uuid = UUID.fromString(uuid);
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public UUID getUuid() {
         return uuid;
     }
 
+    public void setUuid(String uuid) {
+        this.uuid = UUID.fromString(uuid);
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
     public String getID() {
         return uuid.toString();
     }
 
-    public User setUserConfigFromJson(JSONObject json) {
-        String name = json.get("name").toString();
-        String uuid = json.get("uuid").toString();
-
-        this.name = name;
-        this.uuid = UUID.fromString(uuid);
-
-        return this;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public void setUuid(String uuid) {
-        this.uuid = UUID.fromString(uuid);
-    }
-    
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
+    public JSONObject toJSONObject() {
+        return new JSONObject().put("name", name).put("uuid", uuid);
     }
 }

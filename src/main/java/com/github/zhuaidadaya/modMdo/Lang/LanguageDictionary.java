@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 
 public class LanguageDictionary {
@@ -31,12 +31,8 @@ public class LanguageDictionary {
     public void appendResource(String[] resources) {
         for(String s : resources) {
             logger.info("loading language dictionary: " + s);
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new InputStreamReader(Resources.getResource(s, getClass()),"GBK"));
-            } catch (UnsupportedEncodingException e) {
-
-            }
+            BufferedReader reader;
+            reader = new BufferedReader(new InputStreamReader(Resources.getResource(s, getClass()), StandardCharsets.UTF_8));
             String resource = FileReads.read(reader);
 
             JSONObject languageJson = new JSONObject(resource);
