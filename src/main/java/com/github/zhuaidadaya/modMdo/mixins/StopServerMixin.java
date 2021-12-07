@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.LOGGER;
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.server;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.LOGGER;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.server;
 
 @Mixin(RconBase.class)
 public class StopServerMixin {

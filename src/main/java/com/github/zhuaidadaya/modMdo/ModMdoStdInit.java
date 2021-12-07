@@ -1,14 +1,14 @@
 package com.github.zhuaidadaya.modMdo;
 
 import com.github.zhuaidadaya.MCH.Utils.Config.ConfigUtil;
-import com.github.zhuaidadaya.modMdo.Commands.*;
-import com.github.zhuaidadaya.modMdo.Lang.Language;
-import com.github.zhuaidadaya.modMdo.Lang.LanguageDictionary;
-import com.github.zhuaidadaya.modMdo.Listeners.ServerStartListener;
-import com.github.zhuaidadaya.modMdo.Listeners.ServerTickListener;
+import com.github.zhuaidadaya.modMdo.commands.*;
+import com.github.zhuaidadaya.modMdo.lang.Language;
+import com.github.zhuaidadaya.modMdo.lang.LanguageDictionary;
+import com.github.zhuaidadaya.modMdo.listeners.ServerStartListener;
+import com.github.zhuaidadaya.modMdo.listeners.ServerTickListener;
 import net.fabricmc.api.ModInitializer;
 
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 public class ModMdoStdInit implements ModInitializer {
 

@@ -2,7 +2,7 @@ package com.github.zhuaidadaya.modMdo;
 
 import net.fabricmc.api.ClientModInitializer;
 
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.LOGGER;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.LOGGER;
 
 public class ModMdoClient implements ClientModInitializer {
     @Override

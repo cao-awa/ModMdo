@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.motd;
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.server;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.motd;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.server;
 
 @Mixin(ServerMetadata.class)
 public class MotdMixin {
