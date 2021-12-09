@@ -18,13 +18,13 @@
     "environment": "*",
     "entrypoints": {
         "main": [
-            "com.github.zhuaidadaya.modMdo.ModMdoStdInit"
+            "com.github.zhuaidadaya.modMdo.ModMdoStdInitializer"
         ],
         "server": [
-            "com.github.zhuaidadaya.modMdo.ModMdoServer"
+            "com.github.zhuaidadaya.modMdo.ModMdoServerInitializer"
         ],
         "client": [
-            "com.github.zhuaidadaya.modMdo.ModMdoClient"
+            "com.github.zhuaidadaya.modMdo.ModMdoClientInitializer"
         ]
     },
     "mixins": [
@@ -38,13 +38,5 @@
     },
     "suggests": {
         "another-mod": "*"
-    },
-    "custom": {
-        "modmdo": {
-            "badges": [
-                "library",
-                "deprecated"
-            ]
-        }
     }
 }

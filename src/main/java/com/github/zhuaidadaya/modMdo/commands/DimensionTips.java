@@ -1,9 +1,7 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.modMdo.lang.Language;
 import net.minecraft.server.network.ServerPlayerEntity;
-
-import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import net.minecraft.text.TranslatableText;
 
 public class DimensionTips {
     public String getDimensionColor(String dimension) {
@@ -17,16 +15,12 @@ public class DimensionTips {
         return result;
     }
 
-    public String getDimensionName(Language getLang,String dimension) {
-        String result;
-        getLang = getLanguage(getLang);
-        switch(dimension) {
-            case "overworld" -> result = languageDictionary.getWord(getLang,"dimension.overworld");
-            case "the_nether" -> result = languageDictionary.getWord(getLang,"dimension.the_nether");
-            case "the_end" -> result = languageDictionary.getWord(getLang,"dimension.the_end");
-            default -> result = "";
-        }
-        return result;
+    public String getDimensionKey(String dimension) {
+        return "dimension." + dimension;
+    }
+
+    public TranslatableText getDimensionName(String dimension) {
+        return new TranslatableText(getDimensionKey(dimension));
     }
 
     public String getDimension(ServerPlayerEntity player) {

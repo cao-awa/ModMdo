@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modMdo.storage;
 
-import com.github.zhuaidadaya.MCH.Utils.Config.ConfigUtil;
+import com.github.zhuaidadaya.MCH.utils.config.ConfigUtil;
+import com.github.zhuaidadaya.modMdo.bak.AutoBackup;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.lang.LanguageDictionary;
@@ -29,7 +30,7 @@ public class Variables {
     public static CavaUtil cavas;
     public static String motd = "";
     public static MinecraftServer server;
-    public static boolean backing = false;
+    public static AutoBackup bak = new AutoBackup("","");
 
     public static void updateModMdoVariables() {
         config.set("default_language", language.toString());

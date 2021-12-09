@@ -4,9 +4,11 @@
     "package": "com.github.zhuaidadaya.modMdo.mixins",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "KeyboardInputMixin",
         "MotdMixin",
-        "TestMixin",
-        "StopServerMixin"
+        "OptionsScreenMixin",
+        "StopServerMixin",
+        "TestMixin"
     ],
     "client": [
     ],
