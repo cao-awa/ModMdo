@@ -7,7 +7,9 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Random;
 
 public class ConfigUtil {
     /**
@@ -74,10 +76,6 @@ public class ConfigUtil {
         readConfig(true);
     }
 
-    public static ConfigUtil emptyConfigUtil() {
-        return new ConfigUtil(null, null, "1.1", null);
-    }
-
     public ConfigUtil setEntrust(String entrust) {
         this.entrust = entrust;
         logger = LogManager.getLogger("ConfigUtil/" + entrust);
@@ -120,6 +118,10 @@ public class ConfigUtil {
         return configs.get(conf);
     }
 
+    public String getConfigValue(Object conf) {
+        return getConfig(conf).getValue();
+    }
+
     public void readConfig() {
         readConfig(false);
     }
@@ -127,8 +129,7 @@ public class ConfigUtil {
     public void readConfig(boolean log) {
         int configSize = 0;
         try {
-            if(log & utilConfigs.get("name") != null)
-                logger.info("loading config from: " + utilConfigs.get("name").toString());
+            logger.info("loading config from: " + utilConfigs.get("name").toString());
 
             JSONArray configs;
 
@@ -161,7 +162,7 @@ public class ConfigUtil {
             } else {
                 while(true) {
                     String startWith = br.readLine();
-                    if(startWith.replace(" ", "").startsWith("{")) {
+                    if(startWith.replace(" ","").startsWith("{")) {
                         builder.append(startWith);
                         break;
                     }
@@ -174,6 +175,8 @@ public class ConfigUtil {
                 configs = new JSONArray(new JSONObject(builder.toString()).getJSONArray("configs"));
                 configSize = builder.length();
             }
+
+            br.close();
 
             for(Object o : configs) {
                 JSONObject config = new JSONObject(o.toString());
@@ -195,19 +198,15 @@ public class ConfigUtil {
             if(log)
                 logger.info("load config done");
         } catch (Exception e) {
-            boolean emptyConfigUtil = utilConfigs.get("name") == null;
-            logger.error(emptyConfigUtil ? ("failed to load config") : ("failed to load config: " + utilConfigs.get("name").toString()));
-            if(! emptyConfigUtil) {
-                File configFile = new File(utilConfigs.get("path").toString() + "/" + utilConfigs.get("name").toString());
-                if(! configFile.isFile() || configFile.length() == 0 || configSize == 0) {
-                    try {
-                        configFile.getParentFile().mkdirs();
-                        configFile.createNewFile();
-                        writeConfig();
-                        logger.info("created new config file for " + entrust);
-                    } catch (Exception ex) {
-                        logger.info("failed to create new config file for " + entrust);
-                    }
+            logger.error("failed to load config: " + utilConfigs.get("name").toString());
+            File configFile = new File(utilConfigs.get("path").toString() + "/" + utilConfigs.get("name").toString());
+            if(! configFile.isFile() || configFile.length() == 0 || configSize == 0) {
+                try {
+                    configFile.createNewFile();
+                    writeConfig();
+                    logger.info("created new config file for " + entrust);
+                } catch (Exception ex) {
+                    logger.info("failed to create new config file for " + entrust);
                 }
             }
         }

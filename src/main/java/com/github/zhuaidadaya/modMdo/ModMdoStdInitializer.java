@@ -33,15 +33,18 @@ public class ModMdoStdInitializer implements ModInitializer {
         new ServerTickListener().listener();
         new ServerStartListener().listener();
         new CavaCommand().register();
-        new ReloadCommand().register();
+//        new ReloadCommand().register();
+        new BackupCommand().register();
+        new ModMdoConfigCommand().register();
+        new VecCommand().register();
     }
 
     public void initModMdoVariables() {
         if(config.getConfig("default_language") != null)
-            language = Language.getLanguageForName(config.getConfig("default_language").getValue());
+            language = Language.getLanguageForName(config.getConfigValue("default_language"));
         if(config.getConfig("here_command") != null)
-            enableHereCommand = config.getConfig("here_command").getValue().equals("enable");
+            enableHereCommand = config.getConfigValue("here_command").equals("enable");
         if(config.getConfig("dead_message") != null)
-            enableDeadMessage = config.getConfig("dead_message").getValue().equals("enable");
+            enableDeadMessage = config.getConfigValue("dead_message").equals("enable");
     }
 }

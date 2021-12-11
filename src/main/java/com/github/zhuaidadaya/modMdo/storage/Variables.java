@@ -1,7 +1,7 @@
 package com.github.zhuaidadaya.modMdo.storage;
 
 import com.github.zhuaidadaya.MCH.utils.config.ConfigUtil;
-import com.github.zhuaidadaya.modMdo.bak.AutoBackup;
+import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.lang.LanguageDictionary;
@@ -14,12 +14,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import java.io.SyncFailedException;
 import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static String entrust = "ModMdo";
-    public static Language language = Language.CHINESE;
+    public static Language language = Language.ENGLISH;
     public static LanguageDictionary languageDictionary;
     public static boolean enableHereCommand = true;
     public static boolean enableDeadMessage = true;
@@ -30,7 +31,7 @@ public class Variables {
     public static CavaUtil cavas;
     public static String motd = "";
     public static MinecraftServer server;
-    public static AutoBackup bak = new AutoBackup("","");
+    public static BackupUtil bak;
 
     public static void updateModMdoVariables() {
         config.set("default_language", language.toString());
@@ -49,6 +50,14 @@ public class Variables {
 
     public static void updateCavas() {
         config.set("cavas", cavas.toJSONObject());
+    }
+
+    public static void updateBackups() {
+        try {
+            config.set("backups", bak.toJSONObject());
+        } catch (SyncFailedException e) {
+
+        }
     }
 
     public static void setUserProfile(User user, String changeKey, String changeValue) {
