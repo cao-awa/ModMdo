@@ -3,9 +3,9 @@ package com.github.zhuaidadaya.modMdo.cavas;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import org.json.JSONObject;
 
+import java.security.SecureRandom;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Random;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.updateCavas;
 
@@ -51,7 +51,11 @@ public class CavaUtil {
     }
 
     public Cava get() {
-        return cavas.get(cavas.keySet().toArray()[new Random().nextInt(cavas.size())]);
+        try {
+            return cavas.get(cavas.keySet().toArray()[new SecureRandom().nextInt(cavas.size())]);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void deleteCava(String id) {

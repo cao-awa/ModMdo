@@ -25,6 +25,7 @@ public class Variables {
     public static boolean enableHereCommand = true;
     public static boolean enableDeadMessage = true;
     public static boolean enableCava = true;
+    public static boolean enableSecureEnchant = true;
     public static ConfigUtil config;
     public static ProjectUtil projects;
     public static UserUtil users;
@@ -38,6 +39,7 @@ public class Variables {
         config.set("here_command", hereCommandStatus());
         config.set("dead_message", deadMessageStatus());
         config.set("cava", cavaStatus());
+        config.set("secure_enchant", secureEnchantStatus());
     }
 
     public static void updateUserProfiles() {
@@ -121,19 +123,23 @@ public class Variables {
         try {
             return users.getUserConfig(userUUID, "receiveDeadMessage").toString();
         } catch (Exception e) {
-            return enableDeadMessage ? "receive": "rejected";
+            return enableDeadMessage ? "receive" : "rejected";
         }
     }
 
     public static String hereCommandStatus() {
-        return enableHereCommand ? "enable": "disable";
+        return enableHereCommand ? "enable" : "disable";
     }
 
     public static String deadMessageStatus() {
-        return enableDeadMessage ? "enable": "disable";
+        return enableDeadMessage ? "enable" : "disable";
     }
 
     public static String cavaStatus() {
-        return enableCava ? "enable": "disable";
+        return enableCava ? "enable" : "disable";
+    }
+
+    public static String secureEnchantStatus() {
+        return enableSecureEnchant ? "enable" : "disable";
     }
 }

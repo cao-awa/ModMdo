@@ -46,5 +46,9 @@ public class ModMdoStdInitializer implements ModInitializer {
             enableHereCommand = config.getConfigValue("here_command").equals("enable");
         if(config.getConfig("dead_message") != null)
             enableDeadMessage = config.getConfigValue("dead_message").equals("enable");
+        if(config.getConfig("cava") != null)
+            enableCava = config.getConfigValue("cava").equals("enable");
+        if(config.getConfig("secure_enchant") != null)
+            enableSecureEnchant = config.getConfigValue("secure_enchant").equals("enable");
     }
 }

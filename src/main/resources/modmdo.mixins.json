@@ -4,6 +4,7 @@
     "package": "com.github.zhuaidadaya.modMdo.mixins",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "EnchantmentHelperMixin",
         "MinecraftServerSession",
         "MotdMixin",
         "OptionsScreenMixin",
