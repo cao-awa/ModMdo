@@ -1,21 +1,21 @@
-package com.github.zhuaidadaya.modMdo.Commands;
+package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.MCH.Utils.Config.Config;
-import com.github.zhuaidadaya.modMdo.Cavas.Cava;
-import com.github.zhuaidadaya.modMdo.Cavas.CavaUtil;
-import com.github.zhuaidadaya.modMdo.Usr.User;
+import com.github.zhuaidadaya.MCH.utils.config.Config;
+import com.github.zhuaidadaya.modMdo.cavas.Cava;
+import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
+import com.github.zhuaidadaya.modMdo.usr.User;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import org.json.JSONObject;
 
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class CavaCommand {
+public class CavaCommand implements CavaCommandFormat {
     public void register() {
         initCavas();
 
@@ -26,12 +26,12 @@ public class CavaCommand {
 
                 if(enableCava) {
                     try {
-                        source.sendFeedback(Text.of(String.format(languageDictionary.getWord(getUserLanguage(player), "cava.format"), getCava(users.getUser(player)).getMessage(), player.getName().asString())), false);
+                        source.sendFeedback(formatCavaTip(player), false);
                     } catch (Exception e) {
-                        source.sendError(Text.of(languageDictionary.getWord(getUserLanguage(player), "command.cava.noCava")));
+                        source.sendError(formatNoCava());
                     }
                 } else {
-                    source.sendError(Text.of(formatCavaDisabled(player)));
+                    source.sendError(formatCavaDisabled());
                 }
 
                 return 0;
@@ -46,14 +46,14 @@ public class CavaCommand {
 
                         LOGGER.info(String.format(languageDictionary.getWord(language, "cava.created"), player.getName().asString(), player.getUuid(), cava.getID()));
 
-                        source.sendFeedback(Text.of(String.format(languageDictionary.getWord(getUserLanguage(player), "cava.feedback.created"), cava.getID())), false);
+                        source.sendFeedback(formatCavaCreated(cava.getID()), false);
                     } catch (IllegalArgumentException e) {
-                        source.sendError(Text.of(languageDictionary.getWord(getUserLanguage(player), "cava.create.failed.alreadyExists")));
+                        source.sendError(formatCavaExists());
                     } catch (Exception e) {
-                        source.sendError(Text.of(languageDictionary.getWord(getUserLanguage(player), "cava.create.failed")));
+                        source.sendError(formatCavaCreateFail());
                     }
                 } else {
-                    source.sendError(Text.of(formatCavaDisabled(player)));
+                    source.sendError(formatCavaDisabled());
                 }
 
                 return 1;
@@ -69,12 +69,12 @@ public class CavaCommand {
 
                         LOGGER.info(String.format(languageDictionary.getWord(language, "cava.deleted"), player.getName().asString(), player.getUuid(), cavaID));
 
-                        source.sendFeedback(Text.of(String.format(languageDictionary.getWord(getUserLanguage(player), "cava.feedback.deleted"), cavaID)), false);
+                        source.sendFeedback(formatCavaDeleted(cavaID), false);
                     } catch (Exception e) {
-                        source.sendError(Text.of(languageDictionary.getWord(getUserLanguage(player), "cava.delete.failed")));
+                        source.sendError(formatCavaDeleteFail());
                     }
                 } else {
-                    source.sendError(Text.of(formatCavaDisabled(player)));
+                    source.sendError(formatCavaDisabled());
                 }
 
                 return 2;
@@ -82,8 +82,44 @@ public class CavaCommand {
         });
     }
 
-    public String formatCavaDisabled(ServerPlayerEntity player) {
-        return languageDictionary.getWord(getUserLanguage(player), "cava.disabled");
+    @Override
+    public TranslatableText formatCavaDeleteFail() {
+        return new TranslatableText( "cava.delete.failed");
+    }
+
+    @Override
+    public TranslatableText formatCavaDeleted(String cavaID) {
+        return new TranslatableText("cava.feedback.deleted", cavaID);
+    }
+
+    @Override
+    public TranslatableText formatCavaCreateFail() {
+        return new TranslatableText("cava.create.failed");
+    }
+
+    @Override
+    public TranslatableText formatCavaExists() {
+        return new TranslatableText("cava.create.failed.alreadyExists");
+    }
+
+    @Override
+    public TranslatableText formatCavaCreated(String cavaID) {
+        return new TranslatableText("cava.feedback.created", cavaID);
+    }
+
+    @Override
+    public TranslatableText formatNoCava() {
+        return new TranslatableText("command.cava.noCava");
+    }
+
+    @Override
+    public TranslatableText formatCavaTip(ServerPlayerEntity player) {
+        return new TranslatableText("cava.format", getCava(users.getUser(player)).getMessage(), player.getName().asString());
+    }
+
+    @Override
+    public TranslatableText formatCavaDisabled() {
+        return new TranslatableText("cava.disabled");
     }
 
     public Cava getCava(User user) {

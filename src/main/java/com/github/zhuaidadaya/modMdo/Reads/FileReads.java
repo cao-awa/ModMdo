@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.Reads;
+package com.github.zhuaidadaya.modMdo.reads;
 
 import java.io.BufferedReader;
 

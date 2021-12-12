@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.MCH.Utils.Config;
+package com.github.zhuaidadaya.MCH.utils.config;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -7,7 +7,9 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Random;
 
 public class ConfigUtil {
     /**
@@ -116,6 +118,10 @@ public class ConfigUtil {
         return configs.get(conf);
     }
 
+    public String getConfigValue(Object conf) {
+        return getConfig(conf).getValue();
+    }
+
     public void readConfig() {
         readConfig(false);
     }
@@ -169,6 +175,8 @@ public class ConfigUtil {
                 configs = new JSONArray(new JSONObject(builder.toString()).getJSONArray("configs"));
                 configSize = builder.length();
             }
+
+            br.close();
 
             for(Object o : configs) {
                 JSONObject config = new JSONObject(o.toString());

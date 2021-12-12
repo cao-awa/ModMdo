@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.Usr;
+package com.github.zhuaidadaya.modMdo.usr;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.json.JSONObject;

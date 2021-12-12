@@ -1,7 +1,7 @@
-package com.github.zhuaidadaya.modMdo.Projects;
+package com.github.zhuaidadaya.modMdo.projects;
 
-import com.github.zhuaidadaya.modMdo.Usr.User;
-import com.github.zhuaidadaya.modMdo.Usr.UserUtil;
+import com.github.zhuaidadaya.modMdo.usr.User;
+import com.github.zhuaidadaya.modMdo.usr.UserUtil;
 import org.json.JSONObject;
 
 import java.util.LinkedHashMap;

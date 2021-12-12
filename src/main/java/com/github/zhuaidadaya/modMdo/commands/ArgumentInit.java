@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.Commands;
+package com.github.zhuaidadaya.modMdo.commands;
 
 @Deprecated
 public class ArgumentInit {

@@ -1,14 +1,13 @@
-package com.github.zhuaidadaya.modMdo.Listeners;
+package com.github.zhuaidadaya.modMdo.listeners;
 
-import com.github.zhuaidadaya.modMdo.Commands.DimensionTips;
-import com.github.zhuaidadaya.modMdo.Commands.XYZ;
-import com.github.zhuaidadaya.modMdo.Lang.Language;
+import com.github.zhuaidadaya.modMdo.commands.DimensionTips;
+import com.github.zhuaidadaya.modMdo.commands.XYZ;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 public class ServerTickListener {
     public void listener() {
@@ -28,7 +27,7 @@ public class ServerTickListener {
                     if(player.deathTime == 1) {
                         DimensionTips dimensionTips = new DimensionTips();
                         XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
-                        player.sendMessage(Text.of(formatDeathMessage(player, dimensionTips, xyz)), false);
+                        player.sendMessage(formatDeathMessage(player, dimensionTips, xyz), false);
                     }
                 }
             }
@@ -37,9 +36,8 @@ public class ServerTickListener {
         }
     }
 
-    public String formatDeathMessage(ServerPlayerEntity player, DimensionTips dimensionTips, XYZ xyz) {
+    public TranslatableText formatDeathMessage(ServerPlayerEntity player, DimensionTips dimensionTips, XYZ xyz) {
         String dimension = dimensionTips.getDimension(player);
-        Language language = getUserLanguage(player.getUuid());
-        return String.format(languageDictionary.getWord(language, "dead.deadIn"), dimensionTips.getDimensionColor(dimension), dimensionTips.getDimensionName(language,dimension), xyz.getIntegerXYZ());
+        return new TranslatableText("dead.deadIn", dimensionTips.getDimensionColor(dimension), dimensionTips.getDimensionName(dimension), xyz.getIntegerXYZ());
     }
 }

@@ -4,6 +4,8 @@
   "package": "com.github.zhuaidadaya.modMdo.mixins",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "EnchantmentHelperMixin",
+    "MinecraftServerSession",
     "MotdMixin",
     "StopServerMixin"
   ],

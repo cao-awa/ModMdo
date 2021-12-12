@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.Projects;
+package com.github.zhuaidadaya.modMdo.projects;
 
 public enum ProjectStatus {
     COMPLETING(0,"Completing"),

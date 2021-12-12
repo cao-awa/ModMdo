@@ -1,9 +1,9 @@
-package com.github.zhuaidadaya.modMdo.Listeners;
+package com.github.zhuaidadaya.modMdo.listeners;
 
-import com.github.zhuaidadaya.modMdo.Storage.Variables;
+import com.github.zhuaidadaya.modMdo.storage.Variables;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 public class ServerStartListener {
     public void listener() {

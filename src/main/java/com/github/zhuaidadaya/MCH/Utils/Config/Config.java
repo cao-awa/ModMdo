@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.MCH.Utils.Config;
+package com.github.zhuaidadaya.MCH.utils.config;
 
 import org.json.JSONObject;
 

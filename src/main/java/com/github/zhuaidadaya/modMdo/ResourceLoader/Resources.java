@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.ResourceLoader;
+package com.github.zhuaidadaya.modMdo.resourceLoader;
 
 import java.io.File;
 import java.io.InputStream;

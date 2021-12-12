@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.Usr;
+package com.github.zhuaidadaya.modMdo.usr;
 
 import org.json.JSONObject;
 

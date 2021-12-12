@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.MCH.Times;
+package com.github.zhuaidadaya.MCH.times;
 
 public enum TimeType {
     ALL("all"), AS_DAY("day"),AS_MONTH("month"),AS_YEAR("year"),AS_CLOCK("clock"),AS_MINUTE("minute"),AS_SECOND("second"),LOG("LOG"),LONG_LOG("LONG_LOG");

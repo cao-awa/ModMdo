@@ -1,14 +1,14 @@
-package com.github.zhuaidadaya.modMdo.Commands;
+package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.MCH.Utils.Config.Config;
-import com.github.zhuaidadaya.modMdo.Projects.Project;
-import com.github.zhuaidadaya.modMdo.Projects.ProjectUtil;
+import com.github.zhuaidadaya.MCH.utils.config.Config;
+import com.github.zhuaidadaya.modMdo.projects.Project;
+import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import org.json.JSONObject;
 
-import static com.github.zhuaidadaya.modMdo.Storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;

@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.MCH.Times;
+package com.github.zhuaidadaya.MCH.times;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

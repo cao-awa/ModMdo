@@ -1,8 +1,8 @@
-package com.github.zhuaidadaya.modMdo.Projects;
+package com.github.zhuaidadaya.modMdo.projects;
 
-import com.github.zhuaidadaya.MCH.Times.TimeType;
-import com.github.zhuaidadaya.MCH.Times.Times;
-import com.github.zhuaidadaya.modMdo.Usr.User;
+import com.github.zhuaidadaya.MCH.times.TimeType;
+import com.github.zhuaidadaya.MCH.times.Times;
+import com.github.zhuaidadaya.modMdo.usr.User;
 import org.json.JSONObject;
 
 import java.util.Arrays;

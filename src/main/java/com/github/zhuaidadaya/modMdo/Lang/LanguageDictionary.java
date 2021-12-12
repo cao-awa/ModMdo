@@ -1,7 +1,7 @@
-package com.github.zhuaidadaya.modMdo.Lang;
+package com.github.zhuaidadaya.modMdo.lang;
 
-import com.github.zhuaidadaya.modMdo.Reads.FileReads;
-import com.github.zhuaidadaya.modMdo.ResourceLoader.Resources;
+import com.github.zhuaidadaya.modMdo.reads.FileReads;
+import com.github.zhuaidadaya.modMdo.resourceLoader.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;

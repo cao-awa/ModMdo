@@ -1,41 +1,45 @@
-package com.github.zhuaidadaya.modMdo.Storage;
+package com.github.zhuaidadaya.modMdo.storage;
 
-import com.github.zhuaidadaya.MCH.Utils.Config.ConfigUtil;
-import com.github.zhuaidadaya.modMdo.Cavas.CavaUtil;
-import com.github.zhuaidadaya.modMdo.Lang.Language;
-import com.github.zhuaidadaya.modMdo.Lang.LanguageDictionary;
-import com.github.zhuaidadaya.modMdo.Projects.ProjectUtil;
-import com.github.zhuaidadaya.modMdo.Usr.User;
-import com.github.zhuaidadaya.modMdo.Usr.UserUtil;
+import com.github.zhuaidadaya.MCH.utils.config.ConfigUtil;
+import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
+import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
+import com.github.zhuaidadaya.modMdo.lang.Language;
+import com.github.zhuaidadaya.modMdo.lang.LanguageDictionary;
+import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
+import com.github.zhuaidadaya.modMdo.usr.User;
+import com.github.zhuaidadaya.modMdo.usr.UserUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import java.io.SyncFailedException;
 import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static String entrust = "ModMdo";
-    public static Language language = Language.CHINESE;
+    public static Language language = Language.ENGLISH;
     public static LanguageDictionary languageDictionary;
     public static boolean enableHereCommand = true;
     public static boolean enableDeadMessage = true;
     public static boolean enableCava = true;
+    public static boolean enableSecureEnchant = true;
     public static ConfigUtil config;
     public static ProjectUtil projects;
     public static UserUtil users;
     public static CavaUtil cavas;
     public static String motd = "";
     public static MinecraftServer server;
-    public static boolean backing = false;
+    public static BackupUtil bak;
 
     public static void updateModMdoVariables() {
         config.set("default_language", language.toString());
         config.set("here_command", hereCommandStatus());
         config.set("dead_message", deadMessageStatus());
         config.set("cava", cavaStatus());
+        config.set("secure_enchant", secureEnchantStatus());
     }
 
     public static void updateUserProfiles() {
@@ -48,6 +52,14 @@ public class Variables {
 
     public static void updateCavas() {
         config.set("cavas", cavas.toJSONObject());
+    }
+
+    public static void updateBackups() {
+        try {
+            config.set("backups", bak.toJSONObject());
+        } catch (SyncFailedException e) {
+
+        }
     }
 
     public static void setUserProfile(User user, String changeKey, String changeValue) {
@@ -111,19 +123,23 @@ public class Variables {
         try {
             return users.getUserConfig(userUUID, "receiveDeadMessage").toString();
         } catch (Exception e) {
-            return enableDeadMessage ? "receive": "rejected";
+            return enableDeadMessage ? "receive" : "rejected";
         }
     }
 
     public static String hereCommandStatus() {
-        return enableHereCommand ? "enable": "disable";
+        return enableHereCommand ? "enable" : "disable";
     }
 
     public static String deadMessageStatus() {
-        return enableDeadMessage ? "enable": "disable";
+        return enableDeadMessage ? "enable" : "disable";
     }
 
     public static String cavaStatus() {
-        return enableCava ? "enable": "disable";
+        return enableCava ? "enable" : "disable";
+    }
+
+    public static String secureEnchantStatus() {
+        return enableSecureEnchant ? "enable" : "disable";
     }
 }

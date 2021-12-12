@@ -1,4 +1,6 @@
-package com.github.zhuaidadaya.modMdo.Commands;
+package com.github.zhuaidadaya.modMdo.commands;
+
+import org.json.JSONObject;
 
 public class XYZ {
     private double X;
@@ -15,6 +17,12 @@ public class XYZ {
         this.X = xyz.getX();
         this.Y = xyz.getY();
         this.Z = xyz.getZ();
+    }
+
+    public XYZ(JSONObject json) {
+        this.X = Double.parseDouble(json.get("x").toString());
+        this.Y = Double.parseDouble(json.get("y").toString());
+        this.Z = Double.parseDouble(json.get("z").toString());
     }
 
     public double getX() {
@@ -106,6 +114,10 @@ public class XYZ {
         } catch (CloneNotSupportedException e) {
             return new XYZ(this);
         }
+    }
+
+    public JSONObject toJSONObject() {
+        return new JSONObject().put("x", X).put("y", Y).put("z", Z);
     }
 }
 

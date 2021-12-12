@@ -1,6 +1,6 @@
-package com.github.zhuaidadaya.modMdo.Commands;
+package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.modMdo.Projects.Project;
+import com.github.zhuaidadaya.modMdo.projects.Project;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
