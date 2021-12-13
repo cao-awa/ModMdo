@@ -7,6 +7,7 @@ import java.util.UUID;
 public class User {
     private String name;
     private UUID uuid;
+    private int level = 1;
 
     public User() {
     }
@@ -25,12 +26,20 @@ public class User {
         this.uuid = UUID.fromString(uuid);
     }
 
+    public User(String name, String uuid,int level) {
+        this.name = name;
+        this.uuid = UUID.fromString(uuid);
+        this.level = level;
+    }
+
     public User(JSONObject json) {
         String name = json.get("name").toString();
         String uuid = json.get("uuid").toString();
+        int level = json.getInt("level");
 
         this.name = name;
         this.uuid = UUID.fromString(uuid);
+        this.level = level;
     }
 
     public String getName() {
@@ -58,6 +67,15 @@ public class User {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put("name", name).put("uuid", uuid);
+        return new JSONObject().put("name", name).put("uuid", uuid).put("level", level);
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public User setLevel(int level) {
+        this.level = level;
+        return this;
     }
 }

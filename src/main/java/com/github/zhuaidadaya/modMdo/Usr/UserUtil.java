@@ -90,8 +90,33 @@ public class UserUtil {
         removeUser(player.getUuid());
     }
 
-
     public void removeUser(String uuid) {
         users.remove(uuid);
     }
+
+    public void setUserLevel(String uuid, int level) {
+        users.put(uuid, new User(getUser(uuid).toJSONObject()).setLevel(level).toJSONObject());
+    }
+
+    public void setUserLevel(UUID uuid, int level) {
+        setUserLevel(uuid.toString(), level);
+    }
+
+    public void setUserLevel(ServerPlayerEntity player, int level) {
+        setUserLevel(player.getUuid(), level);
+    }
+
+    public int getUserLevel(String uuid) {
+        return new User(getUser(uuid).toJSONObject()).getLevel();
+    }
+
+    public int getUserLevel(UUID uuid) {
+        return getUserLevel(uuid.toString());
+    }
+
+    public int getUserLevel(ServerPlayerEntity player) {
+        return getUserLevel(player.getUuid());
+    }
+
+
 }

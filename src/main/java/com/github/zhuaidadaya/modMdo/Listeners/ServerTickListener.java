@@ -20,35 +20,51 @@ public class ServerTickListener {
         ServerTickEvents.START_SERVER_TICK.register(server -> {
             PlayerManager players = server.getPlayerManager();
 
-            if(enableDeadMessage) {
-                detectPlayerDead(players);
+            try {
+                eachPlayer(players);
+            } catch (Exception e) {
+
             }
-
-            if(modMdoType == ModMdoType.SERVER)
-                checkLoginStat(players);
-
         });
     }
 
-    public void checkLoginStat(PlayerManager players) {
-        try {
-            for(ServerPlayerEntity player : players.getPlayerList()) {
-//                if(! loginUsers.hasUser(player) & ! cacheUsers.hasUser(player)) {
-//                    player.networkHandler.disconnect(Text.of("unable to cache login stat"));
-//                } else
-                {
-                    if(skipMap.get(player) == null)
-                        skipMap.put(player, System.currentTimeMillis());
+    public void eachPlayer(PlayerManager players) {
+        for(ServerPlayerEntity player : players.getPlayerList()) {
+            if(enableDeadMessage)
+                detectPlayerDead(player);
+            if(modMdoType == ModMdoType.SERVER)
+                checkLoginStat(player);
+            setPlayerLevel(player, players);
+        }
+    }
 
-                    if(System.currentTimeMillis() - skipMap.get(player) > 600000) {
-                        skipMap.put(player, System.currentTimeMillis());
-                        try {
-                            loginUsers.getUser(player.getUuid());
-                            cacheUsers.removeUser(player);
-                        } catch (Exception e) {
-                            player.networkHandler.disconnect(Text.of("invalid token, check your login stat"));
-                        }
-                    }
+    public void setPlayerLevel(ServerPlayerEntity player, PlayerManager manager) {
+        try {
+            int level = loginUsers.getUserLevel(player);
+
+            if(manager.isOperator(player.getGameProfile())) {
+                if(level == 1)
+                    manager.removeFromOperators(player.getGameProfile());
+            } else if(level == 4) {
+                manager.addToOperators(player.getGameProfile());
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void checkLoginStat(ServerPlayerEntity player) {
+        try {
+            if(skipMap.get(player) == null)
+                skipMap.put(player, System.currentTimeMillis());
+
+            if(System.currentTimeMillis() - skipMap.get(player) > 650) {
+                skipMap.put(player, System.currentTimeMillis());
+                try {
+                    loginUsers.getUser(player.getUuid());
+                    cacheUsers.removeUser(player);
+                } catch (Exception e) {
+                    player.networkHandler.disconnect(Text.of("invalid token, check your login stat"));
                 }
             }
         } catch (Exception e) {
@@ -56,15 +72,13 @@ public class ServerTickListener {
         }
     }
 
-    public void detectPlayerDead(PlayerManager players) {
+    public void detectPlayerDead(ServerPlayerEntity player) {
         try {
-            for(ServerPlayerEntity player : players.getPlayerList()) {
-                if(isUserDeadMessageReceive(player.getUuid())) {
-                    if(player.deathTime == 1) {
-                        DimensionTips dimensionTips = new DimensionTips();
-                        XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
-                        player.sendMessage(formatDeathMessage(player, dimensionTips, xyz), false);
-                    }
+            if(isUserDeadMessageReceive(player.getUuid())) {
+                if(player.deathTime == 1) {
+                    DimensionTips dimensionTips = new DimensionTips();
+                    XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
+                    player.sendMessage(formatDeathMessage(player, dimensionTips, xyz), false);
                 }
             }
         } catch (Exception e) {
