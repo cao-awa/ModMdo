@@ -13,7 +13,8 @@
         "OptionsScreenMixin",
         "PlayerManagerMixin",
         "ServerPlayNetworkHandlerMixin",
-        "StopServerMixin"
+        "StopServerMixin",
+        "ThreadedAnvilChunkStorageMixin"
     ],
     "client": [
     ],

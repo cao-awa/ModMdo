@@ -28,10 +28,12 @@ public class Variables {
     public static boolean enableSecureEnchant = true;
     public static boolean enableEncryptionToken = true;
     public static Identifier tokenChannel = new Identifier("modmdo:token");
+    public static Identifier connectingChannel = new Identifier("modmdo:connecting");
+    public static UserUtil cacheUsers;
     public static UserUtil loginUsers;
+    public static UserUtil users;
     public static ConfigUtil config;
     public static ProjectUtil projects;
-    public static UserUtil users;
     public static CavaUtil cavas;
     public static String motd = "";
     public static MinecraftServer server;

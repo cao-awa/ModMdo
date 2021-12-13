@@ -30,6 +30,7 @@ public class ModMdoStdInitializer implements ModInitializer {
         updateModMdoVariables();
 
         loginUsers = new UserUtil();
+        cacheUsers = new UserUtil();
 
         new HereCommand().register();
         new DimensionHereCommand().register();
@@ -37,7 +38,7 @@ public class ModMdoStdInitializer implements ModInitializer {
         new ServerTickListener().listener();
         new ServerStartListener().listener();
         new CavaCommand().register();
-//        new ReloadCommand().register();
+        //        new ReloadCommand().register();
         new BackupCommand().register();
         new ModMdoConfigCommand().register();
         new VecCommand().register();
@@ -62,7 +63,7 @@ public class ModMdoStdInitializer implements ModInitializer {
                 modMdoServerToken = config.getConfigValue("token_by_encryption");
             } else {
                 try {
-                    modMdoServerToken = new AES().randomGet(512);
+                    modMdoServerToken = new AES().randomGet(64);
                     LOGGER.info("spawned new encryption token, check the config file");
                 } catch (Exception e) {
                     enableEncryptionToken = false;

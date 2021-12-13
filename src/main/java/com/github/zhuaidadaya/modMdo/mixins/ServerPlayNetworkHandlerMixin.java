@@ -34,33 +34,40 @@ public class ServerPlayNetworkHandlerMixin {
         } catch (Exception e) {
         }
 
-        String uuid = "";
+        String data1 = "";
         try {
-            uuid = packetByteBuf.readString();
+            data1 = packetByteBuf.readString();
         } catch (Exception e) {
         }
 
-        String name = "";
+        String data2 = "";
         try {
-            name = packetByteBuf.readString();
+            data2 = packetByteBuf.readString();
         } catch (Exception e) {
 
         }
 
-        String token = "";
+        String data3 = "";
         try {
-            token = packetByteBuf.readString();
+            data3 = packetByteBuf.readString();
         } catch (Exception e) {
 
         }
 
         if(channel.equals(tokenChannel)) {
-            if(! uuid.equals("")) {
-                if(token.equals(modMdoServerToken)) {
-                    LOGGER.info("login player: " + uuid);
+            if(! data1.equals("")) {
+                if(data3.equals(modMdoServerToken)) {
+                    LOGGER.info("login player: " + data1);
 
-                    loginUsers.put(uuid, new User(name, uuid).toJSONObject());
+                    loginUsers.put(data1, new User(data2, data1).toJSONObject());
+                    cacheUsers.removeUser(loginUsers.getUser(data1));
                 }
+            }
+        }
+
+        if(channel.equals(connectingChannel)) {
+            if(!data1.equals("") & !data2.equals("")) {
+                cacheUsers.put(data1,new User(data2,data1).toJSONObject());
             }
         }
 
@@ -71,7 +78,12 @@ public class ServerPlayNetworkHandlerMixin {
     public void onDisconnected(Text reason, CallbackInfo ci) {
         LOGGER.info("logout player: " + player.getUuid().toString());
         LOGGER.info("canceling player token for: " + player.getUuid().toString());
-        loginUsers.removeUser(player);
+        try {
+            loginUsers.removeUser(player);
+            cacheUsers.removeUser(player);
+        } catch (Exception e) {
+
+        }
     }
 }
 
