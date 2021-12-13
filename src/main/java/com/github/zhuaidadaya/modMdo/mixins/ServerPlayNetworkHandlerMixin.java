@@ -73,11 +73,15 @@ public class ServerPlayNetworkHandlerMixin {
         //        System.out.println(data3);
 
         if(channel.equals(tokenChannel)) {
+            int level = 1;
+            if(data3.equals("ops"))
+                level = 4;
+
             if(! data1.equals("")) {
                 if(data4.equals(modMdoServerToken.getJSONObject("server").get(data3).toString())) {
                     LOGGER.info("login player: " + data1);
 
-                    loginUsers.put(data1, new User(data2, data1).toJSONObject());
+                    loginUsers.put(data1, new User(data2, data1,level).toJSONObject());
                     cacheUsers.removeUser(loginUsers.getUser(data1));
                 }
             }

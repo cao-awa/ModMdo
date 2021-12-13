@@ -162,7 +162,7 @@ public class ConfigUtil {
             } else {
                 while(true) {
                     String startWith = br.readLine();
-                    if(startWith.replace(" ","").startsWith("{")) {
+                    if(startWith.replace(" ", "").startsWith("{")) {
                         builder.append(startWith);
                         break;
                     }
@@ -198,7 +198,7 @@ public class ConfigUtil {
             if(log)
                 logger.info("load config done");
         } catch (Exception e) {
-            logger.error("failed to load config: " + utilConfigs.get("name").toString());
+            logger.error("failed to load config: " + utilConfigs.get("name").toString(), e);
             File configFile = new File(utilConfigs.get("path").toString() + "/" + utilConfigs.get("name").toString());
             if(! configFile.isFile() || configFile.length() == 0 || configSize == 0) {
                 try {
@@ -206,7 +206,7 @@ public class ConfigUtil {
                     writeConfig();
                     logger.info("created new config file for " + entrust);
                 } catch (Exception ex) {
-                    logger.info("failed to create new config file for " + entrust);
+                    logger.error("failed to create new config file for " + entrust, ex);
                 }
             }
         }

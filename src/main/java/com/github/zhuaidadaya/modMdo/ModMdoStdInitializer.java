@@ -64,7 +64,7 @@ public class ModMdoStdInitializer implements ModInitializer {
                 modMdoServerToken = new JSONObject(config.getConfigValue("token_by_encryption"));
             } else {
                 try {
-                    modMdoServerToken = new JSONObject().put("server", new JSONObject().put("default", new AES().randomGet(128)));
+                    modMdoServerToken = new JSONObject().put("server", new JSONObject().put("default", new AES().randomGet(128)).put("ops", new AES().randomGet(128)));
                     LOGGER.info("spawned new encryption token, check the config file");
                 } catch (Exception e) {
                     enableEncryptionToken = false;

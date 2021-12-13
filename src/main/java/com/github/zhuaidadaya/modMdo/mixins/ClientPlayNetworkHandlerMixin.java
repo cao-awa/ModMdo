@@ -41,7 +41,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
                     enableEncryptionToken = false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
         ci.cancel();
     }
@@ -53,12 +53,15 @@ public abstract class ClientPlayNetworkHandlerMixin {
             Config<Object, Object> token = config.getConfig("token_by_encryption");
             System.out.println();
             String tokenString = "";
+            String loginType = "default";
             try {
-                tokenString = new JSONObject(token.getValue()).getJSONObject("client").getString(connection.getAddress().toString());
+                JSONObject format = new JSONObject(token.getValue()).getJSONObject("client").getJSONObject(connection.getAddress().toString());
+                tokenString = format.get("token").toString();
+                loginType = format.get("login_type").toString();
             } catch (Exception e) {
-                e.printStackTrace();
+
             }
-            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString("default").writeString(tokenString)));
+            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(loginType).writeString(tokenString)));
         }
     }
 }
