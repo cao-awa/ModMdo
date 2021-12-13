@@ -5,6 +5,7 @@ import com.github.zhuaidadaya.modMdo.commands.*;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.listeners.ServerStartListener;
 import com.github.zhuaidadaya.modMdo.listeners.ServerTickListener;
+import com.github.zhuaidadaya.modMdo.usr.UserUtil;
 import net.fabricmc.api.ModInitializer;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
@@ -26,6 +27,8 @@ public class ModMdoStdInitializer implements ModInitializer {
 
         initModMdoVariables();
         updateModMdoVariables();
+
+        loginUsers = new UserUtil();
 
         new HereCommand().register();
         new DimensionHereCommand().register();

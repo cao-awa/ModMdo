@@ -91,18 +91,18 @@ public class ModMdoConfigCommand {
     }
 
     public TranslatableText formatEnableHere() {
-        return new TranslatableText("here_command.enabled.rule.format");
+        return new TranslatableText("here_command.enable.rule.format");
     }
 
     public TranslatableText formatDisableHere() {
-        return new TranslatableText("here_command.disabled.rule.format");
+        return new TranslatableText("here_command.disable.rule.format");
     }
 
     public TranslatableText formatEnableSecureEnchant() {
-        return new TranslatableText("secure_command.enchant.enabled.rule.format");
+        return new TranslatableText("secure_enchant.enable.rule.format");
     }
 
     public TranslatableText formatDisableSecureEnchant() {
-        return new TranslatableText("secure_enchant.disabled.rule.format");
+        return new TranslatableText("secure_enchant.disable.rule.format");
     }
 }

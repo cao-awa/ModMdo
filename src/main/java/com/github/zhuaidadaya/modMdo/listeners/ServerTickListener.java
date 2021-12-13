@@ -5,23 +5,54 @@ import com.github.zhuaidadaya.modMdo.commands.XYZ;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+
+import java.util.LinkedHashMap;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 public class ServerTickListener {
+    private final LinkedHashMap<ServerPlayerEntity, Integer> skipMap = new LinkedHashMap<>();
+
     public void listener() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
+            PlayerManager players = server.getPlayerManager();
+
             if(enableDeadMessage) {
-                detectPlayerDead();
+                detectPlayerDead(players);
             }
+
+            checkLoginStat(players);
+
         });
     }
 
-    public void detectPlayerDead() {
+    public void checkLoginStat(PlayerManager players) {
         try {
-            PlayerManager players = server.getPlayerManager();
+            for(ServerPlayerEntity player : players.getPlayerList()) {
+                if(skipMap.get(player) == null)
+                    skipMap.put(player, 0);
+                else
+                    skipMap.put(player, skipMap.get(player) + 1);
 
+                if(skipMap.get(player) > 10) {
+                    skipMap.put(player, 0);
+                    try {
+                        loginUsers.getUser(player.getUuid());
+                    } catch (Exception e) {
+                        System.out.println("failed to check: " + player.getUuid());
+                        player.networkHandler.disconnect(Text.of("invalid token, check your login stat"));
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void detectPlayerDead(PlayerManager players) {
+        try {
             for(ServerPlayerEntity player : players.getPlayerList()) {
                 if(isUserDeadMessageReceive(player.getUuid())) {
                     if(player.deathTime == 1) {
