@@ -12,7 +12,7 @@ import java.net.InetSocketAddress;
 public class ClientConnectMixin {
     @Inject(method = "connect",at = @At("RETURN"))
     private static void connect(InetSocketAddress address, boolean useEpoll, CallbackInfoReturnable<ClientConnection> cir) {
-        System.out.println("connect??");
+//        System.out.println("connect??");
 
 //        client.player.networkHandler.sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString("test")));
     }

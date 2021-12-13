@@ -19,7 +19,7 @@ public class PlayerManagerMixin {
 
     @Inject(method = "onPlayerConnect", at = @At("HEAD"))
     private void onPlayerConnected(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        System.out.println("connect");
+//        System.out.println("connect");
 
 //        player.networkHandler.disconnect(Text.of("invalid token"));
     }
