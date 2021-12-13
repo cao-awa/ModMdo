@@ -46,6 +46,5 @@ public class StopServerMixin {
             Runtime.getRuntime().exit(0);
             LOGGER.info("ModMdo cannot stop server! it will waiting for a long time!");
         }
-        ci.cancel();
     }
 }

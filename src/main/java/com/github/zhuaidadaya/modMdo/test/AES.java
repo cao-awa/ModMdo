@@ -189,4 +189,8 @@ public class AES {
     public String  getKey() {
         return KEY;
     }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(new AES().randomGet(128));
+    }
 }

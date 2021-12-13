@@ -1,5 +1,11 @@
 {
     "command.vec.format": "§aVec3\n§ax: %s\n§ay: %s\n§az: %s\n§6Vec2\n§6x: %s\n§6y: %s\n§d维度\n§dDim: %s",
+    "dead.message.disable.rule.format": "死亡反馈已禁用",
+    "dead.message.enable.rule.format": "死亡反馈已启用",
+    "reconnect.reject.disable.rule.format": "拒绝重新连接已禁用",
+    "reconnect.reject.enable.rule.format": "拒绝重新连接已启用",
+    "encryption.token.disable.rule.format": "加密Token已禁用",
+    "encryption.token.enable.rule.format": "加密Token已启用",
     "cava.disabled": "Cava已被禁用",
     "here_command.disabled": "here已被禁用",
     "cava.disabled.rule.format": "Cava已禁用",
