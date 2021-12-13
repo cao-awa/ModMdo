@@ -5,6 +5,7 @@ import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
+import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
 import net.minecraft.server.MinecraftServer;
@@ -25,6 +26,7 @@ public class Variables {
     public static boolean enableDeadMessage = true;
     public static boolean enableCava = true;
     public static boolean enableSecureEnchant = true;
+    public static boolean enableEncryptionToken = true;
     public static Identifier tokenChannel = new Identifier("modmdo:token");
     public static UserUtil loginUsers;
     public static ConfigUtil config;
@@ -34,6 +36,8 @@ public class Variables {
     public static String motd = "";
     public static MinecraftServer server;
     public static BackupUtil bak;
+    public static ModMdoType modMdoType = ModMdoType.NONE;
+    public static String modMdoServerToken = null;
 
     public static void updateModMdoVariables() {
         config.set("default_language", language.toString());
@@ -41,6 +45,8 @@ public class Variables {
         config.set("dead_message", deadMessageStatus());
         config.set("cava", cavaStatus());
         config.set("secure_enchant", secureEnchantStatus());
+        config.set("encryption_token", encryptionTokenStatus());
+        config.set("token_by_encryption", modMdoServerToken == null ? "" : modMdoServerToken);
     }
 
     public static void updateUserProfiles() {
@@ -142,5 +148,9 @@ public class Variables {
 
     public static String secureEnchantStatus() {
         return enableSecureEnchant ? "enable" : "disable";
+    }
+
+    public static String  encryptionTokenStatus() {
+        return enableEncryptionToken ? "enable" : "disable";
     }
 }

@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modMdo.listeners;
 
 import com.github.zhuaidadaya.modMdo.commands.DimensionTips;
 import com.github.zhuaidadaya.modMdo.commands.XYZ;
+import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -23,7 +24,8 @@ public class ServerTickListener {
                 detectPlayerDead(players);
             }
 
-            checkLoginStat(players);
+            if(modMdoType == ModMdoType.SERVER)
+                checkLoginStat(players);
 
         });
     }

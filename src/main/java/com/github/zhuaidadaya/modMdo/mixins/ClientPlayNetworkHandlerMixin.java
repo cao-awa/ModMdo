@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
+import com.github.zhuaidadaya.MCH.utils.config.Config;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.github.zhuaidadaya.modMdo.storage.Variables.tokenChannel;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin {
@@ -32,9 +33,9 @@ public abstract class ClientPlayNetworkHandlerMixin {
             if(data != null) {
                 int id = data.readVarInt();
                 if(id == 99)
-                    client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString("test")));
+                    enableEncryptionToken = true;
                 if(id == 96)
-                    System.out.println("96");
+                    enableEncryptionToken = false;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -42,8 +43,11 @@ public abstract class ClientPlayNetworkHandlerMixin {
         ci.cancel();
     }
 
-    @Inject(method = "onGameJoin",at = @At("RETURN"))
+    @Inject(method = "onGameJoin", at = @At("RETURN"))
     public void onGameJoin(GameJoinS2CPacket packet, CallbackInfo ci) {
-        client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString("test")));
+        if(enableEncryptionToken) {
+            Config<Object, Object> token = config.getConfig("token_by_encryption");
+            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(token == null ? "" : token.getValue())));
+        }
     }
 }

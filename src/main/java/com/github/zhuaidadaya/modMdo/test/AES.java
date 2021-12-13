@@ -176,18 +176,17 @@ public class AES {
         return StringUtils.isEmpty(encryptStr) ? null : aesDecryptByBytes(base64Decode(encryptStr), decryptKey);
     }
 
-    public static void main(String[] args) throws Exception {
-        byte[] b = new byte[128];
+    public String randomGet(int size) throws Exception{
+        byte[] b = new byte[size];
         SecureRandom random = new SecureRandom();
         random.nextBytes(b);
         StringBuilder content = new StringBuilder();
         for(byte byt : b)
             content.append(byt);
-        System.out.println("before: \n" + content);
-        String encrypt = aesEncrypt(content.toString(), KEY);
-        System.out.println("after: \n" + encrypt);
-        System.out.println("key: \n" + KEY);
-        String decrypt = aesDecrypt(encrypt, KEY);
-        System.out.println("decode: \n" + decrypt);
+        return aesEncrypt(content.toString(), KEY);
+    }
+
+    public String  getKey() {
+        return KEY;
     }
 }
