@@ -67,11 +67,6 @@ public class ServerPlayNetworkHandlerMixin {
 
         }
 
-        //        System.out.println(channel);
-        //        System.out.println(data1);
-        //        System.out.println(data2);
-        //        System.out.println(data3);
-
         if(channel.equals(tokenChannel)) {
             int level = 1;
             if(data3.equals("ops"))
