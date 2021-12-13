@@ -32,8 +32,8 @@ public class StopServerMixin {
                         i++;
 
                         if(i > 5) {
-                            Runtime.getRuntime().exit(0);
                             LOGGER.info("failed to stop server in 5 times try, ModMdo trying force stop task");
+                            Runtime.getRuntime().exit(0);
                         }
                     } catch(Exception ex) {
 

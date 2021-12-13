@@ -5,6 +5,8 @@ import com.github.zhuaidadaya.modMdo.commands.*;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.listeners.ServerStartListener;
 import com.github.zhuaidadaya.modMdo.listeners.ServerTickListener;
+import com.github.zhuaidadaya.modMdo.test.AES;
+import com.github.zhuaidadaya.modMdo.usr.UserUtil;
 import net.fabricmc.api.ModInitializer;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
@@ -26,6 +28,8 @@ public class ModMdoStdInitializer implements ModInitializer {
 
         initModMdoVariables();
         updateModMdoVariables();
+
+        loginUsers = new UserUtil();
 
         new HereCommand().register();
         new DimensionHereCommand().register();
@@ -50,5 +54,21 @@ public class ModMdoStdInitializer implements ModInitializer {
             enableCava = config.getConfigValue("cava").equals("enable");
         if(config.getConfig("secure_enchant") != null)
             enableSecureEnchant = config.getConfigValue("secure_enchant").equals("enable");
+        if(config.getConfig("encryption_token") != null)
+            enableEncryptionToken = config.getConfigValue("encryption_token").equals("enable");
+
+        if(enableEncryptionToken) {
+            if(config.getConfig("token_by_encryption") != null) {
+                modMdoServerToken = config.getConfigValue("token_by_encryption");
+            } else {
+                try {
+                    modMdoServerToken = new AES().randomGet(512);
+                    LOGGER.info("spawned new encryption token, check the config file");
+                } catch (Exception e) {
+                    enableEncryptionToken = false;
+                    LOGGER.info("failed to enable encryption token");
+                }
+            }
+        }
     }
 }

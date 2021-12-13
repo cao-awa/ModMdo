@@ -4,9 +4,15 @@
   "package": "com.github.zhuaidadaya.modMdo.mixins",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "ClientConnectMixin",
+    "ClientPlayNetworkHandlerMixin",
     "EnchantmentHelperMixin",
     "MinecraftServerSession",
     "MotdMixin",
+    "MultiplayerScreenMixin",
+    "OptionsScreenMixin",
+    "PlayerManagerMixin",
+    "ServerPlayNetworkHandlerMixin",
     "StopServerMixin"
   ],
   "client": [

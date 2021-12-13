@@ -53,7 +53,7 @@ public class DimensionHereCommand implements HereCommandFormat {
 
     @Override
     public TranslatableText formatHereDisabled() {
-        return new TranslatableText("here.disabled");
+        return new TranslatableText("here_command.disable");
     }
 
     @Override
@@ -63,9 +63,7 @@ public class DimensionHereCommand implements HereCommandFormat {
         switch(dimension) {
             case "overworld" -> convertTarget = "the_nether";
             case "the_nether" -> convertTarget = "overworld";
-            case "the_end" -> {
-                throw new IllegalArgumentException();
-            }
+            case "the_end" -> throw new IllegalArgumentException();
         }
         XYZ convertXYZ = xyz.clone();
         if(convertTarget.equals("the_nether")) {
@@ -74,7 +72,7 @@ public class DimensionHereCommand implements HereCommandFormat {
             convertXYZ.multiplyXZ(8, 8);
         }
 
-        return new TranslatableText("command.dhere", useHerePlayerName,dimensionTips.getDimensionColor(dimension),useHerePlayerName,dimensionTips.getDimensionName(dimension),xyz.getIntegerXYZ(),dimensionTips.getDimensionName(convertTarget),convertXYZ.getIntegerXYZ());
+        return new TranslatableText("command.dhere", useHerePlayerName,dimensionTips.getDimensionColor(dimension),useHerePlayerName,dimensionTips.getDimensionName(dimension),"§e" + xyz.getIntegerXYZ(),dimensionTips.getDimensionName(convertTarget),"§d" + convertXYZ.getIntegerXYZ());
     }
 
     @Override

@@ -60,4 +60,18 @@ public class UserUtil {
     public User getUser(UUID uuid) {
         return new User(users.get(uuid.toString()));
     }
+
+    public void removeUser(UUID uuid) {
+        removeUser(uuid.toString());
+    }
+
+
+    public void removeUser(ServerPlayerEntity player) {
+        removeUser(player.getUuid());
+    }
+
+
+    public void removeUser(String uuid) {
+        users.remove(uuid);
+    }
 }

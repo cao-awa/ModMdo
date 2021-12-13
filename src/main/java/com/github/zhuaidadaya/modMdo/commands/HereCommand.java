@@ -54,14 +54,14 @@ public class HereCommand implements HereCommandFormat {
 
     @Override
     public TranslatableText formatHereDisabled() {
-        return new TranslatableText("here.disabled");
+        return new TranslatableText("here_command.disable");
     }
 
     @Override
     public TranslatableText formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity player, DimensionTips dimensionTips, ServerPlayerEntity whoUseHere) {
         String useHerePlayerName = whoUseHere.getName().asString();
 
-        return new TranslatableText("command.here", useHerePlayerName,dimensionTips.getDimensionColor(dimension),useHerePlayerName,dimensionTips.getDimensionName(dimension),xyz.getIntegerXYZ());
+        return new TranslatableText("command.here", useHerePlayerName,dimensionTips.getDimensionColor(dimension),useHerePlayerName,dimensionTips.getDimensionName(dimension),"§e" + xyz.getIntegerXYZ());
     }
 
     @Override

@@ -4,12 +4,13 @@ import com.github.zhuaidadaya.MCH.utils.config.ConfigUtil;
 import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.lang.Language;
-import com.github.zhuaidadaya.modMdo.lang.LanguageDictionary;
 import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
+import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -21,11 +22,13 @@ public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
-    public static LanguageDictionary languageDictionary;
     public static boolean enableHereCommand = true;
     public static boolean enableDeadMessage = true;
     public static boolean enableCava = true;
     public static boolean enableSecureEnchant = true;
+    public static boolean enableEncryptionToken = true;
+    public static Identifier tokenChannel = new Identifier("modmdo:token");
+    public static UserUtil loginUsers;
     public static ConfigUtil config;
     public static ProjectUtil projects;
     public static UserUtil users;
@@ -33,6 +36,8 @@ public class Variables {
     public static String motd = "";
     public static MinecraftServer server;
     public static BackupUtil bak;
+    public static ModMdoType modMdoType = ModMdoType.NONE;
+    public static String modMdoServerToken = null;
 
     public static void updateModMdoVariables() {
         config.set("default_language", language.toString());
@@ -40,6 +45,8 @@ public class Variables {
         config.set("dead_message", deadMessageStatus());
         config.set("cava", cavaStatus());
         config.set("secure_enchant", secureEnchantStatus());
+        config.set("encryption_token", encryptionTokenStatus());
+        config.set("token_by_encryption", modMdoServerToken == null ? "" : modMdoServerToken);
     }
 
     public static void updateUserProfiles() {
@@ -141,5 +148,9 @@ public class Variables {
 
     public static String secureEnchantStatus() {
         return enableSecureEnchant ? "enable" : "disable";
+    }
+
+    public static String  encryptionTokenStatus() {
+        return enableEncryptionToken ? "enable" : "disable";
     }
 }

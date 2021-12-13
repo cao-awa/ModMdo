@@ -3,6 +3,7 @@ package com.github.zhuaidadaya.modMdo.commands;
 import com.github.zhuaidadaya.MCH.utils.config.Config;
 import com.github.zhuaidadaya.modMdo.cavas.Cava;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
+import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -44,7 +45,7 @@ public class CavaCommand implements CavaCommandFormat {
                     try {
                         Cava cava = cavas.createCava(users.getUser(player), cavaMessage.substring(13));
 
-                        LOGGER.info(String.format(languageDictionary.getWord(language, "cava.created"), player.getName().asString(), player.getUuid(), cava.getID()));
+                        LOGGER.info(String.format((language == Language.CHINESE ? "玩家 %s(%s) 创建了一个Cava, Cava id: %s" : "player %s(%s) created a Cava, Cava id: %s"), player.getName().asString(), player.getUuid(), cava.getID()));
 
                         source.sendFeedback(formatCavaCreated(cava.getID()), false);
                     } catch (IllegalArgumentException e) {
@@ -67,7 +68,7 @@ public class CavaCommand implements CavaCommandFormat {
 
                         cavas.deleteCava(cavaID);
 
-                        LOGGER.info(String.format(languageDictionary.getWord(language, "cava.deleted"), player.getName().asString(), player.getUuid(), cavaID));
+                        LOGGER.info(String.format((language == Language.CHINESE ? "玩家 %s(%s) 删除了一个Cava, Cava id: %s" : "player %s(%s) deleted a Cava, Cava id: %s"), player.getName().asString(), player.getUuid(), cavaID));
 
                         source.sendFeedback(formatCavaDeleted(cavaID), false);
                     } catch (Exception e) {
@@ -119,7 +120,7 @@ public class CavaCommand implements CavaCommandFormat {
 
     @Override
     public TranslatableText formatCavaDisabled() {
-        return new TranslatableText("cava.disabled");
+        return new TranslatableText("cava.disable");
     }
 
     public Cava getCava(User user) {
