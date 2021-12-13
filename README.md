@@ -1,42 +1,9 @@
 # ModMdo
 a mod for minecraft server
 
+## fabric version
+minimum Fabric Loader version is 0.12.6
+minimum Fabric API version is 0.43.1+1.18
+
 ## use
-ModMdo supported some command
-
-<hr>
-
-```
-/here 
-```
-this command can send your current position<br>
-to all online player
-
-<hr>
-
-```
-/dhere 
-```
-
-this command can send your current position<br>
-to all online player<br>
-and send convert position
-
-if you in overworld<br>
-it will send your overworld position<br>
-and will convert to the_nether position, send again
-
-<hr>
-
-```
-/user 
-```
-
-this command can setting your profile
-
-it has sub command
-```
-/user language 
-```
-this command can set your language<br>
-"chinese" or "english" follow the ``` /user language ```
+visit [wiki](https://github.com/zhuaidadaya/ModMdo/wiki)
