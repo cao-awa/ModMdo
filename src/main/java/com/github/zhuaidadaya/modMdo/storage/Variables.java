@@ -39,7 +39,7 @@ public class Variables {
     public static MinecraftServer server;
     public static BackupUtil bak;
     public static ModMdoType modMdoType = ModMdoType.NONE;
-    public static String modMdoServerToken = null;
+    public static JSONObject modMdoServerToken = null;
 
     public static void updateModMdoVariables() {
         config.set("default_language", language.toString());
@@ -48,7 +48,8 @@ public class Variables {
         config.set("cava", cavaStatus());
         config.set("secure_enchant", secureEnchantStatus());
         config.set("encryption_token", encryptionTokenStatus());
-        config.set("token_by_encryption", modMdoServerToken == null ? "" : modMdoServerToken);
+        if(modMdoServerToken != null)
+            config.set("token_by_encryption", modMdoServerToken);
     }
 
     public static void updateUserProfiles() {

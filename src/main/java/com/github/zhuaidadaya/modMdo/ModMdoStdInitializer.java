@@ -8,6 +8,7 @@ import com.github.zhuaidadaya.modMdo.listeners.ServerTickListener;
 import com.github.zhuaidadaya.modMdo.test.AES;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
 import net.fabricmc.api.ModInitializer;
+import org.json.JSONObject;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
@@ -60,10 +61,10 @@ public class ModMdoStdInitializer implements ModInitializer {
 
         if(enableEncryptionToken) {
             if(config.getConfig("token_by_encryption") != null) {
-                modMdoServerToken = config.getConfigValue("token_by_encryption");
+                modMdoServerToken = new JSONObject(config.getConfigValue("token_by_encryption"));
             } else {
                 try {
-                    modMdoServerToken = new AES().randomGet(64);
+                    modMdoServerToken = new JSONObject().put("server", new JSONObject().put("default", new AES().randomGet(128)).put("ops", new AES().randomGet(128)));
                     LOGGER.info("spawned new encryption token, check the config file");
                 } catch (Exception e) {
                     enableEncryptionToken = false;

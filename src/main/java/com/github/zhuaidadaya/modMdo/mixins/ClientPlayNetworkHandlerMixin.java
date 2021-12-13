@@ -4,11 +4,13 @@ import com.github.zhuaidadaya.MCH.utils.config.Config;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import net.minecraft.util.Identifier;
+import org.json.JSONObject;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,10 +26,10 @@ public abstract class ClientPlayNetworkHandlerMixin {
     @Shadow
     private MinecraftClient client;
 
+    @Shadow @Final private ClientConnection connection;
+
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-        System.out.println("check token");
-
         PacketByteBuf data = packet.getData();
 
         try {
@@ -39,7 +41,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
                     enableEncryptionToken = false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
         ci.cancel();
     }
@@ -49,7 +51,17 @@ public abstract class ClientPlayNetworkHandlerMixin {
         if(enableEncryptionToken) {
             client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(new Identifier("modmdo:connecting"), (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString())));
             Config<Object, Object> token = config.getConfig("token_by_encryption");
-            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(token == null ? "" : token.getValue())));
+            System.out.println();
+            String tokenString = "";
+            String loginType = "default";
+            try {
+                JSONObject format = new JSONObject(token.getValue()).getJSONObject("client").getJSONObject(connection.getAddress().toString());
+                tokenString = format.get("token").toString();
+                loginType = format.get("login_type").toString();
+            } catch (Exception e) {
+
+            }
+            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(loginType).writeString(tokenString)));
         }
     }
 }
