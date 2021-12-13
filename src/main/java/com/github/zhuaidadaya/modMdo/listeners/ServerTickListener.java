@@ -32,7 +32,7 @@ public class ServerTickListener {
         for(ServerPlayerEntity player : players.getPlayerList()) {
             if(enableDeadMessage)
                 detectPlayerDead(player);
-            if(modMdoType == ModMdoType.SERVER)
+            if(modMdoType == ModMdoType.SERVER & enableEncryptionToken)
                 checkLoginStat(player);
             setPlayerLevel(player, players);
         }
@@ -74,7 +74,7 @@ public class ServerTickListener {
 
     public void detectPlayerDead(ServerPlayerEntity player) {
         try {
-            if(isUserDeadMessageReceive(player.getUuid())) {
+            if(isUserDeadMessageReceive(player.getUuid()) & enableDeadMessage) {
                 if(player.deathTime == 1) {
                     DimensionTips dimensionTips = new DimensionTips();
                     XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());

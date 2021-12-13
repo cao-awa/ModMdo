@@ -26,6 +26,7 @@ public class Variables {
     public static boolean enableDeadMessage = true;
     public static boolean enableCava = true;
     public static boolean enableSecureEnchant = true;
+    public static boolean enableRejectReconnect = true;
     public static boolean enableEncryptionToken = true;
     public static Identifier tokenChannel = new Identifier("modmdo:token");
     public static Identifier connectingChannel = new Identifier("modmdo:connecting");
@@ -48,6 +49,7 @@ public class Variables {
         config.set("cava", cavaStatus());
         config.set("secure_enchant", secureEnchantStatus());
         config.set("encryption_token", encryptionTokenStatus());
+        config.set("reject_reconnect", rejectReconnectStatus());
         if(modMdoServerToken != null)
             config.set("token_by_encryption", modMdoServerToken);
     }
@@ -155,5 +157,9 @@ public class Variables {
 
     public static String  encryptionTokenStatus() {
         return enableEncryptionToken ? "enable" : "disable";
+    }
+
+    public static String rejectReconnectStatus() {
+        return enableRejectReconnect ? "enable" : "disable";
     }
 }

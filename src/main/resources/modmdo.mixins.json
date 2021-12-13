@@ -12,6 +12,7 @@
         "MultiplayerScreenMixin",
         "OptionsScreenMixin",
         "PlayerManagerMixin",
+        "ServerLoginNetworkHandlerMixin",
         "ServerPlayNetworkHandlerMixin",
         "StopServerMixin",
         "ThreadedAnvilChunkStorageMixin"
