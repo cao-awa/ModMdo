@@ -14,10 +14,10 @@ import java.util.LinkedHashMap;
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 public class ServerTickListener {
-    private final LinkedHashMap<ServerPlayerEntity, Integer> skipMap = new LinkedHashMap<>();
+    private final LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
 
     public void listener() {
-        ServerTickEvents.END_SERVER_TICK.register(server -> {
+        ServerTickEvents.START_SERVER_TICK.register(server -> {
             PlayerManager players = server.getPlayerManager();
 
             if(enableDeadMessage) {
@@ -33,18 +33,21 @@ public class ServerTickListener {
     public void checkLoginStat(PlayerManager players) {
         try {
             for(ServerPlayerEntity player : players.getPlayerList()) {
-                if(skipMap.get(player) == null)
-                    skipMap.put(player, 0);
-                else
-                    skipMap.put(player, skipMap.get(player) + 1);
+//                if(! loginUsers.hasUser(player) & ! cacheUsers.hasUser(player)) {
+//                    player.networkHandler.disconnect(Text.of("unable to cache login stat"));
+//                } else
+                {
+                    if(skipMap.get(player) == null)
+                        skipMap.put(player, System.currentTimeMillis());
 
-                if(skipMap.get(player) > 6) {
-                    skipMap.put(player, 0);
-                    try {
-                        loginUsers.getUser(player.getUuid());
-                    } catch (Exception e) {
-                        LOGGER.info("failed to check: " + player.getUuid());
-                        player.networkHandler.disconnect(Text.of("invalid token, check your login stat"));
+                    if(System.currentTimeMillis() - skipMap.get(player) > 600000) {
+                        skipMap.put(player, System.currentTimeMillis());
+                        try {
+                            loginUsers.getUser(player.getUuid());
+                            cacheUsers.removeUser(player);
+                        } catch (Exception e) {
+                            player.networkHandler.disconnect(Text.of("invalid token, check your login stat"));
+                        }
                     }
                 }
             }

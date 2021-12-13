@@ -1,23 +1,24 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.github.zhuaidadaya.modMdo.mixins",
-  "compatibilityLevel": "JAVA_16",
-  "mixins": [
-    "ClientConnectMixin",
-    "ClientPlayNetworkHandlerMixin",
-    "EnchantmentHelperMixin",
-    "MinecraftServerSession",
-    "MotdMixin",
-    "MultiplayerScreenMixin",
-    "OptionsScreenMixin",
-    "PlayerManagerMixin",
-    "ServerPlayNetworkHandlerMixin",
-    "StopServerMixin"
-  ],
-  "client": [
-  ],
-  "injectors": {
-    "defaultRequire": 1
+    "required": true,
+    "minVersion": "0.8",
+    "package": "com.github.zhuaidadaya.modMdo.mixins",
+    "compatibilityLevel": "JAVA_16",
+    "mixins": [
+        "ClientConnectMixin",
+        "ClientPlayNetworkHandlerMixin",
+        "EnchantmentHelperMixin",
+        "MinecraftServerSession",
+        "MotdMixin",
+        "MultiplayerScreenMixin",
+        "OptionsScreenMixin",
+        "PlayerManagerMixin",
+        "ServerPlayNetworkHandlerMixin",
+        "StopServerMixin",
+        "ThreadedAnvilChunkStorageMixin"
+    ],
+    "client": [
+    ],
+    "injectors": {
+        "defaultRequire": 1
   }
 }

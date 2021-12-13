@@ -28,16 +28,18 @@ public class Variables {
     public static boolean enableSecureEnchant = true;
     public static boolean enableEncryptionToken = true;
     public static Identifier tokenChannel = new Identifier("modmdo:token");
+    public static Identifier connectingChannel = new Identifier("modmdo:connecting");
+    public static UserUtil cacheUsers;
     public static UserUtil loginUsers;
+    public static UserUtil users;
     public static ConfigUtil config;
     public static ProjectUtil projects;
-    public static UserUtil users;
     public static CavaUtil cavas;
     public static String motd = "";
     public static MinecraftServer server;
     public static BackupUtil bak;
     public static ModMdoType modMdoType = ModMdoType.NONE;
-    public static String modMdoServerToken = null;
+    public static JSONObject modMdoServerToken = null;
 
     public static void updateModMdoVariables() {
         config.set("default_language", language.toString());
@@ -46,7 +48,8 @@ public class Variables {
         config.set("cava", cavaStatus());
         config.set("secure_enchant", secureEnchantStatus());
         config.set("encryption_token", encryptionTokenStatus());
-        config.set("token_by_encryption", modMdoServerToken == null ? "" : modMdoServerToken);
+        if(modMdoServerToken != null)
+            config.set("token_by_encryption", modMdoServerToken);
     }
 
     public static void updateUserProfiles() {
@@ -150,7 +153,7 @@ public class Variables {
         return enableSecureEnchant ? "enable" : "disable";
     }
 
-    public static String  encryptionTokenStatus() {
+    public static String encryptionTokenStatus() {
         return enableEncryptionToken ? "enable" : "disable";
     }
 }

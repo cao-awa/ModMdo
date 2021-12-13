@@ -11,10 +11,11 @@
   ],
   "contact": {
     "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.17",
-    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17"
+    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17",
+    "issues": "https://github.com/zhuaidadaya/ModMdo/issues"
   },
 
-  "license": "CC0-1.0",
+  "license": "GPL-3.0",
   "icon": "assets/modid/icon.png",
 
   "environment": "*",

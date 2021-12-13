@@ -61,8 +61,28 @@ public class UserUtil {
         return new User(users.get(uuid.toString()));
     }
 
+    public User getUser(String uuid) {
+        return new User(users.get(uuid));
+    }
+
+    public boolean hasUser(ServerPlayerEntity player) {
+        return users.get(player.getUuid().toString()) != null;
+    }
+
+    public boolean hasUser(UUID uuid) {
+        return users.get(uuid.toString()) != null;
+    }
+
+    public boolean hasUser(String uuid) {
+        return users.get(uuid) != null;
+    }
+
     public void removeUser(UUID uuid) {
         removeUser(uuid.toString());
+    }
+
+    public void removeUser(User user) {
+        removeUser(user.getUuid());
     }
 
 

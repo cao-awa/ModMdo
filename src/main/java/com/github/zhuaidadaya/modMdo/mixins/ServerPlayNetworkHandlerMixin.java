@@ -3,6 +3,10 @@ package com.github.zhuaidadaya.modMdo.mixins;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -12,6 +16,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Set;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
@@ -30,37 +36,56 @@ public class ServerPlayNetworkHandlerMixin {
 
         PacketByteBuf packetByteBuf = null;
         try {
-            packetByteBuf = packet.getData();
+            packetByteBuf = new PacketByteBuf(packet.getData().copy());
         } catch (Exception e) {
         }
 
-        String uuid = "";
+        String data1 = "";
         try {
-            uuid = packetByteBuf.readString();
+            data1 = packetByteBuf.readString();
         } catch (Exception e) {
         }
 
-        String name = "";
+        String data2 = "";
         try {
-            name = packetByteBuf.readString();
+            data2 = packetByteBuf.readString();
         } catch (Exception e) {
 
         }
 
-        String token = "";
+        String data3 = "";
         try {
-            token = packetByteBuf.readString();
+            data3 = packetByteBuf.readString();
         } catch (Exception e) {
 
         }
+
+        String data4 = "";
+        try {
+            data4 = packetByteBuf.readString();
+        } catch (Exception e) {
+
+        }
+
+        //        System.out.println(channel);
+        //        System.out.println(data1);
+        //        System.out.println(data2);
+        //        System.out.println(data3);
 
         if(channel.equals(tokenChannel)) {
-            if(! uuid.equals("")) {
-                if(token.equals(modMdoServerToken)) {
-                    LOGGER.info("login player: " + uuid);
+            if(! data1.equals("")) {
+                if(data4.equals(modMdoServerToken.getJSONObject("server").get(data3).toString())) {
+                    LOGGER.info("login player: " + data1);
 
-                    loginUsers.put(uuid, new User(name, uuid).toJSONObject());
+                    loginUsers.put(data1, new User(data2, data1).toJSONObject());
+                    cacheUsers.removeUser(loginUsers.getUser(data1));
                 }
+            }
+        }
+
+        if(channel.equals(connectingChannel)) {
+            if(! data1.equals("") & ! data2.equals("")) {
+                cacheUsers.put(data1, new User(data2, data1).toJSONObject());
             }
         }
 
@@ -71,7 +96,47 @@ public class ServerPlayNetworkHandlerMixin {
     public void onDisconnected(Text reason, CallbackInfo ci) {
         LOGGER.info("logout player: " + player.getUuid().toString());
         LOGGER.info("canceling player token for: " + player.getUuid().toString());
-        loginUsers.removeUser(player);
+        try {
+            loginUsers.removeUser(player);
+            cacheUsers.removeUser(player);
+        } catch (Exception e) {
+
+        }
+    }
+
+    @Inject(method = "onPlayerMove", at = @At("HEAD"), cancellable = true)
+    public void onPlayerMove(PlayerMoveC2SPacket packet, CallbackInfo ci) {
+        if(! loginUsers.hasUser(player)) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "onVehicleMove", at = @At("HEAD"), cancellable = true)
+    public void onVehicleMove(VehicleMoveC2SPacket packet, CallbackInfo ci) {
+        if(! loginUsers.hasUser(player)) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "onPlayerInput", at = @At("HEAD"), cancellable = true)
+    public void onPlayerInput(PlayerInputC2SPacket packet, CallbackInfo ci) {
+        if(! loginUsers.hasUser(player)) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "requestTeleport(DDDFFLjava/util/Set;Z)V", at = @At("HEAD"), cancellable = true)
+    public void requestTeleport(double x, double y, double z, float yaw, float pitch, Set<PlayerPositionLookS2CPacket.Flag> flags, boolean shouldDismount, CallbackInfo ci) {
+        if(! loginUsers.hasUser(player)) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "executeCommand", at = @At("HEAD"), cancellable = true)
+    private void executeCommand(String input, CallbackInfo ci) {
+        LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
+        if(! loginUsers.hasUser(player)) {
+            ci.cancel();
+        }
     }
 }
-
