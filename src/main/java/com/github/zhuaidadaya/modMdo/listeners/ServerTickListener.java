@@ -38,12 +38,12 @@ public class ServerTickListener {
                 else
                     skipMap.put(player, skipMap.get(player) + 1);
 
-                if(skipMap.get(player) > 10) {
+                if(skipMap.get(player) > 6) {
                     skipMap.put(player, 0);
                     try {
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
-                        System.out.println("failed to check: " + player.getUuid());
+                        LOGGER.info("failed to check: " + player.getUuid());
                         player.networkHandler.disconnect(Text.of("invalid token, check your login stat"));
                     }
                 }
