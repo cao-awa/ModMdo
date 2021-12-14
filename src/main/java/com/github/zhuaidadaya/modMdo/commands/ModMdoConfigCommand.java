@@ -1,10 +1,10 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
 import com.github.zhuaidadaya.modMdo.storage.Variables;
-import com.github.zhuaidadaya.modMdo.test.AES;
+import com.github.zhuaidadaya.modMdo.token.EncryptionTokenUtil;
+import com.github.zhuaidadaya.modMdo.token.ServerEncryptionToken;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.text.TranslatableText;
-import org.json.JSONObject;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -57,10 +57,10 @@ public class ModMdoConfigCommand {
                 updateModMdoVariables();
 
                 if(config.getConfig("token_by_encryption") != null) {
-                    modMdoServerToken = new JSONObject(config.getConfigValue("token_by_encryption"));
+                    initModMdoToken();
                 } else {
                     try {
-                        modMdoServerToken = new JSONObject().put("server", new JSONObject().put("default", new AES().randomGet(128)).put("ops", new AES().randomGet(128)));
+                        modMdoToken = new EncryptionTokenUtil(ServerEncryptionToken.createServerEncryptionToken());
                         LOGGER.info("spawned new encryption token, check the config file");
                     } catch (Exception e) {
                         enableEncryptionToken = false;

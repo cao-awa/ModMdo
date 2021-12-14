@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.test;
+package com.github.zhuaidadaya.modMdo.token.Encryption;
 
 
 import java.io.IOException;

@@ -17,7 +17,7 @@ public class ServerTickListener {
     private final LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
 
     public void listener() {
-        ServerTickEvents.START_SERVER_TICK.register(server -> {
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
             PlayerManager players = server.getPlayerManager();
 
             try {
@@ -49,22 +49,24 @@ public class ServerTickListener {
                 manager.addToOperators(player.getGameProfile());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 
     public void checkLoginStat(ServerPlayerEntity player) {
         try {
-            if(skipMap.get(player) == null)
-                skipMap.put(player, System.currentTimeMillis());
+            if(! loginUsers.hasUser(player)) {
+                if(skipMap.get(player) == null)
+                    skipMap.put(player, System.currentTimeMillis());
 
-            if(System.currentTimeMillis() - skipMap.get(player) > 650) {
-                skipMap.put(player, System.currentTimeMillis());
-                try {
-                    loginUsers.getUser(player.getUuid());
-                    cacheUsers.removeUser(player);
-                } catch (Exception e) {
-                    player.networkHandler.disconnect(Text.of("invalid token, check your login stat"));
+                if(System.currentTimeMillis() - skipMap.get(player) > 650) {
+                    skipMap.put(player, System.currentTimeMillis());
+                    try {
+                        loginUsers.getUser(player.getUuid());
+                        cacheUsers.removeUser(player);
+                    } catch (Exception e) {
+                        player.networkHandler.disconnect(Text.of("invalid token, check your login stat"));
+                    }
                 }
             }
         } catch (Exception e) {
