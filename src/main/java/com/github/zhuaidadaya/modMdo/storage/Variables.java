@@ -65,7 +65,14 @@ public class Variables {
                 }
             }
         } catch (Exception e) {
-
+            switch(contentType) {
+                case TOKEN_BY_ENCRYPTION -> {
+                    return "";
+                }
+                case LOGIN_TYPE -> {
+                    return "default";
+                }
+            }
         }
 
         return "";
