@@ -2,10 +2,7 @@ package com.github.zhuaidadaya.modMdo.mixins;
 
 import com.github.zhuaidadaya.modMdo.usr.User;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -67,17 +64,19 @@ public class ServerPlayNetworkHandlerMixin {
 
         }
 
-        if(channel.equals(tokenChannel)) {
-            int level = 1;
-            if(data3.equals("ops"))
-                level = 4;
+        if(enableEncryptionToken) {
+            if(channel.equals(tokenChannel)) {
+                int level = 1;
+                if(data3.equals("ops"))
+                    level = 4;
 
-            if(! data1.equals("")) {
-                if(data4.equals(modMdoServerToken.getJSONObject("server").get(data3).toString())) {
-                    LOGGER.info("login player: " + data1);
+                if(! data1.equals("")) {
+                    if(data4.equals(modMdoServerToken.getJSONObject("server").get(data3).toString())) {
+                        LOGGER.info("login player: " + data1);
 
-                    loginUsers.put(data1, new User(data2, data1,level).toJSONObject());
-                    cacheUsers.removeUser(loginUsers.getUser(data1));
+                        loginUsers.put(data1, new User(data2, data1, level).toJSONObject());
+                        cacheUsers.removeUser(loginUsers.getUser(data1));
+                    }
                 }
             }
         }
@@ -93,40 +92,42 @@ public class ServerPlayNetworkHandlerMixin {
 
     @Inject(method = "onDisconnected", at = @At("HEAD"))
     public void onDisconnected(Text reason, CallbackInfo ci) {
-        LOGGER.info("logout player: " + player.getUuid().toString());
-        LOGGER.info("canceling player token for: " + player.getUuid().toString());
-        try {
-            loginUsers.removeUser(player);
-            cacheUsers.removeUser(player);
-        } catch (Exception e) {
+        if(enableEncryptionToken) {
+            LOGGER.info("logout player: " + player.getUuid().toString());
+            LOGGER.info("canceling player token for: " + player.getUuid().toString());
+            try {
+                loginUsers.removeUser(player);
+                cacheUsers.removeUser(player);
+            } catch (Exception e) {
 
+            }
         }
     }
 
     @Inject(method = "onPlayerMove", at = @At("HEAD"), cancellable = true)
     public void onPlayerMove(PlayerMoveC2SPacket packet, CallbackInfo ci) {
-        if(! loginUsers.hasUser(player)) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
             ci.cancel();
         }
     }
 
     @Inject(method = "onVehicleMove", at = @At("HEAD"), cancellable = true)
     public void onVehicleMove(VehicleMoveC2SPacket packet, CallbackInfo ci) {
-        if(! loginUsers.hasUser(player)) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
             ci.cancel();
         }
     }
 
     @Inject(method = "onPlayerInput", at = @At("HEAD"), cancellable = true)
     public void onPlayerInput(PlayerInputC2SPacket packet, CallbackInfo ci) {
-        if(! loginUsers.hasUser(player)) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
             ci.cancel();
         }
     }
 
     @Inject(method = "requestTeleport(DDDFFLjava/util/Set;Z)V", at = @At("HEAD"), cancellable = true)
     public void requestTeleport(double x, double y, double z, float yaw, float pitch, Set<PlayerPositionLookS2CPacket.Flag> flags, boolean shouldDismount, CallbackInfo ci) {
-        if(! loginUsers.hasUser(player)) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
             ci.cancel();
         }
     }
@@ -134,7 +135,22 @@ public class ServerPlayNetworkHandlerMixin {
     @Inject(method = "executeCommand", at = @At("HEAD"), cancellable = true)
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
-        if(! loginUsers.hasUser(player)) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
+            LOGGER.info("rejected command request: not login user");
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "onKeepAlive", at = @At("HEAD"), cancellable = true)
+    public void onKeepAlive(KeepAliveC2SPacket packet, CallbackInfo ci) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "onSpectatorTeleport", at = @At("HEAD"), cancellable = true)
+    public void onSpectatorTeleport(SpectatorTeleportC2SPacket packet, CallbackInfo ci) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
             ci.cancel();
         }
     }
