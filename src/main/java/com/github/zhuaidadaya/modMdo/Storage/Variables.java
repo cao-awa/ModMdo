@@ -65,30 +65,41 @@ public class Variables {
                 }
             }
         } catch (Exception e) {
-
+            switch(contentType) {
+                case TOKEN_BY_ENCRYPTION -> {
+                    return "";
+                }
+                case LOGIN_TYPE -> {
+                    return "default";
+                }
+            }
         }
 
         return "";
     }
 
     public static void initModMdoToken() {
-        JSONObject token = new JSONObject(config.getConfigValue("token_by_encryption"));
-
-        modMdoToken = new EncryptionTokenUtil();
-
         try {
-            JSONObject clientTokens = token.getJSONObject("client");
-            for(Object o : clientTokens.keySet()) {
-                JSONObject clientToken = clientTokens.getJSONObject(o.toString());
-                modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type")));
+            JSONObject token = new JSONObject(config.getConfigValue("token_by_encryption"));
+
+            modMdoToken = new EncryptionTokenUtil();
+
+            try {
+                JSONObject clientTokens = token.getJSONObject("client");
+                for(Object o : clientTokens.keySet()) {
+                    JSONObject clientToken = clientTokens.getJSONObject(o.toString());
+                    modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type")));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+            JSONObject serverToken = token.getJSONObject("server");
+
+            modMdoToken.setServerToken(new ServerEncryptionToken(serverToken.getString("default"), serverToken.getString("ops")));
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
-
-        JSONObject serverToken = token.getJSONObject("server");
-
-        modMdoToken.setServerToken(new ServerEncryptionToken(serverToken.getString("default"),serverToken.getString("ops")));
     }
 
     public static void updateModMdoVariables() {
