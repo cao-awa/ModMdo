@@ -191,7 +191,7 @@ public class ConfigUtil {
                         addToConfig.add(inArray);
                     setList(configKey, addToConfig.toArray());
                 } else {
-                    set(configKey, configDetailed.get("value").toString());
+                    set(configKey, configDetailed.get("value"));
                 }
             }
 

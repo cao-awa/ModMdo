@@ -5,9 +5,14 @@ import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
+import com.github.zhuaidadaya.modMdo.token.ClientEncryptionToken;
+import com.github.zhuaidadaya.modMdo.token.EncryptionTokenUtil;
+import com.github.zhuaidadaya.modMdo.token.ServerEncryptionToken;
+import com.github.zhuaidadaya.modMdo.token.TokenContentType;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -40,7 +45,51 @@ public class Variables {
     public static MinecraftServer server;
     public static BackupUtil bak;
     public static ModMdoType modMdoType = ModMdoType.NONE;
-    public static JSONObject modMdoServerToken = null;
+    public static EncryptionTokenUtil modMdoToken = null;
+    public static TextFieldWidget editToken;
+    public static TextFieldWidget editLoginType;
+    public static TextFieldWidget tokenTip;
+
+    public static String getModMdoTokenFormat(String address, TokenContentType contentType) {
+        String tokenString;
+        String loginType;
+        try {
+            switch(contentType) {
+                case TOKEN_BY_ENCRYPTION -> {
+                    tokenString = modMdoToken.getClientToken(address).getToken();
+                    return tokenString;
+                }
+                case LOGIN_TYPE -> {
+                    loginType = modMdoToken.getClientToken(address).getType();
+                    return loginType;
+                }
+            }
+        } catch (Exception e) {
+
+        }
+
+        return "";
+    }
+
+    public static void initModMdoToken() {
+        JSONObject token = new JSONObject(config.getConfigValue("token_by_encryption"));
+
+        modMdoToken = new EncryptionTokenUtil();
+
+        try {
+            JSONObject clientTokens = token.getJSONObject("client");
+            for(Object o : clientTokens.keySet()) {
+                JSONObject clientToken = clientTokens.getJSONObject(o.toString());
+                modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type")));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        JSONObject serverToken = token.getJSONObject("server");
+
+        modMdoToken.setServerToken(new ServerEncryptionToken(serverToken.getString("default"),serverToken.getString("ops")));
+    }
 
     public static void updateModMdoVariables() {
         config.set("default_language", language.toString());
@@ -50,8 +99,8 @@ public class Variables {
         config.set("secure_enchant", secureEnchantStatus());
         config.set("encryption_token", encryptionTokenStatus());
         config.set("reject_reconnect", rejectReconnectStatus());
-        if(modMdoServerToken != null)
-            config.set("token_by_encryption", modMdoServerToken);
+        if(modMdoToken != null)
+            config.set("token_by_encryption", modMdoToken.toJSONObject());
     }
 
     public static void updateUserProfiles() {
