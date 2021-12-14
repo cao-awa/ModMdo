@@ -75,6 +75,10 @@ public abstract class AddServerScreenMixin extends Screen {
         updateModMdoVariables();
     }
 
+    @Inject(method = "addAndClose", at = @At("HEAD"))
+    private void addAndClose(CallbackInfo ci) {
+        setToken();
+    }
 
     @Inject(method = "render", at = @At("RETURN"))
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
