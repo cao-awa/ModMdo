@@ -140,29 +140,29 @@ public class ModMdoConfigCommand {
     }
 
     public TranslatableText formatEnableEncryptionToken() {
-        return new TranslatableText("encryption.token.disable.rule.format");
+        return new TranslatableText("encryption_token.disable.rule.format");
     }
 
 
     public TranslatableText formatDisableEncryptionToken() {
-        return new TranslatableText("encryption.token.disable.rule.format");
+        return new TranslatableText("encryption_token.disable.rule.format");
     }
 
     public TranslatableText formatEnableRejectReconnect() {
-        return new TranslatableText("reconnect.reject.enable.rule.format");
+        return new TranslatableText("reject_reconnect.enable.rule.format");
     }
 
 
     public TranslatableText formatDisableRejectReconnect() {
-        return new TranslatableText("reconnect.reject.disable.rule.format");
+        return new TranslatableText("reject_reconnect.reject.disable.rule.format");
     }
 
     public TranslatableText formatEnableDeadMessage() {
-        return new TranslatableText("dead.message.enable.rule.format");
+        return new TranslatableText("dead_message.enable.rule.format");
     }
 
 
     public TranslatableText formatDisabledDeadMessage() {
-        return new TranslatableText("dead.message.disable.rule.format");
+        return new TranslatableText("dead_message.disable.rule.format");
     }
 }
