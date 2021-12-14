@@ -14,7 +14,7 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.server;
 public class StopServerMixin {
 
     /**
-     * @author
+     * @author 草awa
      */
     @Inject(at = @At("HEAD"),method = "stop", cancellable = true)
     public void stop(CallbackInfo ci) {

@@ -7,11 +7,12 @@
   "description": "This Mod are testing",
   "authors": [
     "草awa",
+    "草二号机",
     "zhuaidadaya"
   ],
   "contact": {
-    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.17",
-    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17",
+    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
+    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
     "issues": "https://github.com/zhuaidadaya/ModMdo/issues"
   },
 

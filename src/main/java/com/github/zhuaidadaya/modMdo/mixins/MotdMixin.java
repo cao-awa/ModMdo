@@ -14,6 +14,12 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.server;
 @Mixin(ServerMetadata.class)
 public class MotdMixin {
 
+    /**
+     * 想法来源于carpet的motd修改
+     *
+     * @author 草二号机
+     * @param callbackInfoReturnable callback
+     */
     @Inject(method = "getDescription", at = @At("HEAD"), cancellable = true)
     private void getDescription(CallbackInfoReturnable<Text> callbackInfoReturnable) {
         if(server != null) {
