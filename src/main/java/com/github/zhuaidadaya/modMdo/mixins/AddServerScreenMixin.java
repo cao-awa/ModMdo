@@ -58,7 +58,7 @@ public abstract class AddServerScreenMixin extends Screen {
         addSelectableChild(editToken);
 
         editLoginType = new TextFieldWidget(textRenderer, width / 2 + 100, 30, 100, 20, new TranslatableText("oops2"));
-        editLoginType.setText("default");
+        editLoginType.setText(getModMdoTokenFormat(addressField.getText(), TokenContentType.LOGIN_TYPE));
         editLoginType.setChangedListener((validType) -> {
             String loginType = editLoginType.getText();
             addButton.active = (ServerAddress.isValid(this.addressField.getText()) && ! this.serverNameField.getText().isEmpty()) & (loginType.equals("default") | loginType.equals("ops"));
