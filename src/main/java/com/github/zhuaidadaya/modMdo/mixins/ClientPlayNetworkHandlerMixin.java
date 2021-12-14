@@ -9,7 +9,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
-import net.minecraft.util.Identifier;
 import org.json.JSONObject;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,9 +48,8 @@ public abstract class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onGameJoin", at = @At("RETURN"))
     public void onGameJoin(GameJoinS2CPacket packet, CallbackInfo ci) {
         if(enableEncryptionToken) {
-            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(new Identifier("modmdo:connecting"), (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString())));
+            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(connectingChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString())));
             Config<Object, Object> token = config.getConfig("token_by_encryption");
-            System.out.println();
             String tokenString = "";
             String loginType = "default";
             try {

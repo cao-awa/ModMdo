@@ -10,8 +10,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.function.BooleanSupplier;
-
 import static com.github.zhuaidadaya.modMdo.storage.Variables.loginUsers;
 import static com.github.zhuaidadaya.modMdo.storage.Variables.server;
 
@@ -21,9 +19,6 @@ public abstract class ThreadedAnvilChunkStorageMixin {
     @Shadow
     protected abstract void sendChunkDataPackets(ServerPlayerEntity player, Packet<?>[] packets, WorldChunk chunk);
 
-    @Shadow
-    protected abstract void unloadChunks(BooleanSupplier shouldKeepTicking);
-
     @Inject(method = "sendChunkDataPackets", at = @At("HEAD"), cancellable = true)
     public void sendChunkDataPackets(ServerPlayerEntity player, Packet<?>[] packets, WorldChunk chunk, CallbackInfo ci) {
         if(! loginUsers.hasUser(player)) {
@@ -31,13 +26,16 @@ public abstract class ThreadedAnvilChunkStorageMixin {
                 try {
                     Thread.sleep(1000);
 
-                    if(server.getPlayerManager().getPlayerList().contains(player)) {
+                    if(server.getPlayerManager().getPlayerList().contains(player) & loginUsers.hasUser(player)) {
                         sendChunkDataPackets(player, packets, chunk);
                     }
+
                 } catch (InterruptedException e) {
 
                 }
-            }).start(); ci.cancel();
+            }).start();
+
+            ci.cancel();
         }
     }
 }
