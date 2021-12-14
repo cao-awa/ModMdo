@@ -10,8 +10,8 @@
         "zhuaidadaya"
     ],
     "contact": {
-        "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.18",
-        "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.18",
+        "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.18.x",
+        "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.18.x",
         "issues": "https://github.com/zhuaidadaya/ModMdo/issues"
     },
     "license": "GPL-3.0",

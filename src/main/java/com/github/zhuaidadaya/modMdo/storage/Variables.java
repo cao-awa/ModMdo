@@ -33,9 +33,8 @@ public class Variables {
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
     public static boolean enableEncryptionToken = true;
+    public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
     public static Identifier tokenChannel = new Identifier("modmdo:token");
-    public static Identifier connectingChannel = new Identifier("modmdo:connecting");
-    public static UserUtil cacheUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
     public static ConfigUtil config;
@@ -50,6 +49,13 @@ public class Variables {
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
 
+    /**
+     * @author 草awa
+     * @author 草二号机
+     * @param address 通过指定IP查询
+     * @param contentType 查询类型, 可选查询token和登入方式
+     * @return 返回查询结果(或默认值)
+     */
     public static String getModMdoTokenFormat(String address, TokenContentType contentType) {
         String tokenString;
         String loginType;

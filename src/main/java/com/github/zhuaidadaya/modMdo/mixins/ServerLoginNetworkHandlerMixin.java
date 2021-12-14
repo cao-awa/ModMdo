@@ -15,6 +15,15 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
     @Shadow @Final public ClientConnection connection;
 
+    /**
+     * 如果玩家为null, 则拒绝将玩家添加进服务器
+     * (因为其他地方有cancel, 所以可能null)
+     *
+     * @author 草二号机
+     *
+     * @param player 玩家
+     * @param ci callback
+     */
     @Inject(method = "addToServer", at = @At("HEAD"), cancellable = true)
     private void addToServer(ServerPlayerEntity player, CallbackInfo ci) {
         if(player == null)

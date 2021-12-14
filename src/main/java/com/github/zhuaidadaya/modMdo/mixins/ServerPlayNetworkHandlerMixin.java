@@ -23,6 +23,17 @@ public class ServerPlayNetworkHandlerMixin {
     @Shadow
     public ServerPlayerEntity player;
 
+    /**
+     * 解析玩家发送的数据包, 如果identifier为 <code>modmdo:token</code> 则检查token
+     * token正确就加入loginUsers中, 加入就算放行了
+     *
+     * @author 草awa
+     * @author 草二号机
+     * @author zhuaidadaya
+     *
+     * @param packet 客户端发送的数据包
+     * @param ci callback
+     */
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo ci) {
         Identifier channel = new Identifier("");
@@ -75,21 +86,24 @@ public class ServerPlayNetworkHandlerMixin {
                         LOGGER.info("login player: " + data1);
 
                         loginUsers.put(data1, new User(data2, data1, level).toJSONObject());
-                        cacheUsers.removeUser(loginUsers.getUser(data1));
                     }
                 }
-            }
-        }
-
-        if(channel.equals(connectingChannel)) {
-            if(! data1.equals("") & ! data2.equals("")) {
-                cacheUsers.put(data1, new User(data2, data1).toJSONObject());
             }
         }
 
         ci.cancel();
     }
 
+    /**
+     * 在玩家退出游戏后去除放行状态, 下一次进入也需要重传token
+     *
+     * @author 草awa
+     * @author 草二号机
+     * @author zhuaidadaya
+     *
+     * @param reason 移除信息
+     * @param ci callback
+     */
     @Inject(method = "onDisconnected", at = @At("HEAD"))
     public void onDisconnected(Text reason, CallbackInfo ci) {
         if(enableEncryptionToken) {
@@ -97,13 +111,20 @@ public class ServerPlayNetworkHandlerMixin {
             LOGGER.info("canceling player token for: " + player.getUuid().toString());
             try {
                 loginUsers.removeUser(player);
-                cacheUsers.removeUser(player);
             } catch (Exception e) {
 
             }
         }
     }
 
+    /**
+     * 不登入不给移动
+     *
+     * @author 草二号机
+     *
+     * @param packet 移动请求
+     * @param ci callback
+     */
     @Inject(method = "onPlayerMove", at = @At("HEAD"), cancellable = true)
     public void onPlayerMove(PlayerMoveC2SPacket packet, CallbackInfo ci) {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
@@ -111,6 +132,14 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
+    /**
+     * 不登入不给移动
+     *
+     * @author 草二号机
+     *
+     * @param packet 移动请求
+     * @param ci callback
+     */
     @Inject(method = "onVehicleMove", at = @At("HEAD"), cancellable = true)
     public void onVehicleMove(VehicleMoveC2SPacket packet, CallbackInfo ci) {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
@@ -118,6 +147,14 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
+    /**
+     * 不登入不给输入(
+     *
+     * @author 草二号机
+     *
+     * @param packet 输入请求
+     * @param ci callback
+     */
     @Inject(method = "onPlayerInput", at = @At("HEAD"), cancellable = true)
     public void onPlayerInput(PlayerInputC2SPacket packet, CallbackInfo ci) {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
@@ -125,6 +162,20 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
+    /**
+     * 不登入不给传送
+     *
+     * @author 草二号机
+     *
+     * @param x x
+     * @param y y
+     * @param z z
+     * @param yaw yaw
+     * @param pitch pitch
+     * @param flags flags
+     * @param shouldDismount should dismount
+     * @param ci callback
+     */
     @Inject(method = "requestTeleport(DDDFFLjava/util/Set;Z)V", at = @At("HEAD"), cancellable = true)
     public void requestTeleport(double x, double y, double z, float yaw, float pitch, Set<PlayerPositionLookS2CPacket.Flag> flags, boolean shouldDismount, CallbackInfo ci) {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
@@ -132,6 +183,14 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
+    /**
+     * 不登入不给使用命令
+     *
+     * @author 草二号机
+     *
+     * @param input 命令
+     * @param ci callback
+     */
     @Inject(method = "executeCommand", at = @At("HEAD"), cancellable = true)
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
@@ -141,6 +200,14 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
+    /**
+     * 不登入不给保持live状态
+     *
+     * @author 草二号机
+     *
+     * @param packet live包
+     * @param ci callback
+     */
     @Inject(method = "onKeepAlive", at = @At("HEAD"), cancellable = true)
     public void onKeepAlive(KeepAliveC2SPacket packet, CallbackInfo ci) {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
@@ -148,6 +215,14 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
+    /**
+     * 草
+     *
+     * @author 草二号机
+     *
+     * @param packet packet
+     * @param ci callback
+     */
     @Inject(method = "onSpectatorTeleport", at = @At("HEAD"), cancellable = true)
     public void onSpectatorTeleport(SpectatorTeleportC2SPacket packet, CallbackInfo ci) {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
@@ -155,6 +230,14 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
+    /**
+     * 不登入不给于物品交互
+     *
+     * @author 草二号机
+     *
+     * @param packet packet
+     * @param ci callback
+     */
     @Inject(method = "onPlayerInteractItem",at = @At("HEAD"), cancellable = true)
     public void onPlayerInteractItem(PlayerInteractItemC2SPacket packet, CallbackInfo ci) {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
@@ -162,6 +245,14 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
+    /**
+     * 不登入不给于实体交互
+     *
+     * @author 草二号机
+     *
+     * @param packet packet
+     * @param ci callback
+     */
     @Inject(method = "onPlayerInteractEntity",at = @At("HEAD"), cancellable = true)
     public void onPlayerInteractEntity(PlayerInteractEntityC2SPacket packet, CallbackInfo ci) {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
@@ -169,6 +260,14 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
+    /**
+     * 不登入不给于方块交互
+     *
+     * @author 草二号机
+     *
+     * @param packet packet
+     * @param ci callback
+     */
     @Inject(method = "onPlayerInteractBlock",at = @At("HEAD"), cancellable = true)
     public void onPlayerInteractBlock(PlayerInteractBlockC2SPacket packet, CallbackInfo ci) {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {

@@ -47,6 +47,16 @@ public abstract class AddServerScreenMixin extends Screen {
     @Shadow
     protected abstract void addAndClose();
 
+    /**
+     * 在编辑服务器的页面添加token的文本栏
+     * 以及连接类型的文本栏
+     *
+     * @author zhuaidadaya
+     * @author 草二号机
+     * @author 草awa
+     *
+     * @param ci callback
+     */
     @Inject(method = "init", at = @At("RETURN"))
     public void init(CallbackInfo ci) {
         editToken = new TextFieldWidget(textRenderer, width / 2 - 60, 30, 160, 20, new TranslatableText("oops"));
@@ -70,16 +80,39 @@ public abstract class AddServerScreenMixin extends Screen {
         tokenTip.setText("Token");
     }
 
+    /**
+     * 这里直接新建然后添加token, 因为添加相同的IP会覆盖旧的
+     *
+     * @author 草awa
+     */
     public void setToken() {
         modMdoToken.addClientToken(new ClientEncryptionToken(editToken.getText(), addressField.getText(), editLoginType.getText()));
         updateModMdoVariables();
     }
 
+    /**
+     * 保存服务器信息时同时保存token
+     *
+     * @author 草awa
+     *
+     * @param ci callback
+     */
     @Inject(method = "addAndClose", at = @At("HEAD"))
     private void addAndClose(CallbackInfo ci) {
         setToken();
     }
 
+    /**
+     * 渲染三个新添加的文本栏
+     *
+     * @author zhuaidadaya
+     *
+     * @param matrices matrices
+     * @param mouseX mouseX
+     * @param mouseY mouseY
+     * @param delta delta
+     * @param ci callback
+     */
     @Inject(method = "render", at = @At("RETURN"))
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         editToken.render(matrices, mouseX, mouseY, delta);

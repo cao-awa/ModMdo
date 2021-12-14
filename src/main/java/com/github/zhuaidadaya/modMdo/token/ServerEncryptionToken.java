@@ -4,10 +4,6 @@ import com.github.zhuaidadaya.modMdo.token.Encryption.AES;
 import org.json.JSONObject;
 
 public class ServerEncryptionToken extends EncryptionToken{
-    public ServerEncryptionToken(String token, String address, String type) {
-        super(token, address, type);
-    }
-
     public ServerEncryptionToken(String serverDefaultToken,String serverOpsToken) {
         super(serverDefaultToken,serverOpsToken);
     }
