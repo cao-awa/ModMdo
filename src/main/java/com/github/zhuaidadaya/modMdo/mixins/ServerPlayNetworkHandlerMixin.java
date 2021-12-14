@@ -154,4 +154,25 @@ public class ServerPlayNetworkHandlerMixin {
             ci.cancel();
         }
     }
+
+    @Inject(method = "onPlayerInteractItem",at = @At("HEAD"), cancellable = true)
+    public void onPlayerInteractItem(PlayerInteractItemC2SPacket packet, CallbackInfo ci) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "onPlayerInteractEntity",at = @At("HEAD"), cancellable = true)
+    public void onPlayerInteractEntity(PlayerInteractEntityC2SPacket packet, CallbackInfo ci) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "onPlayerInteractBlock",at = @At("HEAD"), cancellable = true)
+    public void onPlayerInteractBlock(PlayerInteractBlockC2SPacket packet, CallbackInfo ci) {
+        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
+            ci.cancel();
+        }
+    }
 }
