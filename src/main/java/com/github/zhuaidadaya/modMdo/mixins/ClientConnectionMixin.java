@@ -4,6 +4,6 @@ import net.minecraft.network.ClientConnection;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ClientConnection.class)
-public class ClientConnectMixin {
+public class ClientConnectionMixin {
 
 }

@@ -5,7 +5,7 @@
     "compatibilityLevel": "JAVA_16",
     "mixins": [
         "AddServerScreenMixin",
-        "ClientConnectMixin",
+        "ClientConnectionMixin",
         "ClientPlayNetworkHandlerMixin",
         "EnchantmentHelperMixin",
         "MinecraftServerSession",
