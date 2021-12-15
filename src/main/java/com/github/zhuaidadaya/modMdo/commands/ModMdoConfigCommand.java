@@ -143,7 +143,6 @@ public class ModMdoConfigCommand {
         return new TranslatableText("encryption_token.disable.rule.format");
     }
 
-
     public TranslatableText formatDisableEncryptionToken() {
         return new TranslatableText("encryption_token.disable.rule.format");
     }
