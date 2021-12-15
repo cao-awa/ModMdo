@@ -72,16 +72,28 @@ public class ServerTickListener {
      */
     public void cancelLoginIfNoExistentOrChangedToken(ServerPlayerEntity player, PlayerManager manager) {
         try {
-            if(! manager.getPlayerList().contains(player)) {
-                loginUsers.removeUser(player);
-            } else {
-                User user = loginUsers.getUser(player);
-                if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getToken())) {
-                    loginUsers.removeUser(player);
+            for(User user : loginUsers.getUsers()) {
+                if(manager.getPlayer(user.getName()) == null) {
+                    loginUsers.removeUser(user);
                 }
             }
-        } catch (Exception e) {
 
+            if(manager.getPlayerList().contains(player)) {
+                User user = loginUsers.getUser(player);
+                if(user.getLevel() == 1) {
+                    if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
+                        loginUsers.removeUser(player);
+                    }
+                } else if(user.getLevel() == 4) {
+                    if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
+                        loginUsers.removeUser(player);
+                    }
+                }
+            }
+
+            System.out.println("?");
+        } catch (Exception e) {
+            //            e.printStackTrace();
         }
     }
 

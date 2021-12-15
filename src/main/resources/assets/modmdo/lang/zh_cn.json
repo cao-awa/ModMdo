@@ -1,4 +1,6 @@
 {
+    "token.regenerate.set.size": "设置token大小: %s",
+    "token.regenerate.failed.format": "无法重新生成token",
     "command.vec.format": "§aVec3\n§ax: %s\n§ay: %s\n§az: %s\n§6Vec2\n§6x: %s\n§6y: %s\n§d维度\n§dDim: %s",
     "dead_message.disable.rule.format": "死亡反馈已禁用",
     "dead_message.enable.rule.format": "死亡反馈已启用",
