@@ -3,6 +3,7 @@ package com.github.zhuaidadaya.modMdo.listeners;
 import com.github.zhuaidadaya.modMdo.commands.DimensionTips;
 import com.github.zhuaidadaya.modMdo.commands.XYZ;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
+import com.github.zhuaidadaya.modMdo.usr.User;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -36,29 +37,60 @@ public class ServerTickListener {
     /**
      * 遍历每一位玩家执行操作
      *
+     * @param players
+     *         玩家管理器
+     *
      * @author 草awa
      * @author 草二号机
-     *
-     * @param players 玩家管理器
      */
     public void eachPlayer(PlayerManager players) {
         for(ServerPlayerEntity player : players.getPlayerList()) {
+            if(modMdoType == ModMdoType.SERVER & enableEncryptionToken) {
+                checkLoginStat(player);
+                cancelLoginIfNoExistentOrChangedToken(player, players);
+            }
             if(enableDeadMessage)
                 detectPlayerDead(player);
-            if(modMdoType == ModMdoType.SERVER & enableEncryptionToken)
-                checkLoginStat(player);
             setPlayerLevel(player, players);
+        }
+    }
+
+    /**
+     * 当玩家不存在时, 清除登入信息
+     * (多个位置都有尝试清除, 保证一定能够移除登入状态)
+     * <p>
+     * 或者服务器Token改变时, 也清除登入信息
+     * (当token不符合时移除玩家, 换用新token即可)
+     * 这种情况一般在手动生成新的token时使用, 否则一般不会
+     *
+     * @param player
+     *         玩家
+     * @param manager
+     *         玩家管理器
+     *
+     * @author 草awa
+     */
+    public void cancelLoginIfNoExistentOrChangedToken(ServerPlayerEntity player, PlayerManager manager) {
+        if(! manager.getPlayerList().contains(player)) {
+            loginUsers.removeUser(player);
+        } else {
+            User user = loginUsers.getUser(player);
+            if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getToken())) {
+                loginUsers.removeUser(player);
+            }
         }
     }
 
     /**
      * 设置玩家的权限等级, 处理使用不同的token登录时获得的不同权限等级
      *
+     * @param player
+     *         玩家
+     * @param manager
+     *         玩家管理器
+     *
      * @author 草二号机
      * @author 草awa
-     *
-     * @param player 玩家
-     * @param manager 玩家管理器
      */
     public void setPlayerLevel(ServerPlayerEntity player, PlayerManager manager) {
         try {
@@ -78,11 +110,12 @@ public class ServerTickListener {
     /**
      * 检查玩家的登入状态, 如果超过指定时间没有登入则断开连接并提示检查token
      *
+     * @param player
+     *         玩家
+     *
      * @author zhuaidadaya
      * @author 草awa
      * @author 草二号机
-     *
-     * @param player 玩家
      */
     public void checkLoginStat(ServerPlayerEntity player) {
         try {
@@ -108,9 +141,10 @@ public class ServerTickListener {
      * 检测玩家的死亡状态, 如果死亡时间为1则发送当时的坐标和维度信息
      * (如果该玩家愿意接收才发送)
      *
-     * @author 草二号机
+     * @param player
+     *         玩家
      *
-     * @param player 玩家
+     * @author 草二号机
      */
     public void detectPlayerDead(ServerPlayerEntity player) {
         try {
@@ -129,12 +163,16 @@ public class ServerTickListener {
     /**
      * 对死亡时的位置、维度进行格式化
      *
-     * @author 草二号机
+     * @param player
+     *         玩家
+     * @param dimensionTips
+     *         用于格式化的DimensionTips
+     * @param xyz
+     *         等同于vec3d
      *
-     * @param player 玩家
-     * @param dimensionTips 用于格式化的DimensionTips
-     * @param xyz 等同于vec3d
      * @return 格式化过后的信息
+     *
+     * @author 草二号机
      */
     public TranslatableText formatDeathMessage(ServerPlayerEntity player, DimensionTips dimensionTips, XYZ xyz) {
         String dimension = dimensionTips.getDimension(player);
