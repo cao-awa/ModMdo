@@ -52,7 +52,12 @@ public class Variables {
 
     public static String formatAddress(SocketAddress socketAddress) {
         String address = socketAddress.toString();
-        return address.substring(0, address.indexOf("/")) + ":" + address.substring(address.lastIndexOf(":") + 1);
+
+        try {
+            return address.substring(0, address.indexOf("/")) + ":" + address.substring(address.lastIndexOf(":") + 1);
+        } catch (Exception e) {
+            return address;
+        }
     }
 
     /**

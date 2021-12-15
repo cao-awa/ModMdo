@@ -29,7 +29,7 @@ public class ServerTickListener {
             try {
                 eachPlayer(players);
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         });
     }
@@ -71,13 +71,17 @@ public class ServerTickListener {
      * @author 草awa
      */
     public void cancelLoginIfNoExistentOrChangedToken(ServerPlayerEntity player, PlayerManager manager) {
-        if(! manager.getPlayerList().contains(player)) {
-            loginUsers.removeUser(player);
-        } else {
-            User user = loginUsers.getUser(player);
-            if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getToken())) {
+        try {
+            if(! manager.getPlayerList().contains(player)) {
                 loginUsers.removeUser(player);
+            } else {
+                User user = loginUsers.getUser(player);
+                if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getToken())) {
+                    loginUsers.removeUser(player);
+                }
             }
+        } catch (Exception e) {
+
         }
     }
 

@@ -76,11 +76,10 @@ public abstract class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onGameJoin", at = @At("RETURN"))
     public void onGameJoin(GameJoinS2CPacket packet, CallbackInfo ci) {
         if(enableEncryptionToken) {
-            String address = connection.getAddress().toString();
-            address = address.substring(0, address.indexOf("/")) + ":" + address.substring(address.lastIndexOf(":") + 1);
+            String address = formatAddress(connection.getAddress());
             String token = getModMdoTokenFormat(address, TokenContentType.TOKEN_BY_ENCRYPTION);
             String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
-            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(loginType).writeString(token)));
+            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(loginType).writeString(token).writeString(address)));
         }
     }
 }

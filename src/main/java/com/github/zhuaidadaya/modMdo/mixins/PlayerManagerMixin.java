@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.modMdoServerChannel;
 
 @Mixin(PlayerManager.class)
 public class PlayerManagerMixin {
@@ -51,6 +50,8 @@ public class PlayerManagerMixin {
         if(enableRejectReconnect) {
             UUID uUID = PlayerEntity.getUuidFromProfile(profile);
             for(ServerPlayerEntity serverPlayerEntity : this.players) {
+                if(serverPlayerEntity.networkHandler.connection.getAddress() == null)
+                    break;
                 if(serverPlayerEntity.getUuid().equals(uUID))
                     cir.cancel();
             }

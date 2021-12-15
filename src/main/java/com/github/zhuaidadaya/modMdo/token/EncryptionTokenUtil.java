@@ -42,8 +42,12 @@ public class EncryptionTokenUtil {
         JSONObject json = new JSONObject();
         JSONObject server = new JSONObject();
         JSONObject client = new JSONObject();
-        server.put("default", serverToken.getServerDefaultToken());
-        server.put("ops",serverToken.getServerOpsToken());
+        try {
+            server.put("default", serverToken.getServerDefaultToken());
+            server.put("ops", serverToken.getServerOpsToken());
+        } catch (Exception e) {
+
+        }
         json.put("server", server);
 
         for(ClientEncryptionToken clientToken : clientTokens.values()) {
