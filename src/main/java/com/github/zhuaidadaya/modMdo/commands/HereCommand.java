@@ -54,7 +54,7 @@ public class HereCommand implements HereCommandFormat {
 
     @Override
     public TranslatableText formatHereDisabled() {
-        return new TranslatableText("here_command.disable");
+        return new TranslatableText("here_command.disable.rule.format");
     }
 
     @Override
@@ -67,11 +67,11 @@ public class HereCommand implements HereCommandFormat {
     @Override
     public TranslatableText formatHereFeedBack(ServerPlayerEntity player) {
         String playerName = player.getName().asString();
-        return new TranslatableText("command.here.feedback", playerName);
+        return new TranslatableText("command_here.feedback", playerName);
     }
 
     @Override
     public TranslatableText formatHereFailedFeedBack(ServerPlayerEntity player) {
-        return new TranslatableText("command.here.failed.feedback");
+        return new TranslatableText("command_here.failed.feedback");
     }
 }
