@@ -52,9 +52,9 @@ public class UserUtil {
     }
 
     public User getUser(ServerPlayerEntity player) {
-        if(users.get(player.getUuid()) == null)
+        if(users.get(player.getUuid().toString()) == null)
             put(player.getUuid(), new User(player.getName().asString(), player.getUuid()).toJSONObject());
-        return new User(users.get(player.getUuid()));
+        return new User(users.get(player.getUuid().toString()));
     }
 
     public User getUser(UUID uuid) {
@@ -107,7 +107,7 @@ public class UserUtil {
     }
 
     public int getUserLevel(String uuid) {
-        return new User(getUser(uuid).toJSONObject()).getLevel();
+        return getUser(uuid).getLevel();
     }
 
     public int getUserLevel(UUID uuid) {
@@ -117,6 +117,4 @@ public class UserUtil {
     public int getUserLevel(ServerPlayerEntity player) {
         return getUserLevel(player.getUuid());
     }
-
-
 }

@@ -84,8 +84,16 @@ public class ServerPlayNetworkHandlerMixin {
 
         }
 
+        String data5 = "";
+        try {
+            data5 = packetByteBuf.readString();
+        } catch (Exception e) {
+
+        }
+
         if(enableEncryptionToken) {
             if(channel.equals(tokenChannel)) {
+
                 int level = 1;
                 if(data3.equals("ops"))
                     level = 4;
@@ -94,7 +102,7 @@ public class ServerPlayNetworkHandlerMixin {
                     if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
                         LOGGER.info("login player: " + data1);
 
-                        loginUsers.put(data1, new User(data2, data1, level, new ClientEncryptionToken(data4, formatAddress(connection.getAddress()), data3)).toJSONObject());
+                        loginUsers.put(data1, new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3)).toJSONObject());
                     }
                 }
             }

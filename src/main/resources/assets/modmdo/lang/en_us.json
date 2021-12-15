@@ -1,4 +1,6 @@
 {
+    "token.regenerate.set.size": "set token size: %s",
+    "token.regenerate.failed.format": "failed to regenerate token",
     "command.vec.format": "§aVec3\n§ax: %s\n§ay: %s\n§az: %s\n§6Vec2\n§6x: %s\n§6y: %s\n§dDimension\n§dDim: %s",
     "dead_message.disable.rule.format": "disabled dead message",
     "dead_message.enable.rule.format": "enabled dead message",

@@ -50,6 +50,8 @@ public class PlayerManagerMixin {
         if(enableRejectReconnect) {
             UUID uUID = PlayerEntity.getUuidFromProfile(profile);
             for(ServerPlayerEntity serverPlayerEntity : this.players) {
+                if(serverPlayerEntity.networkHandler.connection.getAddress() == null)
+                    break;
                 if(serverPlayerEntity.getUuid().equals(uUID))
                     cir.cancel();
             }

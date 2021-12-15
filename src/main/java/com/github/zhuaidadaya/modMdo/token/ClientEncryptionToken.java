@@ -8,6 +8,6 @@ public class ClientEncryptionToken extends EncryptionToken{
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put(this.getAddress(),new JSONObject().put("token",getToken()).put("login_type", getType()));
+        return new JSONObject().put(getAddress(),new JSONObject().put("token",getToken()).put("login_type", getType()).put("address", getAddress()));
     }
 }

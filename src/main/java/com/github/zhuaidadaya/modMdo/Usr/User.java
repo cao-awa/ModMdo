@@ -28,13 +28,13 @@ public class User {
         this.uuid = UUID.fromString(uuid);
     }
 
-    public User(String name, String uuid,int level) {
+    public User(String name, String uuid, int level) {
         this.name = name;
         this.uuid = UUID.fromString(uuid);
         this.level = level;
     }
 
-    public User(String name, String uuid,int level,ClientEncryptionToken token) {
+    public User(String name, String uuid, int level, ClientEncryptionToken token) {
         this.name = name;
         this.uuid = UUID.fromString(uuid);
         this.level = level;
@@ -49,6 +49,16 @@ public class User {
         this.name = name;
         this.uuid = UUID.fromString(uuid);
         this.level = level;
+
+        try {
+            JSONObject token = json.getJSONObject("token");
+            for(Object o : token.keySet()) {
+                JSONObject tokenContent = token.getJSONObject(o.toString());
+                this.clientToken = new ClientEncryptionToken(tokenContent.getString("token"), tokenContent.getString("address"), tokenContent.getString("login_type"));
+            }
+        } catch (Exception e) {
+
+        }
     }
 
     public String getName() {
@@ -76,7 +86,7 @@ public class User {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put("name", name).put("uuid", uuid).put("level", level).put("token", clientToken.getToken());
+        return new JSONObject().put("name", name).put("uuid", uuid).put("level", level).put("token", clientToken.toJSONObject());
     }
 
     public int getLevel() {

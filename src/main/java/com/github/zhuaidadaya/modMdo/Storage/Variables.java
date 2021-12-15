@@ -34,6 +34,7 @@ public class Variables {
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
     public static boolean enableEncryptionToken = true;
+    public static int tokenGenerateSize = 128;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
     public static Identifier tokenChannel = new Identifier("modmdo:token");
     public static UserUtil loginUsers;
@@ -52,7 +53,12 @@ public class Variables {
 
     public static String formatAddress(SocketAddress socketAddress) {
         String address = socketAddress.toString();
-        return address.substring(0, address.indexOf("/")) + ":" + address.substring(address.lastIndexOf(":") + 1);
+
+        try {
+            return address.substring(0, address.indexOf("/")) + ":" + address.substring(address.lastIndexOf(":") + 1);
+        } catch (Exception e) {
+            return address;
+        }
     }
 
     /**

@@ -79,7 +79,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
             String address = formatAddress(connection.getAddress());
             String token = getModMdoTokenFormat(address, TokenContentType.TOKEN_BY_ENCRYPTION);
             String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
-            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(loginType).writeString(token)));
+            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(loginType).writeString(token).writeString(address)));
         }
     }
 }
