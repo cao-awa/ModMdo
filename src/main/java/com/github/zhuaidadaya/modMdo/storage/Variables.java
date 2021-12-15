@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.SyncFailedException;
+import java.net.SocketAddress;
 import java.util.UUID;
 
 public class Variables {
@@ -48,6 +49,11 @@ public class Variables {
     public static TextFieldWidget editToken;
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
+
+    public static String formatAddress(SocketAddress socketAddress) {
+        String address = socketAddress.toString();
+        return address.substring(0, address.indexOf("/")) + ":" + address.substring(address.lastIndexOf(":") + 1);
+    }
 
     /**
      * @author 草awa
