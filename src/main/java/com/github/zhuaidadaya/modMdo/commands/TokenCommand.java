@@ -1,7 +1,7 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.modMdo.token.Encryption.AES;
-import com.github.zhuaidadaya.modMdo.token.ServerEncryptionToken;
+import com.github.zhuaidadaya.modMdo.login.token.Encryption.AES;
+import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.text.TranslatableText;
 
