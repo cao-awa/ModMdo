@@ -1,6 +1,6 @@
 package com.github.zhuaidadaya.modMdo.usr;
 
-import com.github.zhuaidadaya.modMdo.token.ClientEncryptionToken;
+import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
 import org.json.JSONObject;
 
 import java.util.UUID;
