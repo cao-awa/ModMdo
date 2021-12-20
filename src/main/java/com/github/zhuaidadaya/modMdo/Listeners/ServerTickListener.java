@@ -10,13 +10,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
-import java.util.LinkedHashMap;
-
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 public class ServerTickListener {
-    private final LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
-
     /**
      * 添加服务器监听, 每tick结束以后执行一些需要的操作
      *
@@ -29,7 +25,7 @@ public class ServerTickListener {
             try {
                 eachPlayer(players);
             } catch (Exception e) {
-                e.printStackTrace();
+
             }
         });
     }
@@ -137,17 +133,17 @@ public class ServerTickListener {
                 if(skipMap.get(player) == null)
                     skipMap.put(player, System.currentTimeMillis());
 
-                if(System.currentTimeMillis() - skipMap.get(player) > 650) {
+                if(System.currentTimeMillis() - skipMap.get(player) > 1000) {
                     skipMap.put(player, System.currentTimeMillis());
                     try {
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
-                        player.networkHandler.disconnect(Text.of("invalid token, check your login stat"));
+                        player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
                     }
                 }
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 

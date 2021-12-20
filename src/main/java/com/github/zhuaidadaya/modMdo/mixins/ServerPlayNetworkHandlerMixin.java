@@ -1,7 +1,6 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
-import com.github.zhuaidadaya.modMdo.token.ClientEncryptionToken;
-import com.github.zhuaidadaya.modMdo.usr.User;
+import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.*;
@@ -49,6 +48,7 @@ public class ServerPlayNetworkHandlerMixin {
         try {
             channel = packet.getChannel();
         } catch (Exception e) {
+
         }
 
         PacketByteBuf packetByteBuf = null;
@@ -57,10 +57,12 @@ public class ServerPlayNetworkHandlerMixin {
         } catch (Exception e) {
         }
 
+
         String data1 = "";
         try {
             data1 = packetByteBuf.readString();
         } catch (Exception e) {
+
         }
 
         String data2 = "";
@@ -91,21 +93,8 @@ public class ServerPlayNetworkHandlerMixin {
 
         }
 
-        if(enableEncryptionToken) {
-            if(channel.equals(tokenChannel)) {
-
-                int level = 1;
-                if(data3.equals("ops"))
-                    level = 4;
-
-                if(! data1.equals("")) {
-                    if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
-                        LOGGER.info("login player: " + data1);
-
-                        loginUsers.put(data1, new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3)).toJSONObject());
-                    }
-                }
-            }
+        if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
+            serverLogin.login(channel, data1, data2, data3, data4, data5);
         }
 
         ci.cancel();
@@ -126,13 +115,7 @@ public class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onDisconnected", at = @At("HEAD"))
     public void onDisconnected(Text reason, CallbackInfo ci) {
         if(enableEncryptionToken) {
-            LOGGER.info("logout player: " + player.getUuid().toString());
-            LOGGER.info("canceling player token for: " + player.getUuid().toString());
-            try {
-                loginUsers.removeUser(player);
-            } catch (Exception e) {
-
-            }
+            serverLogin.logout(player);
         }
     }
 

@@ -1,12 +1,7 @@
-package com.github.zhuaidadaya.modMdo.token.Encryption;
+package com.github.zhuaidadaya.modMdo.login.token.Encryption;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 
 public abstract class CharacterEncoder {

@@ -1,6 +1,6 @@
-package com.github.zhuaidadaya.modMdo.token;
+package com.github.zhuaidadaya.modMdo.login.token;
 
-import com.github.zhuaidadaya.modMdo.token.Encryption.AES;
+import com.github.zhuaidadaya.modMdo.login.token.Encryption.AES;
 import org.json.JSONObject;
 
 public class ServerEncryptionToken extends EncryptionToken {

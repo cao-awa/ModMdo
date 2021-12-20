@@ -67,7 +67,7 @@ public class ModMdoStdInitializer implements ModInitializer {
                     LOGGER.info("spawned new encryption token, check the config file");
                 } catch (Exception e) {
                     enableEncryptionToken = false;
-                    LOGGER.info("failed to enable encryption token");
+                    LOGGER.warn("failed to enable encryption token");
                 }
             }
         }

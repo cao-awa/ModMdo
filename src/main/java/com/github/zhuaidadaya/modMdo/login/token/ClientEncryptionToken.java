@@ -1,8 +1,8 @@
-package com.github.zhuaidadaya.modMdo.token;
+package com.github.zhuaidadaya.modMdo.login.token;
 
 import org.json.JSONObject;
 
-public class ClientEncryptionToken extends EncryptionToken{
+public class ClientEncryptionToken extends EncryptionToken {
     public ClientEncryptionToken(String token, String address, String type) {
         super(token, address, type);
     }

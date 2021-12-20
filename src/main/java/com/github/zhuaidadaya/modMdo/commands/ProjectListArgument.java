@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@Deprecated
 public class ProjectListArgument implements ArgumentType<String> {
     public static final DynamicCommandExceptionType INVALID_NAME_EXCEPTION = new DynamicCommandExceptionType((name) -> {
         return new TranslatableText("argument.projectName.invalid", name);
