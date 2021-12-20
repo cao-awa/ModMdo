@@ -2,7 +2,6 @@ package com.github.zhuaidadaya.modMdo.commands;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.projects;
 
-@Deprecated
 public class ProjectArgument {
     public int getProjectId(String name) {
         try {

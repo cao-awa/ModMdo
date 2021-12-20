@@ -4,11 +4,12 @@ import com.github.zhuaidadaya.MCH.utils.config.ConfigUtil;
 import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.lang.Language;
+import com.github.zhuaidadaya.modMdo.login.server.ServerLogin;
+import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
+import com.github.zhuaidadaya.modMdo.login.token.EncryptionTokenUtil;
+import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
+import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
 import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
-import com.github.zhuaidadaya.modMdo.token.ClientEncryptionToken;
-import com.github.zhuaidadaya.modMdo.token.EncryptionTokenUtil;
-import com.github.zhuaidadaya.modMdo.token.ServerEncryptionToken;
-import com.github.zhuaidadaya.modMdo.token.TokenContentType;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
@@ -22,6 +23,8 @@ import org.json.JSONObject;
 
 import java.io.SyncFailedException;
 import java.net.SocketAddress;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.UUID;
 
 public class Variables {
@@ -51,6 +54,11 @@ public class Variables {
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
 
+    public static ServerLogin serverLogin = new ServerLogin();
+
+    public static LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
+    public static LinkedHashSet<ServerPlayerEntity> playersChunkSendCache = new LinkedHashSet<>();
+
     public static String formatAddress(SocketAddress socketAddress) {
         String address = socketAddress.toString();
 
@@ -62,11 +70,15 @@ public class Variables {
     }
 
     /**
+     * @param address
+     *         通过指定IP查询
+     * @param contentType
+     *         查询类型, 可选查询token和登入方式
+     *
+     * @return 返回查询结果(或默认值)
+     *
      * @author 草awa
      * @author 草二号机
-     * @param address 通过指定IP查询
-     * @param contentType 查询类型, 可选查询token和登入方式
-     * @return 返回查询结果(或默认值)
      */
     public static String getModMdoTokenFormat(String address, TokenContentType contentType) {
         String tokenString;
@@ -233,7 +245,7 @@ public class Variables {
         return enableSecureEnchant ? "enable" : "disable";
     }
 
-    public static String  encryptionTokenStatus() {
+    public static String encryptionTokenStatus() {
         return enableEncryptionToken ? "enable" : "disable";
     }
 

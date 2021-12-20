@@ -1,7 +1,7 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
-import com.github.zhuaidadaya.modMdo.token.ClientEncryptionToken;
-import com.github.zhuaidadaya.modMdo.token.TokenContentType;
+import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
+import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.screen.AddServerScreen;
 import net.minecraft.client.gui.screen.Screen;

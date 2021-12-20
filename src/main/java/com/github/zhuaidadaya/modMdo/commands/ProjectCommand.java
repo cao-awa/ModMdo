@@ -13,10 +13,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-@Deprecated
 public class ProjectCommand {
-
-    @Deprecated
     public void register() {
         initProject();
         //        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
@@ -54,7 +51,6 @@ public class ProjectCommand {
         });
     }
 
-    @Deprecated
     public void startProject(Project project) {
         projects.addProject(project);
 
@@ -62,7 +58,6 @@ public class ProjectCommand {
         updateProjects();
     }
 
-    @Deprecated
     public void initProject() {
         LOGGER.info("initializing projects");
         Config<Object, Object> projectConf = config.getConfig("projects");

@@ -4,20 +4,22 @@
     "package": "com.github.zhuaidadaya.modMdo.mixins",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
-        "ClientConnectionMixin",
-        "ClientPlayNetworkHandlerMixin",
-        "EnchantmentHelperMixin",
-        "MinecraftServerSession",
-        "MotdMixin",
-        "MultiplayerScreenMixin",
-        "OptionsScreenMixin",
-        "PlayerManagerMixin",
-        "ServerLoginNetworkHandlerMixin",
-        "ServerPlayNetworkHandlerMixin",
-        "StopServerMixin",
-        "ThreadedAnvilChunkStorageMixin"
+        "MinecraftServerSession"
     ],
     "client": [
+        "ClientConnectionMixin",
+        "AddServerScreenMixin",
+        "OptionsScreenMixin",
+        "ClientPlayNetworkHandlerMixin"
+    ],
+    "server": [
+        "StopServerMixin",
+        "EnchantmentHelperMixin",
+        "PlayerManagerMixin",
+        "MotdMixin",
+        "ThreadedAnvilChunkStorageMixin",
+        "ServerLoginNetworkHandlerMixin",
+        "ServerPlayNetworkHandlerMixin"
     ],
     "injectors": {
         "defaultRequire": 1

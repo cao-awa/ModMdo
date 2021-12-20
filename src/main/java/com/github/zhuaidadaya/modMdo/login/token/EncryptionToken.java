@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.token;
+package com.github.zhuaidadaya.modMdo.login.token;
 
 public class EncryptionToken {
     private String token = "";

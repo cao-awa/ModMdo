@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.token;
+package com.github.zhuaidadaya.modMdo.login.token;
 
 import org.json.JSONObject;
 

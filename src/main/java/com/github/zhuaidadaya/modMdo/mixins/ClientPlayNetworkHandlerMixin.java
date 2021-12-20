@@ -1,6 +1,6 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
-import com.github.zhuaidadaya.modMdo.token.TokenContentType;
+import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
