@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modMdo;
 
+import com.github.zhuaidadaya.modMdo.commands.ProjectCommand;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import net.fabricmc.api.DedicatedServerModInitializer;
 
@@ -12,5 +13,7 @@ public class ModMdoServerInitializer implements DedicatedServerModInitializer {
         LOGGER.info("loading for ModMdo Server");
 
         modMdoType = ModMdoType.SERVER;
+
+        new ProjectCommand().register();
     }
 }

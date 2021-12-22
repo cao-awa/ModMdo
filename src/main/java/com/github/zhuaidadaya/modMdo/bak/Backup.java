@@ -19,6 +19,8 @@ public class Backup {
     private String createTime;
     private long totalSize = 0;
     private boolean synchronizing = false;
+    private boolean stopping = false;
+    private boolean stopped = false;
 
     public Backup(JSONObject json) {
         name = json.get("name").toString();
@@ -73,6 +75,22 @@ public class Backup {
         return this;
     }
 
+    public void stop() {
+        stopping = true;
+
+        while(! stopped) {
+            try {
+                Thread.sleep(25);
+            } catch (InterruptedException e) {
+
+            }
+        }
+
+        synchronizing = false;
+
+        stopped = false;
+    }
+
     public boolean isSynchronizing() {
         return synchronizing;
     }
@@ -89,39 +107,69 @@ public class Backup {
 
         writeFiles(new File(sourcePath), path + "/");
 
-        size = totalSize / 1024 / 1024 + "MB";
+        if(stopping) {
+            deleteFiles(new File(path), path + "/");
 
-        synchronizing = false;
+            stopped = true;
 
-        return System.currentTimeMillis() - startTime;
+            synchronizing = false;
+
+            stopping = false;
+
+            return - 1;
+        } else {
+            size = totalSize / 1024 / 1024 + "MB";
+
+            synchronizing = false;
+
+            return System.currentTimeMillis() - startTime;
+        }
+    }
+
+    private void deleteFiles(File file, String base) {
+        if(file.isDirectory()) {
+            for(File f : file.listFiles()) {
+                if(f.isFile()) {
+                    f.delete();
+                } else if(f.isDirectory()) {
+                    deleteFiles(f, base + f.getName() + "/");
+                    f.delete();
+                }
+            }
+        } else {
+            file.delete();
+        }
     }
 
     private void writeFiles(File file, String base) {
-        if(file.listFiles() != null) {
-            if(file.isDirectory()) {
-                for(File f : file.listFiles()) {
-                    if(f.isFile()) {
-                        try {
-                            new File(base).mkdirs();
+        if(file.isDirectory()) {
+            for(File f : file.listFiles()) {
+                if(stopping)
+                    break;
 
-                            if(f.getAbsolutePath().contains("$"))
-                                continue;
+                if(f.isFile()) {
+                    try {
+                        File parent = new File(base);
+                        if(! parent.isDirectory())
+                            parent.mkdirs();
 
-                            writeSingleFile(new File(base + f.getName()), f);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            logger.error("fail to backup file: " + f.getAbsolutePath());
-                        }
-                    } else if(f.isDirectory()) {
-                        writeFiles(f, base + f.getName() + "/");
+                        if(f.getAbsolutePath().contains("$"))
+                            continue;
+
+                        writeSingleFile(new File(base + f.getName()), f);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.error("fail to backup file: " + f.getAbsolutePath());
                     }
+                } else if(f.isDirectory()) {
+                    writeFiles(f, base + f.getName() + "/");
                 }
-            } else {
-                try {
-                    writeSingleFile(new File(base + file.getName()), file);
-                } catch (Exception e) {
-                    logger.error("fail to backup file: " + file.getAbsolutePath());
-                }
+            }
+        } else {
+            try {
+                writeSingleFile(new File(base + file.getName()), file);
+            } catch (Exception e) {
+                logger.error("fail to backup file: " + file.getAbsolutePath());
             }
         }
     }
@@ -132,9 +180,16 @@ public class Backup {
 
         byte[] buffer = new byte[8192];
         int bytes;
-        while((bytes = in.read(buffer)) != - 1) {
-            out.write(buffer, 0, bytes);
-            totalSize += bytes;
+
+        try {
+            while((bytes = in.read(buffer)) != - 1) {
+                if(stopping)
+                    break;
+                out.write(buffer, 0, bytes);
+                totalSize += bytes;
+            }
+        } catch (Exception e) {
+
         }
 
         out.close();

@@ -1,4 +1,12 @@
 {
+    "analyzer.tasking": "§chas a analyzing, please wait finish",
+    "analyzer.finished": "§dtick analyze finished",
+    "analyzer.started": "§eanalyzing tick",
+    "analyzer.result": "§dstart tick analyzer, result will spawn at %s",
+    "backup.stopping": "§estopping backup",
+    "backup.stopped": "§dstopped backup",
+    "backup.no.task": "§cno backup task running",
+    "backup.running": "§ebackup start",
     "token.regenerate.set.size": "set token size: %s",
     "token.regenerate.failed.format": "failed to regenerate token",
     "command.vec.format": "§aVec3\n§ax: %s\n§ay: %s\n§az: %s\n§6Vec2\n§6x: %s\n§6y: %s\n§dDimension\n§dDim: %s",

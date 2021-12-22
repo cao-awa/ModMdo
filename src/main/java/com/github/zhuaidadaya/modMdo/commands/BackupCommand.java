@@ -14,6 +14,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import org.json.JSONObject;
 
+import java.io.File;
+
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -24,40 +26,98 @@ public class BackupCommand {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("backup").executes(defaultBackup -> {
-                ServerCommandSource source = defaultBackup.getSource();
-                PlayerManager players = source.getServer().getPlayerManager();
-                String levelName = ((MinecraftServerSession) defaultBackup.getSource().getServer()).getSession().getDirectoryName() + "/";
-                String sourcePath = (dedicated ? "" : "saves/") + levelName;
-
-                TranslatableText result;
-                result = new TranslatableText("backup.starting");
-                for(ServerPlayerEntity player : players.getPlayerList()) {
-                    player.sendMessage(result,false);
-                }
-
-                if(!bak.isSynchronizing()) {
-                    result = bak.createBackup(new Backup(null, "backup/" + levelName + "/" + Times.getTime(TimeType.AS_SECOND), sourcePath));
-                } else {
-                    result = new TranslatableText("backup.tasking");
-                }
-
-                for(ServerPlayerEntity player : players.getPlayerList()) {
-                    player.sendMessage(result,false);
-                }
+                backup(null, dedicated, defaultBackup.getSource());
 
                 return 0;
-            }).then(argument("asName", StringArgumentType.string()).executes(asNameBackup -> {
+            }).then(literal("name").then(argument("asName", StringArgumentType.string()).executes(asNameBackup -> {
+                backup(asNameBackup.getInput().split(" ")[1], dedicated, asNameBackup.getSource());
 
                 return 1;
+            }))).then(literal("stop").executes(stop -> {
+                stopBackup(stop.getSource());
+
+                return - 1;
+            })).then(literal("status").executes(status -> {
+                status.getSource().sendFeedback(bak.isSynchronizing() ? new TranslatableText("backup.running") : new TranslatableText("backup.no.task"), false);
+
+                return 2;
             })));
         });
+    }
+
+    public void stopBackup(ServerCommandSource source) {
+        new Thread(() -> {
+            if(bak.isSynchronizing()) {
+                source.sendFeedback(new TranslatableText("backup.stopping"), false);
+                source.sendFeedback(bak.stop(), false);
+            } else {
+                source.sendFeedback(new TranslatableText("backup.no.task"),false);
+            }
+        }).start();
+    }
+
+    public void backup(String name, boolean dedicated, ServerCommandSource source) {
+        new Thread(() -> {
+            PlayerManager players = source.getServer().getPlayerManager();
+            String levelName = ((MinecraftServerSession) source.getServer()).getSession().getDirectoryName() + "/";
+            String sourcePath = (dedicated ? "" : "saves/") + levelName;
+
+            TranslatableText result;
+            result = new TranslatableText("backup.starting");
+
+            try {
+                if(! bak.isSynchronizing()) {
+                    for(ServerPlayerEntity player : players.getPlayerList()) {
+                        player.sendMessage(result, false);
+                    }
+
+                    source.sendFeedback(new TranslatableText("backup.running"), false);
+                    result = bak.createBackup(new Backup(name, "backup/" + levelName + "/" + Times.getTime(TimeType.AS_SECOND), sourcePath));
+
+                    for(ServerPlayerEntity player : players.getPlayerList()) {
+                        player.sendMessage(result, false);
+                    }
+                } else {
+                    source.sendError(result);
+
+                    result = new TranslatableText("backup.tasking");
+
+                    source.sendError(result);
+                }
+            } catch (Exception e) {
+
+            }
+        }).start();
     }
 
     public void initBackups() {
         LOGGER.info("initializing backups");
         Config<Object, Object> backupsConf = config.getConfig("backups");
+
         if(backupsConf != null) {
-            bak = new BackupUtil(new JSONObject(backupsConf.getValue()));
+            JSONObject backups = new JSONObject(backupsConf.getValue());
+            JSONObject backupsCopy = new JSONObject(backups.toString());
+
+            try {
+                for(Object o : backupsCopy.keySet()) {
+                    JSONObject backup = backups.getJSONObject(o.toString());
+
+                    String path = backup.get("path").toString();
+                    File backupPtah = new File(path);
+
+                    try {
+                        if(! backupPtah.exists() | ! backupPtah.isDirectory() | backupPtah.listFiles().length < 1) {
+                            backups.remove(o.toString());
+                        }
+                    } catch (Exception e) {
+                        backups.remove(o.toString());
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+
+            bak = new BackupUtil(backups);
         } else {
             bak = new BackupUtil();
             config.set("backups", new JSONObject());
