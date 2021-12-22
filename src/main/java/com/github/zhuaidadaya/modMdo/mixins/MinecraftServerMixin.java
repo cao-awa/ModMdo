@@ -90,7 +90,7 @@ public class MinecraftServerMixin {
 
             try {
                 new File(tickAnalyzerFile).getParentFile().mkdirs();
-                BufferedWriter writer = new BufferedWriter(new FileWriter(tickAnalyzerFile,true));
+                BufferedWriter writer = new BufferedWriter(new FileWriter(tickAnalyzerFile, true));
                 writer.write(result.toString());
                 writer.close();
             } catch (Exception e) {
@@ -99,7 +99,8 @@ public class MinecraftServerMixin {
 
             analyzedTick++;
 
-            LOGGER.info("snap tick(" + analyzedTick + "tick), cached time analyzed");
+            if(analyzedTick % 10 == 0)
+                LOGGER.info("snap tick(" + analyzedTick + "tick), cached time analyzed");
 
             if(shortAnalyze & analyzedTick > 59) {
                 enableTickAnalyzer = false;
@@ -112,16 +113,24 @@ public class MinecraftServerMixin {
     @Inject(method = "tickWorlds", at = @At("HEAD"))
     public void tickWorldsStart(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_worlds_start", System.currentTimeMillis());
-            tickMap.put("ticking_world", 1L);
-            tickEntitiesMap = new LinkedHashMap<>();
+            try {
+                tickMap.put("tick_worlds_start", System.currentTimeMillis());
+                tickMap.put("ticking_world", 1L);
+                tickEntitiesMap = new LinkedHashMap<>();
+            } catch (Exception e) {
+
+            }
         }
     }
 
     @Inject(method = "tickWorlds", at = @At("RETURN"))
     public void tickWorldsEnd(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_worlds_time", System.currentTimeMillis() - tickMap.get("tick_worlds_start"));
+            try {
+                tickMap.put("tick_worlds_time", System.currentTimeMillis() - tickMap.get("tick_worlds_start"));
+            } catch (Exception e) {
+
+            }
         }
     }
 }

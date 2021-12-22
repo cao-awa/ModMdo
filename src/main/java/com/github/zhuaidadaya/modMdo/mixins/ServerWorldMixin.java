@@ -14,18 +14,26 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.tickMap;
 @Mixin(ServerWorld.class)
 public class ServerWorldMixin {
 
-    @Inject(method = "tick",at = @At("HEAD"))
+    @Inject(method = "tick", at = @At("HEAD"))
     public void tickWorldStart(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_start", System.currentTimeMillis());
+            try {
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_start", System.currentTimeMillis());
+            } catch (Exception e) {
+
+            }
         }
     }
 
-    @Inject(method = "tick",at = @At("RETURN"))
+    @Inject(method = "tick", at = @At("RETURN"))
     public void tickWorldEnd(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_time", System.currentTimeMillis() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_start"));
-            tickMap.put("ticking_world", tickMap.get("ticking_world") + 1);
+            try {
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_time", System.currentTimeMillis() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_start"));
+                tickMap.put("ticking_world", tickMap.get("ticking_world") + 1);
+            } catch (Exception e) {
+
+            }
         }
     }
 }
