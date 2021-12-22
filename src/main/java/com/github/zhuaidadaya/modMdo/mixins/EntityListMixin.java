@@ -45,7 +45,7 @@ public class EntityListMixin {
                 for(Entity entity : this.entities.values()) {
                     try {
                         String name = entity.getType().toString();
-                        worldEntities.put(name,worldEntities.containsKey(name) ? worldEntities.get(name) + 1 : 1);
+                        worldEntities.put(name, worldEntities.containsKey(name) ? worldEntities.get(name) + 1 : 1);
                     } catch (Exception e) {
 
                     }

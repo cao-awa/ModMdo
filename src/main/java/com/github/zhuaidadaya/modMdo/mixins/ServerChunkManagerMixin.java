@@ -24,7 +24,6 @@ public class ServerChunkManagerMixin {
         if(enableTickAnalyzer) {
             try {
                 tickMap.put("tick_world" + tickMap.get("ticking_world") + "_chunks_start", System.currentTimeMillis());
-
             } catch (Exception e) {
 
             }

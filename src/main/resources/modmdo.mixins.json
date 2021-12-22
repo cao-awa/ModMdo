@@ -8,10 +8,12 @@
         "ItemEntityMixin",
         "MinecraftServerMixin",
         "MinecraftServerSession",
+        "RedstoneWireBlockMixin",
         "ServerChunkManagerMixin",
         "ServerEntityManagerMixin",
         "ServerNetworkIoMixin",
-        "ServerWorldMixin"
+        "ServerWorldMixin",
+        "WorldMixin"
     ],
     "client": [
         "AddServerScreenMixin",
