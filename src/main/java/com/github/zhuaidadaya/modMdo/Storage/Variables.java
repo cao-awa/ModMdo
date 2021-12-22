@@ -37,6 +37,7 @@ public class Variables {
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
     public static boolean enableEncryptionToken = true;
+    public static boolean enableTickAnalyzer = false;
     public static int tokenGenerateSize = 128;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
     public static Identifier tokenChannel = new Identifier("modmdo:token");
@@ -54,10 +55,18 @@ public class Variables {
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
 
-    public static ServerLogin serverLogin = new ServerLogin();
+    public static int itemDespawnAge = 6000;
 
+    public static ServerLogin serverLogin = new ServerLogin();
     public static LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
     public static LinkedHashSet<ServerPlayerEntity> playersChunkSendCache = new LinkedHashSet<>();
+
+    public static int analyzedTick = 0;
+    public static boolean shortAnalyze = true;
+    public static String tickAnalyzerFile = "logs/tick_analyzer/";
+    public static String tickStartTime;
+    public static LinkedHashMap<String, Long> tickMap = new LinkedHashMap<>();
+    public static LinkedHashMap<String, LinkedHashMap<String, Integer>> tickEntitiesMap = new LinkedHashMap<>();
 
     public static String formatAddress(SocketAddress socketAddress) {
         String address = socketAddress.toString();

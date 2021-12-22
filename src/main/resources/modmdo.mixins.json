@@ -4,8 +4,14 @@
     "package": "com.github.zhuaidadaya.modMdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
-        "ArgumentTypesMixin",
-        "MinecraftServerSession"
+        "EntityListMixin",
+        "ItemEntityMixin",
+        "MinecraftServerMixin",
+        "MinecraftServerSession",
+        "ServerChunkManagerMixin",
+        "ServerEntityManagerMixin",
+        "ServerNetworkIoMixin",
+        "ServerWorldMixin"
     ],
     "client": [
         "AddServerScreenMixin",

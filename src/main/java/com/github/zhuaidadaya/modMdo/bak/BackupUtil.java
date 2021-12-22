@@ -14,6 +14,7 @@ public class BackupUtil {
     private final LinkedHashMap<Object, Backup> backups = new LinkedHashMap<>();
     private final Logger logger = LogManager.getLogger("ModMdo Backup");
     private boolean synchronizing = false;
+    private Backup backupSnap;
 
     public BackupUtil(Backup... backups) {
         for(Backup backup : backups) {
@@ -33,24 +34,39 @@ public class BackupUtil {
         return synchronizing;
     }
 
-    public TranslatableText createBackup(Backup backup) {
+    public TranslatableText createBackup(Backup backup) throws Exception{
         backups.put(backup.getId(), backup);
-        String result;
         updateBackups();
         try {
             if(synchronizing)
                 throw new SyncFailedException("cannot invoke createBackup() because synchronizing");
             synchronizing = true;
-            String time = (backup.createBackup() / 1000) + "s";
-            String size = backup.getSize();
-            result = "backup finished in " + time + "s, " + "size: " + size;
-            logger.info(result);
+            backupSnap = backup;
+            long backupTime = backupSnap.createBackup();
+            if(backupTime == -1) {
+                backups.remove(backup.getId());
+                throw new Exception();
+            }
+            String time = (backupTime) + "ms(" + (backupTime / 1000) + "s)";
+            String size = backupSnap.getSize();
+            logger.info("backup finished in " + time + "s, " + "size: " + size);
             synchronizing = false;
             return new TranslatableText("backup.success",  time, size);
         } catch (SyncFailedException e) {
-            result = "fail to backup: " + backup.getId();
-            logger.error(result, e);
+            logger.error("fail to backup: " + backupSnap.getId(), e);
             return new TranslatableText("backup.failed");
+        }
+    }
+
+    public TranslatableText stop() {
+        if(synchronizing) {
+            if(backupSnap.isSynchronizing()) {
+                backupSnap.stop();
+            }
+            synchronizing = false;
+            return new TranslatableText("backup.stopped");
+        } else {
+            return new TranslatableText("backup.no.task");
         }
     }
 

@@ -12,5 +12,7 @@ public class ModMdoServerInitializer implements DedicatedServerModInitializer {
         LOGGER.info("loading for ModMdo Server");
 
         modMdoType = ModMdoType.SERVER;
+
+//        new ProjectCommand().register();
     }
 }
