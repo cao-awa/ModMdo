@@ -23,7 +23,7 @@ public class ServerChunkManagerMixin {
     public void tickChunkStart(BooleanSupplier booleanSupplier, CallbackInfo ci) {
         if(enableTickAnalyzer) {
             try {
-                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_chunks_start", System.currentTimeMillis());
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_chunks_manager_start", System.nanoTime());
             } catch (Exception e) {
 
             }
@@ -34,7 +34,29 @@ public class ServerChunkManagerMixin {
     public void tickChunkEnd(BooleanSupplier booleanSupplier, CallbackInfo ci) {
         if(enableTickAnalyzer) {
             try {
-                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_chunks_time", System.currentTimeMillis() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_chunks_start"));
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_chunks_manager_time", System.nanoTime() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_chunks_manager_start"));
+            } catch (Exception e) {
+
+            }
+        }
+    }
+
+    @Inject(method = "tickChunks",at = @At("HEAD"))
+    public void tickChunksStart(CallbackInfo ci) {
+        if(enableTickAnalyzer) {
+            try {
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_chunks_start", System.nanoTime());
+            } catch (Exception e) {
+
+            }
+        }
+    }
+
+    @Inject(method = "tickChunks",at = @At("RETURN"))
+    public void tickChunksEnd(CallbackInfo ci) {
+        if(enableTickAnalyzer) {
+            try {
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_chunks_time", System.nanoTime() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_chunks_start"));
             } catch (Exception e) {
 
             }

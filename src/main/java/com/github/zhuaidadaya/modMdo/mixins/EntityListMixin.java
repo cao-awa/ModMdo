@@ -29,7 +29,7 @@ public class EntityListMixin {
     public void forEach(Consumer<Entity> action) {
         if(enableTickAnalyzer) {
             try {
-                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_start", System.currentTimeMillis());
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_start", System.nanoTime());
                 tickMap.put("world" + tickMap.get("ticking_world") + "_entities", (long) entities.size());
             } catch (Exception e) {
 
@@ -59,7 +59,7 @@ public class EntityListMixin {
 
         if(enableTickAnalyzer) {
             try {
-                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_time", System.currentTimeMillis() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_entities_start"));
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_time", System.nanoTime() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_entities_start"));
             } catch (Exception e) {
 
             }

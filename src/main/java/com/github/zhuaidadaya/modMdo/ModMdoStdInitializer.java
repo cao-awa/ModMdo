@@ -39,7 +39,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         new ServerStartListener().listener();
         new CavaCommand().register();
         new ModMdoConfigCommand().register();
-        new VecCommand().register();
         new TokenCommand().register();
         new BackupCommand().register();
         new AnalyzerCommand().register();
@@ -68,7 +67,7 @@ public class ModMdoStdInitializer implements ModInitializer {
                     LOGGER.info("spawned new encryption token, check the config file");
                 } catch (Exception e) {
                     enableEncryptionToken = false;
-                    LOGGER.warn("failed to enable encryption token");
+                    LOGGER.info("failed to enable encryption token");
                 }
             }
         }

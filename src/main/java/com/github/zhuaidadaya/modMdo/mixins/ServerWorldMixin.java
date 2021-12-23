@@ -18,7 +18,7 @@ public class ServerWorldMixin {
     public void tickWorldStart(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if(enableTickAnalyzer) {
             try {
-                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_start", System.currentTimeMillis());
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_start", System.nanoTime());
             } catch (Exception e) {
 
             }
@@ -29,7 +29,7 @@ public class ServerWorldMixin {
     public void tickWorldEnd(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if(enableTickAnalyzer) {
             try {
-                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_time", System.currentTimeMillis() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_start"));
+                tickMap.put("tick_world" + tickMap.get("ticking_world") + "_time", System.nanoTime() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_start"));
                 tickMap.put("ticking_world", tickMap.get("ticking_world") + 1);
             } catch (Exception e) {
 
