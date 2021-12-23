@@ -36,7 +36,7 @@ public class Variables {
     public static boolean enableCava = true;
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
-    public static boolean enableEncryptionToken = true;
+    public static boolean enableEncryptionToken = false;
     public static boolean enableTickAnalyzer = false;
     public static int tokenGenerateSize = 128;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
