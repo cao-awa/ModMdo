@@ -39,7 +39,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         new ServerStartListener().listener();
         new CavaCommand().register();
         new ModMdoConfigCommand().register();
-        new VecCommand().register();
         new TokenCommand().register();
         new BackupCommand().register();
         new AnalyzerCommand().register();

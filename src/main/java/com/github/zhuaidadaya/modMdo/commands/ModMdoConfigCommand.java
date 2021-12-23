@@ -1,12 +1,14 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.modMdo.storage.Variables;
 import com.github.zhuaidadaya.modMdo.login.token.EncryptionTokenUtil;
 import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
+import com.github.zhuaidadaya.modMdo.storage.Variables;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.text.TranslatableText;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ModMdoConfigCommand {
@@ -28,9 +30,7 @@ public class ModMdoConfigCommand {
                 rejection.getSource().sendFeedback(formatDisableHere(), false);
 
                 return 0;
-            }))));
-
-            dispatcher.register(literal("modmdo").requires(level -> level.hasPermissionLevel(4)).then(literal("enableSecureEnchant").executes(getHereReceive -> {
+            }))).then(literal("enableSecureEnchant").executes(getHereReceive -> {
                 getHereReceive.getSource().sendFeedback(formatConfigReturnMessage("secure_enchant"), false);
 
                 return 2;
@@ -46,9 +46,7 @@ public class ModMdoConfigCommand {
                 rejection.getSource().sendFeedback(formatDisableSecureEnchant(), false);
 
                 return 0;
-            }))));
-
-            dispatcher.register(literal("modmdo").requires(level -> level.hasPermissionLevel(4)).then(literal("enableEncryptionToken").executes(getHereReceive -> {
+            }))).then(literal("enableEncryptionToken").executes(getHereReceive -> {
                 getHereReceive.getSource().sendFeedback(formatConfigReturnMessage("encryption_token"), false);
 
                 return 2;
@@ -77,9 +75,7 @@ public class ModMdoConfigCommand {
                 rejection.getSource().sendFeedback(formatDisableEncryptionToken(), false);
 
                 return 0;
-            }))));
-
-            dispatcher.register(literal("modmdo").requires(level -> level.hasPermissionLevel(4)).then(literal("enableRejectReconnect").executes(getHereReceive -> {
+            }))).then(literal("enableRejectReconnect").executes(getHereReceive -> {
                 getHereReceive.getSource().sendFeedback(formatConfigReturnMessage("reject_reconnect"), false);
 
                 return 2;
@@ -96,9 +92,7 @@ public class ModMdoConfigCommand {
                 rejection.getSource().sendFeedback(formatDisableRejectReconnect(), false);
 
                 return 0;
-            }))));
-
-            dispatcher.register(literal("modmdo").requires(level -> level.hasPermissionLevel(4)).then(literal("enableDeadMessage").executes(getHereReceive -> {
+            }))).then(literal("enableDeadMessage").executes(getHereReceive -> {
                 getHereReceive.getSource().sendFeedback(formatConfigReturnMessage("dead_message"), false);
 
                 return 2;
@@ -115,12 +109,32 @@ public class ModMdoConfigCommand {
                 rejection.getSource().sendFeedback(formatDisabledDeadMessage(), false);
 
                 return 0;
+            }))).then(literal("itemDespawnTicks").executes(getDespawnTicks -> {
+                getDespawnTicks.getSource().sendFeedback(formatItemDespawnTicks(), false);
+
+                return 2;
+            }).then(literal("become").then(argument("ticks", IntegerArgumentType.integer()).executes(setTicks -> {
+                itemDespawnAge = Integer.parseInt(setTicks.getInput().split(" ")[2]);
+
+                setTicks.getSource().sendFeedback(formatItemDespawnTicks(), false);
+
+                return 1;
+            }))).then(literal("original").executes(setTicksToDefault -> {
+                itemDespawnAge = 6000;
+
+                setTicksToDefault.getSource().sendFeedback(formatItemDespawnTicks(), false);
+
+                return 2;
             }))));
         });
     }
 
     public TranslatableText formatConfigReturnMessage(String config) {
         return new TranslatableText(config + "." + Variables.config.getConfigValue(config) + ".rule.format");
+    }
+
+    public TranslatableText formatItemDespawnTicks() {
+        return new TranslatableText("item.despawn.ticks.rule.format", itemDespawnAge);
     }
 
     public TranslatableText formatEnableHere() {
@@ -142,6 +156,7 @@ public class ModMdoConfigCommand {
     public TranslatableText formatEnableEncryptionToken() {
         return new TranslatableText("encryption_token.disable.rule.format");
     }
+
 
     public TranslatableText formatDisableEncryptionToken() {
         return new TranslatableText("encryption_token.disable.rule.format");

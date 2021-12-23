@@ -15,7 +15,7 @@ public class ServerNetworkIoMixin {
     @Inject(method = "tick", at = @At("HEAD"))
     public void tickNetworkStart(CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_network_start", System.currentTimeMillis());
+            tickMap.put("tick_network_start", System.nanoTime());
         }
     }
 
@@ -23,7 +23,7 @@ public class ServerNetworkIoMixin {
     @Inject(method = "tick", at = @At("RETURN"))
     public void tickNetworkEnd(CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_network_time", System.currentTimeMillis() - tickMap.get("tick_network_start"));
+            tickMap.put("tick_network_time", System.nanoTime() - tickMap.get("tick_network_start"));
         }
     }
 }

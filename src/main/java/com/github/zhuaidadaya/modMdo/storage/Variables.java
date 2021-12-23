@@ -79,15 +79,11 @@ public class Variables {
     }
 
     /**
-     * @param address
-     *         通过指定IP查询
-     * @param contentType
-     *         查询类型, 可选查询token和登入方式
-     *
-     * @return 返回查询结果(或默认值)
-     *
      * @author 草awa
      * @author 草二号机
+     * @param address 通过指定IP查询
+     * @param contentType 查询类型, 可选查询token和登入方式
+     * @return 返回查询结果(或默认值)
      */
     public static String getModMdoTokenFormat(String address, TokenContentType contentType) {
         String tokenString;
@@ -254,7 +250,7 @@ public class Variables {
         return enableSecureEnchant ? "enable" : "disable";
     }
 
-    public static String encryptionTokenStatus() {
+    public static String  encryptionTokenStatus() {
         return enableEncryptionToken ? "enable" : "disable";
     }
 

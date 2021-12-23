@@ -11,33 +11,33 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.tickMap;
 
 @Mixin(ServerEntityManager.class)
 public class ServerEntityManagerMixin {
-    @Inject(method = "loadChunks",at = @At("HEAD"))
+    @Inject(method = "loadChunks", at = @At("HEAD"))
     public void loadChunksStart(CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_load_chunk_start", System.currentTimeMillis());
+            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_load_chunk_start", System.nanoTime());
         }
     }
 
 
-    @Inject(method = "loadChunks",at = @At("RETURN"))
+    @Inject(method = "loadChunks", at = @At("RETURN"))
     public void loadChunksEnd(CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_load_chunk_time", tickMap.get("tick_world" +tickMap.get("ticking_world") + "_entities_load_chunk_start") - System.currentTimeMillis());
+            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_load_chunk_time", System.nanoTime() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_entities_load_chunk_start"));
         }
     }
 
-    @Inject(method = "unloadChunks",at = @At("HEAD"))
+    @Inject(method = "unloadChunks", at = @At("HEAD"))
     public void unloadChunksStart(CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_unload_chunk_start", System.currentTimeMillis());
+            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_unload_chunk_start", System.nanoTime());
         }
     }
 
 
-    @Inject(method = "unloadChunks",at = @At("RETURN"))
+    @Inject(method = "unloadChunks", at = @At("RETURN"))
     public void unloadChunksEnd(CallbackInfo ci) {
         if(enableTickAnalyzer) {
-            tickMap.put("tick_world" + tickMap.get("ticking_world") +"_entities_unload_chunk_time", System.currentTimeMillis() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_entities_unload_chunk_start"));
+            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_unload_chunk_time", System.nanoTime() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_entities_unload_chunk_start"));
         }
     }
 }
