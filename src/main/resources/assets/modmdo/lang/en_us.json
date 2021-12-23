@@ -1,5 +1,5 @@
 {
-    "item.despawn.ticks.rule.format": "item will remove before %s ticks",
+    "item.despawn.ticks.rule.format": "item will after before %s ticks",
     "analyzer.tasking": "§chas a analyzing, please wait finish",
     "analyzer.finished": "§dtick analyze finished",
     "analyzer.started": "§eanalyzing tick",
