@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.enabledCancelTIck;
 
 @Mixin(MinecraftServer.class)
 public class MinecraftServerMixin {
@@ -28,8 +29,16 @@ public class MinecraftServerMixin {
     @Final
     private Map<RegistryKey<World>, ServerWorld> worlds;
 
-    @Inject(method = "tick", at = @At("HEAD"))
+    @Shadow private float tickTime;
+
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tickStart(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+        if(enabledCancelTIck) {
+            if(cancelTickStart > 60000)
+                enabledCancelTIck = false;
+            ci.cancel();
+        }
+
         if(enableTickAnalyzer) {
             tickMap.put("tick_start", System.nanoTime());
             tickStartTime = Times.getTime(TimeType.ALL);
@@ -57,18 +66,102 @@ public class MinecraftServerMixin {
                     }
 
                     try {
-                        long tickWorldTime = tickMap.get("tick_world" + i + "_time");
-                        long tickWorldStart = tickMap.get("tick_world" + i + "_start");
-                        long tickEntitiesTime = tickMap.get("tick_world" + i + "_entities_time");
-                        long tickEntitiesStart = tickMap.get("tick_world" + i + "_entities_start");
-                        long tickEntitiesLoadChunksTime = tickMap.get("tick_world" + i + "_entities_load_chunk_time");
-                        long tickEntitiesLoadChunksStart = tickMap.get("tick_world" + i + "_entities_load_chunk_start");
-                        long tickEntitiesUnloadChunksTime = tickMap.get("tick_world" + i + "_entities_unload_chunk_time");
-                        long tickEntitiesUnloadChunksStart = tickMap.get("tick_world" + i + "_entities_unload_chunk_start");
-                        long tickWorldChunksManagerTime = tickMap.get("tick_world" + i + "_chunks_manager_time");
-                        long tickWorldChunksManagerStart = tickMap.get("tick_world" + i + "_chunks_manager_start");
-                        long tickWorldChunksTime = tickMap.get("tick_world" + i + "_chunks_time");
-                        long tickWorldChunksStart = tickMap.get("tick_world" + i + "_chunks_start");
+                        long tickWorldTime = - 1;
+                        try {
+                            tickWorldTime = tickMap.get("tick_world" + i + "_time");
+                        } catch (Exception e) {
+
+                        }
+                        long tickWorldStart = baseTickStart;
+
+                        try {
+                            tickWorldStart = tickMap.get("tick_world" + i + "_start");
+                        } catch (Exception e) {
+
+                        }
+                        long tickEntitiesTime = - 1;
+
+                        try {
+                            tickEntitiesTime = tickMap.get("tick_world" + i + "_entities_time");
+                        } catch (Exception e) {
+
+                        }
+                        long tickEntitiesStart = baseTickStart;
+
+                        try {
+                            tickEntitiesStart = tickMap.get("tick_world" + i + "_entities_start");
+                        } catch (Exception e) {
+
+                        }
+                        long tickEntitiesLoadChunksTime = - 1;
+                        try {
+                            tickEntitiesLoadChunksTime = tickMap.get("tick_world" + i + "_entities_load_chunk_time");
+                        } catch (Exception e) {
+
+                        }
+                        long tickEntitiesLoadChunksStart = baseTickStart;
+                        try {
+                            tickEntitiesLoadChunksStart = tickMap.get("tick_world" + i + "_entities_load_chunk_start");
+                        } catch (Exception e) {
+
+                        }
+                        long tickEntitiesUnloadChunksTime = - 1;
+                        try {
+                            tickEntitiesUnloadChunksTime = tickMap.get("tick_world" + i + "_entities_unload_chunk_time");
+                        } catch (Exception e) {
+
+                        }
+                        long tickEntitiesUnloadChunksStart = baseTickStart;
+                        try {
+                            tickEntitiesUnloadChunksStart = tickMap.get("tick_world" + i + "_entities_unload_chunk_start");
+                        } catch (Exception e) {
+
+                        }
+                        long tickWorldChunksManagerTime = - 1;
+                        try {
+                            tickWorldChunksManagerTime = tickMap.get("tick_world" + i + "_chunks_manager_time");
+                        } catch (Exception e) {
+
+                        }
+                        long tickWorldChunksManagerStart = baseTickStart;
+                        try {
+                            tickWorldChunksManagerStart = tickMap.get("tick_world" + i + "_chunks_manager_start");
+                        } catch (Exception e) {
+
+                        }
+                        long tickWorldChunksTime = - 1;
+                        try {
+                            tickWorldChunksTime = tickMap.get("tick_world" + i + "_chunks_time");
+                        } catch (Exception e) {
+
+                        }
+                        long tickWorldChunksStart = baseTickStart;
+                        try {
+                            tickWorldChunksStart = tickMap.get("tick_world" + i + "_chunks_start");
+                        } catch (Exception e) {
+
+                        }
+                        long tickEntitiesManagerTime = - 1;
+                        try {
+                            tickEntitiesManagerTime = tickMap.get("tick_world" + i + "_entities_manager_time");
+                        } catch (Exception e) {
+
+                        }
+                        long tickEntitiesManagerStart = baseTickStart;
+                        try {
+                            tickEntitiesManagerStart = tickMap.get("tick_world" + i + "_entities_manager_start");
+                        } catch (Exception e) {
+
+                        }
+                        if(tickWorldTime < 0) {
+                            throw new Exception();
+                        }
+                        long entitiesCount = 0;
+                        try {
+                            entitiesCount = tickMap.get("world" + i + "_entities");
+                        } catch (Exception e) {
+
+                        }
                         result.append("|    |    |--world").append(i).append("(").append(name).append("): ").append(tickWorldTime).append("ns").append("\n");
                         result.append("|    |    |    |--step start: ").append(tickWorldStart - baseTickStart).append("ns*").append("\n");
                         result.append("|    |    |    |--tick chunks(M): ").append(tickWorldChunksManagerTime).append("ns").append("\n");
@@ -77,15 +170,19 @@ public class MinecraftServerMixin {
                         result.append("|    |    |    |    |    |--step time: ").append(tickWorldChunksStart - baseTickStart).append("ns*").append("\n");
                         result.append("|    |    |    |--tick entities(W): ").append(tickEntitiesTime).append("ns").append("\n");
                         result.append("|    |    |    |    |--step start: ").append(tickEntitiesStart - baseTickStart).append("ns*").append("\n");
-                        result.append("|    |    |    |    |--entities: ").append(tickMap.get("world" + i + "_entities")).append("\n");
-                        try {
-                            LinkedHashMap<String, Integer> entities = tickEntitiesMap.get("world" + i + "_entities");
-                            for(String s : entities.keySet()) {
-                                result.append("|    |    |    |    |    |--").append(s).append(": ").append(entities.get(s)).append("\n");
-                            }
-                        } catch (Exception e) {
+                        result.append("|    |    |    |    |--entities: ").append(entitiesCount).append("\n");
+                        if(entitiesCount > 0) {
+                            try {
+                                LinkedHashMap<String, Integer> entities = tickEntitiesMap.get("world" + i + "_entities");
+                                for(String s : entities.keySet()) {
+                                    result.append("|    |    |    |    |    |--").append(s).append(": ").append(entities.get(s)).append("\n");
+                                }
+                            } catch (Exception e) {
 
+                            }
                         }
+                        result.append("|    |    |    |--tick entities(M): ").append(tickEntitiesManagerTime).append("ns").append("\n");
+                        result.append("|    |    |    |    |--step start: ").append(tickEntitiesManagerStart - baseTickStart).append("ns*").append("\n");
                         result.append("|    |    |    |    |--load chunks(M): ").append(tickEntitiesLoadChunksTime).append("ns").append("\n");
                         result.append("|    |    |    |    |    |--step start: ").append(tickEntitiesLoadChunksStart - baseTickStart).append("ns*").append("\n");
                         result.append("|    |    |    |    |--unload chunks(M): ").append(tickEntitiesUnloadChunksTime).append("ns").append("\n");

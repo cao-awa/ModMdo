@@ -1,0 +1,32 @@
+package com.github.zhuaidadaya.modMdo.commands;
+
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+
+import static com.github.zhuaidadaya.modMdo.storage.Variables.getCommandRequestVersion;
+
+public class SimpleCommandOperation {
+    public LiteralText formatModMdoVersionRequire(String commandBelong) {
+        return new LiteralText("this command minimum ModMdo version require: " + getCommandRequestVersion(commandBelong));
+    }
+
+    public void sendFeedback(CommandContext<ServerCommandSource> source, Text message) {
+        source.getSource().sendFeedback(message, false);
+    }
+
+    public void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, Text message) {
+        source.getSource().sendFeedback(message, true);
+    }
+
+    public void sendError(CommandContext<ServerCommandSource> source, Text message) {
+        source.getSource().sendError(message);
+    }
+
+    public ServerPlayerEntity getPlayer(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
+        return source.getSource().getPlayer();
+    }
+}

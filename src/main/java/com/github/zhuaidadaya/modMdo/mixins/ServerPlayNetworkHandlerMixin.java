@@ -93,8 +93,15 @@ public class ServerPlayNetworkHandlerMixin {
 
         }
 
+        String data6 = "";
+        try {
+            data6 = packetByteBuf.readString();
+        } catch (Exception e) {
+
+        }
+
         if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
-            serverLogin.login(channel,data1,data2,data3,data4,data5);
+            serverLogin.login(channel, data1, data2, data3, data4, data5,data6);
         }
 
         ci.cancel();

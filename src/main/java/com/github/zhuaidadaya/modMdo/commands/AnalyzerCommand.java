@@ -3,7 +3,6 @@ package com.github.zhuaidadaya.modMdo.commands;
 import com.github.zhuaidadaya.MCH.times.TimeType;
 import com.github.zhuaidadaya.MCH.times.Times;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.Vec2f;
@@ -12,44 +11,42 @@ import net.minecraft.util.math.Vec3d;
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class AnalyzerCommand {
+public class AnalyzerCommand extends SimpleCommandOperation implements SimpleCommand {
+    @Override
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("analyzer").then(literal("tick").executes(tickAnalyze -> {
-                if(shortAnalyze & !enableTickAnalyzer) {
-                    new Thread(() -> {
-                        analyzedTick = 0;
+                if(commandApplyToPlayer(MODMDO_COMMAND_ANALYZER, getPlayer(tickAnalyze), this, tickAnalyze)) {
+                    if(shortAnalyze & ! enableTickAnalyzer) {
+                        new Thread(() -> {
+                            analyzedTick = 0;
 
-                        tickAnalyzerFile = "logs/tick_analyzer/" + Times.getTime(TimeType.ALL) + ".log";
-                        tickAnalyze.getSource().sendFeedback(new TranslatableText("analyzer.result", tickAnalyzerFile), true);
+                            tickAnalyzerFile = "logs/tick_analyzer/" + Times.getTime(TimeType.ALL) + ".log";
+                            sendFeedbackAndInform(tickAnalyze, new TranslatableText("analyzer.result", tickAnalyzerFile));
+                            sendFeedbackAndInform(tickAnalyze, new TranslatableText("analyzer.started"));
 
-                        tickAnalyze.getSource().sendFeedback(new TranslatableText("analyzer.started"), true);
+                            enableTickAnalyzer = true;
 
-                        enableTickAnalyzer = true;
+                            while(enableTickAnalyzer) {
+                                try {
+                                    Thread.sleep(50);
+                                } catch (InterruptedException e) {
 
-                        while(enableTickAnalyzer) {
-                            try {
-                                Thread.sleep(50);
-                            } catch (InterruptedException e) {
-
+                                }
                             }
-                        }
 
-                        tickAnalyze.getSource().sendFeedback(new TranslatableText("analyzer.finished"), true);
-                    }).start();
-                } else {
-                    tickAnalyze.getSource().sendFeedback(new TranslatableText("analyzer.tasking"), true);
+                            sendFeedback(tickAnalyze, new TranslatableText("analyzer.finished"));
+                        }).start();
+                    }
                 }
-
                 return 1;
-            })).then(literal("vec").executes(defaultBackup -> {
-                ServerCommandSource source = defaultBackup.getSource();
-                ServerPlayerEntity player = source.getPlayer();
+            })).then(literal("vec").executes(vec -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_ANALYZER, getPlayer(vec), this, vec)) {
+                    ServerPlayerEntity player = getPlayer(vec);
 
-                DimensionTips dimensionTips = new DimensionTips();
+                    sendFeedback(vec, formatVecMessage(player.getPos(), player.getRotationClient(), dimensionTips.getDimension(player)));
 
-                player.sendMessage(formatVecMessage(player.getPos(), player.getRotationClient(), dimensionTips.getDimension(player)), false);
-
+                }
                 return 0;
             })));
         });

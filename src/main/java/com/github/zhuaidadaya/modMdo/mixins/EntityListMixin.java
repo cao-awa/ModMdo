@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.function.Consumer;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.enabledCancelEntitiesTIck;
 
 @Mixin(EntityList.class)
 public class EntityListMixin {
@@ -27,6 +28,10 @@ public class EntityListMixin {
      */
     @Overwrite
     public void forEach(Consumer<Entity> action) {
+        if(enabledCancelEntitiesTIck) {
+            return;
+        }
+
         if(enableTickAnalyzer) {
             try {
                 tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_start", System.nanoTime());

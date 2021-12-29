@@ -54,7 +54,7 @@ public class User {
             JSONObject token = json.getJSONObject("token");
             for(Object o : token.keySet()) {
                 JSONObject tokenContent = token.getJSONObject(o.toString());
-                this.clientToken = new ClientEncryptionToken(tokenContent.getString("token"), tokenContent.getString("address"), tokenContent.getString("login_type"));
+                this.clientToken = new ClientEncryptionToken(tokenContent.getString("token"), tokenContent.getString("address"), tokenContent.getString("login_type"), tokenContent.getString("modmdo_version"));
             }
         } catch (Exception e) {
 

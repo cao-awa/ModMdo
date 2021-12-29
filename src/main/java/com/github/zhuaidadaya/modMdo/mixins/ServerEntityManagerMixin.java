@@ -11,6 +11,21 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.tickMap;
 
 @Mixin(ServerEntityManager.class)
 public class ServerEntityManagerMixin {
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    public void tickEntitiesManagerStart(CallbackInfo ci) {
+        if(enableTickAnalyzer) {
+            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_manager_start", System.nanoTime());
+        }
+    }
+
+    @Inject(method = "tick", at = @At("RETURN"))
+    public void tickEntitiesManagerEnd(CallbackInfo ci) {
+        if(enableTickAnalyzer) {
+            tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_manager_time", System.nanoTime() - tickMap.get("tick_world" + tickMap.get("ticking_world") + "_entities_manager_start"));
+        }
+    }
+
     @Inject(method = "loadChunks", at = @At("HEAD"))
     public void loadChunksStart(CallbackInfo ci) {
         if(enableTickAnalyzer) {

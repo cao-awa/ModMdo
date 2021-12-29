@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.VERSION_ID;
 
 @Mixin(AddServerScreen.class)
 public abstract class AddServerScreenMixin extends Screen {
@@ -51,16 +52,17 @@ public abstract class AddServerScreenMixin extends Screen {
      * 在编辑服务器的页面添加token的文本栏
      * 以及连接类型的文本栏
      *
+     * @param ci
+     *         callback
+     *
      * @author zhuaidadaya
      * @author 草二号机
      * @author 草awa
-     *
-     * @param ci callback
      */
     @Inject(method = "init", at = @At("RETURN"))
     public void init(CallbackInfo ci) {
         editToken = new TextFieldWidget(textRenderer, width / 2 - 60, 30, 160, 20, new TranslatableText("oops"));
-        editToken.setMaxLength(512);
+        editToken.setMaxLength(2048);
         editToken.setText(getModMdoTokenFormat(addressField.getText(), TokenContentType.TOKEN_BY_ENCRYPTION));
         editToken.setChangedListener((address) -> {
             setToken();
@@ -86,16 +88,17 @@ public abstract class AddServerScreenMixin extends Screen {
      * @author 草awa
      */
     public void setToken() {
-        modMdoToken.addClientToken(new ClientEncryptionToken(editToken.getText(), addressField.getText(), editLoginType.getText()));
+        modMdoToken.addClientToken(new ClientEncryptionToken(editToken.getText(), addressField.getText(), editLoginType.getText(), VERSION_ID));
         updateModMdoVariables();
     }
 
     /**
      * 保存服务器信息时同时保存token
      *
-     * @author 草awa
+     * @param ci
+     *         callback
      *
-     * @param ci callback
+     * @author 草awa
      */
     @Inject(method = "addAndClose", at = @At("HEAD"))
     private void addAndClose(CallbackInfo ci) {
@@ -105,13 +108,18 @@ public abstract class AddServerScreenMixin extends Screen {
     /**
      * 渲染三个新添加的文本栏
      *
-     * @author zhuaidadaya
+     * @param matrices
+     *         matrices
+     * @param mouseX
+     *         mouseX
+     * @param mouseY
+     *         mouseY
+     * @param delta
+     *         delta
+     * @param ci
+     *         callback
      *
-     * @param matrices matrices
-     * @param mouseX mouseX
-     * @param mouseY mouseY
-     * @param delta delta
-     * @param ci callback
+     * @author zhuaidadaya
      */
     @Inject(method = "render", at = @At("RETURN"))
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {

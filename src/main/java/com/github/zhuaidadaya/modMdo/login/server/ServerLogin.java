@@ -8,7 +8,7 @@ import net.minecraft.util.Identifier;
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 public class ServerLogin {
-    public void login(Identifier channel, String data1, String data2, String data3, String data4, String data5) {
+    public void login(Identifier channel, String data1, String data2, String data3, String data4, String data5, String data6) {
         if(channel.equals(tokenChannel)) {
 
             int level = 1;
@@ -19,7 +19,7 @@ public class ServerLogin {
                 if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
                     LOGGER.info("login player: " + data1);
 
-                    loginUsers.put(data1, new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3)).toJSONObject());
+                    loginUsers.put(data1, new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)).toJSONObject());
                 }
             }
         }

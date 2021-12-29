@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.VERSION_ID;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin {
@@ -79,7 +80,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
             String address = formatAddress(connection.getAddress());
             String token = getModMdoTokenFormat(address, TokenContentType.TOKEN_BY_ENCRYPTION);
             String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
-            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(loginType).writeString(token).writeString(address)));
+            client.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(client.player.getUuid().toString()).writeString(client.player.getName().asString()).writeString(loginType).writeString(token).writeString(address).writeString(VERSION_ID)));
         }
     }
 }

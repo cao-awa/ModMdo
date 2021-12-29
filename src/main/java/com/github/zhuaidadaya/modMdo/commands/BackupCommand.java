@@ -17,29 +17,34 @@ import org.json.JSONObject;
 import java.io.File;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.commandApplyToPlayer;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class BackupCommand {
+public class BackupCommand extends SimpleCommandOperation implements ConfigurableCommand {
     public void register() {
-        initBackups();
+        init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("backup").executes(defaultBackup -> {
-                backup(null, dedicated, defaultBackup.getSource());
-
+                if(commandApplyToPlayer(MODMDO_COMMAND_BAK, getPlayer(defaultBackup), this, defaultBackup)) {
+                    backup(null, dedicated, defaultBackup.getSource());
+                }
                 return 0;
             }).then(literal("name").then(argument("asName", StringArgumentType.string()).executes(asNameBackup -> {
-                backup(asNameBackup.getInput().split(" ")[1], dedicated, asNameBackup.getSource());
-
+                if(commandApplyToPlayer(MODMDO_COMMAND_BAK, getPlayer(asNameBackup), this, asNameBackup)) {
+                    backup(asNameBackup.getInput().split(" ")[1], dedicated, asNameBackup.getSource());
+                }
                 return 1;
             }))).then(literal("stop").executes(stop -> {
-                stopBackup(stop.getSource());
-
+                if(commandApplyToPlayer(MODMDO_COMMAND_BAK, getPlayer(stop), this, stop)) {
+                    stopBackup(stop.getSource());
+                }
                 return - 1;
             })).then(literal("status").executes(status -> {
-                status.getSource().sendFeedback(bak.isSynchronizing() ? new TranslatableText("backup.running") : new TranslatableText("backup.no.task"), false);
-
+                if(commandApplyToPlayer(MODMDO_COMMAND_BAK, getPlayer(status), this, status)) {
+                    sendFeedback(status, bak.isSynchronizing() ? new TranslatableText("backup.running") : new TranslatableText("backup.no.task"));
+                }
                 return 2;
             })));
         });
@@ -51,7 +56,7 @@ public class BackupCommand {
                 source.sendFeedback(new TranslatableText("backup.stopping"), false);
                 source.sendFeedback(bak.stop(), false);
             } else {
-                source.sendFeedback(new TranslatableText("backup.no.task"),false);
+                source.sendFeedback(new TranslatableText("backup.no.task"), false);
             }
         }).start();
     }
@@ -68,14 +73,18 @@ public class BackupCommand {
             try {
                 if(! bak.isSynchronizing()) {
                     for(ServerPlayerEntity player : players.getPlayerList()) {
-                        player.sendMessage(result, false);
+                        if(commandApplyToPlayer(MODMDO_COMMAND_BAK, player, this, source)) {
+                            player.sendMessage(result, false);
+                        }
                     }
 
                     source.sendFeedback(new TranslatableText("backup.running"), false);
                     result = bak.createBackup(new Backup(name, "backup/" + levelName + "/" + Times.getTime(TimeType.AS_SECOND), sourcePath));
 
                     for(ServerPlayerEntity player : players.getPlayerList()) {
-                        player.sendMessage(result, false);
+                        if(commandApplyToPlayer(MODMDO_COMMAND_BAK, player, this, source)) {
+                            player.sendMessage(result, false);
+                        }
                     }
                 } else {
                     source.sendError(result);
@@ -90,7 +99,7 @@ public class BackupCommand {
         }).start();
     }
 
-    public void initBackups() {
+    public void init() {
         LOGGER.info("initializing backups");
         Config<Object, Object> backupsConf = config.getConfig("backups");
 
