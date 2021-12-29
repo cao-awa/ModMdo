@@ -27,7 +27,7 @@
         "PlayerManagerMixin",
         "ServerLoginNetworkHandlerMixin",
         "ServerPlayNetworkHandlerMixin",
-        "StopServerMixin",
+        "StopServerRconMixin",
         "ThreadedAnvilChunkStorageMixin"
     ],
     "injectors": {

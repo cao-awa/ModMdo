@@ -11,46 +11,51 @@ import org.json.JSONObject;
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class ModMdoUserCommand {
+public class ModMdoUserCommand extends SimpleCommandOperation implements ConfigurableCommand{
     public void register() {
-        initUserProfile();
+        init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("user").then(literal("receiveHereMessage").executes(getHereReceive -> {
-                ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
-                getHereReceive.getSource().sendFeedback(formatProfileReturnMessage("receiveHereMessage", getUserHereReceive(player.getUuid())), false);
-
+            dispatcher.register(literal("user").then(literal("hereMessage").executes(getHereReceive -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(getHereReceive), this, getHereReceive)) {
+                    ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
+                    getHereReceive.getSource().sendFeedback(formatProfileReturnMessage("receiveHereMessage", getUserHereReceive(player.getUuid())), false);
+                }
                 return 2;
             }).then(literal("receive").executes(receive -> {
-                ServerPlayerEntity player = receive.getSource().getPlayer();
-                setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "receive");
-                receive.getSource().sendFeedback(receiveHereMessage(), false);
-
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(receive), this, receive)) {
+                    ServerPlayerEntity player = receive.getSource().getPlayer();
+                    setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "receive");
+                    receive.getSource().sendFeedback(receiveHereMessage(), false);
+                }
                 return 1;
             })).then(literal("rejection").executes(rejection -> {
-                ServerPlayerEntity player = rejection.getSource().getPlayer();
-                setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "rejection");
-                rejection.getSource().sendFeedback(rejectionHereMessage(), false);
-
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(rejection), this, rejection)) {
+                    ServerPlayerEntity player = rejection.getSource().getPlayer();
+                    setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "rejection");
+                    rejection.getSource().sendFeedback(rejectionHereMessage(), false);
+                }
                 return 0;
-            }))));
-
-            dispatcher.register(literal("user").then(literal("receiveDeadMessage").executes(getHereReceive -> {
-                ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
-                getHereReceive.getSource().sendFeedback(formatProfileReturnMessage( "receiveDeadMessage", getUserDeadMessageReceive(player.getUuid())), false);
-
+            }))).then(literal("deadMessage").executes(getHereReceive -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(getHereReceive), this, getHereReceive)) {
+                    ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
+                    getHereReceive.getSource().sendFeedback(formatProfileReturnMessage("receiveDeadMessage", getUserDeadMessageReceive(player.getUuid())), false);
+                }
                 return 2;
             }).then(literal("receive").executes(receive -> {
-                ServerPlayerEntity player = receive.getSource().getPlayer();
-                setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveDeadMessage", "receive");
-                receive.getSource().sendFeedback(receiveDeadMessage(), false);
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(receive), this, receive)) {
 
+                    ServerPlayerEntity player = receive.getSource().getPlayer();
+                    setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveDeadMessage", "receive");
+                    receive.getSource().sendFeedback(receiveDeadMessage(), false);
+                }
                 return 1;
             })).then(literal("rejection").executes(rejection -> {
-                ServerPlayerEntity player = rejection.getSource().getPlayer();
-                setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveDeadMessage", "rejection");
-                rejection.getSource().sendFeedback(rejectionDeadMessage(), false);
-
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(rejection), this, rejection)) {
+                    ServerPlayerEntity player = rejection.getSource().getPlayer();
+                    setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveDeadMessage", "rejection");
+                    rejection.getSource().sendFeedback(rejectionDeadMessage(), false);
+                }
                 return 0;
             }))));
         });
@@ -77,7 +82,7 @@ public class ModMdoUserCommand {
     }
 
 
-    public void initUserProfile() {
+    public void init() {
         LOGGER.info("initializing user profiles");
 
         Config<Object, Object> projectConf = config.getConfig("user_profiles");

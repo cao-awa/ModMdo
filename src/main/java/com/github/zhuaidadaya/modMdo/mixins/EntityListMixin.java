@@ -27,6 +27,10 @@ public class EntityListMixin {
      */
     @Overwrite
     public void forEach(Consumer<Entity> action) {
+        if(enabledCancelEntitiesTIck) {
+            return;
+        }
+
         if(enableTickAnalyzer) {
             try {
                 tickMap.put("tick_world" + tickMap.get("ticking_world") + "_entities_start", System.nanoTime());

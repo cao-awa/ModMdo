@@ -9,7 +9,7 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.modMdoType;
 public class ModMdoServerInitializer implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
-        LOGGER.info("loading for ModMdo Server");
+        LOGGER.info("loading for ModMdo Server (step 2/2)");
 
         modMdoType = ModMdoType.SERVER;
 

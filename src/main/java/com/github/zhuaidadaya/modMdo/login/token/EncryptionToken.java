@@ -8,15 +8,23 @@ public class EncryptionToken {
     private String serverDefaultToken = "";
     private String serverOpsToken = "";
 
-    public EncryptionToken(String token, String address, String type) {
+    private String version = "";
+
+    public EncryptionToken(String token, String address, String type, String modMdoVersion) {
         this.token = token;
         this.address = address;
         this.type = type;
+        if(modMdoVersion != null)
+            this.version = modMdoVersion;
     }
 
     public EncryptionToken(String defaultToken, String opsToken) {
         this.serverDefaultToken = defaultToken;
         this.serverOpsToken = opsToken;
+    }
+
+    public String getVersion() {
+        return this.version;
     }
 
     public String getToken() {

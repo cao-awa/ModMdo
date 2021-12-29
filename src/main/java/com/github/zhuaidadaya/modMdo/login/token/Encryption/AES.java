@@ -8,6 +8,8 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 
 public class AES {
+    private byte[] key;
+
     public static String base64Encode(byte[] bytes) {
         return Base64.encodeBase64String(bytes);
     }
@@ -21,9 +23,14 @@ public class AES {
         return cipher.doFinal(content);
     }
 
+    public byte[] getKey() {
+        return key;
+    }
+
     public String randomGet(int size) throws Exception {
         byte[] content = new byte[size];
         byte[] key = new byte[16];
+        this.key = key;
         SecureRandom random = new SecureRandom();
         random.nextBytes(content);
         random.nextBytes(key);

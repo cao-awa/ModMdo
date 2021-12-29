@@ -11,119 +11,178 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class ModMdoConfigCommand {
+public class ModMdoConfigCommand extends SimpleCommandOperation implements SimpleCommand {
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("modmdo").requires(level -> level.hasPermissionLevel(4)).then(literal("enableHere").executes(getHereReceive -> {
-                getHereReceive.getSource().sendFeedback(formatConfigReturnMessage("here_command"), false);
-
-                return 2;
-            }).then(literal("enable").executes(receive -> {
-                enableHereCommand = true;
-                updateModMdoVariables();
-                receive.getSource().sendFeedback(formatEnableHere(), false);
-
-                return 1;
-            })).then(literal("disable").executes(rejection -> {
-                enableHereCommand = false;
-                updateModMdoVariables();
-                rejection.getSource().sendFeedback(formatDisableHere(), false);
-
-                return 0;
-            }))).then(literal("enableSecureEnchant").executes(getHereReceive -> {
-                getHereReceive.getSource().sendFeedback(formatConfigReturnMessage("secure_enchant"), false);
-
-                return 2;
-            }).then(literal("enable").executes(receive -> {
-                enableSecureEnchant = true;
-                updateModMdoVariables();
-                receive.getSource().sendFeedback(formatEnableSecureEnchant(), false);
-
-                return 1;
-            })).then(literal("disable").executes(rejection -> {
-                enableSecureEnchant = false;
-                updateModMdoVariables();
-                rejection.getSource().sendFeedback(formatDisableSecureEnchant(), false);
-
-                return 0;
-            }))).then(literal("enableEncryptionToken").executes(getHereReceive -> {
-                getHereReceive.getSource().sendFeedback(formatConfigReturnMessage("encryption_token"), false);
-
-                return 2;
-            }).then(literal("enable").executes(receive -> {
-                enableEncryptionToken = true;
-                updateModMdoVariables();
-
-                if(config.getConfig("token_by_encryption") != null) {
-                    initModMdoToken();
-                } else {
-                    try {
-                        modMdoToken = new EncryptionTokenUtil(ServerEncryptionToken.createServerEncryptionToken());
-                        LOGGER.info("spawned new encryption token, check the config file");
-                    } catch (Exception e) {
-                        enableEncryptionToken = false;
-                        LOGGER.info("failed to enable encryption token");
-                    }
+            dispatcher.register(literal("modmdo").requires(level -> level.hasPermissionLevel(4)).then(literal("here").executes(here -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(here), this, here)) {
+                    sendFeedback(here,formatConfigReturnMessage("here_command"));
                 }
-
-                receive.getSource().sendFeedback(formatEnableEncryptionToken(), false);
-
-                return 1;
-            })).then(literal("disable").executes(rejection -> {
-                enableEncryptionToken = false;
-                updateModMdoVariables();
-                rejection.getSource().sendFeedback(formatDisableEncryptionToken(), false);
-
-                return 0;
-            }))).then(literal("enableRejectReconnect").executes(getHereReceive -> {
-                getHereReceive.getSource().sendFeedback(formatConfigReturnMessage("reject_reconnect"), false);
-
                 return 2;
-            }).then(literal("enable").executes(receive -> {
-                enableRejectReconnect = true;
-                updateModMdoVariables();
-
-                receive.getSource().sendFeedback(formatEnableRejectReconnect(), false);
-
+            }).then(literal("enable").executes(enableHere -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enableHere), this, enableHere)) {
+                    enableHereCommand = true;
+                    updateModMdoVariables();
+                    sendFeedback(enableHere,formatEnableHere());
+                }
                 return 1;
-            })).then(literal("disable").executes(rejection -> {
-                enableRejectReconnect = false;
-                updateModMdoVariables();
-                rejection.getSource().sendFeedback(formatDisableRejectReconnect(), false);
-
+            })).then(literal("disable").executes(disableHere -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(disableHere), this, disableHere)) {
+                    enableHereCommand = false;
+                    updateModMdoVariables();
+                    sendFeedback(disableHere,formatDisableHere());
+                }
                 return 0;
-            }))).then(literal("enableDeadMessage").executes(getHereReceive -> {
-                getHereReceive.getSource().sendFeedback(formatConfigReturnMessage("dead_message"), false);
+            }))).then(literal("secureEnchant").executes(secureEnchant -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(secureEnchant), this, secureEnchant)) {
 
+                    sendFeedback(secureEnchant,formatConfigReturnMessage("secure_enchant"));
+                }
                 return 2;
-            }).then(literal("enable").executes(receive -> {
-                enableRejectReconnect = true;
-                updateModMdoVariables();
-
-                receive.getSource().sendFeedback(formatEnableDeadMessage(), false);
-
+            }).then(literal("enable").executes(enableSecureEnchant -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enableSecureEnchant), this, enableSecureEnchant)) {
+                    Variables.enableSecureEnchant = true;
+                    updateModMdoVariables();
+                    sendFeedback(enableSecureEnchant,formatEnableSecureEnchant());
+                }
                 return 1;
-            })).then(literal("disable").executes(rejection -> {
-                enableRejectReconnect = false;
-                updateModMdoVariables();
-                rejection.getSource().sendFeedback(formatDisabledDeadMessage(), false);
+            })).then(literal("disable").executes(disableSecureEnchant -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(disableSecureEnchant), this, disableSecureEnchant)) {
+                    enableSecureEnchant = false;
+                    updateModMdoVariables();
+                    sendFeedback(disableSecureEnchant,formatDisableSecureEnchant());
+                }
+                return 0;
+            }))).then(literal("encryptionToken").executes(encryptionToken -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(encryptionToken), this, encryptionToken)) {
 
+                    sendFeedback(encryptionToken, formatConfigReturnMessage("encryption_token"));
+                }
+                return 2;
+            }).then(literal("enable").executes(enableEncryptionToken -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enableEncryptionToken), this, enableEncryptionToken)) {
+                    Variables.enableEncryptionToken = true;
+                    updateModMdoVariables();
+
+                    if(config.getConfig("token_by_encryption") != null) {
+                        initModMdoToken();
+                    } else {
+                        try {
+                            modMdoToken = new EncryptionTokenUtil(ServerEncryptionToken.createServerEncryptionToken());
+                            LOGGER.info("spawned new encryption token, check the config file");
+                        } catch (Exception e) {
+                            Variables.enableEncryptionToken = false;
+                            LOGGER.info("failed to enable encryption token");
+                        }
+                    }
+
+                    sendFeedback(enableEncryptionToken, formatEnableEncryptionToken());
+                }
+                return 1;
+            })).then(literal("disable").executes(disableEncryptionToken -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(disableEncryptionToken), this, disableEncryptionToken)) {
+                    enableEncryptionToken = false;
+                    updateModMdoVariables();
+                    sendFeedback(disableEncryptionToken, formatDisableEncryptionToken());
+                }
+                return 0;
+            }))).then(literal("rejectReconnect").executes(rejectReconnect -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(rejectReconnect), this, rejectReconnect)) {
+                    sendFeedback(rejectReconnect, formatConfigReturnMessage("reject_reconnect"));
+                }
+                return 2;
+            }).then(literal("enable").executes(reject -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(reject), this, reject)) {
+                    enableRejectReconnect = true;
+                    updateModMdoVariables();
+
+                    sendFeedback(reject, formatEnableRejectReconnect());
+                }
+                return 1;
+            })).then(literal("disable").executes(receive -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(receive), this, receive)) {
+                    enableRejectReconnect = false;
+                    updateModMdoVariables();
+                    sendFeedback(receive, formatDisableRejectReconnect());
+                } return 0;
+            }))).then(literal("deadMessage").executes(deadMessage -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(deadMessage), this,deadMessage)) {
+                    sendFeedback(deadMessage, formatConfigReturnMessage("dead_message"));
+                }
+                return 2;
+            }).then(literal("enable").executes(enabled -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enabled), this,enabled)) {
+                    enableDeadMessage = true;
+                    updateModMdoVariables();
+
+                    sendFeedback(enabled, formatEnableDeadMessage());
+                }
+                return 1;
+            })).then(literal("disable").executes(disable -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(disable), this, disable)) {
+
+                    enableDeadMessage = false;
+                    updateModMdoVariables();
+                    sendFeedback(disable, formatDisabledDeadMessage());
+                }
                 return 0;
             }))).then(literal("itemDespawnTicks").executes(getDespawnTicks -> {
-                getDespawnTicks.getSource().sendFeedback(formatItemDespawnTicks(), false);
-
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(getDespawnTicks), this, getDespawnTicks)) {
+                    sendFeedback(getDespawnTicks, formatItemDespawnTicks());
+                }
                 return 2;
             }).then(literal("become").then(argument("ticks", IntegerArgumentType.integer()).executes(setTicks -> {
-                itemDespawnAge = Integer.parseInt(setTicks.getInput().split(" ")[3]);
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(setTicks), this, setTicks)) {
+                    itemDespawnAge = Integer.parseInt(setTicks.getInput().split(" ")[3]);
 
-                setTicks.getSource().sendFeedback(formatItemDespawnTicks(), false);
-
+                    sendFeedbackAndInform(setTicks, formatItemDespawnTicks());
+                }
                 return 1;
             }))).then(literal("original").executes(setTicksToDefault -> {
-                itemDespawnAge = 6000;
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(setTicksToDefault), this, setTicksToDefault)) {
+                    itemDespawnAge = 6000;
 
-                setTicksToDefault.getSource().sendFeedback(formatItemDespawnTicks(), false);
+                    sendFeedbackAndInform(setTicksToDefault, formatItemDespawnTicks());
+                }
+                return 2;
+            }))).then(literal("tickingEntities").executes(getTickingEntities -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(getTickingEntities), this, getTickingEntities)) {
+                    sendFeedbackAndInform(getTickingEntities, formatTickingEntitiesTick());
+                }
+                return 0;
+            }).then(literal("enable").executes(enableTickingEntities -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enableTickingEntities), this, enableTickingEntities)) {
+                    enabledCancelEntitiesTIck = false;
 
+                    sendFeedbackAndInform(enableTickingEntities, formatTickingEntitiesTick());
+                }
+                return 1;
+            })).then(literal("disable").executes(disableTickingEntities -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(disableTickingEntities), this, disableTickingEntities)) {
+                    enabledCancelEntitiesTIck = true;
+
+                    sendFeedbackAndInform(disableTickingEntities, formatTickingEntitiesTick());
+                }
+                return 2;
+            }))).then(literal("tickingGame").executes(getTickingGame -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(getTickingGame), this, getTickingGame)) {
+                    sendFeedbackAndInform(getTickingGame, formatTickingGame());
+                }
+                return 0;
+            }).then(literal("enable").executes(enableTickingGame -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enableTickingGame), this, enableTickingGame)) {
+                    enabledCancelTIck = false;
+
+                    sendFeedbackAndInform(enableTickingGame, formatTickingGame());
+                }
+                return 1;
+            })).then(literal("disable").executes(disableTickingGame -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(disableTickingGame), this, disableTickingGame)) {
+                    enabledCancelTIck = true;
+
+                    cancelTickStart = System.currentTimeMillis();
+                    sendFeedbackAndInform(disableTickingGame, formatTickingGame());
+                }
                 return 2;
             }))));
         });
@@ -131,6 +190,14 @@ public class ModMdoConfigCommand {
 
     public TranslatableText formatConfigReturnMessage(String config) {
         return new TranslatableText(config + "." + Variables.config.getConfigValue(config) + ".rule.format");
+    }
+
+    public TranslatableText formatTickingGame() {
+        return new TranslatableText(enabledCancelTIck ? "ticking.server.disable.rule.format" : "ticking.server.enable.rule.format");
+    }
+
+    public TranslatableText formatTickingEntitiesTick() {
+        return new TranslatableText(enabledCancelEntitiesTIck ? "ticking.entities.disable.rule.format" : "ticking.entities.enable.rule.format");
     }
 
     public TranslatableText formatItemDespawnTicks() {

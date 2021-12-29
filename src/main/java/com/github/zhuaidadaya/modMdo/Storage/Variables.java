@@ -3,6 +3,8 @@ package com.github.zhuaidadaya.modMdo.storage;
 import com.github.zhuaidadaya.MCH.utils.config.ConfigUtil;
 import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
+import com.github.zhuaidadaya.modMdo.commands.DimensionTips;
+import com.github.zhuaidadaya.modMdo.commands.SimpleCommandOperation;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.login.server.ServerLogin;
 import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
@@ -13,8 +15,10 @@ import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
+import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +33,7 @@ import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
+    public static String VERSION_ID = "1.0.7";
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -38,6 +43,9 @@ public class Variables {
     public static boolean enableRejectReconnect = true;
     public static boolean enableEncryptionToken = false;
     public static boolean enableTickAnalyzer = false;
+    public static boolean enabledCancelEntitiesTIck = false;
+    public static boolean enabledCancelTIck = false;
+    public static long cancelTickStart = - 1;
     public static int tokenGenerateSize = 128;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
     public static Identifier tokenChannel = new Identifier("modmdo:token");
@@ -54,6 +62,20 @@ public class Variables {
     public static TextFieldWidget editToken;
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
+    public static DimensionTips dimensionTips = new DimensionTips();
+    public static LinkedHashMap<String, Integer> modMdoVersionToIdMap = new LinkedHashMap<>();
+    public static LinkedHashMap<Integer, String> modMdoIdToVersionMap = new LinkedHashMap<>();
+    public static LinkedHashMap<String, Integer> modMdoCommandVersionMap = new LinkedHashMap<>();
+
+    public static String MODMDO_COMMAND_ROOT = "/";
+    public static String MODMDO_COMMAND_CONF = "modmdo/";
+    public static String MODMDO_COMMAND_TICK = "modmdo/tick/";
+    public static String MODMDO_COMMAND_HERE = "here/";
+    public static String MODMDO_COMMAND_CAVA = "cava/";
+    public static String MODMDO_COMMAND_BAK = "bak/";
+    public static String MODMDO_COMMAND_USR = "user/";
+    public static String MODMDO_COMMAND_ANALYZER = "analyzer/";
+    public static String MODMDO_COMMAND_TOKEN = "token/";
 
     public static int itemDespawnAge = 6000;
 
@@ -79,11 +101,15 @@ public class Variables {
     }
 
     /**
+     * @param address
+     *         通过指定IP查询
+     * @param contentType
+     *         查询类型, 可选查询token和登入方式
+     *
+     * @return 返回查询结果(或默认值)
+     *
      * @author 草awa
      * @author 草二号机
-     * @param address 通过指定IP查询
-     * @param contentType 查询类型, 可选查询token和登入方式
-     * @return 返回查询结果(或默认值)
      */
     public static String getModMdoTokenFormat(String address, TokenContentType contentType) {
         String tokenString;
@@ -113,6 +139,38 @@ public class Variables {
         return "";
     }
 
+    public static String getPlayerModMdoVersion(ServerPlayerEntity player) {
+        return loginUsers.getUser(player).getClientToken().getVersion();
+    }
+
+    public static boolean equalsModMdoVersion(ServerPlayerEntity player) {
+        return getPlayerModMdoVersion(player).equals(VERSION_ID);
+    }
+
+    public static boolean commandApplyToPlayer(String commandBelong, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
+        if(getCommandCanUse(commandBelong, player))
+            return true;
+
+        command.sendError(source, command.formatModMdoVersionRequire(commandBelong));
+        return false;
+    }
+
+    public static boolean commandApplyToPlayer(String commandBelong, ServerPlayerEntity player, SimpleCommandOperation command, ServerCommandSource source) {
+        if(getCommandCanUse(commandBelong, player))
+            return true;
+
+        source.sendError(command.formatModMdoVersionRequire(commandBelong));
+        return false;
+    }
+
+    public static boolean getCommandCanUse(String commandBelong, ServerPlayerEntity player) {
+        return modMdoCommandVersionMap.get(commandBelong) <= (modMdoVersionToIdMap.get(getPlayerModMdoVersion(player)) != null ? modMdoVersionToIdMap.get(getPlayerModMdoVersion(player)) : - 1);
+    }
+
+    public static String getCommandRequestVersion(String commandBelong) {
+        return modMdoIdToVersionMap.get(modMdoCommandVersionMap.get(commandBelong));
+    }
+
     public static void initModMdoToken() {
         try {
             JSONObject token = new JSONObject(config.getConfigValue("token_by_encryption"));
@@ -123,7 +181,7 @@ public class Variables {
                 JSONObject clientTokens = token.getJSONObject("client");
                 for(Object o : clientTokens.keySet()) {
                     JSONObject clientToken = clientTokens.getJSONObject(o.toString());
-                    modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type")));
+                    modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type"), ""));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -250,7 +308,7 @@ public class Variables {
         return enableSecureEnchant ? "enable" : "disable";
     }
 
-    public static String  encryptionTokenStatus() {
+    public static String encryptionTokenStatus() {
         return enableEncryptionToken ? "enable" : "disable";
     }
 

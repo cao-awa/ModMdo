@@ -7,8 +7,14 @@ import com.github.zhuaidadaya.modMdo.listeners.ServerStartListener;
 import com.github.zhuaidadaya.modMdo.listeners.ServerTickListener;
 import com.github.zhuaidadaya.modMdo.login.token.EncryptionTokenUtil;
 import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
+import com.github.zhuaidadaya.modMdo.reads.FileReads;
+import com.github.zhuaidadaya.modMdo.resourceLoader.Resources;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
 import net.fabricmc.api.ModInitializer;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
@@ -16,6 +22,7 @@ public class ModMdoStdInitializer implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        LOGGER.info("loading ModMdo " + VERSION_ID + " (step 1/2)");
         LOGGER.info("ModMdo Std Initiator running");
         LOGGER.info("loading for ModMdo Std init");
 
@@ -30,6 +37,8 @@ public class ModMdoStdInitializer implements ModInitializer {
         initModMdoVariables();
         updateModMdoVariables();
 
+        parseMapFormat();
+
         loginUsers = new UserUtil();
 
         new HereCommand().register();
@@ -42,6 +51,20 @@ public class ModMdoStdInitializer implements ModInitializer {
         new TokenCommand().register();
         new BackupCommand().register();
         new AnalyzerCommand().register();
+    }
+
+    public void parseMapFormat() {
+        JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/format/versions_map.json", getClass())))));
+        JSONObject commandMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/format/command_map.json", getClass())))));
+
+        for(String s : versionMap.keySet())
+            modMdoVersionToIdMap.put(s, versionMap.getInt(s));
+
+        for(String s : versionMap.keySet())
+            modMdoIdToVersionMap.put(versionMap.getInt(s), s);
+
+        for(String s : commandMap.keySet())
+            modMdoCommandVersionMap.put(s, commandMap.getInt(s));
     }
 
     public void initModMdoVariables() {

@@ -14,7 +14,7 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.tickMap;
 @Mixin(ServerWorld.class)
 public class ServerWorldMixin {
 
-    @Inject(method = "tick",at = @At("HEAD"))
+    @Inject(method = "tick", at = @At("HEAD"))
     public void tickWorldStart(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if(enableTickAnalyzer) {
             try {
@@ -25,7 +25,7 @@ public class ServerWorldMixin {
         }
     }
 
-    @Inject(method = "tick",at = @At("RETURN"))
+    @Inject(method = "tick", at = @At("RETURN"))
     public void tickWorldEnd(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if(enableTickAnalyzer) {
             try {

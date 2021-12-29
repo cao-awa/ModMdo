@@ -1,7 +1,6 @@
 package com.github.zhuaidadaya.modMdo.listeners;
 
-import com.github.zhuaidadaya.modMdo.commands.DimensionTips;
-import com.github.zhuaidadaya.modMdo.commands.XYZ;
+import com.github.zhuaidadaya.modMdo.simple.vec.XYZ;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -52,11 +51,11 @@ public class ServerTickListener {
     }
 
     /**
-     * 当玩家不存在时, 清除登入信息
-     * (多个位置都有尝试清除, 保证一定能够移除登入状态)
-     * <p>
-     * 或者服务器Token改变时, 也清除登入信息
-     * (当token不符合时移除玩家, 换用新token即可)
+     * 当玩家不存在时, 清除登入信息<br>
+     * (多个位置都有尝试清除, 保证一定能够移除登入状态)<br>
+     * <br>
+     * 或者服务器Token改变时, 也清除登入信息<br>
+     * (当token不符合时移除玩家, 换用新token即可)<br>
      * 这种情况一般在手动生成新的token时使用, 否则一般不会
      *
      * @param player
@@ -160,9 +159,8 @@ public class ServerTickListener {
         try {
             if(isUserDeadMessageReceive(player.getUuid()) & enableDeadMessage) {
                 if(player.deathTime == 1) {
-                    DimensionTips dimensionTips = new DimensionTips();
                     XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
-                    player.sendMessage(formatDeathMessage(player, dimensionTips, xyz), false);
+                    player.sendMessage(formatDeathMessage(player, xyz), false);
                 }
             }
         } catch (Exception e) {
@@ -175,8 +173,6 @@ public class ServerTickListener {
      *
      * @param player
      *         玩家
-     * @param dimensionTips
-     *         用于格式化的DimensionTips
      * @param xyz
      *         等同于vec3d
      *
@@ -184,7 +180,7 @@ public class ServerTickListener {
      *
      * @author 草二号机
      */
-    public TranslatableText formatDeathMessage(ServerPlayerEntity player, DimensionTips dimensionTips, XYZ xyz) {
+    public TranslatableText formatDeathMessage(ServerPlayerEntity player, XYZ xyz) {
         String dimension = dimensionTips.getDimension(player);
         return new TranslatableText("dead.deadIn", dimensionTips.getDimensionColor(dimension), dimensionTips.getDimensionName(dimension), xyz.getIntegerXYZ());
     }
