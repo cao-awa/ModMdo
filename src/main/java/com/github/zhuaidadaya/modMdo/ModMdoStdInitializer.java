@@ -32,7 +32,7 @@ public class ModMdoStdInitializer implements ModInitializer {
                 so this file maybe get large and large
                 but usually, it will smaller than 1MB
                                 
-                """);
+                """).setSplitRange(50000).setEncryption(true).setEncryptionHead(true);
 
         initModMdoVariables();
         updateModMdoVariables();
@@ -93,6 +93,8 @@ public class ModMdoStdInitializer implements ModInitializer {
                     LOGGER.info("failed to enable encryption token");
                 }
             }
+        } else {
+            modMdoToken = new EncryptionTokenUtil();
         }
     }
 }

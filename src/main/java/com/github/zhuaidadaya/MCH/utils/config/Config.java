@@ -71,7 +71,7 @@ public class Config<K, V> {
                     for(Object o : configValues) {
                         if(index == 1) {
                             cacheObject2 = o;
-                            values.put(cacheObject.toString(), cacheObject2.toString());
+                            values.put(cacheObject.toString(), cacheObject2);
                             index = 0;
                         } else {
                             cacheObject = o;
@@ -82,7 +82,7 @@ public class Config<K, V> {
                     if(index % 2 != 0) {
                         json.put(getKey(), new JSONObject().put("listTag", false).put("value", configValues));
                     } else {
-                        values.put(cacheObject.toString(), cacheObject2.toString());
+                        values.put(cacheObject.toString(), cacheObject2);
                         json.put(getKey(), new JSONObject().put("listTag", false).put("value", values));
                     }
                 } else {
