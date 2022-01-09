@@ -27,8 +27,8 @@ public class MinecraftServerMixin {
     @Shadow
     @Final
     private Map<RegistryKey<World>, ServerWorld> worlds;
-
-    @Shadow private float tickTime;
+    @Shadow
+    private float tickTime;
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tickStart(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {

@@ -1,5 +1,6 @@
 {
-    "item.despawn.ticks.rule.format": "掉落物消失时间现在为%s游戏刻",
+    "item.despawn.ticks.disable.rule.format": "掉落物将不会再自然消失",
+    "item.despawn.ticks.rule.format": "掉落物自然消失时间现在为%s游戏刻",
     "analyzer.tasking": "§c有一个正在进行中的分析, 请等待完成",
     "analyzer.finished": "§d游戏刻分析已完成",
     "analyzer.started": "§e分析进行中",

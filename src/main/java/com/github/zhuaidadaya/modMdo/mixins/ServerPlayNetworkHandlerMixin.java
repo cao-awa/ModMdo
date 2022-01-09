@@ -100,8 +100,15 @@ public class ServerPlayNetworkHandlerMixin {
 
         }
 
+        System.out.println(data1);
+        System.out.println(data2);
+        System.out.println(data3);
+        System.out.println(data4);
+        System.out.println(data5);
+        System.out.println(data6);
+
         if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
-            serverLogin.login(channel, data1, data2, data3, data4, data5,data6);
+            serverLogin.login(channel, data1, data2, data3, data4, data5, data6);
         }
 
         ci.cancel();

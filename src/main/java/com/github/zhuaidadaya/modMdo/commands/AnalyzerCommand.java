@@ -16,28 +16,32 @@ public class AnalyzerCommand extends SimpleCommandOperation implements SimpleCom
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("analyzer").then(literal("tick").executes(tickAnalyze -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_ANALYZER, getPlayer(tickAnalyze), this, tickAnalyze)) {
-                    if(shortAnalyze & ! enableTickAnalyzer) {
-                        new Thread(() -> {
-                            analyzedTick = 0;
+                try {
+                    if(commandApplyToPlayer(MODMDO_COMMAND_ANALYZER, getPlayer(tickAnalyze), this, tickAnalyze)) {
+                        if(shortAnalyze & ! enableTickAnalyzer) {
+                            new Thread(() -> {
+                                analyzedTick = 0;
 
-                            tickAnalyzerFile = "logs/tick_analyzer/" + Times.getTime(TimeType.ALL) + ".log";
-                            sendFeedbackAndInform(tickAnalyze, new TranslatableText("analyzer.result", tickAnalyzerFile));
-                            sendFeedbackAndInform(tickAnalyze, new TranslatableText("analyzer.started"));
+                                tickAnalyzerFile = "logs/tick_analyzer/" + Times.getTime(TimeType.ALL) + ".log";
+                                sendFeedbackAndInform(tickAnalyze, new TranslatableText("analyzer.result", tickAnalyzerFile));
+                                sendFeedbackAndInform(tickAnalyze, new TranslatableText("analyzer.started"));
 
-                            enableTickAnalyzer = true;
+                                enableTickAnalyzer = true;
 
-                            while(enableTickAnalyzer) {
-                                try {
-                                    Thread.sleep(50);
-                                } catch (InterruptedException e) {
+                                while(enableTickAnalyzer) {
+                                    try {
+                                        Thread.sleep(50);
+                                    } catch (InterruptedException e) {
 
+                                    }
                                 }
-                            }
 
-                            sendFeedback(tickAnalyze, new TranslatableText("analyzer.finished"));
-                        }).start();
+                                sendFeedback(tickAnalyze, new TranslatableText("analyzer.finished"));
+                            }).start();
+                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 return 1;
             })).then(literal("vec").executes(vec -> {

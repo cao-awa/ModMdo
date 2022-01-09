@@ -1,13 +1,18 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
+import com.github.zhuaidadaya.modMdo.projects.Project;
+
+import java.util.Collection;
+
+import static com.github.zhuaidadaya.modMdo.storage.Variables.getApply;
 import static com.github.zhuaidadaya.modMdo.storage.Variables.projects;
 
 public class ProjectArgument {
-    public int getProjectId(String name) {
+    public String getProjectId(String name) {
         try {
             return projects.getID(name);
         } catch (Exception e) {
-            return -1;
+            return "p-n";
         }
     }
 
@@ -24,10 +29,11 @@ public class ProjectArgument {
     }
 
     public String[] getProjectsName() {
+        String apply = getApply();
         if(projects != null) {
-            System.out.println(projects.toJSONObject());
-
-            return projects.toJSONObject().keySet().toArray(new String[projects.size()]);
+            Collection<Project> projectCollection = projects.getProjects();
+            projectCollection.removeIf(project -> ! project.getApply().equals(apply));
+            return projects.getForSpecially(projectCollection).getProjectsNames();
         } else {
             return new String[]{"example"};
         }

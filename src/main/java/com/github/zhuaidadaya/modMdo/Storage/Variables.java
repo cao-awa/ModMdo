@@ -58,7 +58,7 @@ public class Variables {
     public static MinecraftServer server;
     public static BackupUtil bak;
     public static ModMdoType modMdoType = ModMdoType.NONE;
-    public static EncryptionTokenUtil modMdoToken = null;
+    public static EncryptionTokenUtil modMdoToken;
     public static TextFieldWidget editToken;
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;

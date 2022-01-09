@@ -53,7 +53,7 @@ public class UserUtil {
 
     public User getUser(ServerPlayerEntity player) {
         if(users.get(player.getUuid().toString()) == null)
-            put(player.getUuid(), new User(player.getName().asString(), player.getUuid()).toJSONObject());
+            put(player.getUuid().toString(), new User(player.getName().asString(), player.getUuid()).toJSONObject());
         return new User(users.get(player.getUuid().toString()));
     }
 

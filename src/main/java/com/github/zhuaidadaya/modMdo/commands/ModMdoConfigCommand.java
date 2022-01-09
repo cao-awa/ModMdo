@@ -131,7 +131,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     sendFeedback(getDespawnTicks, formatItemDespawnTicks());
                 }
                 return 2;
-            }).then(literal("become").then(argument("ticks", IntegerArgumentType.integer()).executes(setTicks -> {
+            }).then(literal("become").then(argument("ticks", IntegerArgumentType.integer(-1)).executes(setTicks -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(setTicks), this, setTicks)) {
                     itemDespawnAge = Integer.parseInt(setTicks.getInput().split(" ")[3]);
 
@@ -201,7 +201,11 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     }
 
     public TranslatableText formatItemDespawnTicks() {
-        return new TranslatableText("item.despawn.ticks.rule.format", itemDespawnAge);
+        if(itemDespawnAge > -1) {
+            return new TranslatableText("item.despawn.ticks.rule.format", itemDespawnAge);
+        } else {
+            return new TranslatableText("item.despawn.ticks.disable.rule.format", itemDespawnAge);
+        }
     }
 
     public TranslatableText formatEnableHere() {
