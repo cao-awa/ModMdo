@@ -11,6 +11,7 @@ import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
 import com.github.zhuaidadaya.modMdo.login.token.EncryptionTokenUtil;
 import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
+import com.github.zhuaidadaya.modMdo.mixins.MinecraftServerSession;
 import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
@@ -20,6 +21,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +36,7 @@ import java.util.UUID;
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static String VERSION_ID = "1.0.7";
+    public static int MODMDO_VERSION = 1;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -58,7 +61,7 @@ public class Variables {
     public static MinecraftServer server;
     public static BackupUtil bak;
     public static ModMdoType modMdoType = ModMdoType.NONE;
-    public static EncryptionTokenUtil modMdoToken;
+    public static EncryptionTokenUtil modMdoToken = null;
     public static TextFieldWidget editToken;
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
@@ -89,6 +92,27 @@ public class Variables {
     public static String tickStartTime;
     public static LinkedHashMap<String, Long> tickMap = new LinkedHashMap<>();
     public static LinkedHashMap<String, LinkedHashMap<String, Integer>> tickEntitiesMap = new LinkedHashMap<>();
+
+    public static void sendMessageToPlayer(ServerPlayerEntity player, Text message, boolean actionBar) {
+        player.sendMessage(message, actionBar);
+    }
+
+    public static String getApply(MinecraftServer server) {
+        return ((MinecraftServerSession) server).getSession().getDirectoryName() + "/";
+    }
+
+    public static String getApply(SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
+        return getApply(command.getServer(source));
+    }
+
+    public static String getApply() {
+        return getApply(server);
+    }
+
+    public static void sendMessageToAllPlayer(Text message, boolean actionBar) {
+        for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
+            sendMessageToPlayer(player, message, actionBar);
+    }
 
     public static String formatAddress(SocketAddress socketAddress) {
         String address = socketAddress.toString();
@@ -139,12 +163,16 @@ public class Variables {
         return "";
     }
 
-    public static String getPlayerModMdoVersion(ServerPlayerEntity player) {
-        return loginUsers.getUser(player).getClientToken().getVersion();
+    public static int getPlayerModMdoVersion(ServerPlayerEntity player) {
+        try {
+            return Integer.parseInt(loginUsers.getUser(player).getClientToken().getVersion());
+        }catch (Exception e) {
+            return -1;
+        }
     }
 
     public static boolean equalsModMdoVersion(ServerPlayerEntity player) {
-        return getPlayerModMdoVersion(player).equals(VERSION_ID);
+        return getPlayerModMdoVersion(player) == MODMDO_VERSION;
     }
 
     public static boolean commandApplyToPlayer(String commandBelong, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
@@ -164,7 +192,7 @@ public class Variables {
     }
 
     public static boolean getCommandCanUse(String commandBelong, ServerPlayerEntity player) {
-        return modMdoCommandVersionMap.get(commandBelong) <= (modMdoVersionToIdMap.get(getPlayerModMdoVersion(player)) != null ? modMdoVersionToIdMap.get(getPlayerModMdoVersion(player)) : - 1);
+        return modMdoCommandVersionMap.get(commandBelong) <= getPlayerModMdoVersion(player);
     }
 
     public static String getCommandRequestVersion(String commandBelong) {
