@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modMdo.commands;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -28,5 +29,9 @@ public class SimpleCommandOperation {
 
     public ServerPlayerEntity getPlayer(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
         return source.getSource().getPlayer();
+    }
+
+    public MinecraftServer getServer(CommandContext<ServerCommandSource> source) {
+        return source.getSource().getServer();
     }
 }

@@ -54,14 +54,7 @@ public class ModMdoStdInitializer implements ModInitializer {
     }
 
     public void parseMapFormat() {
-        JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/format/versions_map.json", getClass())))));
         JSONObject commandMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/format/command_map.json", getClass())))));
-
-        for(String s : versionMap.keySet())
-            modMdoVersionToIdMap.put(s, versionMap.getInt(s));
-
-        for(String s : versionMap.keySet())
-            modMdoIdToVersionMap.put(versionMap.getInt(s), s);
 
         for(String s : commandMap.keySet())
             modMdoCommandVersionMap.put(s, commandMap.getInt(s));
