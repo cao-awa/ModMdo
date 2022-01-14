@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.MCH.utils.config;
+package com.github.zhuaidadaya.utils.config;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.MCH.utils.config;
+package com.github.zhuaidadaya.utils.config;
 
 /**
  * <p>As Default Config</p>
