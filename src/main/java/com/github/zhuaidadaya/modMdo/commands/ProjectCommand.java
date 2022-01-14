@@ -1,8 +1,8 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.MCH.utils.config.Config;
 import com.github.zhuaidadaya.modMdo.projects.Project;
 import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
+import com.github.zhuaidadaya.utils.config.Config;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -66,9 +66,9 @@ public class ProjectCommand extends SimpleCommandOperation implements Configurab
 
     public void init() {
         LOGGER.info("initializing projects");
-        Config<Object, Object> projectConf = config.getConfig("projects");
+        Object projectConf = config.getConfig("projects");
         if(projectConf != null) {
-            projects = new ProjectUtil(new JSONObject(projectConf.getValue()));
+            projects = new ProjectUtil(new JSONObject(projectConf.toString()));
         } else {
             projects = new ProjectUtil();
             config.set("projects", new JSONObject());

@@ -2,10 +2,10 @@ package com.github.zhuaidadaya.modMdo.commands;
 
 import com.github.zhuaidadaya.MCH.times.TimeType;
 import com.github.zhuaidadaya.MCH.times.Times;
-import com.github.zhuaidadaya.MCH.utils.config.Config;
 import com.github.zhuaidadaya.modMdo.bak.Backup;
 import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.mixins.MinecraftServerSession;
+import com.github.zhuaidadaya.utils.config.Config;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.PlayerManager;
@@ -100,10 +100,10 @@ public class BackupCommand extends SimpleCommandOperation implements Configurabl
 
     public void init() {
         LOGGER.info("initializing backups");
-        Config<Object, Object> backupsConf = config.getConfig("backups");
+        Object backupsConf = config.getConfig("backups");
 
         if(backupsConf != null) {
-            JSONObject backups = new JSONObject(backupsConf.getValue());
+            JSONObject backups = new JSONObject(backupsConf.toString());
             JSONObject backupsCopy = new JSONObject(backups.toString());
 
             try {

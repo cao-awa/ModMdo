@@ -1,6 +1,5 @@
 package com.github.zhuaidadaya.modMdo.storage;
 
-import com.github.zhuaidadaya.MCH.utils.config.ConfigUtil;
 import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.commands.DimensionTips;
@@ -16,7 +15,10 @@ import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
+import com.github.zhuaidadaya.utils.config.ObjectConfigUtil;
 import com.mojang.brigadier.context.CommandContext;
+import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -54,7 +56,7 @@ public class Variables {
     public static Identifier tokenChannel = new Identifier("modmdo:token");
     public static UserUtil loginUsers;
     public static UserUtil users;
-    public static ConfigUtil config;
+    public static ObjectConfigUtil config;
     public static ProjectUtil projects;
     public static CavaUtil cavas;
     public static String motd = "";
@@ -66,9 +68,9 @@ public class Variables {
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
     public static DimensionTips dimensionTips = new DimensionTips();
-    public static LinkedHashMap<String, Integer> modMdoVersionToIdMap = new LinkedHashMap<>();
-    public static LinkedHashMap<Integer, String> modMdoIdToVersionMap = new LinkedHashMap<>();
-    public static LinkedHashMap<String, Integer> modMdoCommandVersionMap = new LinkedHashMap<>();
+    public static Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
+    public static Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
+    public static Object2IntRBTreeMap<String> modMdoCommandVersionMap = new Object2IntRBTreeMap<>();
 
     public static String MODMDO_COMMAND_ROOT = "/";
     public static String MODMDO_COMMAND_CONF = "modmdo/";
@@ -192,6 +194,7 @@ public class Variables {
     }
 
     public static boolean getCommandCanUse(String commandBelong, ServerPlayerEntity player) {
+        System.out.println(getPlayerModMdoVersion(player));
         return modMdoCommandVersionMap.get(commandBelong) <= getPlayerModMdoVersion(player);
     }
 
@@ -201,7 +204,7 @@ public class Variables {
 
     public static void initModMdoToken() {
         try {
-            JSONObject token = new JSONObject(config.getConfigValue("token_by_encryption"));
+            JSONObject token = new JSONObject(config.getConfigString("token_by_encryption"));
 
             modMdoToken = new EncryptionTokenUtil();
 
@@ -278,7 +281,7 @@ public class Variables {
 
     public static Language getUserLanguage(UUID userUUID) {
         try {
-            return getLanguage(Language.getLanguageForName(users.getUserConfig(userUUID, "language").toString()));
+            return getLanguage(Language.getLanguageForName(users.getUserConfig(userUUID.toString(), "language").toString()));
         } catch (Exception e) {
             return language;
         }
@@ -290,7 +293,7 @@ public class Variables {
 
     public static boolean isUserHereReceive(UUID userUUID) {
         try {
-            return users.getUserConfig(userUUID, "receiveHereMessage").toString().equals("receive");
+            return users.getUserConfig(userUUID.toString(), "receiveHereMessage").toString().equals("receive");
         } catch (Exception e) {
             return enableHereCommand;
         }
@@ -298,7 +301,7 @@ public class Variables {
 
     public static String getUserHereReceive(UUID userUUID) {
         try {
-            return users.getUserConfig(userUUID, "receiveHereMessage").toString();
+            return users.getUserConfig(userUUID.toString(), "receiveHereMessage").toString();
         } catch (Exception e) {
             return enableHereCommand ? "receive" : "rejected";
         }
@@ -306,7 +309,7 @@ public class Variables {
 
     public static boolean isUserDeadMessageReceive(UUID userUUID) {
         try {
-            return users.getUserConfig(userUUID, "receiveDeadMessage").toString().equals("receive");
+            return users.getUserConfig(userUUID.toString(), "receiveDeadMessage").toString().equals("receive");
         } catch (Exception e) {
             return enableDeadMessage;
         }
@@ -314,7 +317,7 @@ public class Variables {
 
     public static String getUserDeadMessageReceive(UUID userUUID) {
         try {
-            return users.getUserConfig(userUUID, "receiveDeadMessage").toString();
+            return users.getUserConfig(userUUID.toString(), "receiveDeadMessage").toString();
         } catch (Exception e) {
             return enableDeadMessage ? "receive" : "rejected";
         }

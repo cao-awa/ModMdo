@@ -1,20 +1,15 @@
 package com.github.zhuaidadaya.modMdo;
 
-import com.github.zhuaidadaya.MCH.utils.config.ConfigUtil;
 import com.github.zhuaidadaya.modMdo.commands.*;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.listeners.ServerStartListener;
 import com.github.zhuaidadaya.modMdo.listeners.ServerTickListener;
 import com.github.zhuaidadaya.modMdo.login.token.EncryptionTokenUtil;
 import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
-import com.github.zhuaidadaya.modMdo.reads.FileReads;
-import com.github.zhuaidadaya.modMdo.resourceLoader.Resources;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
+import com.github.zhuaidadaya.utils.config.EncryptionType;
+import com.github.zhuaidadaya.utils.config.ObjectConfigUtil;
 import net.fabricmc.api.ModInitializer;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
@@ -26,18 +21,16 @@ public class ModMdoStdInitializer implements ModInitializer {
         LOGGER.info("ModMdo Std Initiator running");
         LOGGER.info("loading for ModMdo Std init");
 
-        config = new ConfigUtil("config/", "ModMdo.mhf", entrust).setNote("""
+        config = new ObjectConfigUtil(entrust,"config/", "ModMdo.mhf").setNote("""
                 this file is database file of "ModMdo"
                 not configs only
                 so this file maybe get large and large
                 but usually, it will smaller than 1MB
                                 
-                """).setSplitRange(50000).setEncryption(true).setEncryptionHead(true);
+                """).setSplitRange(50000).setEncryption(false).setEncryptionHead(false).setEncryptionType(EncryptionType.COMPOSITE_SEQUENCE);
 
         initModMdoVariables();
         updateModMdoVariables();
-
-        parseMapFormat();
 
         loginUsers = new UserUtil();
 
@@ -53,26 +46,19 @@ public class ModMdoStdInitializer implements ModInitializer {
         new AnalyzerCommand().register();
     }
 
-    public void parseMapFormat() {
-        JSONObject commandMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/format/command_map.json", getClass())))));
-
-        for(String s : commandMap.keySet())
-            modMdoCommandVersionMap.put(s, commandMap.getInt(s));
-    }
-
     public void initModMdoVariables() {
         if(config.getConfig("default_language") != null)
-            language = Language.getLanguageForName(config.getConfigValue("default_language"));
+            language = Language.getLanguageForName(config.getConfigString("default_language"));
         if(config.getConfig("here_command") != null)
-            enableHereCommand = config.getConfigValue("here_command").equals("enable");
+            enableHereCommand = config.getConfigString("here_command").equals("enable");
         if(config.getConfig("dead_message") != null)
-            enableDeadMessage = config.getConfigValue("dead_message").equals("enable");
+            enableDeadMessage = config.getConfigString("dead_message").equals("enable");
         if(config.getConfig("cava") != null)
-            enableCava = config.getConfigValue("cava").equals("enable");
+            enableCava = config.getConfigString("cava").equals("enable");
         if(config.getConfig("secure_enchant") != null)
-            enableSecureEnchant = config.getConfigValue("secure_enchant").equals("enable");
+            enableSecureEnchant = config.getConfigString("secure_enchant").equals("enable");
         if(config.getConfig("encryption_token") != null)
-            enableEncryptionToken = config.getConfigValue("encryption_token").equals("enable");
+            enableEncryptionToken = config.getConfigString("encryption_token").equals("enable");
 
         if(enableEncryptionToken) {
             if(config.getConfig("token_by_encryption") != null) {

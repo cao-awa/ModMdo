@@ -189,7 +189,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     }
 
     public TranslatableText formatConfigReturnMessage(String config) {
-        return new TranslatableText(config + "." + Variables.config.getConfigValue(config) + ".rule.format");
+        return new TranslatableText(config + "." + Variables.config.getConfigString(config) + ".rule.format");
     }
 
     public TranslatableText formatTickingGame() {
