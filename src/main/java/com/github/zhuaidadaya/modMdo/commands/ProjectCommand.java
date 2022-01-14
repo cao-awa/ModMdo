@@ -1,6 +1,6 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.MCH.utils.config.Config;
+import com.github.zhuaidadaya.config.utils.Config;
 import com.github.zhuaidadaya.modMdo.projects.Project;
 import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;

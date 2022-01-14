@@ -1,24 +1,24 @@
 package com.github.zhuaidadaya.modMdo.usr;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.json.JSONObject;
 
-import java.util.LinkedHashMap;
 import java.util.UUID;
 
 public class UserUtil {
-    private final LinkedHashMap<Object, JSONObject> users = new LinkedHashMap<>();
+    private final Object2ObjectRBTreeMap<String, JSONObject> users = new Object2ObjectRBTreeMap<>();
 
     public UserUtil() {
 
     }
 
     public UserUtil(JSONObject json) {
-        for(Object o : json.keySet())
-            users.put(o.toString(), json.getJSONObject(o.toString()));
+        for(String o : json.keySet())
+            users.put(o, json.getJSONObject(o));
     }
 
-    public void put(Object target, JSONObject value) {
+    public void put(String target, JSONObject value) {
         users.put(target, value);
     }
 
@@ -28,10 +28,10 @@ public class UserUtil {
         return users.get(target.toString());
     }
 
-    public Object getUserConfig(Object targetUuid, Object getConfig) {
-        if(users.get(targetUuid.toString()) == null)
+    public Object getUserConfig(String targetUuid, Object getConfig) {
+        if(users.get(targetUuid) == null)
             throw new IllegalStateException();
-        return users.get(targetUuid.toString()).get(getConfig.toString()).toString();
+        return users.get(targetUuid).get(getConfig.toString()).toString();
     }
 
     public JSONObject toJSONObject() {
@@ -52,12 +52,14 @@ public class UserUtil {
     }
 
     public User getUser(ServerPlayerEntity player) {
-        if(users.get(player.getUuid()) == null)
-            put(player.getUuid(), new User(player.getName().asString(), player.getUuid()).toJSONObject());
-        return new User(users.get(player.getUuid()));
+        if(users.get(player.getUuid().toString()) == null)
+            put(player.getUuid().toString(), new User(player.getName().asString(), player.getUuid()).toJSONObject());
+        return new User(users.get(player.getUuid().toString()));
     }
 
     public User getUser(UUID uuid) {
+        System.out.println(users);
+        System.out.println(uuid.toString());
         return new User(users.get(uuid.toString()));
     }
 
@@ -107,7 +109,7 @@ public class UserUtil {
     }
 
     public int getUserLevel(String uuid) {
-        return new User(getUser(uuid).toJSONObject()).getLevel();
+        return getUser(uuid).getLevel();
     }
 
     public int getUserLevel(UUID uuid) {
@@ -117,6 +119,4 @@ public class UserUtil {
     public int getUserLevel(ServerPlayerEntity player) {
         return getUserLevel(player.getUuid());
     }
-
-
 }

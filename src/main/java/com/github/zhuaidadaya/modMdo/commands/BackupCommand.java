@@ -2,7 +2,7 @@ package com.github.zhuaidadaya.modMdo.commands;
 
 import com.github.zhuaidadaya.MCH.times.TimeType;
 import com.github.zhuaidadaya.MCH.times.Times;
-import com.github.zhuaidadaya.MCH.utils.config.Config;
+import com.github.zhuaidadaya.config.utils.Config;
 import com.github.zhuaidadaya.modMdo.bak.Backup;
 import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.mixins.MinecraftServerSession;

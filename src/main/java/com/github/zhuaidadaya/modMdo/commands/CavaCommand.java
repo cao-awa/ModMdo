@@ -1,6 +1,6 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.MCH.utils.config.Config;
+import com.github.zhuaidadaya.config.utils.Config;
 import com.github.zhuaidadaya.modMdo.cavas.Cava;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.usr.User;
