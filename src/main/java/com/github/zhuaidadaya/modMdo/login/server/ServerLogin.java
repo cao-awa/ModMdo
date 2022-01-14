@@ -22,6 +22,8 @@ public class ServerLogin {
                     LOGGER.info("login player: " + data1);
                 }
             }
+        } else {
+            LOGGER.info(data1 + " try login without ModMdo client on server enabled token checker");
         }
     }
 

@@ -41,6 +41,7 @@ public class User {
         this.uuid = UUID.fromString(uuid);
         this.level = level;
         this.clientToken = token;
+        exceptToken = false;
     }
 
     public User(JSONObject json) {
