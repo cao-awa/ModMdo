@@ -6,20 +6,23 @@ import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 public class ReformConfigUtil implements AbstractConfigUtil {
+    private boolean loadManifest = true;
     /**
      *
      */
-    private final Object2ObjectMap<Object, ReformConfig<Object>> configs = new Object2ObjectRBTreeMap<>();
+    private Object2ObjectMap<Object, ReformConfig<Object>> configs = new Object2ObjectRBTreeMap<>();
     private EncryptionType encryptionType = EncryptionType.COMPOSITE_SEQUENCE;
     /**
      *
@@ -35,6 +38,16 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     private boolean canShutdown = true;
     private boolean shuttingDown = false;
     private boolean shutdown = false;
+    private boolean autoWrite = true;
+    private boolean encryptionHead = false;
+    private boolean encryption = false;
+    private int inseparableLevel = 3;
+
+    private String entrust;
+    private String version;
+    private String path;
+    private String name;
+    private String note;
 
     public ReformConfigUtil() {
         defaultUtilConfigs();
@@ -151,22 +164,46 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         return new ReformConfigUtil(null, null, "1.1", null, true);
     }
 
+    private void build(@Nullable String entrust, @Nullable String configPath, @Nullable String configName, @Nullable String configVersion, boolean empty, boolean loadManifest) {
+        defaultUtilConfigs();
+        configs = new Object2ObjectRBTreeMap<>();
+        if(configPath != null)
+            setPath(configPath);
+        if(configName != null)
+            setName(configName);
+        if(configVersion != null)
+            setVersion(configVersion);
+        if(entrust != null)
+            setEntrust(entrust);
+        logger = LogManager.getLogger("ConfigUtil-" + entrust);
+        this.empty = empty;
+        this.loadManifest = loadManifest;
+        if(! empty)
+            readConfig(true, false, loadManifest);
+    }
+
     public ReformConfigUtil setPath(String path) {
-        addUtilConfig("path", path);
+        checkShutdown();
+
+        this.path = path;
         return this;
     }
 
     public ReformConfigUtil setVersion(String version) {
-        addUtilConfig("version", version);
+        checkShutdown();
+
+        this.version = version;
         return this;
     }
 
     public ReformConfigUtil setName(String name) {
+        checkShutdown();
+
         try {
             name.substring(name.indexOf("."), name.indexOf(".") + 1);
-            addUtilConfig("name", name);
+            this.name = name;
         } catch (Exception e) {
-            addUtilConfig("name", name + (String.valueOf(name.charAt(name.length() - 1)).equals(".") ? "mhf" : ".mhf"));
+            this.name = name + (String.valueOf(name.charAt(name.length() - 1)).equals(".") ? "mhf" : ".mhf");
         }
         return this;
     }
@@ -176,25 +213,27 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public void defaultUtilConfigs() {
-        addUtilConfig("path", System.getProperty("user.dir"));
-        addUtilConfig("name", "config.mhf");
-        addUtilConfig("version", "1.2");
-        addUtilConfig("autoWrite", true);
-        addUtilConfig("inseparableLevel", 3);
-        addUtilConfig("encryptionHead", false);
-        addUtilConfig("encryption", false);
-    }
+        checkShutdown();
 
-    public void addUtilConfig(Object name, Object value) {
-        configs.put("CU%" + name, new ReformConfig<>(value, false));
+        this.path = System.getProperty("user.dir");
+        this.name = "config.mhf";
+        this.version = "1.2";
+        this.autoWrite = true;
+        this.inseparableLevel = 3;
+        this.encryptionHead = false;
+        this.encryption = false;
     }
 
     public ReformConfigUtil setInseparableLevel(int inseparableLevel) {
-        configs.put("CU%inseparableLevel", new ReformConfig<>(inseparableLevel > - 1 ? inseparableLevel < 4 ? inseparableLevel : 3 : 0, false));
+        checkShutdown();
+
+        this.inseparableLevel = inseparableLevel > - 1 ? inseparableLevel < 4 ? inseparableLevel : 3 : 0;
         return this;
     }
 
     public ReformConfigUtil setLibraryOffset(int offset) {
+        checkShutdown();
+
         if(offset != - 1)
             this.libraryOffset = Math.max(1, offset);
         else
@@ -203,50 +242,68 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public ReformConfigUtil setSplitRange(int range) {
+        checkShutdown();
+
         splitRange = range;
         return this;
     }
 
     public ReformConfigUtil setEncryptionType(EncryptionType type) {
+        checkShutdown();
+
         this.encryptionType = type;
         return this;
     }
 
     public ReformConfigUtil setEmpty(boolean empty) {
+        checkShutdown();
+
         this.empty = empty;
         return this;
     }
 
     public ReformConfigUtil setEntrust(String entrust) {
-        addUtilConfig("entrust", entrust);
+        checkShutdown();
+
+        this.entrust = entrust;
         logger = LogManager.getLogger("ConfigUtil-" + entrust);
         return this;
     }
 
     public ReformConfigUtil setEncryptionHead(boolean encryptionHead) {
-        addUtilConfig("encryptionHead", encryptionHead);
+        checkShutdown();
+
+        this.encryptionHead = encryptionHead;
         return this;
     }
 
     public ReformConfigUtil setAutoWrite(boolean autoWrite) {
-        configs.put("CU%autoWrite", new ReformConfig<>(autoWrite, false));
+        checkShutdown();
+
+        this.autoWrite = autoWrite;
         return this;
     }
 
     public ReformConfigUtil setNote(String note) {
-        addUtilConfig("note", note);
+        checkShutdown();
+
+        this.note = note;
         return this;
     }
 
     public ReformConfigUtil fuse(ReformConfigUtil parent) {
+        checkShutdown();
+
         for(Object o : parent.configs.keySet())
-            this.setConf(true, o.toString(), parent.configs.get(o.toString()).getValue());
+            this.setConf(true, o.toString(), parent.configs.get(o.toString()));
         return this;
     }
 
     public ReformConfigUtil setEncryption(boolean encryption) {
-        addUtilConfig("encryption", encryption);
-        if(getUtilBoolean("autoWrite")) {
+        checkShutdown();
+
+        this.encryption = encryption;
+        if(autoWrite) {
             try {
                 writeConfig();
             } catch (Exception e) {
@@ -257,10 +314,14 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public Map<Object, ReformConfig<Object>> getConfigs() {
+        checkShutdown();
+
         return configs;
     }
 
-    public ReformConfig<Object> getConfig(Object conf) {
+    public Object getConfig(Object conf) {
+        checkShutdown();
+
         return configs.get(conf);
     }
 
@@ -273,6 +334,8 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public boolean readConfig(boolean log, boolean forceLoad, boolean init) {
+        checkShutdown();
+
         if(shuttingDown) {
             return false;
         }
@@ -286,9 +349,9 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         int configSize = 0;
         try {
             if(log)
-                logger.info("loading config from: " + getUtilString("name"));
+                logger.info("loading config from: " + name);
 
-            File configFile = new File(getUtilString("path") + "/" + getUtilString("name"));
+            File configFile = new File(path + "/" + name);
 
             BufferedReader br = new BufferedReader(new FileReader(configFile, Charset.forName("unicode")));
             StringBuilder builder = decryption(br, forceLoad);
@@ -317,8 +380,6 @@ public class ReformConfigUtil implements AbstractConfigUtil {
                 }
                 JSONObject config = new JSONObject(o.toString());
                 String configKey = config.keySet().toArray()[0].toString();
-                if(log)
-                    logger.info("loading for config: " + configKey);
                 JSONObject configDetailed = config.getJSONObject(configKey);
                 if(configDetailed.getBoolean("listTag")) {
                     JSONArray array = configDetailed.getJSONArray("values");
@@ -339,7 +400,7 @@ public class ReformConfigUtil implements AbstractConfigUtil {
 
                 JSONObject manifest = source.getJSONObject("manifest");
                 for(String s : manifest.keySet()) {
-                    addUtilConfig(s, manifest.get(s));
+                    manifestLoading(s, manifest.get(s));
                 }
             }
 
@@ -355,17 +416,17 @@ public class ReformConfigUtil implements AbstractConfigUtil {
             throw e;
         } catch (Exception e) {
             if(! shuttingDown) {
-                logger.error(empty ? ("failed to load config") : ("failed to load config: " + getUtilString("name")));
+                logger.error(empty ? ("failed to load config") : ("failed to load config: " + name));
                 if(! empty) {
-                    File configFile = new File(getUtilString("path") + "/" + getUtilString("name"));
+                    File configFile = new File(path + "/" + name);
                     if(! configFile.isFile() || configFile.length() == 0 || configSize == 0) {
                         try {
                             configFile.getParentFile().mkdirs();
                             configFile.createNewFile();
                             writeConfig();
-                            logger.info("created new config file for " + getUtilString("entrust"));
+                            logger.info("created new config file for " + entrust);
                         } catch (Exception ex) {
-                            logger.error("failed to create new config file for " + getUtilString("entrust"));
+                            logger.error("failed to create new config file for " + entrust);
                         }
                     }
                 }
@@ -377,9 +438,42 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         }
     }
 
+    private void manifestLoading(String key, Object value) {
+        switch(key) {
+            case "config" -> {
+                String c = value.toString().replace("\\", "/");
+                this.name = c.substring(c.indexOf("/") + 1);
+                this.path = c.substring(0, c.indexOf("/"));
+            }
+            case "entrust" -> {
+                this.entrust = value.toString();
+            }
+            case "autoWrite" -> {
+                this.autoWrite = Boolean.parseBoolean(value.toString());
+            }
+            case "configVersion" -> {
+                this.version = value.toString();
+            }
+            case "inseparableLevel" -> {
+                this.inseparableLevel = Integer.parseInt(value.toString());
+            }
+            case "encryptionType" -> {
+                this.encryptionType = EncryptionType.parseEncryptionType(value.toString());
+            }
+            case "encryption" -> {
+                this.encryption = Boolean.parseBoolean(value.toString());
+            }
+            case "encryptionHead" -> {
+                this.encryptionHead = Boolean.parseBoolean(value.toString());
+            }
+        }
+    }
+
     public StringBuilder decryption() {
+        checkShutdown();
+
         try {
-            File configFile = new File(getUtilString("path") + "/" + getUtilString("name"));
+            File configFile = new File(path + "/" + name);
 
             BufferedReader br = new BufferedReader(new FileReader(configFile, Charset.forName("unicode")));
 
@@ -394,6 +488,8 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public StringBuilder decryption(BufferedReader reader, boolean forceLoad) {
+        checkShutdown();
+
         try {
             StringBuilder builder = new StringBuilder();
             String cache = reader.readLine();
@@ -538,6 +634,8 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public void writeConfig() {
+        checkShutdown();
+
         try {
             if(shuttingDown) {
                 return;
@@ -551,7 +649,7 @@ public class ReformConfigUtil implements AbstractConfigUtil {
 
             Random r = new Random();
 
-            if(getUtilBoolean("encryption")) {
+            if(encryption) {
                 switch(encryptionType.getId()) {
                     case 0 -> {
                         builder = encryptionByRandomSequence(write, r);
@@ -562,10 +660,10 @@ public class ReformConfigUtil implements AbstractConfigUtil {
                 }
             } else {
                 builder = new StringBuilder();
-                builder.append("no encryption config: [config_size=").append(write.length()).append(", config_version=").append(getUtilString("version")).append("]").append("\n").append(write);
+                builder.append("no encryption config: [config_size=").append(write.length()).append(", config_version=").append(version).append("]").append("\n").append(formatNote()).append("\n\n").append(write);
             }
 
-            BufferedWriter writer = new BufferedWriter(new FileWriter(getUtilString("path") + "/" + getUtilString("name"), Charset.forName("unicode"), false));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + name, Charset.forName("unicode"), false));
             write(writer, builder.toString());
             writer.close();
 
@@ -576,6 +674,8 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public void write(Writer writer, StringBuffer information) throws IOException {
+        checkShutdown();
+
         writer.write(information.toString());
     }
 
@@ -588,12 +688,16 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public void write(String information) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(getUtilString("path") + "/" + getUtilString("name"), Charset.forName("unicode"), false));
+        checkShutdown();
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + name, Charset.forName("unicode"), false));
         write(writer, new StringBuffer(information));
         writer.close();
     }
 
-    public StringBuilder encryptionByRandomSequence(StringBuilder write, Random r) {
+    public StringBuilder encryptionByRandomSequence(StringBuilder information, Random r) {
+        checkShutdown();
+
         int checkingCodeRange = r.nextInt(1024 * 8);
         checkingCodeRange = checkingCodeRange > 13 ? checkingCodeRange : 14;
         int checkingCode = r.nextInt(checkingCodeRange);
@@ -602,7 +706,7 @@ public class ReformConfigUtil implements AbstractConfigUtil {
 
         StringBuilder builder = new StringBuilder();
 
-        if(getUtilBoolean("encryption")) {
+        if(encryption) {
             int wrap = splitRange;
 
             for(; wrap > 0; wrap--) {
@@ -610,26 +714,26 @@ public class ReformConfigUtil implements AbstractConfigUtil {
                 if(splitIndex < 50) {
                     splitIndex += 50;
                 }
-                if((splitIndex + split) < write.length()) {
+                if((splitIndex + split) < information.length()) {
                     split += splitIndex - 1;
-                    write.insert(split, "\n");
+                    information.insert(split, "\n");
                 } else {
                     break;
                 }
             }
         }
 
-        int[] charArray = write.chars().toArray();
+        int[] charArray = information.chars().toArray();
 
         builder.append((char) 0);
 
-        if(! getUtilBoolean("encryptionHead")) {
+        if(! encryptionHead) {
             builder.append(" encryption: [" + "type=").append(encryptionType.getName()).append(", ");
             builder.append("SUPPORT=MCH -> https://github.com/zhuaidadaya/ConfigUtil , ");
             builder.append("check code=").append(checkingCode).append(", ");
             builder.append("offset=").append(checkingCodeRange).append(", ");
-            builder.append("config size=").append(write.length()).append(", ");
-            builder.append("config version=").append(getUtilString("version")).append(", ");
+            builder.append("config size=").append(information.length()).append(", ");
+            builder.append("config version=").append(version).append(", ");
             builder.append("split=").append(split).append(", ");
             builder.append("split range=").append(splitRange).append("]");
             builder.append((char) 10);
@@ -644,11 +748,11 @@ public class ReformConfigUtil implements AbstractConfigUtil {
             write2RandomByte(builder);
             builder.append(" OFFSET?").append(checkingCodeRange);
             write3RandomByte(builder, checkingCodeRange);
-            builder.append(" VER?").append(getUtilString("version"));
+            builder.append(" VER?").append(version);
             write2RandomByte(builder, checkingCodeRange);
             builder.append(" EC?").append(checkingCode);
             write2RandomByte(builder, checkingCodeRange);
-            builder.append(" SZ?").append(write.length());
+            builder.append(" SZ?").append(information.length());
             write3RandomByte(builder, checkingCodeRange);
             builder.append("\n");
         }
@@ -674,25 +778,27 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         return builder;
     }
 
-    public StringBuilder encryptionByCompositeSequence(StringBuilder write) {
+    public StringBuilder encryptionByCompositeSequence(StringBuilder information) {
+        checkShutdown();
+
         Random r = new Random();
         int checkingCodeRange = 1024 * 12;
         int checkingCode = r.nextInt(checkingCodeRange);
         checkingCode = checkingCode > 13 ? checkingCode : 14;
-        int[] charArray = write.chars().toArray();
+        int[] charArray = information.chars().toArray();
 
         StringBuilder builder = new StringBuilder();
 
         builder.append((char) 1);
 
-        if(! getUtilBoolean("encryptionHead")) {
+        if(! encryptionHead) {
             builder.append(" encryption: [");
             builder.append("type=").append(encryptionType.getName()).append(", ");
             builder.append("SUPPORT=MCH -> https://github.com/zhuaidadaya/ConfigUtil , ");
             builder.append("check code=").append(checkingCode).append(", ");
             builder.append("offset=").append(checkingCodeRange).append(", ");
-            builder.append("config size=").append(write.length()).append(", ");
-            builder.append("config version=").append(getUtilString("version"));
+            builder.append("config size=").append(information.length()).append(", ");
+            builder.append("config version=").append(version);
             builder.append("]");
             builder.append((char) 10);
             builder.append(formatNote());
@@ -706,9 +812,9 @@ public class ReformConfigUtil implements AbstractConfigUtil {
             write3RandomByte(builder);
             builder.append(" OFFSET?").append(checkingCodeRange);
             write2RandomByte(builder);
-            builder.append(" VER?").append(getUtilString("version"));
+            builder.append(" VER?").append(version);
             write2RandomByte(builder);
-            builder.append(" SZ?").append(write.length());
+            builder.append(" SZ?").append(information.length());
             write3RandomByte(builder);
             builder.append((char) 10);
         }
@@ -733,7 +839,6 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         builder.append((char) head);
 
         int offset;
-        int inseparableLevel = getUtilInt("inseparableLevel");
 
         if(libraryLimit * charArray.length > 10000000) {
             logger.warn(libraryLimit * charArray.length + " sequence building, maybe build a long time");
@@ -866,7 +971,7 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         return builder;
     }
 
-    public void writeRandomByte(StringBuilder writer, int limit, int bytes) {
+    private void writeRandomByte(StringBuilder writer, int limit, int bytes) {
         Random r = new Random();
         try {
             for(int i = 0; i < bytes; i++) {
@@ -878,23 +983,23 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         }
     }
 
-    public void write3RandomByte(StringBuilder writer, int limit) {
+    private void write3RandomByte(StringBuilder writer, int limit) {
         writeRandomByte(writer, limit, 3);
     }
 
-    public void write3RandomByte(StringBuilder writer) {
+    private void write3RandomByte(StringBuilder writer) {
         write3RandomByte(writer, new Random().nextInt(25565));
     }
 
-    public void write2RandomByte(StringBuilder writer, int limit) {
+    private void write2RandomByte(StringBuilder writer, int limit) {
         writeRandomByte(writer, limit, 2);
     }
 
-    public void write2RandomByte(StringBuilder writer) {
+    private void write2RandomByte(StringBuilder writer) {
         write2RandomByte(writer, new Random().nextInt(25565));
     }
 
-    public void writeRandomByte(Writer writer, int limit, int bytes) {
+    private void writeRandomByte(Writer writer, int limit, int bytes) {
         Random r = new Random();
         try {
             for(int i = 0; i < bytes; i++) {
@@ -906,60 +1011,72 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         }
     }
 
-    public void write3RandomByte(Writer writer, int limit) {
+    private void write3RandomByte(Writer writer, int limit) {
         writeRandomByte(writer, limit, 3);
     }
 
-    public void write3RandomByte(Writer writer) {
+    private void write3RandomByte(Writer writer) {
         write3RandomByte(writer, new Random().nextInt(25565));
     }
 
-    public void write2RandomByte(Writer writer, int limit) {
+    private void write2RandomByte(Writer writer, int limit) {
         writeRandomByte(writer, limit, 2);
     }
 
-    public void write2RandomByte(Writer writer) {
+    private void write2RandomByte(Writer writer) {
         write2RandomByte(writer, new Random().nextInt(25565));
     }
 
     public void remove(Object key) {
+        checkShutdown();
+
         configs.remove(key);
     }
 
+    public void remove(Object key, Object... configValues) {
+        checkShutdown();
+
+        configs.remove(key, configValues);
+    }
+
     public void set(Object key, Object... configKeysValues) throws IllegalArgumentException {
+        checkShutdown();
+
         setConf(false, key, configKeysValues);
     }
 
-    public void setConf(boolean init, Object key, Object... configKeysValues) throws IllegalArgumentException {
-        if(configKeysValues.length > 1 & configKeysValues.length % 2 != 0)
-            throw new IllegalArgumentException("values argument size need Integral multiple of 2, but argument size " + configKeysValues.length + " not Integral multiple of 2");
-        configs.put(key, new ReformConfig<>(configKeysValues, false));
-        if(getUtilBoolean("autoWrite") & ! init) {
-            try {
+    private void setConf(boolean init, Object key, Object... configKeysValues) throws IllegalArgumentException {
+        if(configKeysValues.length > 1) {
+            if(configKeysValues.length % 2 != 0)
+                throw new IllegalArgumentException("values argument size need Integral multiple of 2, but argument size " + configKeysValues.length + " not Integral multiple of 2");
+            configs.put(key, new ReformConfig<>(configKeysValues,false));
+        } else {
+            configs.put(key, new ReformConfig<>(configKeysValues[0],false));
+        }
+        if(autoWrite) {
+            if(! init)
                 writeConfig();
-            } catch (Exception e) {
-
-            }
         }
     }
 
     public void setList(Object key, Object... configValues) {
+        checkShutdown();
+
         setListConf(false, key, configValues);
     }
 
-    public void setListConf(boolean init, Object key, Object... configValues) {
+    private void setListConf(boolean init, Object key, Object... configValues) {
         configs.put(key, new ReformConfig<>(configValues, true));
-        if(getUtilBoolean("autoWrite") & ! init) {
-            try {
+        if(autoWrite) {
+            if(! init)
                 writeConfig();
-            } catch (Exception e) {
-
-            }
         }
     }
 
 
     public String toString() {
+        checkShutdown();
+
         StringBuilder builder = new StringBuilder();
         for(Object o : configs.keySet()) {
             builder.append(o.toString()).append("=").append(configs.get(o).toString()).append(", ");
@@ -975,32 +1092,73 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public JSONObject toJSONObject() {
+        checkShutdown();
+
         JSONObject json = new JSONObject();
         JSONArray addToConfig = new JSONArray();
-        for(Object config : configs.keySet()) {
+        for(Object configKey : configs.keySet()) {
+            Object config = configs.get(configKey);
+
             JSONObject conf = new JSONObject();
-            conf.put(config.toString(), configs.get(config).toJSONObject());
+            JSONObject inJ = new JSONObject();
+
+            if(config instanceof Object[] | config instanceof List<?>) {
+                ObjectList<Object> list;
+                if(config instanceof Object[]) {
+                    list = ObjectList.of((Object[]) config);
+
+                    if(list.size() == 1)
+                        list = ObjectList.of(ObjectList.of((Object[]) config).get(0));
+
+                    inJ.put("values", list);
+                } else {
+                    list = ObjectList.of(config);
+
+                    inJ.put("values", (List<?>) config);
+                }
+
+                inJ.put("totalSize", list.size());
+
+                inJ.put("listTag", true);
+            } else {
+                if(config instanceof String)
+                    inJ.put("value", config.toString());
+                else if(config instanceof Boolean)
+                    inJ.put("value", Boolean.parseBoolean(config.toString()));
+                else if(config instanceof Integer)
+                    inJ.put("value", Integer.parseInt(config.toString()));
+                else
+                    inJ.put("value", config);
+
+                inJ.put("listTag", false);
+            }
+
+            conf.put(configKey.toString(), inJ);
             addToConfig.put(conf);
         }
 
         json.put("configs", addToConfig);
 
         JSONObject manifest = new JSONObject();
-        manifest.put("configVersion", getUtilString("version"));
+        manifest.put("configVersion", version);
         manifest.put("configsTotal", configs.size());
-        manifest.put("encryption", getUtilBoolean("encryption"));
-        manifest.put("encryptionHead", getUtilBoolean("encryptionHead"));
-        manifest.put("config", new File(getUtilString("path") + "/" + getUtilString("name")));
-        manifest.put("autoWrite", getUtilBoolean("autoWrite"));
+        manifest.put("encryption", encryption);
+        manifest.put("encryptionHead", encryptionHead);
+        manifest.put("config", new File(path + "/" + name));
+        manifest.put("autoWrite", autoWrite);
+        manifest.put("entrust", entrust);
+        manifest.put("configName", name);
+        manifest.put("inseparableLevel", inseparableLevel);
+        manifest.put("encryptionType", encryptionType.getName());
         json.put("manifest", manifest);
 
         return json;
     }
 
-    public String formatNote() {
-        if(getUtilString("note") != null) {
+    private String formatNote() {
+        if(note != null) {
             try {
-                BufferedReader reader = new BufferedReader(new StringReader(getUtilString("note")));
+                BufferedReader reader = new BufferedReader(new StringReader(note));
                 StringBuilder builder = new StringBuilder("/**\n");
 
                 String cache;
@@ -1021,11 +1179,34 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         return canShutdown;
     }
 
-    public void setShuttingDown(boolean shuttingDown) {
-        this.shuttingDown = shuttingDown;
+    private void setShuttingDown() {
+        this.shuttingDown = true;
+    }
+
+    public void rebuild() {
+        logger.info("rebuilding ConfigUtil");
+
+        shutdown = false;
+
+        build(entrust, path, name, version, empty, loadManifest);
+    }
+
+    public void invalid() {
+        checkShutdown();
+
+        logger.info("invaliding ConfigUtil");
+
+        shutdown();
+
+        logger.info("cleaning configs");
+
+        configs = null;
+
+        System.gc();
     }
 
     public void shutdown() {
+        checkShutdown();
         logger.info("saving configs and shutting down ConfigUtil");
         try {
             while(! canShutdown()) {
@@ -1044,7 +1225,7 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         } catch (Exception e) {
             logger.error("failed to save configs, shutting down");
         }
-        setShuttingDown(true);
+        setShuttingDown();
         while(! canShutdown()) {
             try {
                 Thread.sleep(100);
@@ -1056,7 +1237,14 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         logger.info("ConfigUtil are shutdown");
     }
 
+    private void checkShutdown() {
+        if(shutdown) {
+            throw new IllegalStateException("this ConfigUtil already shutdown, invoke rebuild() to build again");
+        }
+    }
+
     public int getConfigTotal() {
+        checkShutdown();
         return configs.size();
     }
 
@@ -1065,54 +1253,34 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     }
 
     public String getConfigString(Object config) {
-        ReformConfig<Object> c = getConfig(config);
-        if(c == null)
+        checkShutdown();
+        try {
+            return getConfig(config).toString();
+        } catch (Exception e) {
             return null;
-        return getConfig(config).getString();
+        }
     }
 
     public int getConfigInt(Object config) {
-        return getConfig(config).getInt();
+        return Integer.parseInt(getConfigString(config));
     }
 
     public long getConfigLong(Object config) {
-        return getConfig(config).getLong();
+        return Long.parseLong(getConfigString(config));
     }
 
     public boolean getConfigBoolean(Object config) {
-        return getConfig(config).getBoolean();
+        return Boolean.parseBoolean(getConfigString(config));
+
     }
 
     public JSONObject getConfigJSONObject(Object config) {
-        return getConfig(config).getJSONObject();
+        return new JSONObject(getConfigString(config));
+
     }
 
     public JSONArray getConfigJSONArray(Object config) {
-        return getConfig(config).getJSONArray();
-    }
-
-    public String getUtilString(Object config) {
-        return getConfig("CU%" + config).getString();
-    }
-
-    public boolean getUtilBoolean(Object config) {
-        return getConfig("CU%" + config).getBoolean();
-    }
-
-    public int getUtilInt(Object config) {
-        return getConfig("CU%" + config).getInt();
-    }
-
-    public long getUtilLong(Object config) {
-        return getConfig("CU%" + config).getLong();
-    }
-
-    public JSONObject getUtilJSONObject(Object config) {
-        return getConfig("CU%" + config).getJSONObject();
-    }
-
-    public JSONArray getUtilJSONArray(Object config) {
-        return getConfig("CU%" + config).getJSONArray();
+        return new JSONArray(getConfigString(config));
     }
 }
 

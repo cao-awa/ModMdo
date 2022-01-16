@@ -58,8 +58,6 @@ public class UserUtil {
     }
 
     public User getUser(UUID uuid) {
-        System.out.println(users);
-        System.out.println(uuid.toString());
         return new User(users.get(uuid.toString()));
     }
 

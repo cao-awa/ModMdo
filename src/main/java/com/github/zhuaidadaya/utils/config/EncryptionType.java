@@ -33,4 +33,16 @@ public enum EncryptionType {
     public int getId() {
         return id;
     }
+
+    public static EncryptionType parseEncryptionType(String value) {
+        switch(value) {
+            case "Random Sequence" -> {
+                return RANDOM_SEQUENCE;
+            }
+            case "Composite Sequence" -> {
+                return COMPOSITE_SEQUENCE;
+            }
+        }
+        return null;
+    }
 }
