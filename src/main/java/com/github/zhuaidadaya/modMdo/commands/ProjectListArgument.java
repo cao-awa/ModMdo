@@ -36,8 +36,8 @@ public class ProjectListArgument implements ArgumentType<String> {
     @Override
     public String parse(StringReader stringReader) throws CommandSyntaxException {
         String string = stringReader.readUnquotedString();
-        int i = new ProjectArgument().getProjectId(string);
-        if(i == - 1) {
+        String id = new ProjectArgument().getProjectId(string);
+        if(id.equals("p-n")) {
             throw INVALID_NAME_EXCEPTION.create(string);
         } else {
             return string;

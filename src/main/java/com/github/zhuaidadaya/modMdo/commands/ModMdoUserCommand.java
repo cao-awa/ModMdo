@@ -1,15 +1,14 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.config.utils.Config;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
+import com.github.zhuaidadaya.utils.config.Config;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import org.json.JSONObject;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.commandApplyToPlayer;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ModMdoUserCommand extends SimpleCommandOperation implements ConfigurableCommand{
@@ -86,9 +85,9 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
     public void init() {
         LOGGER.info("initializing user profiles");
 
-        Config<Object, Object> projectConf = config.getConfig("user_profiles");
+        Object projectConf = config.getConfig("user_profiles");
         if(projectConf != null) {
-            users = new UserUtil(new JSONObject(projectConf.getValue()));
+            users = new UserUtil(new JSONObject(projectConf.toString()));
         } else {
             users = new UserUtil();
             config.set("user_profiles", new JSONObject());

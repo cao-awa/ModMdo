@@ -2,15 +2,21 @@ package com.github.zhuaidadaya.modMdo.mixins;
 
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.MessageType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,13 +27,20 @@ import java.util.Set;
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 @Mixin(ServerPlayNetworkHandler.class)
-public class ServerPlayNetworkHandlerMixin {
+public abstract class ServerPlayNetworkHandlerMixin {
     @Shadow
     public ServerPlayerEntity player;
 
     @Shadow
     @Final
     public ClientConnection connection;
+
+    @Shadow
+    @Final
+    private MinecraftServer server;
+
+    @Shadow
+    protected abstract boolean isHost();
 
     /**
      * 解析玩家发送的数据包, 如果identifier为 <code>modmdo:token</code> 则检查token
@@ -44,67 +57,71 @@ public class ServerPlayNetworkHandlerMixin {
      */
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo ci) {
-        Identifier channel = new Identifier("");
         try {
-            channel = packet.getChannel();
+            Identifier channel = new Identifier("");
+
+            try {
+                channel = packet.getChannel();
+            } catch (Exception e) {
+
+            }
+
+            PacketByteBuf packetByteBuf = null;
+            try {
+                packetByteBuf = new PacketByteBuf(packet.getData().copy());
+            } catch (Exception e) {
+            }
+
+
+            String data1 = "";
+            try {
+                data1 = packetByteBuf.readString();
+            } catch (Exception e) {
+
+            }
+
+            String data2 = "";
+            try {
+                data2 = packetByteBuf.readString();
+            } catch (Exception e) {
+
+            }
+
+            String data3 = "";
+            try {
+                data3 = packetByteBuf.readString();
+            } catch (Exception e) {
+
+            }
+
+            String data4 = "";
+            try {
+                data4 = packetByteBuf.readString();
+            } catch (Exception e) {
+
+            }
+
+            String data5 = "";
+            try {
+                data5 = packetByteBuf.readString();
+            } catch (Exception e) {
+
+            }
+
+            String data6 = "";
+            try {
+                data6 = packetByteBuf.readString();
+            } catch (Exception e) {
+
+            }
+
+            if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
+                serverLogin.login(channel, data1, data2, data3, data4, data5, data6);
+            }
+
+            ci.cancel();
         } catch (Exception e) {
-
         }
-
-        PacketByteBuf packetByteBuf = null;
-        try {
-            packetByteBuf = new PacketByteBuf(packet.getData().copy());
-        } catch (Exception e) {
-        }
-
-
-        String data1 = "";
-        try {
-            data1 = packetByteBuf.readString();
-        } catch (Exception e) {
-
-        }
-
-        String data2 = "";
-        try {
-            data2 = packetByteBuf.readString();
-        } catch (Exception e) {
-
-        }
-
-        String data3 = "";
-        try {
-            data3 = packetByteBuf.readString();
-        } catch (Exception e) {
-
-        }
-
-        String data4 = "";
-        try {
-            data4 = packetByteBuf.readString();
-        } catch (Exception e) {
-
-        }
-
-        String data5 = "";
-        try {
-            data5 = packetByteBuf.readString();
-        } catch (Exception e) {
-
-        }
-
-        String data6 = "";
-        try {
-            data6 = packetByteBuf.readString();
-        } catch (Exception e) {
-
-        }
-
-        if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
-            serverLogin.login(channel, data1, data2, data3, data4, data5,data6);
-        }
-
-        ci.cancel();
     }
 
     /**
@@ -112,18 +129,33 @@ public class ServerPlayNetworkHandlerMixin {
      *
      * @param reason
      *         移除信息
-     * @param ci
-     *         callback
      *
      * @author 草awa
      * @author 草二号机
      * @author zhuaidadaya
+     *
+     * @reason
      */
-    @Inject(method = "onDisconnected", at = @At("HEAD"))
-    public void onDisconnected(Text reason, CallbackInfo ci) {
+    @Overwrite
+    public void onDisconnected(Text reason) {
+
+        LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
+        this.server.forcePlayerSampleUpdate();
+        if(loginUsers.hasUser(player))
+            this.server.getPlayerManager().broadcast((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
+
         if(enableEncryptionToken) {
             serverLogin.logout(player);
         }
+
+        this.player.onDisconnect();
+        this.server.getPlayerManager().remove(this.player);
+        this.player.getTextStream().onDisconnect();
+        if(this.isHost()) {
+            LOGGER.info("Stopping singleplayer server as player logged out");
+            this.server.stop(false);
+        }
+
     }
 
     /**

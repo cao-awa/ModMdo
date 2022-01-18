@@ -1,6 +1,5 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.config.utils.Config;
 import com.github.zhuaidadaya.modMdo.projects.Project;
 import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -13,9 +12,10 @@ import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class ProjectCommand {
+public class ProjectCommand extends SimpleCommandOperation implements ConfigurableCommand {
+
     public void register() {
-        initProject();
+        init();
         //        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
         //            dispatcher.register(literal("broadcast")
         //                    .requires(source -> source.hasPermissionLevel(2)) // Must be a game master to use the command. Command will not show up in tab completion or execute to non operators or any operator that is permission level 1.
@@ -28,13 +28,18 @@ public class ProjectCommand {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("projects").then(literal("start").then(argument("projectName", string()).executes(start -> {
-                ServerPlayerEntity player = start.getSource().getPlayer();
-                Project project = new Project(getString(start, "projectName"), users.getUser(player));
-                startProject(project);
+                try {
+                    ServerPlayerEntity player = start.getSource().getPlayer();
+                    Project project = new Project(getString(start, "projectName"), getApply(this, start), users.getUser(player));
+                    startProject(project);
 
-                new ArgumentInit().init();
+                    new ArgumentInit().init();
 
-                return 1;
+                    return 1;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return - 1;
+                }
             }).then(argument("projectNote", greedyString()).executes(c -> {
                 System.out.println("project note");
                 return 2;
@@ -58,11 +63,11 @@ public class ProjectCommand {
         updateProjects();
     }
 
-    public void initProject() {
+    public void init() {
         LOGGER.info("initializing projects");
-        Config<Object, Object> projectConf = config.getConfig("projects");
+        Object projectConf = config.getConfig("projects");
         if(projectConf != null) {
-            projects = new ProjectUtil(new JSONObject(projectConf.getValue()));
+            projects = new ProjectUtil(new JSONObject(projectConf.toString()));
         } else {
             projects = new ProjectUtil();
             config.set("projects", new JSONObject());

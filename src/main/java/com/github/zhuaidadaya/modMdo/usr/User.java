@@ -9,7 +9,7 @@ public class User {
     private String name;
     private UUID uuid;
     private int level = 1;
-    private ClientEncryptionToken clientToken;
+    private ClientEncryptionToken clientToken = null;
 
     public User() {
     }
@@ -86,7 +86,13 @@ public class User {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put("name", name).put("uuid", uuid).put("level", level).put("token", clientToken.toJSONObject());
+        try {
+            if(clientToken == null)
+                throw new Exception();
+            return new JSONObject().put("name", name).put("uuid", uuid).put("level", level).put("token", clientToken.toJSONObject());
+        } catch (Exception e) {
+            return new JSONObject().put("name", name).put("uuid", uuid).put("level", level);
+        }
     }
 
     public int getLevel() {

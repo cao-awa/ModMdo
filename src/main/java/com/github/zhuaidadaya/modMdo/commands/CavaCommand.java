@@ -1,6 +1,5 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.config.utils.Config;
 import com.github.zhuaidadaya.modMdo.cavas.Cava;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.usr.User;
@@ -12,7 +11,6 @@ import net.minecraft.text.TranslatableText;
 import org.json.JSONObject;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.commandApplyToPlayer;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -66,7 +64,7 @@ public class CavaCommand extends SimpleCommandOperation implements ConfigurableC
 
                     if(enableCava) {
                         try {
-                            String cavaID = users.getUserConfig(player.getUuid(), "lastCava").toString();
+                            String cavaID = users.getUserConfig(player.getUuid().toString(), "lastCava").toString();
 
                             cavas.deleteCava(cavaID);
 
@@ -127,9 +125,9 @@ public class CavaCommand extends SimpleCommandOperation implements ConfigurableC
 
     public void init() {
         LOGGER.info("initializing cavas");
-        Config<Object, Object> projectConf = config.getConfig("cavas");
+        Object projectConf = config.getConfig("cavas");
         if(projectConf != null) {
-            cavas = new CavaUtil(new JSONObject(projectConf.getValue()));
+            cavas = new CavaUtil(new JSONObject(projectConf.toString()));
         } else {
             cavas = new CavaUtil();
             config.set("cavas", new JSONObject());

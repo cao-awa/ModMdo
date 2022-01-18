@@ -17,9 +17,9 @@ public class ServerLogin {
 
             if(! data1.equals("")) {
                 if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
-                    LOGGER.info("login player: " + data1);
-
                     loginUsers.put(data1, new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)).toJSONObject());
+
+                    LOGGER.info("login player: " + data1);
                 }
             }
         }

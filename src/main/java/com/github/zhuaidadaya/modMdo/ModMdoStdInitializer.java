@@ -12,6 +12,7 @@ import com.github.zhuaidadaya.utils.config.ObjectConfigUtil;
 import net.fabricmc.api.ModInitializer;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.rejectUsers;
 
 public class ModMdoStdInitializer implements ModInitializer {
 
@@ -33,6 +34,7 @@ public class ModMdoStdInitializer implements ModInitializer {
         updateModMdoVariables();
 
         loginUsers = new UserUtil();
+        rejectUsers = new UserUtil();
 
         new HereCommand().register();
         new DimensionHereCommand().register();

@@ -6,6 +6,7 @@ import com.github.zhuaidadaya.modMdo.usr.User;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
@@ -78,10 +79,12 @@ public class ServerTickListener {
                 if(user.getLevel() == 1) {
                     if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
                         loginUsers.removeUser(player);
+                        player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
                     }
                 } else if(user.getLevel() == 4) {
                     if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
                         loginUsers.removeUser(player);
+                        player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
                     }
                 }
             }
@@ -135,8 +138,10 @@ public class ServerTickListener {
                 if(System.currentTimeMillis() - skipMap.get(player) > 1000) {
                     skipMap.put(player, System.currentTimeMillis());
                     try {
+                        System.out.println(player.getUuid());
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
+                        e.printStackTrace();
                         player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
                     }
                 }

@@ -37,8 +37,8 @@ import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.7";
-    public static int MODMDO_VERSION = 1;
+    public static String VERSION_ID = "1.0.8";
+    public static int MODMDO_VERSION = 2;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -54,6 +54,7 @@ public class Variables {
     public static int tokenGenerateSize = 128;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
     public static Identifier tokenChannel = new Identifier("modmdo:token");
+    public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
     public static ObjectConfigUtil config;
