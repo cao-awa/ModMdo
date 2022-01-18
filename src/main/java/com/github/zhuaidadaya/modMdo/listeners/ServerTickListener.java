@@ -138,7 +138,6 @@ public class ServerTickListener {
                 if(System.currentTimeMillis() - skipMap.get(player) > 1000) {
                     skipMap.put(player, System.currentTimeMillis());
                     try {
-                        System.out.println(player.getUuid());
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
                         e.printStackTrace();
