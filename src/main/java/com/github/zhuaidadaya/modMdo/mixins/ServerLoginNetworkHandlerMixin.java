@@ -54,11 +54,15 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 if(System.currentTimeMillis() - waiting > 1500) {
                     if(rejectUsers.hasUser(player)) {
                         connection.send(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
-                        rejectUsers.removeUser(player);
                     } else {
                         connection.send(new DisconnectS2CPacket(new LiteralText("this server enabled ModMdo checker, please login with token")));
                     }
                     connection.disconnect(new LiteralText("failed to login server"));
+                    try {
+                        rejectUsers.removeUser(player);
+                    } catch (Exception e) {
+
+                    }
                     return;
                 }
 
