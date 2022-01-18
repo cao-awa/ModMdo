@@ -54,8 +54,10 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 if(System.currentTimeMillis() - waiting > 1500) {
                     if(rejectUsers.hasUser(player)) {
                         connection.send(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
+                        LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player provided a bad token");
                     } else {
-                        connection.send(new DisconnectS2CPacket(new LiteralText("this server enabled ModMdo checker, please login with token")));
+                        connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with token")));
+                        LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
                     }
                     connection.disconnect(new LiteralText("failed to login server"));
                     try {

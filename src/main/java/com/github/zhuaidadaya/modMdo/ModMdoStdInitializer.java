@@ -12,7 +12,6 @@ import com.github.zhuaidadaya.utils.config.ObjectConfigUtil;
 import net.fabricmc.api.ModInitializer;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.rejectUsers;
 
 public class ModMdoStdInitializer implements ModInitializer {
 
@@ -74,6 +73,9 @@ public class ModMdoStdInitializer implements ModInitializer {
                     LOGGER.info("failed to enable encryption token");
                 }
             }
+
+            if(modMdoToken != null)
+                saveToken();
         } else {
             modMdoToken = new EncryptionTokenUtil();
         }

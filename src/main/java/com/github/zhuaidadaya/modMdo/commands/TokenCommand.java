@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.text.TranslatableText;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.commandApplyToPlayer;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class TokenCommand extends SimpleCommandOperation implements SimpleCommand {
@@ -90,14 +89,17 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
 
     public void generateDefault(int size) throws Exception {
         modMdoToken.setServerToken(new ServerEncryptionToken(modMdoToken.getServerToken().setServerDefaultToken(new AES().randomGet(size))));
+        saveToken();
     }
 
     public void generateOps(int size) throws Exception {
         modMdoToken.setServerToken(new ServerEncryptionToken(modMdoToken.getServerToken().setServerOpsToken(new AES().randomGet(size))));
+        saveToken();
     }
 
     public void generateAll(int size) throws Exception {
         modMdoToken.setServerToken(ServerEncryptionToken.createServerEncryptionToken(size));
+        saveToken();
     }
 
     public void setGenerateSize(int size) {
