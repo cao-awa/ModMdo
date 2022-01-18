@@ -150,24 +150,22 @@ public abstract class ServerPlayNetworkHandlerMixin {
      */
     @Overwrite
     public void onDisconnected(Text reason) {
-
-        LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
-        this.server.forcePlayerSampleUpdate();
-        if(loginUsers.hasUser(player))
-            this.server.getPlayerManager().broadcastChatMessage((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
-
-        if(enableEncryptionToken) {
-            serverLogin.logout(player);
+        if(loginUsers.hasUser(player)) {
+            LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
+            this.server.forcePlayerSampleUpdate();
+            if(loginUsers.hasUser(player))
+                this.server.getPlayerManager().broadcastChatMessage((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
+            this.player.onDisconnect();
+            this.server.getPlayerManager().remove(this.player);
+            this.player.getTextStream().onDisconnect();
+            if(this.isHost()) {
+                LOGGER.info("Stopping singleplayer server as player logged out");
+                this.server.stop(false);
+            }
+            if(enableEncryptionToken) {
+                serverLogin.logout(player);
+            }
         }
-
-        this.player.onDisconnect();
-        this.server.getPlayerManager().remove(this.player);
-        this.player.getTextStream().onDisconnect();
-        if(this.isHost()) {
-            LOGGER.info("Stopping singleplayer server as player logged out");
-            this.server.stop(false);
-        }
-
     }
 
     /**
