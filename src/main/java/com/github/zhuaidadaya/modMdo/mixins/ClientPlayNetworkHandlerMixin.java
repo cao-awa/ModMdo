@@ -70,14 +70,12 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
             int id;
             id = data.readVarInt();
 
-            LOGGER.info("id: " + id);
-
             if(id == 99) {
                 String address = formatAddress(connection.getAddress());
                 String token = getModMdoTokenFormat(address, TokenContentType.TOKEN_BY_ENCRYPTION);
                 String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
                 UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-                connection.send(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString("dummy_name").writeString(loginType).writeString(token).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
+                connection.send(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(token).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
             }
         } catch (Exception e) {
             LOGGER.error("error in connecting ModMdo server", e);
