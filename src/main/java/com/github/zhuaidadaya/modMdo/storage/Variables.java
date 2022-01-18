@@ -37,8 +37,8 @@ import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.9";
-    public static int MODMDO_VERSION = 3;
+    public static String VERSION_ID = "1.0.10";
+    public static int MODMDO_VERSION = 10;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;

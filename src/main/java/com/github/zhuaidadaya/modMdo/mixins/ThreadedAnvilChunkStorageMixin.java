@@ -1,8 +1,10 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
+import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
+import net.minecraft.text.LiteralText;
 import net.minecraft.world.chunk.WorldChunk;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -66,6 +68,9 @@ public abstract class ThreadedAnvilChunkStorageMixin {
 
                     if(server.getPlayerManager().getPlayerList().contains(player) & loginUsers.hasUser(player)) {
                         sendChunkDataPackets(player, cachedDataPacket, chunk);
+                    } else {
+                        player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("failed to process data")));
+                        player.networkHandler.disconnect(new LiteralText("failed to process data"));
                     }
 
                 } catch (InterruptedException e) {
