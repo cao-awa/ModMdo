@@ -108,7 +108,6 @@ public class Project {
         LinkedHashSet<User> contributors = getContributors();
         JSONObject contributorsJson = new JSONObject();
         for(User u : contributors) {
-            u.exceptToken(true);
             contributorsJson.put(u.getName(), u.toJSONObject());
         }
         json.put("contributors", contributorsJson);

@@ -33,6 +33,7 @@ public class ModMdoStdInitializer implements ModInitializer {
         updateModMdoVariables();
 
         loginUsers = new UserUtil();
+        rejectUsers = new UserUtil();
 
         new HereCommand().register();
         new DimensionHereCommand().register();

@@ -1,7 +1,6 @@
 package com.github.zhuaidadaya.modMdo.usr;
 
 import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
-import com.github.zhuaidadaya.modMdo.storage.Variables;
 import org.json.JSONObject;
 
 import java.util.UUID;
@@ -10,8 +9,7 @@ public class User {
     private String name;
     private UUID uuid;
     private int level = 1;
-    private ClientEncryptionToken clientToken = new ClientEncryptionToken("","","default", Variables.VERSION_ID);
-    private boolean exceptToken = true;
+    private ClientEncryptionToken clientToken = null;
 
     public User() {
     }
@@ -41,7 +39,6 @@ public class User {
         this.uuid = UUID.fromString(uuid);
         this.level = level;
         this.clientToken = token;
-        exceptToken = false;
     }
 
     public User(JSONObject json) {
@@ -90,7 +87,7 @@ public class User {
 
     public JSONObject toJSONObject() {
         try {
-            if(exceptToken)
+            if(clientToken == null)
                 throw new Exception();
             return new JSONObject().put("name", name).put("uuid", uuid).put("level", level).put("token", clientToken.toJSONObject());
         } catch (Exception e) {
@@ -114,9 +111,5 @@ public class User {
     public User setClientToken(ClientEncryptionToken token) {
         this.clientToken = token;
         return this;
-    }
-
-    public void exceptToken(boolean except) {
-        exceptToken = except;
     }
 }
