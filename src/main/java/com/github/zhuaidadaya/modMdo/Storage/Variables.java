@@ -29,7 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import java.io.SyncFailedException;
+import java.io.*;
 import java.net.SocketAddress;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -37,8 +37,8 @@ import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.9";
-    public static int MODMDO_VERSION = 3;
+    public static String VERSION_ID = "1.0.11";
+    public static int MODMDO_VERSION = 5;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -95,6 +95,20 @@ public class Variables {
     public static String tickStartTime;
     public static LinkedHashMap<String, Long> tickMap = new LinkedHashMap<>();
     public static LinkedHashMap<String, LinkedHashMap<String, Integer>> tickEntitiesMap = new LinkedHashMap<>();
+
+    public static void saveToken() {
+        try {
+            new File("token/").mkdirs();
+            BufferedWriter bw = new BufferedWriter(new FileWriter("token/token.txt"));
+            bw.write(modMdoToken.getServerToken().checkToken("default"));
+            bw.close();
+            bw = new BufferedWriter(new FileWriter("token/token_ops.txt"));
+            bw.write(modMdoToken.getServerToken().checkToken("ops"));
+            bw.close();
+        } catch (IOException e) {
+
+        }
+    }
 
     public static void sendMessageToPlayer(ServerPlayerEntity player, Text message, boolean actionBar) {
         player.sendMessage(message, actionBar);
