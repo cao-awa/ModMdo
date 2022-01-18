@@ -87,8 +87,6 @@ public class User {
 
     public JSONObject toJSONObject() {
         try {
-            if(clientToken == null)
-                throw new Exception();
             return new JSONObject().put("name", name).put("uuid", uuid).put("level", level).put("token", clientToken.toJSONObject());
         } catch (Exception e) {
             return new JSONObject().put("name", name).put("uuid", uuid).put("level", level);
