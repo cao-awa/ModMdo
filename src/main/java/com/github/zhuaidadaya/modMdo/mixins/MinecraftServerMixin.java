@@ -21,15 +21,14 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.enabledCancelTIck;
 
 @Mixin(MinecraftServer.class)
 public class MinecraftServerMixin {
     @Shadow
     @Final
     private Map<RegistryKey<World>, ServerWorld> worlds;
-
-    @Shadow private float tickTime;
+    @Shadow
+    private float tickTime;
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tickStart(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
@@ -43,6 +42,11 @@ public class MinecraftServerMixin {
             tickMap.put("tick_start", System.nanoTime());
             tickStartTime = Times.getTime(TimeType.ALL);
         }
+    }
+
+    @Inject(method = "stop",at = @At("HEAD"))
+    public void stop(boolean bl, CallbackInfo ci) {
+        config.shutdown();
     }
 
     @Inject(method = "tick", at = @At("RETURN"))

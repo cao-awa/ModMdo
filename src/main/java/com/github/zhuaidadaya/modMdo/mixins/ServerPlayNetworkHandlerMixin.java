@@ -36,7 +36,7 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
  * SKP(Skip)
  * VSD(Version Difference)
  * <p>
- * 手动替换检测: 1.18.x
+ * 手动替换检测: 1.17.x
  */
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
@@ -150,22 +150,26 @@ public abstract class ServerPlayNetworkHandlerMixin {
      */
     @Overwrite
     public void onDisconnected(Text reason) {
-        if(loginUsers.hasUser(player)) {
-            LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
-            this.server.forcePlayerSampleUpdate();
-            if(loginUsers.hasUser(player))
-                this.server.getPlayerManager().broadcast((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
-            this.player.onDisconnect();
-            this.server.getPlayerManager().remove(this.player);
-            this.player.getTextStream().onDisconnect();
-            if(this.isHost()) {
-                LOGGER.info("Stopping singleplayer server as player logged out");
-                this.server.stop(false);
+        new Thread(() -> {
+            Thread.currentThread().setName("ModMdo accepting");
+
+            if(loginUsers.hasUser(player)) {
+                LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
+                this.server.forcePlayerSampleUpdate();
+                if(loginUsers.hasUser(player))
+                    this.server.getPlayerManager().broadcast((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
+                this.player.onDisconnect();
+                this.server.getPlayerManager().remove(this.player);
+                this.player.getTextStream().onDisconnect();
+                if(this.isHost()) {
+                    LOGGER.info("Stopping singleplayer server as player logged out");
+                    this.server.stop(false);
+                }
+                if(enableEncryptionToken) {
+                    serverLogin.logout(player);
+                }
             }
-            if(enableEncryptionToken) {
-                serverLogin.logout(player);
-            }
-        }
+        }).start();
     }
 
     /**

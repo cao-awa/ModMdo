@@ -9,8 +9,12 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.modMdoType;
 public class ModMdoClientInitializer implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        LOGGER.info("loading for ModMdo Client (step 2/2)");
+        new Thread(() -> {
+            Thread.currentThread().setName("ModMdo");
 
-        modMdoType = ModMdoType.CLIENT;
+            LOGGER.info("loading for ModMdo Client (step 2/2)");
+
+            modMdoType = ModMdoType.CLIENT;
+        }).start();
     }
 }

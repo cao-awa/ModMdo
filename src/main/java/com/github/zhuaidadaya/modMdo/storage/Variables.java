@@ -36,8 +36,8 @@ import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.14";
-    public static int MODMDO_VERSION = 8;
+    public static String VERSION_ID = "1.0.15";
+    public static int MODMDO_VERSION = 9;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -68,8 +68,10 @@ public class Variables {
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
     public static DimensionTips dimensionTips = new DimensionTips();
+
     public static Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
+
     public static Object2IntRBTreeMap<String> modMdoCommandVersionMap = new Object2IntRBTreeMap<>();
 
     public static String MODMDO_COMMAND_ROOT = "/";
@@ -211,7 +213,7 @@ public class Variables {
     }
 
     public static String getCommandRequestVersion(String commandBelong) {
-        return modMdoIdToVersionMap.get(modMdoCommandVersionMap.getInt( commandBelong));
+        return modMdoIdToVersionMap.get(modMdoCommandVersionMap.getInt(commandBelong));
     }
 
     public static void initModMdoToken() {

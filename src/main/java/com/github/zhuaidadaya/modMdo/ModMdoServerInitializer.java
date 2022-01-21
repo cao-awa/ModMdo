@@ -14,16 +14,20 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 public class ModMdoServerInitializer implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
-        LOGGER.info("loading for ModMdo Server (step 2/2)");
+        new Thread(() -> {
+            Thread.currentThread().setName("ModMdo");
 
-        modMdoType = ModMdoType.SERVER;
+            LOGGER.info("loading for ModMdo Server (step 2/2)");
 
-        parseMapFormat();
-        //        new ProjectCommand().register();
+            modMdoType = ModMdoType.SERVER;
+
+            parseMapFormat();
+            //        new ProjectCommand().register();
 
 
-        if(modMdoToken != null)
-            saveToken();
+            if(modMdoToken != null)
+                saveToken();
+        }).start();
     }
 
     public void parseMapFormat() {
