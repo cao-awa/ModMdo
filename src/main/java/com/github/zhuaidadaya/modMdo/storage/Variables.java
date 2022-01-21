@@ -62,6 +62,7 @@ public class Variables {
     public static boolean enableTickAnalyzer = false;
     public static boolean enabledCancelEntitiesTIck = false;
     public static boolean enabledCancelTIck = false;
+    public static boolean tokenChanged = false;
     public static long cancelTickStart = - 1;
     public static int tokenGenerateSize = 128;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");

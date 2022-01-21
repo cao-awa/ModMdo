@@ -32,7 +32,11 @@ public class ModMdoStdInitializer implements ModInitializer {
                                     
                     """).setSplitRange(50000).setEncryption(false).setEncryptionHead(false).setEncryptionType(EncryptionType.COMPOSITE_SEQUENCE);
 
-            initModMdoVariables();
+            try {
+                initModMdoVariables();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             updateModMdoVariables();
 
             loginUsers = new UserUtil();
@@ -65,10 +69,11 @@ public class ModMdoStdInitializer implements ModInitializer {
         if(config.getConfig("encryption_token") != null)
             enableEncryptionToken = config.getConfigString("encryption_token").equals("enable");
 
-        if(enableEncryptionToken) {
-            if(config.getConfig("token_by_encryption") != null) {
-                initModMdoToken();
-            } else {
+        if(config.getConfig("token_by_encryption") != null) {
+            LOGGER.info("init token");
+            initModMdoToken();
+        } else {
+            if(enableEncryptionToken) {
                 try {
                     modMdoToken = new EncryptionTokenUtil(ServerEncryptionToken.createServerEncryptionToken());
                     LOGGER.info("spawned new encryption token, check the config file");
@@ -76,9 +81,10 @@ public class ModMdoStdInitializer implements ModInitializer {
                     enableEncryptionToken = false;
                     LOGGER.info("failed to enable encryption token");
                 }
+            } else {
+                modMdoToken = new EncryptionTokenUtil();
             }
-        } else {
-            modMdoToken = new EncryptionTokenUtil();
         }
+
     }
 }
