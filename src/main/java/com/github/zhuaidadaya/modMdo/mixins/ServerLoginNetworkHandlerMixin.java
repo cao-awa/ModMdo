@@ -57,7 +57,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player provided a bad token");
                     } else {
                         connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with token")));
-                        LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
+                        LOGGER.warn("ModMdo reject a login request, " + player.getName().asString() + ", because player not login with ModMdo");
                     }
                     connection.disconnect(new LiteralText("failed to login server"));
                     try {

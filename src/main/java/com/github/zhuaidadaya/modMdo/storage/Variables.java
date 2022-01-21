@@ -32,13 +32,12 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.SocketAddress;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.13";
-    public static int MODMDO_VERSION = 7;
+    public static String VERSION_ID = "1.0.14";
+    public static int MODMDO_VERSION = 8;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -87,7 +86,6 @@ public class Variables {
 
     public static ServerLogin serverLogin = new ServerLogin();
     public static LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
-    public static LinkedHashSet<ServerPlayerEntity> playersChunkSendCache = new LinkedHashSet<>();
 
     public static int analyzedTick = 0;
     public static boolean shortAnalyze = true;
