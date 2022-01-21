@@ -37,19 +37,15 @@ public class ProjectCommand extends SimpleCommandOperation implements Configurab
 
                     return 1;
                 } catch (Exception e) {
-                    e.printStackTrace();
                     return - 1;
                 }
             }).then(argument("projectNote", greedyString()).executes(c -> {
-                System.out.println("project note");
                 return 2;
             })))).then(literal("detailed").then(argument("projects", ProjectListArgument.projectList()).executes(projectsInfo -> {
                 String[] input = projectsInfo.getInput().split(" ");
-                System.out.println(input[2]);
                 return 3;
             }).then(literal("initiator").executes(initiator -> {
                 String[] input = initiator.getInput().split(" ");
-                System.out.println(input[2]);
                 initiator.getSource().sendFeedback(Text.of(initiator.getLastChild().getInput()), true);
                 return 0;
             })))));

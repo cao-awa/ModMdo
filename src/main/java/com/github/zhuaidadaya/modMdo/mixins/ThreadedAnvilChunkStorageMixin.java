@@ -1,20 +1,12 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
-import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
-import net.minecraft.text.LiteralText;
 import net.minecraft.world.chunk.WorldChunk;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.playersChunkSendCache;
 
 /**
  * TAG:DRT|SKP|VSD
@@ -54,33 +46,33 @@ public abstract class ThreadedAnvilChunkStorageMixin {
      * @author zhuaidadaya
      * @author 草二号机
      */
-    @Inject(method = "sendChunkDataPackets", at = @At("HEAD"), cancellable = true)
-    private void sendChunkDataPackets(ServerPlayerEntity player, MutableObject<ChunkDataS2CPacket> cachedDataPacket, WorldChunk chunk, CallbackInfo ci) {
-        if(playersChunkSendCache.contains(player))
-            ci.cancel();
-
-        if(! loginUsers.hasUser(player)) {
-            playersChunkSendCache.add(player);
-
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1000);
-
-                    if(server.getPlayerManager().getPlayerList().contains(player) & loginUsers.hasUser(player)) {
-                        sendChunkDataPackets(player, cachedDataPacket, chunk);
-                    } else {
-                        player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("failed to process data")));
-                        player.networkHandler.disconnect(new LiteralText("failed to process data"));
-                    }
-
-                } catch (InterruptedException e) {
-
-                }
-
-                playersChunkSendCache.remove(player);
-            }).start();
-
-            ci.cancel();
-        }
-    }
+//    @Inject(method = "sendChunkDataPackets", at = @At("HEAD"), cancellable = true)
+//    private void sendChunkDataPackets(ServerPlayerEntity player, MutableObject<ChunkDataS2CPacket> cachedDataPacket, WorldChunk chunk, CallbackInfo ci) {
+//        if(playersChunkSendCache.contains(player))
+//            ci.cancel();
+//
+//        if(! loginUsers.hasUser(player)) {
+//            playersChunkSendCache.add(player);
+//
+//            new Thread(() -> {
+//                try {
+//                    Thread.sleep(1000);
+//
+//                    if(server.getPlayerManager().getPlayerList().contains(player) & loginUsers.hasUser(player)) {
+//                        sendChunkDataPackets(player, cachedDataPacket, chunk);
+//                    } else {
+//                        player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("failed to process data")));
+//                        player.networkHandler.disconnect(new LiteralText("failed to process data"));
+//                    }
+//
+//                } catch (InterruptedException e) {
+//
+//                }
+//
+//                playersChunkSendCache.remove(player);
+//            }).start();
+//
+//            ci.cancel();
+//        }
+//    }
 }

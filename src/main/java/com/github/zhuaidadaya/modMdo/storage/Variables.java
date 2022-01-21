@@ -37,8 +37,8 @@ import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.11";
-    public static int MODMDO_VERSION = 5;
+    public static String VERSION_ID = "1.0.13";
+    public static int MODMDO_VERSION = 7;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -209,12 +209,11 @@ public class Variables {
     }
 
     public static boolean getCommandCanUse(String commandBelong, ServerPlayerEntity player) {
-        System.out.println(getPlayerModMdoVersion(player));
-        return modMdoCommandVersionMap.get(commandBelong) <= getPlayerModMdoVersion(player);
+        return modMdoCommandVersionMap.getInt(commandBelong) <= getPlayerModMdoVersion(player);
     }
 
     public static String getCommandRequestVersion(String commandBelong) {
-        return modMdoIdToVersionMap.get(modMdoCommandVersionMap.get(commandBelong));
+        return modMdoIdToVersionMap.get(modMdoCommandVersionMap.getInt( commandBelong));
     }
 
     public static void initModMdoToken() {

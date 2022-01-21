@@ -73,9 +73,6 @@ public class ModMdoStdInitializer implements ModInitializer {
                     LOGGER.info("failed to enable encryption token");
                 }
             }
-
-            if(modMdoToken != null)
-                saveToken();
         } else {
             modMdoToken = new EncryptionTokenUtil();
         }
