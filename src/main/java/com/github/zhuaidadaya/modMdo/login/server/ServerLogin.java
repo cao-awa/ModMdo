@@ -19,6 +19,8 @@ public class ServerLogin {
                 if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
                     loginUsers.put(data1, new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)).toJSONObject());
 
+                    Thread.currentThread().setName("ModMdo Login");
+
                     LOGGER.info("login player: " + data1);
                 } else {
                     rejectUsers.put(data1,new User(data2, data1, level).toJSONObject());

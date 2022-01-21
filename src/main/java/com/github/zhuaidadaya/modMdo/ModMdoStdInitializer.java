@@ -17,34 +17,38 @@ public class ModMdoStdInitializer implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        LOGGER.info("loading ModMdo " + VERSION_ID + " (step 1/2)");
-        LOGGER.info("ModMdo Std Initiator running");
-        LOGGER.info("loading for ModMdo Std init");
+        new Thread(() -> {
+            Thread.currentThread().setName("ModMdo");
 
-        config = new ObjectConfigUtil(entrust,"config/", "ModMdo.mhf").setNote("""
-                this file is database file of "ModMdo"
-                not configs only
-                so this file maybe get large and large
-                but usually, it will smaller than 1MB
-                                
-                """).setSplitRange(50000).setEncryption(false).setEncryptionHead(false).setEncryptionType(EncryptionType.COMPOSITE_SEQUENCE);
+            LOGGER.info("loading ModMdo " + VERSION_ID + " (step 1/2)");
+            LOGGER.info("ModMdo Std Initiator running");
+            LOGGER.info("loading for ModMdo Std init");
 
-        initModMdoVariables();
-        updateModMdoVariables();
+            config = new ObjectConfigUtil(entrust, "config/", "ModMdo.mhf").setNote("""
+                    this file is database file of "ModMdo"
+                    not configs only
+                    so this file maybe get large and large
+                    but usually, it will smaller than 1MB
+                                    
+                    """).setSplitRange(50000).setEncryption(false).setEncryptionHead(false).setEncryptionType(EncryptionType.COMPOSITE_SEQUENCE);
 
-        loginUsers = new UserUtil();
-        rejectUsers = new UserUtil();
+            initModMdoVariables();
+            updateModMdoVariables();
 
-        new HereCommand().register();
-        new DimensionHereCommand().register();
-        new ModMdoUserCommand().register();
-        new ServerTickListener().listener();
-        new ServerStartListener().listener();
-        new CavaCommand().register();
-        new ModMdoConfigCommand().register();
-        new TokenCommand().register();
-        new BackupCommand().register();
-        new AnalyzerCommand().register();
+            loginUsers = new UserUtil();
+            rejectUsers = new UserUtil();
+
+            new HereCommand().register();
+            new DimensionHereCommand().register();
+            new ModMdoUserCommand().register();
+            new ServerTickListener().listener();
+            new ServerStartListener().listener();
+            new CavaCommand().register();
+            new ModMdoConfigCommand().register();
+            new TokenCommand().register();
+            new BackupCommand().register();
+            new AnalyzerCommand().register();
+        }).start();
     }
 
     public void initModMdoVariables() {

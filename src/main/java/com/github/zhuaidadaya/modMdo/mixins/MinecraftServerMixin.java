@@ -44,6 +44,11 @@ public class MinecraftServerMixin {
         }
     }
 
+    @Inject(method = "stop",at = @At("HEAD"))
+    public void stop(boolean bl, CallbackInfo ci) {
+        config.shutdown();
+    }
+
     @Inject(method = "tick", at = @At("RETURN"))
     public void tickEnd(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if(enableTickAnalyzer) {
