@@ -32,13 +32,12 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.SocketAddress;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.11";
-    public static int MODMDO_VERSION = 5;
+    public static String VERSION_ID = "1.0.14";
+    public static int MODMDO_VERSION = 8;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -69,8 +68,10 @@ public class Variables {
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
     public static DimensionTips dimensionTips = new DimensionTips();
+
     public static Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
+
     public static Object2IntRBTreeMap<String> modMdoCommandVersionMap = new Object2IntRBTreeMap<>();
 
     public static String MODMDO_COMMAND_ROOT = "/";
@@ -87,7 +88,6 @@ public class Variables {
 
     public static ServerLogin serverLogin = new ServerLogin();
     public static LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
-    public static LinkedHashSet<ServerPlayerEntity> playersChunkSendCache = new LinkedHashSet<>();
 
     public static int analyzedTick = 0;
     public static boolean shortAnalyze = true;
@@ -209,12 +209,11 @@ public class Variables {
     }
 
     public static boolean getCommandCanUse(String commandBelong, ServerPlayerEntity player) {
-        System.out.println(getPlayerModMdoVersion(player));
-        return modMdoCommandVersionMap.get(commandBelong) <= getPlayerModMdoVersion(player);
+        return modMdoCommandVersionMap.getInt(commandBelong) <= getPlayerModMdoVersion(player);
     }
 
     public static String getCommandRequestVersion(String commandBelong) {
-        return modMdoIdToVersionMap.get(modMdoCommandVersionMap.get(commandBelong));
+        return modMdoIdToVersionMap.get(modMdoCommandVersionMap.getInt(commandBelong));
     }
 
     public static void initModMdoToken() {

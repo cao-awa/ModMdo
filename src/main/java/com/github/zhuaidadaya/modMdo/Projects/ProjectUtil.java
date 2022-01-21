@@ -39,7 +39,6 @@ public class ProjectUtil {
             this.projects.put(project.getID(), project);
             projectsMap.put(project.getName(), project.getID());
         }
-        System.out.println("PJT done: " + this.projects);
     }
 
     public ProjectUtil addProject(Project... projects) {
@@ -53,7 +52,6 @@ public class ProjectUtil {
             this.projects.put(project.getID(), project);
             projectsMap.put(project.getName(), project.getID());
         }
-        System.out.println(this.projects);
         return this;
     }
 

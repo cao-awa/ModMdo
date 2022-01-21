@@ -142,7 +142,6 @@ public class ServerTickListener {
                     try {
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
-                        e.printStackTrace();
                         player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
                     }
                 }

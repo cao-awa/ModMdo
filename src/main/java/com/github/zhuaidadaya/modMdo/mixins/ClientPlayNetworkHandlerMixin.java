@@ -3,18 +3,13 @@ package com.github.zhuaidadaya.modMdo.mixins;
 import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,30 +17,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Set;
 import java.util.UUID;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketListener {
-    @Final
-    @Shadow
-    private MinecraftClient client;
-
     @Shadow
     @Final
     private ClientConnection connection;
-
-    @Shadow private Set<RegistryKey<World>> worldKeys;
-
-    @Shadow private DynamicRegistryManager registryManager;
-
-    @Shadow private int chunkLoadDistance;
-
-    @Shadow private ClientWorld.Properties worldProperties;
-
-    @Shadow private ClientWorld world;
 
     @Shadow @Final private GameProfile profile;
 
