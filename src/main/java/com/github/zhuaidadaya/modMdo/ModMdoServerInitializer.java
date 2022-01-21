@@ -32,7 +32,7 @@ public class ModMdoServerInitializer implements DedicatedServerModInitializer {
 
     public void parseMapFormat() {
         JSONObject commandMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/format/command_map.json", getClass())))));
-        JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/format/version_map.json", getClass())))));
+        JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/format/versions_map.json", getClass())))));
 
         for(String s : versionMap.keySet())
             modMdoIdToVersionMap.put(Integer.valueOf(s), versionMap.getString(s));

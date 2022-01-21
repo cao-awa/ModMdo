@@ -1,8 +1,11 @@
 package com.github.zhuaidadaya.modMdo.usr;
 
 import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
+import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.UUID;
 
 public class User {
@@ -10,6 +13,7 @@ public class User {
     private UUID uuid;
     private int level = 1;
     private ClientEncryptionToken clientToken = null;
+    private ObjectRBTreeSet<String> follows = new ObjectRBTreeSet<>();
 
     public User() {
     }
@@ -59,6 +63,14 @@ public class User {
         } catch (Exception e) {
 
         }
+
+        try {
+            JSONArray subs = json.getJSONArray("subs");
+            for(Object o : subs)
+                this.follows.add(o.toString());
+        } catch (Exception e) {
+
+        }
     }
 
     public String getName() {
@@ -86,13 +98,21 @@ public class User {
     }
 
     public JSONObject toJSONObject() {
+        JSONObject json = new JSONObject();
         try {
-            if(clientToken == null)
-                throw new Exception();
-            return new JSONObject().put("name", name).put("uuid", uuid).put("level", level).put("token", clientToken.toJSONObject());
+            json.put("name", name);
+            json.put("uuid", uuid);
+            json.put("level", level);
+            json.put("token", clientToken.toJSONObject());
+            json.put("subs", new JSONArray(follows.toArray()));
         } catch (Exception e) {
-            return new JSONObject().put("name", name).put("uuid", uuid).put("level", level);
+            json.put("name", name);
+            json.put("uuid", uuid);
+            json.put("level", level);
+            json.put("subs", new JSONArray(follows.toArray()));
         }
+
+        return json;
     }
 
     public int getLevel() {
@@ -111,5 +131,23 @@ public class User {
     public User setClientToken(ClientEncryptionToken token) {
         this.clientToken = token;
         return this;
+    }
+
+    public User addFollows(String... follows) {
+        if(follows != null)
+            this.follows.addAll(List.of(follows));
+        return this;
+    }
+
+    public void removeFollow(String follow) {
+        this.follows.remove(follow);
+    }
+
+    public void clearFollows() {
+        this.follows = new ObjectRBTreeSet<>();
+    }
+
+    public boolean isFollow(String... follows) {
+        return this.follows.containsAll(List.of(follows));
     }
 }

@@ -36,7 +36,7 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
  * SKP(Skip)
  * VSD(Version Difference)
  * <p>
- * 手动替换检测: 1.17.x
+ * 手动替换检测: 1.18.x
  */
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
@@ -145,7 +145,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
      * @author 草awa
      * @author 草二号机
      * @author zhuaidadaya
-     *
      * @reason
      */
     @Overwrite
@@ -153,13 +152,13 @@ public abstract class ServerPlayNetworkHandlerMixin {
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
-            if(loginUsers.hasUser(player)) {
-                LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
+            LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
+
+            if(loginUsers.hasUser(player) | player.networkHandler.connection.getAddress() == null) {
                 this.server.forcePlayerSampleUpdate();
-                if(loginUsers.hasUser(player))
-                    this.server.getPlayerManager().broadcast((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
-                this.player.onDisconnect();
                 this.server.getPlayerManager().remove(this.player);
+                this.server.getPlayerManager().broadcast((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
+                this.player.onDisconnect();
                 this.player.getTextStream().onDisconnect();
                 if(this.isHost()) {
                     LOGGER.info("Stopping singleplayer server as player logged out");
@@ -169,6 +168,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     serverLogin.logout(player);
                 }
             }
+
         }).start();
     }
 
@@ -265,10 +265,14 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "executeCommand", at = @At("HEAD"), cancellable = true)
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
+        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.try", player.getName().asString(), input), "runCommand");
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
             LOGGER.info("rejected command request: not login user");
+            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.rejected.without.login", player.getName().asString()), "runCommand");
             ci.cancel();
         }
+
+        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command", player.getName().asString(), input), "runCommand");
     }
 
     //    /**

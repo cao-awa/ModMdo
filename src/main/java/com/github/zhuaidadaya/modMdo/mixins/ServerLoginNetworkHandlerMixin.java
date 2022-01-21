@@ -10,6 +10,7 @@ import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -47,25 +48,28 @@ public abstract class ServerLoginNetworkHandlerMixin {
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
-            new ServerPlayNetworkHandler(server, connection, player)
-                    .sendPacket(
-                            new CustomPayloadS2CPacket(
-                                    modMdoServerChannel,
-                                    new PacketByteBuf(Unpooled.buffer()).writeVarInt(enableEncryptionToken ? 99 : 96)
-                            )
-                    );
-
             long waiting = System.currentTimeMillis();
+
+            try {
+                new ServerPlayNetworkHandler(server, connection, player).sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(enableEncryptionToken ? 99 : 96)));
+
+                sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.try", player.getName().asString()), "joinServer");
+            } catch (Exception e) {
+
+            }
+
             while(! loginUsers.hasUser(player)) {
                 if(rejectUsers.hasUser(player)) {
                     connection.send(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
                     LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player provided a bad token");
+                    sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.bad.token", player.getName().asString()), "joinServer");
                     waiting = 0;
                 }
                 if(System.currentTimeMillis() - waiting > 3000) {
                     if(!rejectUsers.hasUser(player)) {
                         connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with token")));
                         LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
+                        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "joinServer");
                     }
                     connection.disconnect(new LiteralText("failed to login server"));
                     try {

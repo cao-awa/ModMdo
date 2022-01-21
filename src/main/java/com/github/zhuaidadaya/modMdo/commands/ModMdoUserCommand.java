@@ -2,16 +2,17 @@ package com.github.zhuaidadaya.modMdo.commands;
 
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
-import com.github.zhuaidadaya.utils.config.Config;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import org.json.JSONObject;
 
+import java.util.Locale;
+
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class ModMdoUserCommand extends SimpleCommandOperation implements ConfigurableCommand{
+public class ModMdoUserCommand extends SimpleCommandOperation implements ConfigurableCommand {
     public void register() {
         init();
 
@@ -44,7 +45,6 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
                 return 2;
             }).then(literal("receive").executes(receive -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(receive), this, receive)) {
-
                     ServerPlayerEntity player = receive.getSource().getPlayer();
                     setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveDeadMessage", "receive");
                     receive.getSource().sendFeedback(receiveDeadMessage(), false);
@@ -57,7 +57,45 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
                     rejection.getSource().sendFeedback(rejectionDeadMessage(), false);
                 }
                 return 0;
-            }))));
+            }))).then(literal("objects").then(literal("joinServer").then(literal("follow").executes(joinServerFollow -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_FOLLOW, getPlayer(joinServerFollow), this, joinServerFollow)) {
+                    String joinGameFollowConfig = config.getConfigString("joinServer").toLowerCase(Locale.ROOT);
+                    if(joinGameFollowConfig.equals("unable")) {
+                        sendFeedback(joinServerFollow, new TranslatableText("follow.join.server.unable.rule.format"));
+                    } else {
+                        if(joinGameFollowConfig.equals("ops") & ! getPlayer(joinServerFollow).hasPermissionLevel(4)) {
+                            sendFeedback(joinServerFollow, new TranslatableText("follow.join.server.ops.rule.format"));
+                        } else {
+                            addUserFollow(users.getUser(getPlayer(joinServerFollow)), "joinServer");
+                        }
+                    }
+                }
+                return 0;
+            })).then(literal("unfollow").executes(joinServerUnfollow -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_FOLLOW, getPlayer(joinServerUnfollow), this, joinServerUnfollow)) {
+                    removeUserFollow(users.getUser(getPlayer(joinServerUnfollow)), "joinServer");
+                }
+                return 1;
+            }))).then(literal("runCommand").then(literal("follow").executes(runCommandFollow -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_FOLLOW, getPlayer(runCommandFollow), this, runCommandFollow)) {
+                    String joinGameFollowConfig = config.getConfigString("runCommand").toLowerCase(Locale.ROOT);
+                    if(joinGameFollowConfig.equals("unable")) {
+                        sendFeedback(runCommandFollow, new TranslatableText("follow.run.command.unable.rule.format"));
+                    } else {
+                        if(joinGameFollowConfig.equals("ops") & ! getPlayer(runCommandFollow).hasPermissionLevel(4)) {
+                            sendFeedback(runCommandFollow, new TranslatableText("follow.run.command.ops.rule.format"));
+                        } else {
+                            addUserFollow(users.getUser(getPlayer(runCommandFollow)), "runCommand");
+                        }
+                    }
+                }
+                return 0;
+            })).then(literal("unfollow").executes(runCommandUnfollow -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_FOLLOW, getPlayer(runCommandUnfollow), this, runCommandUnfollow)) {
+                    removeUserFollow(users.getUser(getPlayer(runCommandUnfollow)), "runCommand");
+                }
+                return 1;
+            })))));
         });
     }
 
@@ -74,7 +112,7 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
     }
 
     public TranslatableText rejectionDeadMessage() {
-        return new TranslatableText( "dead.rejection");
+        return new TranslatableText("dead.rejection");
     }
 
     public TranslatableText receiveDeadMessage() {

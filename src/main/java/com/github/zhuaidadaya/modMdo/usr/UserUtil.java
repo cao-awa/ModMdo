@@ -22,6 +22,10 @@ public class UserUtil {
         users.put(target, value);
     }
 
+    public void put(User user) {
+        users.put(user.getID(), user.toJSONObject());
+    }
+
     public JSONObject getJSONObject(Object target) {
         if(users.get(target.toString()) == null)
             throw new IllegalStateException();

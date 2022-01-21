@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modMdo.listeners;
 
 import com.github.zhuaidadaya.modMdo.simple.vec.XYZ;
+import com.github.zhuaidadaya.modMdo.storage.Variables;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -22,6 +23,8 @@ public class ServerTickListener {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             PlayerManager players = server.getPlayerManager();
 
+            Variables.server = server;
+
             try {
                 eachPlayer(players);
             } catch (Exception e) {
@@ -42,8 +45,12 @@ public class ServerTickListener {
     public void eachPlayer(PlayerManager players) {
         for(ServerPlayerEntity player : players.getPlayerList()) {
             if(modMdoType == ModMdoType.SERVER & enableEncryptionToken) {
-                checkLoginStat(player);
-                cancelLoginIfNoExistentOrChangedToken(player, players);
+                checkLoginStat(player, players);
+                try {
+                    cancelLoginIfNoExistentOrChangedToken(player, players);
+                } catch (Exception e) {
+
+                }
             }
             if(enableDeadMessage)
                 detectPlayerDead(player);
@@ -81,11 +88,13 @@ public class ServerTickListener {
                         if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
                             loginUsers.removeUser(player);
                             player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
+                            manager.remove(player);
                         }
                     } else if(user.getLevel() == 4) {
                         if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
                             loginUsers.removeUser(player);
                             player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
+                            manager.remove(player);
                         }
                     }
                 }
@@ -131,7 +140,7 @@ public class ServerTickListener {
      * @author 草awa
      * @author 草二号机
      */
-    public void checkLoginStat(ServerPlayerEntity player) {
+    public void checkLoginStat(ServerPlayerEntity player, PlayerManager manager) {
         try {
             if(! loginUsers.hasUser(player)) {
                 if(skipMap.get(player) == null)
@@ -142,12 +151,13 @@ public class ServerTickListener {
                     try {
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
-                        player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
+                        if(player.networkHandler.connection.isOpen())
+                            player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 

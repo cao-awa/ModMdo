@@ -3,9 +3,11 @@ package com.github.zhuaidadaya.modMdo.login.token;
 import com.github.zhuaidadaya.modMdo.login.token.Encryption.AES;
 import org.json.JSONObject;
 
+import java.util.Objects;
+
 public class ServerEncryptionToken extends EncryptionToken {
     public ServerEncryptionToken(String serverDefaultToken, String serverOpsToken) {
-        super(serverDefaultToken, serverOpsToken);
+        super(Objects.requireNonNull(serverDefaultToken), Objects.requireNonNull(serverOpsToken));
     }
 
     public ServerEncryptionToken(EncryptionToken serverToken) {
@@ -14,7 +16,7 @@ public class ServerEncryptionToken extends EncryptionToken {
 
     public static ServerEncryptionToken createServerEncryptionToken() {
         try {
-            return new ServerEncryptionToken(new AES().randomGet(128), new AES().randomGet(128));
+            return new ServerEncryptionToken(new AES().randomGet(1024), new AES().randomGet(1024));
         } catch (Exception e) {
             return new ServerEncryptionToken("", "");
         }
