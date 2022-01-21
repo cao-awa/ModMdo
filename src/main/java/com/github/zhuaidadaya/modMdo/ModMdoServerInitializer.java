@@ -20,6 +20,10 @@ public class ModMdoServerInitializer implements DedicatedServerModInitializer {
 
         parseMapFormat();
         //        new ProjectCommand().register();
+
+
+        if(modMdoToken != null)
+            saveToken();
     }
 
     public void parseMapFormat() {
