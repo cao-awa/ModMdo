@@ -151,8 +151,11 @@ public class ServerTickListener {
                     try {
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
-                        if(player.networkHandler.connection.isOpen())
+                        if(player.networkHandler.connection.isOpen()) {
                             player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
+                            if(player.networkHandler.connection.getAddress() != null)
+                                manager.remove(player);
+                        }
                     }
                 }
             }

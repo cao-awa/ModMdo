@@ -62,6 +62,7 @@ public class Variables {
     public static boolean enableTickAnalyzer = false;
     public static boolean enabledCancelEntitiesTIck = false;
     public static boolean enabledCancelTIck = false;
+    public static boolean tokenChanged = false;
     public static long cancelTickStart = - 1;
     public static int tokenGenerateSize = 128;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
@@ -105,7 +106,7 @@ public class Variables {
             bw = new BufferedWriter(new FileWriter("token/token_ops.txt"));
             bw.write(modMdoToken.getServerToken().checkToken("ops"));
             bw.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
 
         }
     }
@@ -224,6 +225,7 @@ public class Variables {
 
             try {
                 JSONObject clientTokens = token.getJSONObject("client");
+
                 for(Object o : clientTokens.keySet()) {
                     JSONObject clientToken = clientTokens.getJSONObject(o.toString());
                     modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type"), VERSION_ID));
@@ -236,7 +238,7 @@ public class Variables {
 
             modMdoToken.setServerToken(new ServerEncryptionToken(serverToken.getString("default"), serverToken.getString("ops")));
         } catch (Exception e) {
-            modMdoToken = new EncryptionTokenUtil(ServerEncryptionToken.createServerEncryptionToken());
+
         }
     }
 
