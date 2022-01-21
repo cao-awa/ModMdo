@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -31,13 +32,25 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.SocketAddress;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.UUID;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.14";
-    public static int MODMDO_VERSION = 8;
+    public static final String MODMDO_COMMAND_ROOT = "/";
+    public static final String MODMDO_COMMAND_CONF = "modmdo/";
+    public static final String MODMDO_COMMAND_TICK = "modmdo/tick/";
+    public static final String MODMDO_COMMAND_HERE = "here/";
+    public static final String MODMDO_COMMAND_CAVA = "cava/";
+    public static final String MODMDO_COMMAND_BAK = "bak/";
+    public static final String MODMDO_COMMAND_USR = "user/";
+    public static final String MODMDO_COMMAND_ANALYZER = "analyzer/";
+    public static final String MODMDO_COMMAND_TOKEN = "token/";
+    public static final String MODMDO_COMMAND_FOLLOW = "user/follow";
+    public static String VERSION_ID = "1.0.15";
+    public static int MODMDO_VERSION = 9;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -68,22 +81,9 @@ public class Variables {
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
     public static DimensionTips dimensionTips = new DimensionTips();
-
     public static Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
-
     public static Object2IntRBTreeMap<String> modMdoCommandVersionMap = new Object2IntRBTreeMap<>();
-
-    public static String MODMDO_COMMAND_ROOT = "/";
-    public static String MODMDO_COMMAND_CONF = "modmdo/";
-    public static String MODMDO_COMMAND_TICK = "modmdo/tick/";
-    public static String MODMDO_COMMAND_HERE = "here/";
-    public static String MODMDO_COMMAND_CAVA = "cava/";
-    public static String MODMDO_COMMAND_BAK = "bak/";
-    public static String MODMDO_COMMAND_USR = "user/";
-    public static String MODMDO_COMMAND_ANALYZER = "analyzer/";
-    public static String MODMDO_COMMAND_TOKEN = "token/";
-
     public static int itemDespawnAge = 6000;
 
     public static ServerLogin serverLogin = new ServerLogin();
@@ -183,8 +183,8 @@ public class Variables {
     public static int getPlayerModMdoVersion(ServerPlayerEntity player) {
         try {
             return Integer.parseInt(loginUsers.getUser(player).getClientToken().getVersion());
-        }catch (Exception e) {
-            return -1;
+        } catch (Exception e) {
+            return - 1;
         }
     }
 
@@ -226,17 +226,17 @@ public class Variables {
                 JSONObject clientTokens = token.getJSONObject("client");
                 for(Object o : clientTokens.keySet()) {
                     JSONObject clientToken = clientTokens.getJSONObject(o.toString());
-                    modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type"), ""));
+                    modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type"), VERSION_ID));
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+
             }
 
             JSONObject serverToken = token.getJSONObject("server");
 
             modMdoToken.setServerToken(new ServerEncryptionToken(serverToken.getString("default"), serverToken.getString("ops")));
         } catch (Exception e) {
-
+            modMdoToken = new EncryptionTokenUtil(ServerEncryptionToken.createServerEncryptionToken());
         }
     }
 
@@ -285,24 +285,92 @@ public class Variables {
         updateUserProfiles();
     }
 
+    public static void addUserFollow(User user, String... follows) {
+        JSONObject userInfo;
+        try {
+            userInfo = users.getJSONObject(user.getID());
+        } catch (Exception e) {
+            userInfo = new JSONObject().put("uuid", user.getID()).put("name", user.getName());
+        }
+        user = new User(userInfo);
+        user.addFollows(follows);
+        users.put(user);
+
+        updateUserProfiles();
+    }
+
+    public static void removeUserFollow(User user, String... follows) {
+        JSONObject userInfo;
+        try {
+            userInfo = users.getJSONObject(user.getID());
+        } catch (Exception e) {
+            userInfo = new JSONObject().put("uuid", user.getID()).put("name", user.getName());
+        }
+        user = new User(userInfo);
+
+        for(String s : follows) {
+            user.removeFollow(s);
+        }
+
+        users.put(user);
+
+        updateUserProfiles();
+    }
+
+    public static void clearUserFollow(User user) {
+        JSONObject userInfo;
+        try {
+            userInfo = users.getJSONObject(user.getID());
+        } catch (Exception e) {
+            userInfo = new JSONObject().put("uuid", user.getID()).put("name", user.getName());
+        }
+        user = new User(userInfo);
+        user.clearFollows();
+        users.put(user);
+
+        updateUserProfiles();
+    }
+
+    public static void sendFollowingMessage(PlayerManager players, Text message, String... follows) {
+        try {
+            for(ServerPlayerEntity player : players.getPlayerList()) {
+                User staticUser = users.getUser(player.getUuid());
+                HashSet<String> permissions = new HashSet<>();
+
+                boolean unableToSend = false;
+
+                for(String s : follows) {
+                    permissions.add(config.getConfigString(s).toLowerCase(Locale.ROOT));
+                }
+
+                if(permissions.contains("unable"))
+                    unableToSend = true;
+
+                if(! unableToSend) {
+                    boolean needOps = permissions.contains("ops");
+
+                    if(staticUser.isFollow(follows)) {
+                        if(needOps) {
+                            sendMessageToPlayer(player, message, false);
+                        } else {
+                            if(player.hasPermissionLevel(4)) {
+                                sendMessageToPlayer(player, message, false);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
     public static Language getLanguage() {
         return language;
     }
 
     public static Language getLanguage(Language lang) {
         return lang == null ? language : lang;
-    }
-
-    public static Language getUserLanguage(UUID userUUID) {
-        try {
-            return getLanguage(Language.getLanguageForName(users.getUserConfig(userUUID.toString(), "language").toString()));
-        } catch (Exception e) {
-            return language;
-        }
-    }
-
-    public static Language getUserLanguage(ServerPlayerEntity player) {
-        return getUserLanguage(player.getUuid());
     }
 
     public static boolean isUserHereReceive(UUID userUUID) {
