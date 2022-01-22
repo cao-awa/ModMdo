@@ -1,7 +1,5 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
-import com.github.zhuaidadaya.MCH.times.TimeType;
-import com.github.zhuaidadaya.MCH.times.Times;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
@@ -15,32 +13,7 @@ public class AnalyzerCommand extends SimpleCommandOperation implements SimpleCom
     @Override
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("analyzer").then(literal("tick").executes(tickAnalyze -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_ANALYZER, getPlayer(tickAnalyze), this, tickAnalyze)) {
-                    if(shortAnalyze & ! enableTickAnalyzer) {
-                        new Thread(() -> {
-                            analyzedTick = 0;
-
-                            tickAnalyzerFile = "logs/tick_analyzer/" + Times.getTime(TimeType.ALL) + ".log";
-                            sendFeedbackAndInform(tickAnalyze, new TranslatableText("analyzer.result", tickAnalyzerFile));
-                            sendFeedbackAndInform(tickAnalyze, new TranslatableText("analyzer.started"));
-
-                            enableTickAnalyzer = true;
-
-                            while(enableTickAnalyzer) {
-                                try {
-                                    Thread.sleep(50);
-                                } catch (InterruptedException e) {
-
-                                }
-                            }
-
-                            sendFeedback(tickAnalyze, new TranslatableText("analyzer.finished"));
-                        }).start();
-                    }
-                }
-                return 1;
-            })).then(literal("vec").executes(vec -> {
+            dispatcher.register(literal("analyzer").then(literal("vec").executes(vec -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_ANALYZER, getPlayer(vec), this, vec)) {
                     ServerPlayerEntity player = getPlayer(vec);
 
