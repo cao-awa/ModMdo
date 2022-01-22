@@ -6,29 +6,19 @@
     "mixins": [
         "EntityListMixin",
         "ItemEntityMixin",
-        "MinecraftServerMixin",
-        "MinecraftServerSession",
-        "RedstoneWireBlockMixin",
-        "ServerChunkManagerMixin",
-        "ServerEntityManagerMixin",
-        "ServerNetworkIoMixin",
-        "ServerWorldMixin",
-        "WorldMixin"
+        "MinecraftServerSession"
     ],
     "client": [
         "AddServerScreenMixin",
         "ClientConnectionMixin",
-        "ClientPlayNetworkHandlerMixin",
-        "OptionsScreenMixin"
+        "ClientPlayNetworkHandlerMixin"
     ],
     "server": [
         "EnchantmentHelperMixin",
-        "MotdMixin",
         "PlayerManagerMixin",
         "ServerLoginNetworkHandlerMixin",
         "ServerPlayNetworkHandlerMixin",
-        "StopServerRconMixin",
-        "ThreadedAnvilChunkStorageMixin"
+        "StopServerRconMixin"
     ],
     "injectors": {
         "defaultRequire": 1

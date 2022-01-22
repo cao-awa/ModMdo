@@ -12,8 +12,10 @@ public class User {
     private String name;
     private UUID uuid;
     private int level = 1;
+    private long onlineTime = 0;
     private ClientEncryptionToken clientToken = null;
     private ObjectRBTreeSet<String> follows = new ObjectRBTreeSet<>();
+    private boolean dummyPlayer = true;
 
     public User() {
     }
@@ -43,6 +45,7 @@ public class User {
         this.uuid = UUID.fromString(uuid);
         this.level = level;
         this.clientToken = token;
+        this.dummyPlayer = false;
     }
 
     public User(JSONObject json) {
@@ -60,6 +63,7 @@ public class User {
                 JSONObject tokenContent = token.getJSONObject(o.toString());
                 this.clientToken = new ClientEncryptionToken(tokenContent.getString("token"), tokenContent.getString("address"), tokenContent.getString("login_type"), tokenContent.getString("modmdo_version"));
             }
+            dummyPlayer = false;
         } catch (Exception e) {
 
         }
@@ -68,6 +72,19 @@ public class User {
             JSONArray subs = json.getJSONArray("subs");
             for(Object o : subs)
                 this.follows.add(o.toString());
+        } catch (Exception e) {
+
+        }
+
+        try {
+            onlineTime = json.getLong("onlineTime");
+        } catch (Exception e) {
+
+        }
+
+        try {
+            if(dummyPlayer)
+                dummyPlayer = json.getBoolean("dummy");
         } catch (Exception e) {
 
         }
@@ -100,12 +117,16 @@ public class User {
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
         try {
+            json.put("dummy", dummyPlayer);
+            json.put("onlineTime", onlineTime);
             json.put("name", name);
             json.put("uuid", uuid);
             json.put("level", level);
             json.put("token", clientToken.toJSONObject());
             json.put("subs", new JSONArray(follows.toArray()));
         } catch (Exception e) {
+            json.put("dummy", dummyPlayer);
+            json.put("onlineTime", onlineTime);
             json.put("name", name);
             json.put("uuid", uuid);
             json.put("level", level);
@@ -149,5 +170,13 @@ public class User {
 
     public boolean isFollow(String... follows) {
         return this.follows.containsAll(List.of(follows));
+    }
+
+    public void addOnlineTime(long timeMillion) {
+        onlineTime += timeMillion;
+    }
+
+    public long getOnlineTime() {
+        return onlineTime;
     }
 }

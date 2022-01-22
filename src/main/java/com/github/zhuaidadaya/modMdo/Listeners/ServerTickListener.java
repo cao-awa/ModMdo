@@ -5,6 +5,7 @@ import com.github.zhuaidadaya.modMdo.storage.Variables;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -12,15 +13,19 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.disconnectedSet;
 
 public class ServerTickListener {
+    private long lastAddOnlineTime = - 1;
+    private long lastSaveUserProfile = System.currentTimeMillis();
+
     /**
      * 添加服务器监听, 每tick结束以后执行一些需要的操作
      *
      * @author 草二号机
      */
     public void listener() {
+        lastAddOnlineTime = System.currentTimeMillis();
+
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             PlayerManager players = server.getPlayerManager();
 
@@ -30,6 +35,13 @@ public class ServerTickListener {
                 eachPlayer(players);
             } catch (Exception e) {
 
+            }
+
+            addOnlineTime(players);
+
+            if(System.currentTimeMillis() - lastSaveUserProfile > 1000) {
+                updateUserProfiles();
+                lastSaveUserProfile = System.currentTimeMillis();
             }
         });
     }
@@ -57,6 +69,16 @@ public class ServerTickListener {
             if(enableDeadMessage)
                 detectPlayerDead(player);
         }
+    }
+
+    public void addOnlineTime(PlayerManager players) {
+        long current = System.currentTimeMillis();
+        for(ServerPlayerEntity player : players.getPlayerList()) {
+            User user = users.getUser(player);
+            user.addOnlineTime(Math.max(0, current - lastAddOnlineTime));
+            users.put(user);
+        }
+        lastAddOnlineTime = System.currentTimeMillis();
     }
 
     /**
@@ -168,6 +190,9 @@ public class ServerTickListener {
                 }
             } else {
                 if(disconnectedSet.contains(player.networkHandler.connection.getAddress())) {
+                    if(player.networkHandler.connection.isOpen()) {
+                        player.networkHandler.connection.send(new DisconnectS2CPacket(new LiteralText("tot error")));
+                    }
                     loginUsers.removeUser(player);
                     manager.remove(player);
                 }

@@ -62,9 +62,7 @@ public class Variables {
     public static boolean enableEncryptionToken = false;
     public static boolean enableTickAnalyzer = false;
     public static boolean enabledCancelEntitiesTIck = false;
-    public static boolean enabledCancelTIck = false;
     public static boolean tokenChanged = false;
-    public static long cancelTickStart = - 1;
     public static int tokenGenerateSize = 128;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
     public static Identifier tokenChannel = new Identifier("modmdo:token");
@@ -91,13 +89,6 @@ public class Variables {
 
     public static ServerLogin serverLogin = new ServerLogin();
     public static LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
-
-    public static int analyzedTick = 0;
-    public static boolean shortAnalyze = true;
-    public static String tickAnalyzerFile = "logs/tick_analyzer/";
-    public static String tickStartTime;
-    public static LinkedHashMap<String, Long> tickMap = new LinkedHashMap<>();
-    public static LinkedHashMap<String, LinkedHashMap<String, Integer>> tickEntitiesMap = new LinkedHashMap<>();
 
     public static LinkedHashSet<SocketAddress> disconnectedSet = new LinkedHashSet<>();
 

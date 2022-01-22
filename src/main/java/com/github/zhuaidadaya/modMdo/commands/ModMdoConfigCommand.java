@@ -167,26 +167,6 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     sendFeedbackAndInform(disableTickingEntities, formatTickingEntitiesTick());
                 }
                 return 2;
-            }))).then(literal("tickingGame").executes(getTickingGame -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(getTickingGame), this, getTickingGame)) {
-                    sendFeedbackAndInform(getTickingGame, formatTickingGame());
-                }
-                return 0;
-            }).then(literal("enable").executes(enableTickingGame -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enableTickingGame), this, enableTickingGame)) {
-                    enabledCancelTIck = false;
-
-                    sendFeedbackAndInform(enableTickingGame, formatTickingGame());
-                }
-                return 1;
-            })).then(literal("disable").executes(disableTickingGame -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(disableTickingGame), this, disableTickingGame)) {
-                    enabledCancelTIck = true;
-
-                    cancelTickStart = System.currentTimeMillis();
-                    sendFeedbackAndInform(disableTickingGame, formatTickingGame());
-                }
-                return 2;
             }))).then(literal("joinServerFollow").executes(getJoinServerFollowLimit -> {
                 if(config.getConfigString("joinServer") == null)
                     config.set("joinServer", PermissionLevel.OPS);
@@ -255,10 +235,6 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
 
     public TranslatableText formatRunCommandFollow() {
         return formatConfigReturnMessage("follow.run.command", config.getConfigString("runCommand").toLowerCase(Locale.ROOT));
-    }
-
-    public TranslatableText formatTickingGame() {
-        return new TranslatableText(enabledCancelTIck ? "ticking.server.disable.rule.format" : "ticking.server.enable.rule.format");
     }
 
     public TranslatableText formatTickingEntitiesTick() {
