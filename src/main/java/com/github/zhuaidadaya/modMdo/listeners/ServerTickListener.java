@@ -51,10 +51,10 @@ public class ServerTickListener {
                 } catch (Exception e) {
 
                 }
+                setPlayerLevel(player, players);
             }
             if(enableDeadMessage)
                 detectPlayerDead(player);
-            setPlayerLevel(player, players);
         }
     }
 
@@ -156,13 +156,19 @@ public class ServerTickListener {
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
                         if(player.networkHandler.connection.getAddress() != null) {
-                            e.printStackTrace();
                             if(player.networkHandler.connection.isOpen()) {
                                 player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
-                                    manager.remove(player);
+                                manager.remove(player);
+                            } else {
+                                manager.remove(player);
                             }
                         }
                     }
+                }
+            } else {
+                if(disconnectedSet.contains(player.networkHandler.connection.getAddress())) {
+                    loginUsers.removeUser(player);
+                    manager.remove(player);
                 }
             }
         } catch (Exception e) {

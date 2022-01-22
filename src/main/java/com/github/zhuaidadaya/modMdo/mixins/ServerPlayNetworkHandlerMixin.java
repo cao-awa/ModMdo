@@ -127,8 +127,14 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
             }
 
-            if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
-                serverLogin.login(channel, data1, data2, data3, data4, data5, data6);
+            if(channel.equals(tokenChannel)) {
+                if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
+                    serverLogin.login(data1, data2, data3, data4, data5, data6);
+                }
+            } else if(channel.equals(loginChannel)){
+                if(modMdoType == ModMdoType.SERVER) {
+                    serverLogin.login(data1, data2, data3, data4, data5);
+                }
             }
 
             ci.cancel();
@@ -152,9 +158,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
-            LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
-
-            if(loginUsers.hasUser(player) | player.networkHandler.connection.getAddress() == null) {
+            if(loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
+                LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
                 this.server.forcePlayerSampleUpdate();
                 this.server.getPlayerManager().remove(this.player);
                 this.server.getPlayerManager().broadcast((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
