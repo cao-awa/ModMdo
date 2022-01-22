@@ -152,9 +152,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
-            LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
-
-            if(loginUsers.hasUser(player) | player.networkHandler.connection.getAddress() == null) {
+            if(loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
+                LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
                 this.server.forcePlayerSampleUpdate();
                 this.server.getPlayerManager().remove(this.player);
                 this.server.getPlayerManager().broadcastChatMessage((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);

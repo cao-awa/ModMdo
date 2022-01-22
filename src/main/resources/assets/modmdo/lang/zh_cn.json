@@ -1,4 +1,7 @@
 {
+    "server.cpu": "服务器CPU: %s -> %s",
+    "server.memory": "服务器内存: %sMB / %sMB",
+    "server.tps": "服务器TPS: %sms -> %s / %s",
     "player.run.command": "玩家 %s 运行了命令: \n%s",
     "player.run.command.rejected.without.login": "已拒绝 %s 运行命令, 此玩家未登录服务器",
     "player.run.command.try": "玩家 %s 正在尝试运行命令: \n%s",

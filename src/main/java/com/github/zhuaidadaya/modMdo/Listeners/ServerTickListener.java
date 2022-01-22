@@ -12,6 +12,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.disconnectedSet;
 
 public class ServerTickListener {
     /**
@@ -51,10 +52,10 @@ public class ServerTickListener {
                 } catch (Exception e) {
 
                 }
+                setPlayerLevel(player, players);
             }
             if(enableDeadMessage)
                 detectPlayerDead(player);
-            setPlayerLevel(player, players);
         }
     }
 
@@ -75,29 +76,33 @@ public class ServerTickListener {
      */
     public void cancelLoginIfNoExistentOrChangedToken(ServerPlayerEntity player, PlayerManager manager) {
         try {
-            for(User user : loginUsers.getUsers()) {
-                if(manager.getPlayer(user.getName()) == null) {
-                    loginUsers.removeUser(user);
+            if(tokenChanged) {
+                for(User user : loginUsers.getUsers()) {
+                    if(manager.getPlayer(user.getName()) == null) {
+                        loginUsers.removeUser(user);
+                    }
                 }
-            }
 
-            if(manager.getPlayerList().contains(player)) {
-                if(loginUsers.hasUser(player)) {
-                    User user = loginUsers.getUser(player);
-                    if(user.getLevel() == 1) {
-                        if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
-                            loginUsers.removeUser(player);
-                            player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                            manager.remove(player);
-                        }
-                    } else if(user.getLevel() == 4) {
-                        if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
-                            loginUsers.removeUser(player);
-                            player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                            manager.remove(player);
+                if(manager.getPlayerList().contains(player)) {
+                    if(loginUsers.hasUser(player)) {
+                        User user = loginUsers.getUser(player);
+                        if(user.getLevel() == 1) {
+                            if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
+                                loginUsers.removeUser(player);
+                                player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
+                                manager.remove(player);
+                            }
+                        } else if(user.getLevel() == 4) {
+                            if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
+                                loginUsers.removeUser(player);
+                                player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
+                                manager.remove(player);
+                            }
                         }
                     }
                 }
+
+                tokenChanged = false;
             }
         } catch (Exception e) {
 
@@ -151,12 +156,20 @@ public class ServerTickListener {
                     try {
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
-                        if(player.networkHandler.connection.isOpen()) {
-                            player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
-                            if(player.networkHandler.connection.getAddress() != null)
+                        if(player.networkHandler.connection.getAddress() != null) {
+                            if(player.networkHandler.connection.isOpen()) {
+                                player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
                                 manager.remove(player);
+                            } else {
+                                manager.remove(player);
+                            }
                         }
                     }
+                }
+            } else {
+                if(disconnectedSet.contains(player.networkHandler.connection.getAddress())) {
+                    loginUsers.removeUser(player);
+                    manager.remove(player);
                 }
             }
         } catch (Exception e) {

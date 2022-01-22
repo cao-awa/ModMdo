@@ -5,7 +5,6 @@ import com.github.zhuaidadaya.MCH.times.Times;
 import com.github.zhuaidadaya.modMdo.bak.Backup;
 import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.mixins.MinecraftServerSession;
-import com.github.zhuaidadaya.utils.config.Config;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.PlayerManager;
@@ -21,6 +20,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class BackupCommand extends SimpleCommandOperation implements ConfigurableCommand {
+    @Override
     public void register() {
         init();
 

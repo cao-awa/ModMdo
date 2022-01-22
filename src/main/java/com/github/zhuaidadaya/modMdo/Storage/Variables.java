@@ -30,12 +30,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.SyncFailedException;
 import java.net.SocketAddress;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
@@ -49,8 +49,9 @@ public class Variables {
     public static final String MODMDO_COMMAND_ANALYZER = "analyzer/";
     public static final String MODMDO_COMMAND_TOKEN = "token/";
     public static final String MODMDO_COMMAND_FOLLOW = "user/follow";
-    public static String VERSION_ID = "1.0.15";
-    public static int MODMDO_VERSION = 9;
+    public static final String MODMDO_COMMAND_SERVER = "server/";
+    public static String VERSION_ID = "1.0.17";
+    public static int MODMDO_VERSION = 11;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -67,6 +68,7 @@ public class Variables {
     public static int tokenGenerateSize = 128;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
     public static Identifier tokenChannel = new Identifier("modmdo:token");
+    public static Identifier loginChannel = new Identifier("modmdo:login");
     public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
@@ -96,6 +98,8 @@ public class Variables {
     public static String tickStartTime;
     public static LinkedHashMap<String, Long> tickMap = new LinkedHashMap<>();
     public static LinkedHashMap<String, LinkedHashMap<String, Integer>> tickEntitiesMap = new LinkedHashMap<>();
+
+    public static LinkedHashSet<SocketAddress> disconnectedSet = new LinkedHashSet<>();
 
     public static void saveToken() {
         try {

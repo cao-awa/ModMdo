@@ -1,4 +1,7 @@
 {
+    "server.cpu": "Server CPU: %s -> %s",
+    "server.memory": "Server Memory: %sMB / %sMB",
+    "server.tps": "Server TPS: %sms -> %s / %s",
     "player.run.command": "player %s run the command: \n%s",
     "player.run.command.rejected.without.login": "rejected %s run command, because player not logged to server",
     "player.run.command.try": "player %s trying run command: \n%s",

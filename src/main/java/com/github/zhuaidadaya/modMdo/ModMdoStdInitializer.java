@@ -52,6 +52,7 @@ public class ModMdoStdInitializer implements ModInitializer {
             new TokenCommand().register();
             new BackupCommand().register();
             new AnalyzerCommand().register();
+            new ServerCommand().register();
         }).start();
     }
 
