@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
+import com.github.zhuaidadaya.modMdo.storage.Variables;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.MinecraftServer;
@@ -13,6 +14,10 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.getCommandRequestV
 public class SimpleCommandOperation {
     public LiteralText formatModMdoVersionRequire(String commandBelong) {
         return new LiteralText("this command minimum ModMdo version require: " + getCommandRequestVersion(commandBelong));
+    }
+
+    public LiteralText formatModMdoVersionRequire(int versionRequire) {
+        return new LiteralText("this command minimum ModMdo version require: " + Variables.modMdoIdToVersionMap.get(versionRequire));
     }
 
     public void sendFeedback(CommandContext<ServerCommandSource> source, Text message) {
@@ -33,5 +38,9 @@ public class SimpleCommandOperation {
 
     public MinecraftServer getServer(CommandContext<ServerCommandSource> source) {
         return source.getSource().getServer();
+    }
+
+    public String getInput(CommandContext<ServerCommandSource> source) {
+        return source.getInput();
     }
 }

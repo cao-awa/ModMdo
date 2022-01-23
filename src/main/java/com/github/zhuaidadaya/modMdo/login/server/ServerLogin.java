@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modMdo.login.server;
 
 import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
+import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -13,10 +14,22 @@ public class ServerLogin {
             level = 4;
 
         if(! data1.equals("")) {
-            if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
-                loginUsers.put(data1, new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)).toJSONObject());
+            try {
+                if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
+                    loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)));
 
-                LOGGER.info("login player: " + data1);
+                    LOGGER.info("login player: " + data1);
+                } else {
+                    rejectUsers.put(new User(data2, data1, level));
+                }
+            } catch (NullPointerException e) {
+                modMdoToken.setServerToken(ServerEncryptionToken.createServerEncryptionToken());
+
+                rejectUsers.put(new User(data2, data1, level));
+
+                saveToken();
+
+                updateModMdoVariables();
             }
         }
     }
@@ -27,7 +40,7 @@ public class ServerLogin {
             level = 4;
 
         if(! data1.equals("")) {
-            loginUsers.put(data1, new User(data2, data1, level, new ClientEncryptionToken("", data3, data4, data5)).toJSONObject());
+            loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken("", data3, data4, data5)));
 
             LOGGER.info("login player: " + data1);
         }
@@ -35,7 +48,8 @@ public class ServerLogin {
 
     public void logout(ServerPlayerEntity player) {
         LOGGER.info("logout player: " + player.getUuid().toString());
-        LOGGER.info("canceling player token for: " + player.getUuid().toString());
+        if(loginUsers.getUser(player).getClientToken() != null)
+            LOGGER.info("canceling player token for: " + player.getUuid().toString());
         try {
             loginUsers.removeUser(player);
         } catch (Exception e) {

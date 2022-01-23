@@ -4,7 +4,6 @@ import com.github.zhuaidadaya.MCH.times.TimeType;
 import com.github.zhuaidadaya.MCH.times.Times;
 import com.github.zhuaidadaya.modMdo.bak.Backup;
 import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
-import com.github.zhuaidadaya.modMdo.mixins.MinecraftServerSession;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.PlayerManager;
@@ -63,8 +62,8 @@ public class BackupCommand extends SimpleCommandOperation implements Configurabl
     public void backup(String name, boolean dedicated, ServerCommandSource source) {
         new Thread(() -> {
             PlayerManager players = source.getServer().getPlayerManager();
-            String levelName = ((MinecraftServerSession) source.getServer()).getSession().getDirectoryName() + "/";
-            String sourcePath = (dedicated ? "" : "saves/") + levelName;
+            String levelName = getServerLevelNamePath(source.getServer());
+            String sourcePath = getServerLevelPath(source.getServer());
 
             TranslatableText result;
             result = new TranslatableText("backup.starting");

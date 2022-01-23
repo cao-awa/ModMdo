@@ -9,5 +9,6 @@
     "user/": 1,
     "token/": 1,
     "user/follow": 10,
-    "server/": 11
+    "server/": 11,
+    "ranking/": 11
 }

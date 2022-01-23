@@ -39,6 +39,11 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
+    public static boolean rankingSwitchNoDump = true;
+    public static boolean enableRanking = false;
+    public static String rankingObject = "Nan";
+    public static int rankingRandomSwitchInterval = 20 * 60 * 8;
+    public static String rankingOnlineTimeScale = "minute";
     public static final String MODMDO_COMMAND_ROOT = "/";
     public static final String MODMDO_COMMAND_CONF = "modmdo/";
     public static final String MODMDO_COMMAND_TICK = "modmdo/tick/";
@@ -47,6 +52,7 @@ public class Variables {
     public static final String MODMDO_COMMAND_BAK = "bak/";
     public static final String MODMDO_COMMAND_USR = "user/";
     public static final String MODMDO_COMMAND_ANALYZER = "analyzer/";
+    public static final String MODMDO_COMMAND_RANKING = "ranking/";
     public static final String MODMDO_COMMAND_TOKEN = "token/";
     public static final String MODMDO_COMMAND_FOLLOW = "user/follow";
     public static final String MODMDO_COMMAND_SERVER = "server/";
@@ -60,7 +66,6 @@ public class Variables {
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
     public static boolean enableEncryptionToken = false;
-    public static boolean enableTickAnalyzer = false;
     public static boolean enabledCancelEntitiesTIck = false;
     public static boolean tokenChanged = false;
     public static int tokenGenerateSize = 128;
@@ -91,6 +96,50 @@ public class Variables {
     public static LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
 
     public static LinkedHashSet<SocketAddress> disconnectedSet = new LinkedHashSet<>();
+
+    public static HashSet<String> rankingObjects = new HashSet<>();
+    public static HashSet<String> rankingObjectsNoDump = new HashSet<>();
+
+    public static boolean rankingIsStatObject(String ranking) {
+        if(ranking.equals("destroy.blocks")) {
+            return true;
+        } else if(ranking.equals("villager.trades")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static String getRandomRankingObject() {
+        if(rankingObjects.size() > 0) {
+            Random r = new Random();
+            return rankingObjects.toArray()[Math.max(0, r.nextInt(rankingObjects.size()))].toString();
+        } else {
+            return "Nan";
+        }
+    }
+
+    public static String getRandomRankingObjectNoDump() {
+            if(rankingObjectsNoDump.size() == 0) {
+                rankingObjectsNoDump.addAll(rankingObjects.stream().toList());
+            }
+            if(rankingObjectsNoDump.size() > 0) {
+                Random r = new Random();
+                String ranking = rankingObjectsNoDump.toArray()[Math.max(0, r.nextInt(rankingObjectsNoDump.size()))].toString();
+                rankingObjectsNoDump.remove(ranking);
+                return ranking;
+            } else {
+                return "Nan";
+            }
+    }
+
+    public static String getServerLevelNamePath(MinecraftServer server) {
+        return ((MinecraftServerSession) server).getSession().getDirectoryName() + "/";
+    }
+
+    public static String getServerLevelPath(MinecraftServer server) {
+        return (server.isDedicated() ? "" : "saves/") + getServerLevelNamePath(server);
+    }
 
     public static void saveToken() {
         try {
@@ -196,6 +245,14 @@ public class Variables {
         return false;
     }
 
+    public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
+        if(getCommandCanUse(versionRequire, player))
+            return true;
+
+        command.sendError(source, command.formatModMdoVersionRequire(versionRequire));
+        return false;
+    }
+
     public static boolean commandApplyToPlayer(String commandBelong, ServerPlayerEntity player, SimpleCommandOperation command, ServerCommandSource source) {
         if(getCommandCanUse(commandBelong, player))
             return true;
@@ -205,7 +262,11 @@ public class Variables {
     }
 
     public static boolean getCommandCanUse(String commandBelong, ServerPlayerEntity player) {
-        return modMdoCommandVersionMap.getInt(commandBelong) <= getPlayerModMdoVersion(player);
+        return getCommandCanUse(modMdoCommandVersionMap.getInt(commandBelong), player);
+    }
+
+    public static boolean getCommandCanUse(int versionRequire, ServerPlayerEntity player) {
+        return versionRequire <= getPlayerModMdoVersion(player);
     }
 
     public static String getCommandRequestVersion(String commandBelong) {

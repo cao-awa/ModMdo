@@ -19,41 +19,41 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("modmdo").requires(level -> level.hasPermissionLevel(4)).then(literal("here").executes(here -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(here), this, here)) {
-                    sendFeedback(here,formatConfigReturnMessage("here_command"));
+                    sendFeedback(here, formatConfigReturnMessage("here_command"));
                 }
                 return 2;
             }).then(literal("enable").executes(enableHere -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enableHere), this, enableHere)) {
                     enableHereCommand = true;
                     updateModMdoVariables();
-                    sendFeedback(enableHere,formatEnableHere());
+                    sendFeedback(enableHere, formatEnableHere());
                 }
                 return 1;
             })).then(literal("disable").executes(disableHere -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(disableHere), this, disableHere)) {
                     enableHereCommand = false;
                     updateModMdoVariables();
-                    sendFeedback(disableHere,formatDisableHere());
+                    sendFeedback(disableHere, formatDisableHere());
                 }
                 return 0;
             }))).then(literal("secureEnchant").executes(secureEnchant -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(secureEnchant), this, secureEnchant)) {
 
-                    sendFeedback(secureEnchant,formatConfigReturnMessage("secure_enchant"));
+                    sendFeedback(secureEnchant, formatConfigReturnMessage("secure_enchant"));
                 }
                 return 2;
             }).then(literal("enable").executes(enableSecureEnchant -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enableSecureEnchant), this, enableSecureEnchant)) {
                     Variables.enableSecureEnchant = true;
                     updateModMdoVariables();
-                    sendFeedback(enableSecureEnchant,formatEnableSecureEnchant());
+                    sendFeedback(enableSecureEnchant, formatEnableSecureEnchant());
                 }
                 return 1;
             })).then(literal("disable").executes(disableSecureEnchant -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(disableSecureEnchant), this, disableSecureEnchant)) {
                     enableSecureEnchant = false;
                     updateModMdoVariables();
-                    sendFeedback(disableSecureEnchant,formatDisableSecureEnchant());
+                    sendFeedback(disableSecureEnchant, formatDisableSecureEnchant());
                 }
                 return 0;
             }))).then(literal("encryptionToken").executes(encryptionToken -> {
@@ -67,9 +67,10 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     Variables.enableEncryptionToken = true;
                     updateModMdoVariables();
 
-                    if(config.getConfig("token_by_encryption") != null) {
+                    try {
                         initModMdoToken();
-                    } else {
+                        modMdoToken.getServerToken().getToken();
+                    } catch (NullPointerException npe) {
                         try {
                             modMdoToken = new EncryptionTokenUtil(ServerEncryptionToken.createServerEncryptionToken());
                             LOGGER.info("spawned new encryption token, check the config file");
@@ -78,6 +79,12 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                             LOGGER.info("failed to enable encryption token");
                         }
                     }
+
+                    saveToken();
+
+                    updateModMdoVariables();
+
+                    tokenChanged = true;
 
                     sendFeedback(enableEncryptionToken, formatEnableEncryptionToken());
                 }
@@ -107,14 +114,15 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     enableRejectReconnect = false;
                     updateModMdoVariables();
                     sendFeedback(receive, formatDisableRejectReconnect());
-                } return 0;
+                }
+                return 0;
             }))).then(literal("deadMessage").executes(deadMessage -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(deadMessage), this,deadMessage)) {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(deadMessage), this, deadMessage)) {
                     sendFeedback(deadMessage, formatConfigReturnMessage("dead_message"));
                 }
                 return 2;
             }).then(literal("enable").executes(enabled -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enabled), this,enabled)) {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(enabled), this, enabled)) {
                     enableDeadMessage = true;
                     updateModMdoVariables();
 
@@ -134,7 +142,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     sendFeedback(getDespawnTicks, formatItemDespawnTicks());
                 }
                 return 2;
-            }).then(literal("become").then(argument("ticks", IntegerArgumentType.integer(-1)).executes(setTicks -> {
+            }).then(literal("become").then(argument("ticks", IntegerArgumentType.integer(- 1)).executes(setTicks -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_CONF, getPlayer(setTicks), this, setTicks)) {
                     itemDespawnAge = Integer.parseInt(setTicks.getInput().split(" ")[3]);
 
@@ -177,13 +185,13 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
             }).then(literal("disable").executes(disableJoinServerFollow -> {
                 config.set("joinServer", PermissionLevel.UNABLE);
 
-                sendFeedback(disableJoinServerFollow,formatJoinGameFollow());
+                sendFeedback(disableJoinServerFollow, formatJoinGameFollow());
 
                 return 1;
             })).then(literal("all").executes(enableJoinServerFollowForAll -> {
                 config.set("joinServer", PermissionLevel.ALL);
 
-                sendFeedback(enableJoinServerFollowForAll,formatJoinGameFollow());
+                sendFeedback(enableJoinServerFollowForAll, formatJoinGameFollow());
 
                 return 2;
             })).then(literal("ops").executes(enableJoinServerFollowForOps -> {
@@ -202,13 +210,13 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
             }).then(literal("disable").executes(disableJoinServerFollow -> {
                 config.set("runCommand", PermissionLevel.UNABLE);
 
-                sendFeedback(disableJoinServerFollow,formatRunCommandFollow());
+                sendFeedback(disableJoinServerFollow, formatRunCommandFollow());
 
                 return 1;
             })).then(literal("all").executes(enableJoinServerFollowForAll -> {
                 config.set("runCommand", PermissionLevel.ALL);
 
-                sendFeedback(enableJoinServerFollowForAll,formatRunCommandFollow());
+                sendFeedback(enableJoinServerFollowForAll, formatRunCommandFollow());
 
                 return 2;
             })).then(literal("ops").executes(enableJoinServerFollowForOps -> {
@@ -225,7 +233,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
         return new TranslatableText(config + "." + Variables.config.getConfigString(config) + ".rule.format");
     }
 
-    public TranslatableText formatConfigReturnMessage(String head,String info) {
+    public TranslatableText formatConfigReturnMessage(String head, String info) {
         return new TranslatableText(head + "." + info + ".rule.format");
     }
 
@@ -242,7 +250,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     }
 
     public TranslatableText formatItemDespawnTicks() {
-        if(itemDespawnAge > -1) {
+        if(itemDespawnAge > - 1) {
             return new TranslatableText("item.despawn.ticks.rule.format", itemDespawnAge);
         } else {
             return new TranslatableText("item.despawn.ticks.disable.rule.format", itemDespawnAge);
@@ -266,7 +274,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     }
 
     public TranslatableText formatEnableEncryptionToken() {
-        return new TranslatableText("encryption_token.disable.rule.format");
+        return new TranslatableText("encryption_token.enable.rule.format");
     }
 
 
