@@ -136,6 +136,10 @@ public class User {
         return json;
     }
 
+    public boolean isDummyPlayer() {
+        return dummyPlayer;
+    }
+
     public int getLevel() {
         return level;
     }
@@ -151,6 +155,7 @@ public class User {
 
     public User setClientToken(ClientEncryptionToken token) {
         this.clientToken = token;
+        this.dummyPlayer = false;
         return this;
     }
 
@@ -176,7 +181,98 @@ public class User {
         onlineTime += timeMillion;
     }
 
+    public long processRemainingSeconds() {
+        long onlineSeconds = getOnlineTime() / 1000;
+
+        onlineSeconds -= (onlineSeconds > 59 ? onlineSeconds / 60 : 0) * 60;
+        return onlineSeconds;
+    }
+
+    public long processRemainingMinutes() {
+        long onlineSeconds = getOnlineTime() / 1000;
+
+        long onlineMinutes = onlineSeconds / 60;
+        onlineMinutes -= (onlineMinutes > 59 ? onlineMinutes / 60 : 0) * 60;
+        return onlineMinutes;
+    }
+
+    public long processRemainingHours() {
+        long onlineSeconds = getOnlineTime() / 1000;
+
+        long onlineMinutes = onlineSeconds / 60;
+        long onlineHours = onlineMinutes > 59 ? onlineMinutes / 60 : 0;
+        onlineHours -= (onlineHours > 23 ? onlineHours / 24 : 0) * 24;
+        return onlineHours;
+    }
+
+    public long processRemainingDays() {
+        long onlineSeconds = getOnlineTime() / 1000;
+
+        long onlineMinutes = onlineSeconds / 60;
+        long onlineHours = onlineMinutes > 59 ? onlineMinutes / 60 : 0;
+        long onlineDays = onlineHours > 23 ? onlineHours / 24 : 0;
+        onlineDays -= (onlineDays > 29 ? onlineDays / 30 : 0) * 30;
+        return onlineDays;
+    }
+
+    public long processRemainingMonths() {
+        long onlineSeconds = getOnlineTime() / 1000;
+
+        long onlineMinutes = onlineSeconds / 60;
+        long onlineHours = onlineMinutes > 59 ? onlineMinutes / 60 : 0;
+        long onlineDays = onlineHours > 23 ? onlineHours / 24 : 0;
+        long onlineMonths = onlineDays > 29 ? onlineDays / 30 : 0;
+        onlineMonths -= (onlineMonths > 11 ? onlineMonths / 12 : 0) * 12;
+        return onlineMonths;
+    }
+
+    public long processRemainingYears() {
+        long onlineSeconds = getOnlineTime() / 1000;
+
+        long onlineMinutes = onlineSeconds / 60;
+        long onlineHours = onlineMinutes > 59 ? onlineMinutes / 60 : 0;
+        long onlineDays = onlineHours > 23 ? onlineHours / 24 : 0;
+        long onlineMonths = onlineDays > 29 ? onlineDays / 30 : 0;
+        return onlineMonths > 11 ? onlineMonths / 12 : 0;
+    }
+
     public long getOnlineTime() {
         return onlineTime;
+    }
+
+    public void setOnlineTime(long onlineTime) {
+        this.onlineTime = onlineTime;
+    }
+
+    public long getOnlineSecond() {
+        return onlineTime / 1000;
+    }
+
+    public long getOnlineMinute() {
+        if(getOnlineSecond() > 59)
+            return getOnlineSecond() / 60;
+        else
+            return 0;
+    }
+
+    public long getOnlineHour() {
+        if(getOnlineMinute() > 59)
+            return getOnlineMinute() / 60;
+        else
+            return 0;
+    }
+
+    public long getOnlineDay() {
+        if(getOnlineHour() > 23)
+            return getOnlineHour() / 24;
+        else
+            return 0;
+    }
+
+    public long getOnlineMonth() {
+        if(getOnlineSecond() > 29)
+            return getOnlineDay() / 30;
+        else
+            return 0;
     }
 }

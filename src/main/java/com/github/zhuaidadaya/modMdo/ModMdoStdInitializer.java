@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modMdo;
 
 import com.github.zhuaidadaya.modMdo.commands.*;
+import com.github.zhuaidadaya.modMdo.commands.ranking.RankingCommand;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.listeners.ServerStartListener;
 import com.github.zhuaidadaya.modMdo.listeners.ServerTickListener;
@@ -53,6 +54,7 @@ public class ModMdoStdInitializer implements ModInitializer {
             new BackupCommand().register();
             new AnalyzerCommand().register();
             new ServerCommand().register();
+            new RankingCommand().register();
         }).start();
     }
 
@@ -86,6 +88,5 @@ public class ModMdoStdInitializer implements ModInitializer {
                 modMdoToken = new EncryptionTokenUtil();
             }
         }
-
     }
 }

@@ -6,17 +6,25 @@ import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
+import net.minecraft.scoreboard.ScoreboardPlayerScore;
+import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 public class ServerTickListener {
     private long lastAddOnlineTime = - 1;
-    private long lastSaveUserProfile = System.currentTimeMillis();
+    private long lastIntervalActive = System.currentTimeMillis();
+    private int randomRankingSwitchTick = 0;
 
     /**
      * 添加服务器监听, 每tick结束以后执行一些需要的操作
@@ -26,8 +34,51 @@ public class ServerTickListener {
     public void listener() {
         lastAddOnlineTime = System.currentTimeMillis();
 
+        new Thread(() -> {
+            while(server == null) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+
+                }
+            }
+            while(server.isRunning()) {
+                try {
+                    PlayerManager players = server.getPlayerManager();
+
+                    setOnlineTimeAndRanking(server, players);
+
+                    updateRankingShow(server);
+
+                    if(System.currentTimeMillis() - lastIntervalActive > 1000) {
+                        updateUserProfiles();
+                        lastIntervalActive = System.currentTimeMillis();
+                        if(rankingIsStatObject(rankingObject)) {
+                            updateOtherRankings(server, players);
+                        }
+                    }
+
+                    if(rankingRandomSwitchInterval != - 1) {
+                        if(randomRankingSwitchTick > rankingRandomSwitchInterval) {
+                            if(rankingSwitchNoDump)
+                                config.set("ranking_object", rankingObject = getRandomRankingObjectNoDump());
+                            else
+                                config.set("ranking_object", rankingObject = getRandomRankingObject());
+                            randomRankingSwitchTick = 0;
+                        }
+                    }
+
+                    Thread.sleep(20);
+                } catch (Exception e) {
+
+                }
+            }
+        }).start();
+
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             PlayerManager players = server.getPlayerManager();
+
+            randomRankingSwitchTick++;
 
             Variables.server = server;
 
@@ -36,12 +87,101 @@ public class ServerTickListener {
             } catch (Exception e) {
 
             }
-
-            if(System.currentTimeMillis() - lastSaveUserProfile > 1000) {
-                updateUserProfiles();
-                lastSaveUserProfile = System.currentTimeMillis();
-            }
         });
+    }
+
+    public void updateTradeWithVillager(MinecraftServer server, ServerPlayerEntity player, JSONObject stat) {
+        try {
+            JSONObject custom = stat.getJSONObject("minecraft:custom");
+
+            int tradeCount = custom.getInt("minecraft:traded_with_villager");
+
+            ServerScoreboard scoreboard = server.getScoreboard();
+            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.trd"));
+
+            scoreboardPlayerScore.setScore(tradeCount);
+            scoreboard.updateScore(scoreboardPlayerScore);
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void updateOtherRankings(MinecraftServer server, PlayerManager manager) {
+        for(ServerPlayerEntity player : manager.getPlayerList()) {
+            User user = users.getUser(player);
+            if(! user.isDummyPlayer()) {
+                try {
+                    BufferedReader reader = new BufferedReader(new FileReader(getServerLevelPath(server) + "stats/" + player.getUuid().toString() + ".json"));
+
+                    player.getStatHandler().save();
+
+                    String cache;
+                    StringBuilder builder = new StringBuilder();
+                    while((cache = reader.readLine()) != null) {
+                        builder.append(cache);
+                    }
+
+                    JSONObject source = new JSONObject(builder.toString());
+                    JSONObject stat = source.getJSONObject("stats");
+
+                    if(rankingObject.equals("destroy.blocks")) {
+                        updateDestroyBlocks(server, player, stat);
+                    } else if(rankingObject.equals("villager.trades")) {
+                        updateTradeWithVillager(server, player, stat);
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+        }
+    }
+
+    public void updateDestroyBlocks(MinecraftServer server, ServerPlayerEntity player, JSONObject stat) {
+        try {
+            JSONObject mined = stat.getJSONObject("minecraft:mined");
+
+            int minedCount = 0;
+
+            for(String s : mined.keySet()) {
+                minedCount += mined.getInt(s);
+            }
+
+            ServerScoreboard scoreboard = server.getScoreboard();
+            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.dsy"));
+
+            scoreboardPlayerScore.setScore(minedCount);
+            scoreboard.updateScore(scoreboardPlayerScore);
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void updateOnlineTime(MinecraftServer server, ServerPlayerEntity player) {
+        User user = users.getUser(player);
+        if(! user.isDummyPlayer()) {
+            ServerScoreboard scoreboard = server.getScoreboard();
+            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.ots"));
+            long showOnlineTime;
+            switch(rankingOnlineTimeScale) {
+                case "second" -> {
+                    showOnlineTime = user.getOnlineSecond();
+                }
+                case "hour" -> {
+                    showOnlineTime = user.getOnlineHour();
+                }
+                case "day" -> {
+                    showOnlineTime = user.getOnlineDay();
+                }
+                case "month" -> {
+                    showOnlineTime = user.getOnlineMonth();
+                }
+                default -> {
+                    showOnlineTime = user.getOnlineMinute();
+                }
+            }
+            scoreboardPlayerScore.setScore((int) showOnlineTime);
+            scoreboard.updateScore(scoreboardPlayerScore);
+        }
     }
 
     /**
@@ -66,16 +206,62 @@ public class ServerTickListener {
             }
             if(enableDeadMessage)
                 detectPlayerDead(player);
-
-            addOnlineTime(player);
         }
     }
 
-    public void addOnlineTime(ServerPlayerEntity player) {
-        User user = users.getUser(player);
-        user.addOnlineTime(Math.max(0, System.currentTimeMillis() - lastAddOnlineTime));
-        users.put(user);
+    public void setOnlineTimeAndRanking(MinecraftServer server, PlayerManager players) {
+        long current = System.currentTimeMillis();
+        for(ServerPlayerEntity player : players.getPlayerList()) {
+            User userCache = loginUsers.getUser(player);
+            User user = users.getUser(player);
+
+            user.setClientToken(userCache.getClientToken());
+
+            if(userCache.getOnlineTime() == 0) {
+                userCache.setOnlineTime(user.getOnlineTime());
+            }
+
+            userCache.addOnlineTime(Math.max(0, current - lastAddOnlineTime));
+
+            loginUsers.put(userCache);
+            users.put(userCache);
+
+            if(enableRanking) {
+                if(rankingObject.equals("online.times")) {
+                    updateOnlineTime(server, player);
+                }
+            }
+        }
         lastAddOnlineTime = System.currentTimeMillis();
+    }
+
+    public void updateRankingShow(MinecraftServer server) {
+        ServerScoreboard scoreboard = server.getScoreboard();
+
+        if(enableRanking) {
+            if(scoreboard.containsObjective("modmdo.dsy")) {
+                rankingObjects.add("destroy.blocks");
+            }
+            if(scoreboard.containsObjective("modmdo.ots")) {
+                rankingObjects.add("online.times");
+            }
+            if(scoreboard.containsObjective("modmdo.trd")) {
+                rankingObjects.add("villager.trades");
+            }
+
+            switch(rankingObject) {
+                case "online.times" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.ots"));
+                case "destroy.blocks" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.dsy"));
+                case "villager.trades" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.trd"));
+            }
+        } else {
+            if(scoreboard.containsObjective("modmdo.dsy"))
+                scoreboard.removeObjective(scoreboard.getObjective("modmdo.dsy"));
+            if(scoreboard.containsObjective("modmdo.ots"))
+                scoreboard.removeObjective(scoreboard.getObjective("modmdo.ots"));
+            if(scoreboard.containsObjective("modmdo.trd"))
+                scoreboard.removeObjective(scoreboard.getObjective("modmdo.trd"));
+        }
     }
 
     /**
@@ -105,17 +291,23 @@ public class ServerTickListener {
                 if(manager.getPlayerList().contains(player)) {
                     if(loginUsers.hasUser(player)) {
                         User user = loginUsers.getUser(player);
-                        if(user.getLevel() == 1) {
-                            if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
-                                loginUsers.removeUser(player);
-                                player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                                manager.remove(player);
-                            }
-                        } else if(user.getLevel() == 4) {
-                            if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
-                                loginUsers.removeUser(player);
-                                player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                                manager.remove(player);
+                        if(user.getClientToken().getToken().equals("")) {
+                            loginUsers.removeUser(player);
+                            player.networkHandler.disconnect(new LiteralText("empty token, please update"));
+                            manager.remove(player);
+                        } else {
+                            if(user.getLevel() == 1) {
+                                if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
+                                    loginUsers.removeUser(player);
+                                    player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
+                                    manager.remove(player);
+                                }
+                            } else if(user.getLevel() == 4) {
+                                if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
+                                    loginUsers.removeUser(player);
+                                    player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
+                                    manager.remove(player);
+                                }
                             }
                         }
                     }
