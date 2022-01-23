@@ -6,19 +6,20 @@
     "mixins": [
         "EntityListMixin",
         "ItemEntityMixin",
-        "MinecraftServerSession"
-    ],
-    "client": [
-        "AddServerScreenMixin",
+        "MinecraftServerSession",
         "ClientConnectionMixin",
-        "ClientPlayNetworkHandlerMixin"
-    ],
-    "server": [
+        "ClientPlayNetworkHandlerMixin",
         "EnchantmentHelperMixin",
         "PlayerManagerMixin",
         "ServerLoginNetworkHandlerMixin",
         "ServerPlayNetworkHandlerMixin",
         "StopServerRconMixin"
+    ],
+    "client": [
+        "AddServerScreenMixin"
+    ],
+    "server": [
+
     ],
     "injectors": {
         "defaultRequire": 1

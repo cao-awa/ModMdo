@@ -68,7 +68,7 @@ public class Variables {
     public static boolean enableEncryptionToken = false;
     public static boolean enabledCancelEntitiesTIck = false;
     public static boolean tokenChanged = false;
-    public static int tokenGenerateSize = 128;
+    public static int tokenGenerateSize = 1024;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
     public static Identifier tokenChannel = new Identifier("modmdo:token");
     public static Identifier loginChannel = new Identifier("modmdo:login");

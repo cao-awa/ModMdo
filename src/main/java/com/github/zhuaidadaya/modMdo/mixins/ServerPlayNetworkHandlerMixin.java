@@ -36,7 +36,7 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
  * SKP(Skip)
  * VSD(Version Difference)
  * <p>
- * 手动替换检测: 1.18.x
+ * 手动替换检测: 1.17.x
  */
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
@@ -46,17 +46,29 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Shadow
     @Final
     public ClientConnection connection;
-
+    private boolean firstKeepAlive = false;
     @Shadow
     @Final
     private MinecraftServer server;
+    @Shadow
+    private boolean waitingForKeepAlive;
+
+    @Shadow
+    private long keepAliveId;
+
+    @Shadow
+    private long lastKeepAliveTime;
 
     @Shadow
     protected abstract boolean isHost();
 
+    @Shadow
+    public abstract void disconnect(Text reason);
+
     /**
-     * 解析玩家发送的数据包, 如果identifier为 <code>modmdo:token</code> 则检查token
-     * token正确就加入loginUsers中, 加入就算放行了
+     * 解析玩家发送的数据包, 如果identifier为 <code>modmdo:token</code> 则检查token<br>
+     * token正确就加入loginUsers中, 加入就算放行了<br>
+     * <br>
      *
      * @param packet
      *         客户端发送的数据包
@@ -131,7 +143,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                 if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
                     serverLogin.login(data1, data2, data3, data4, data5, data6);
                 }
-            } else if(channel.equals(loginChannel)){
+            } else if(channel.equals(loginChannel)) {
                 if(modMdoType == ModMdoType.SERVER) {
                     serverLogin.login(data1, data2, data3, data4, data5);
                 }
@@ -192,6 +204,26 @@ public abstract class ServerPlayNetworkHandlerMixin {
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
             ci.cancel();
         }
+    }
+
+    /**
+     * @author
+     */
+    @Overwrite
+    public void onKeepAlive(KeepAliveC2SPacket packet) {
+        if(packet.getId() != this.keepAliveId)
+            firstKeepAlive = ! firstKeepAlive;
+        else
+            firstKeepAlive = false;
+        if(this.waitingForKeepAlive && packet.getId() == this.keepAliveId) {
+            int i = (int) (Util.getMeasuringTimeMs() - this.lastKeepAliveTime);
+            this.player.pingMilliseconds = (this.player.pingMilliseconds * 3 + i) / 4;
+            this.waitingForKeepAlive = false;
+        } else if(! this.isHost()) {
+            if(! firstKeepAlive)
+                this.disconnect(new TranslatableText("disconnect.timeout"));
+        }
+
     }
 
     /**
@@ -279,21 +311,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
         sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command", player.getName().asString(), input), "runCommand");
     }
-
-    //    /**
-    //     * 不登入不给保持live状态
-    //     *
-    //     * @author 草二号机
-    //     *
-    //     * @param packet live包
-    //     * @param ci callback
-    //     */
-    //    @Inject(method = "onKeepAlive", at = @At("HEAD"), cancellable = true)
-    //    public void onKeepAlive(KeepAliveC2SPacket packet, CallbackInfo ci) {
-    //        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
-    //            ci.cancel();
-    //        }
-    //    }
 
     /**
      * 草

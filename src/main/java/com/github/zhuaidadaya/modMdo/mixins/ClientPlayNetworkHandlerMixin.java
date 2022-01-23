@@ -81,7 +81,6 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                 String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
                 UUID uuid = PlayerEntity.getUuidFromProfile(profile);
                 connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
-
             }
         } catch (Exception e) {
             LOGGER.error("error in connecting ModMdo server", e);
