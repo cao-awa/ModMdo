@@ -87,9 +87,11 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
                     }
                 }
-            }
 
-            server.getPlayerManager().onPlayerConnect(connection, player);
+                server.getPlayerManager().onPlayerConnect(connection, player);
+            } else {
+                server.getPlayerManager().onPlayerConnect(connection, player);
+            }
         }).start();
     }
 }

@@ -3,15 +3,11 @@ package com.github.zhuaidadaya.modMdo.mixins;
 import com.github.zhuaidadaya.modMdo.storage.Variables;
 import io.netty.channel.Channel;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.listener.PacketListener;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.net.SocketAddress;
 
@@ -19,42 +15,18 @@ import java.net.SocketAddress;
 public abstract class ClientConnectionMixin {
 
     @Shadow
-    @Final
-    private static Logger LOGGER;
-    @Shadow
     private Channel channel;
     @Shadow
-    private boolean disconnected;
-
-    @Shadow
-    @Nullable
-    public abstract Text getDisconnectReason();
-
-    @Shadow
-    public abstract PacketListener getPacketListener();
-
-    @Shadow private SocketAddress address;
-
-    @Shadow public abstract boolean isOpen();
+    private SocketAddress address;
 
     /**
      * @author 草awa
-     *
-     * @reason
      */
-    @Overwrite
-    public void handleDisconnection() {
+    @Inject(method = "handleDisconnection", cancellable = true, at = @At("HEAD"))
+    public void handleDisconnection(CallbackInfo ci) {
         if(this.channel == null || this.channel.isOpen()) {
-            return;
+            ci.cancel();
         }
-        if(!disconnected) {
-            this.disconnected = true;
-            if(this.getDisconnectReason() != null) {
-                this.getPacketListener().onDisconnected(this.getDisconnectReason());
-            } else if(this.getPacketListener() != null) {
-                this.getPacketListener().onDisconnected(new TranslatableText("multiplayer.disconnect.generic"));
-            }
-            Variables.disconnectedSet.add(address);
-        }
+        Variables.disconnectedSet.add(address);
     }
 }
