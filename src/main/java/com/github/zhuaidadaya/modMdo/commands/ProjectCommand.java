@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modMdo.commands;
 
+import com.github.zhuaidadaya.modMdo.commands.init.ArgumentInit;
 import com.github.zhuaidadaya.modMdo.projects.Project;
 import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -33,7 +34,7 @@ public class ProjectCommand extends SimpleCommandOperation implements Configurab
                     Project project = new Project(getString(start, "projectName"), getApply(this, start), users.getUser(player));
                     startProject(project);
 
-                    new ArgumentInit().init();
+                    ArgumentInit.initProject();
 
                     return 1;
                 } catch (Exception e) {

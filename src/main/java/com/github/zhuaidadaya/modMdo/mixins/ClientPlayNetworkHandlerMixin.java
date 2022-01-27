@@ -1,6 +1,8 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
+import com.github.zhuaidadaya.modMdo.commands.init.ArgumentInit;
 import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
+import com.github.zhuaidadaya.modMdo.wrap.server.ServerUtil;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.MinecraftClient;
@@ -12,9 +14,13 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerAbilitiesS2CPacket;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import org.json.JSONObject;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,17 +43,24 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     @Final
     private ClientConnection connection;
 
-    @Shadow private Set<RegistryKey<World>> worldKeys;
+    @Shadow
+    private Set<RegistryKey<World>> worldKeys;
 
-    @Shadow private DynamicRegistryManager registryManager;
+    @Shadow
+    private DynamicRegistryManager registryManager;
 
-    @Shadow private int chunkLoadDistance;
+    @Shadow
+    private int chunkLoadDistance;
 
-    @Shadow private ClientWorld.Properties worldProperties;
+    @Shadow
+    private ClientWorld.Properties worldProperties;
 
-    @Shadow private ClientWorld world;
+    @Shadow
+    private ClientWorld world;
 
-    @Shadow @Final private GameProfile profile;
+    @Shadow
+    @Final
+    private GameProfile profile;
 
     /**
      * 如果收到了服务器的包,确定对方是一个ModMdo服务器并开启Token加密才发送数据包
@@ -70,21 +83,71 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
             int id;
             id = data.readVarInt();
 
-            if(id == 99) {
-                String address = formatAddress(connection.getAddress());
-                String token = getModMdoTokenFormat(address, TokenContentType.TOKEN_BY_ENCRYPTION);
-                String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
-                UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-                connection.send(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(token).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
-            } else if(id == 96) {
-                String address = formatAddress(connection.getAddress());
-                String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
-                UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-                connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
+            LOGGER.info("server has a payload: " + id);
+
+            switch(id) {
+                case 99 -> {
+                    String address = formatAddress(connection.getAddress());
+                    String token = getModMdoTokenFormat(address, TokenContentType.TOKEN_BY_ENCRYPTION);
+                    String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
+                    UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+                    connection.send(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(token).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
+                }
+                case 96 -> {
+                    String address = formatAddress(connection.getAddress());
+                    String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
+                    UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+                    connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
+
+                }
+                case 106 -> {
+                    String wrapName = "";
+                    try {
+                        wrapName = data.readString();
+                    } catch (Exception ex) {
+
+                    }
+
+                    wrap = wrapName;
+                    connectTo = true;
+                }
+                case 107 -> {
+                    String serversInfo = "";
+                    try {
+                        serversInfo = data.readString();
+                    } catch (Exception ex) {
+
+                    }
+
+                    servers = new ServerUtil(new JSONObject(serversInfo));
+
+                    ArgumentInit.initServerWrap();
+                }
             }
         } catch (Exception e) {
             LOGGER.error("error in connecting ModMdo server", e);
         }
         ci.cancel();
+    }
+
+    @Inject(method = "onHealthUpdate", at = @At("HEAD"), cancellable = true)
+    public void onHealthUpdate(HealthUpdateS2CPacket packet, CallbackInfo ci) {
+        if(client.player == null) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "onExperienceBarUpdate", at = @At("HEAD"), cancellable = true)
+    public void onExperienceBarUpdate(ExperienceBarUpdateS2CPacket packet, CallbackInfo ci) {
+        if(client.player == null) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "onPlayerAbilities", at = @At("HEAD"), cancellable = true)
+    public void onPlayerAbilities(PlayerAbilitiesS2CPacket packet, CallbackInfo ci) {
+        if(client.player == null) {
+            ci.cancel();
+        }
     }
 }

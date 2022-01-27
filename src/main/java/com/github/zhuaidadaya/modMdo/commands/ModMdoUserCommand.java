@@ -58,7 +58,7 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
                 }
                 return 0;
             }))).then(literal("objects").then(literal("joinServer").then(literal("follow").executes(joinServerFollow -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_FOLLOW, getPlayer(joinServerFollow), this, joinServerFollow)) {
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(joinServerFollow), this, joinServerFollow)) {
                     String joinGameFollowConfig = config.getConfigString("joinServer").toLowerCase(Locale.ROOT);
                     if(joinGameFollowConfig.equals("unable")) {
                         sendFeedback(joinServerFollow, new TranslatableText("follow.join.server.unable.rule.format"));
@@ -72,12 +72,12 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
                 }
                 return 0;
             })).then(literal("unfollow").executes(joinServerUnfollow -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_FOLLOW, getPlayer(joinServerUnfollow), this, joinServerUnfollow)) {
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(joinServerUnfollow), this, joinServerUnfollow)) {
                     removeUserFollow(users.getUser(getPlayer(joinServerUnfollow)), "joinServer");
                 }
                 return 1;
             }))).then(literal("runCommand").then(literal("follow").executes(runCommandFollow -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_FOLLOW, getPlayer(runCommandFollow), this, runCommandFollow)) {
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(runCommandFollow), this, runCommandFollow)) {
                     String joinGameFollowConfig = config.getConfigString("runCommand").toLowerCase(Locale.ROOT);
                     if(joinGameFollowConfig.equals("unable")) {
                         sendFeedback(runCommandFollow, new TranslatableText("follow.run.command.unable.rule.format"));
@@ -91,7 +91,7 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
                 }
                 return 0;
             })).then(literal("unfollow").executes(runCommandUnfollow -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_FOLLOW, getPlayer(runCommandUnfollow), this, runCommandUnfollow)) {
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(runCommandUnfollow), this, runCommandUnfollow)) {
                     removeUserFollow(users.getUser(getPlayer(runCommandUnfollow)), "runCommand");
                 }
                 return 1;
