@@ -1,6 +1,6 @@
-package com.github.zhuaidadaya.modMdo.commands.wrap;
+package com.github.zhuaidadaya.modMdo.commands.jump;
 
-import com.github.zhuaidadaya.modMdo.wrap.server.ServerInformation;
+import com.github.zhuaidadaya.modMdo.jump.server.ServerInformation;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -18,17 +18,17 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.servers;
 
-public class ServerWrapArgument implements ArgumentType<String> {
+public class ServerJumpArgument implements ArgumentType<String> {
     public static final DynamicCommandExceptionType INVALID_NAME_EXCEPTION = new DynamicCommandExceptionType((name) -> {
         return new TranslatableText("argument.server.unknown", name);
     });
     private static final Collection<String> EXAMPLES = List.of("127.0.0.1");
 
-    private ServerWrapArgument() {
+    private ServerJumpArgument() {
     }
 
-    public static ServerWrapArgument servers() {
-        return new ServerWrapArgument();
+    public static ServerJumpArgument servers() {
+        return new ServerJumpArgument();
     }
 
     public static ServerInformation getServer(CommandContext<ServerCommandSource> context, String name) {
@@ -54,7 +54,7 @@ public class ServerWrapArgument implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(new ServerWrapListArgument().getServersName(), builder);
+        return CommandSource.suggestMatching(new ServerJumpListArgument().getServersName(), builder);
     }
 
 
