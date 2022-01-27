@@ -11,6 +11,7 @@ import net.minecraft.text.TranslatableText;
 import java.util.Locale;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.enableCheckTokenPerTick;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -176,55 +177,86 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 }
                 return 2;
             }))).then(literal("joinServerFollow").executes(getJoinServerFollowLimit -> {
-                if(config.getConfigString("joinServer") == null)
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(getJoinServerFollowLimit), this, getJoinServerFollowLimit)) {
+                    if(config.getConfigString("joinServer") == null)
+                        config.set("joinServer", PermissionLevel.OPS);
+
+                    sendFeedback(getJoinServerFollowLimit, formatJoinGameFollow());
+                }
+                return 0;
+            }).then(literal("disable").executes(disableJoinServerFollow -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(disableJoinServerFollow), this, disableJoinServerFollow)) {
+                    config.set("joinServer", PermissionLevel.UNABLE);
+
+                    sendFeedback(disableJoinServerFollow, formatJoinGameFollow());
+                }
+                return 1;
+            })).then(literal("all").executes(enableJoinServerFollowForAll -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(enableJoinServerFollowForAll), this, enableJoinServerFollowForAll)) {
+                    config.set("joinServer", PermissionLevel.ALL);
+
+                    sendFeedback(enableJoinServerFollowForAll, formatJoinGameFollow());
+                }
+                return 2;
+            })).then(literal("ops").executes(enableJoinServerFollowForOps -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(enableJoinServerFollowForOps), this, enableJoinServerFollowForOps)) {
                     config.set("joinServer", PermissionLevel.OPS);
 
-                sendFeedback(getJoinServerFollowLimit, formatJoinGameFollow());
-
-                return 0;
-            }).then(literal("disable").executes(disableJoinServerFollow -> {
-                config.set("joinServer", PermissionLevel.UNABLE);
-
-                sendFeedback(disableJoinServerFollow, formatJoinGameFollow());
-
-                return 1;
-            })).then(literal("all").executes(enableJoinServerFollowForAll -> {
-                config.set("joinServer", PermissionLevel.ALL);
-
-                sendFeedback(enableJoinServerFollowForAll, formatJoinGameFollow());
-
-                return 2;
-            })).then(literal("ops").executes(enableJoinServerFollowForOps -> {
-                config.set("joinServer", PermissionLevel.OPS);
-
-                sendFeedback(enableJoinServerFollowForOps, formatJoinGameFollow());
-
+                    sendFeedback(enableJoinServerFollowForOps, formatJoinGameFollow());
+                }
                 return 3;
             }))).then(literal("runCommandFollow").executes(getJoinServerFollowLimit -> {
-                if(config.getConfigString("runCommand") == null)
-                    config.set("runCommand", PermissionLevel.OPS);
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(getJoinServerFollowLimit), this, getJoinServerFollowLimit)) {
+                    if(config.getConfigString("runCommand") == null)
+                        config.set("runCommand", PermissionLevel.OPS);
 
-                sendFeedback(getJoinServerFollowLimit, formatRunCommandFollow());
-
+                    sendFeedback(getJoinServerFollowLimit, formatRunCommandFollow());
+                }
                 return 0;
             }).then(literal("disable").executes(disableJoinServerFollow -> {
-                config.set("runCommand", PermissionLevel.UNABLE);
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(disableJoinServerFollow), this, disableJoinServerFollow)) {
+                    config.set("runCommand", PermissionLevel.UNABLE);
 
-                sendFeedback(disableJoinServerFollow, formatRunCommandFollow());
-
+                    sendFeedback(disableJoinServerFollow, formatRunCommandFollow());
+                }
                 return 1;
             })).then(literal("all").executes(enableJoinServerFollowForAll -> {
-                config.set("runCommand", PermissionLevel.ALL);
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(enableJoinServerFollowForAll), this, enableJoinServerFollowForAll)) {
+                    config.set("runCommand", PermissionLevel.ALL);
 
-                sendFeedback(enableJoinServerFollowForAll, formatRunCommandFollow());
-
+                    sendFeedback(enableJoinServerFollowForAll, formatRunCommandFollow());
+                }
                 return 2;
             })).then(literal("ops").executes(enableJoinServerFollowForOps -> {
-                config.set("runCommand", PermissionLevel.OPS);
+                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(enableJoinServerFollowForOps), this, enableJoinServerFollowForOps)) {
+                    config.set("runCommand", PermissionLevel.OPS);
 
-                sendFeedback(enableJoinServerFollowForOps, formatRunCommandFollow());
-
+                    sendFeedback(enableJoinServerFollowForOps, formatRunCommandFollow());
+                }
                 return 3;
+            }))).then(literal("checkTokenPerTick").executes(getCheckTokenPerTick -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF_CHECK, getPlayer(getCheckTokenPerTick), this, getCheckTokenPerTick)) {
+                    sendFeedback(getCheckTokenPerTick, formatConfigReturnMessage("check_token_per_tick"));
+                }
+                return 0;
+            }).then(literal("enable").executes(check -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF_CHECK, getPlayer(check), this, check)) {
+                    enableCheckTokenPerTick = true;
+
+                    updateModMdoVariables();
+
+                    sendFeedback(check, formatConfigReturnMessage("check_token_per_tick"));
+                }
+                return 0;
+            })).then(literal("disable").executes(noCheck -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF_CHECK, getPlayer(noCheck), this, noCheck)) {
+                    enableCheckTokenPerTick = false;
+
+                    updateModMdoVariables();
+
+                    sendFeedback(noCheck, formatConfigReturnMessage("check_token_per_tick"));
+                }
+                return 0;
             }))));
         });
     }

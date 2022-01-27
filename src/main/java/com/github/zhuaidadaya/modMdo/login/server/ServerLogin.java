@@ -16,9 +16,9 @@ public class ServerLogin {
         if(! data1.equals("")) {
             try {
                 if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
-                    loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)));
-
                     LOGGER.info("login player: " + data1);
+
+                    loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)));
                 } else {
                     rejectUsers.put(new User(data2, data1, level));
                 }
@@ -40,16 +40,17 @@ public class ServerLogin {
             level = 4;
 
         if(! data1.equals("")) {
-            loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken("", data3, data4, data5)));
-
             LOGGER.info("login player: " + data1);
+
+            loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken("", data3, data4, data5)));
         }
     }
 
     public void logout(ServerPlayerEntity player) {
-        LOGGER.info("logout player: " + player.getUuid().toString());
-        if(loginUsers.getUser(player).getClientToken() != null)
+        if(loginUsers.getUser(player).getClientToken() != null) {
+            LOGGER.info("logout player: " + player.getUuid().toString());
             LOGGER.info("canceling player token for: " + player.getUuid().toString());
+        }
         try {
             loginUsers.removeUser(player);
         } catch (Exception e) {

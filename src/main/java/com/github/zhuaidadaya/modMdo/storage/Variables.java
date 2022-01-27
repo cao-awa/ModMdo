@@ -15,10 +15,12 @@ import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
+import com.github.zhuaidadaya.modMdo.wrap.server.ServerUtil;
 import com.github.zhuaidadaya.utils.config.ObjectConfigUtil;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
@@ -39,11 +41,6 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static boolean rankingSwitchNoDump = true;
-    public static boolean enableRanking = false;
-    public static String rankingObject = "Nan";
-    public static int rankingRandomSwitchInterval = 20 * 60 * 8;
-    public static String rankingOnlineTimeScale = "minute";
     public static final String MODMDO_COMMAND_ROOT = "/";
     public static final String MODMDO_COMMAND_CONF = "modmdo/";
     public static final String MODMDO_COMMAND_TICK = "modmdo/tick/";
@@ -54,10 +51,17 @@ public class Variables {
     public static final String MODMDO_COMMAND_ANALYZER = "analyzer/";
     public static final String MODMDO_COMMAND_RANKING = "ranking/";
     public static final String MODMDO_COMMAND_TOKEN = "token/";
-    public static final String MODMDO_COMMAND_FOLLOW = "user/follow";
+    public static final String MODMDO_COMMAND_USR_FOLLOW = "user/follow";
+    public static final String MODMDO_COMMAND_CONF_CHECK = "conf/check";
     public static final String MODMDO_COMMAND_SERVER = "server/";
-    public static String VERSION_ID = "1.0.17";
-    public static int MODMDO_VERSION = 11;
+    public static final String MODMDO_COMMAND_WRAP = "wrap/";
+    public static boolean rankingSwitchNoDump = true;
+    public static boolean enableRanking = false;
+    public static String rankingObject = "Nan";
+    public static int rankingRandomSwitchInterval = 20 * 60 * 8;
+    public static String rankingOnlineTimeScale = "minute";
+    public static String VERSION_ID = "1.0.18";
+    public static int MODMDO_VERSION = 12;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -67,6 +71,8 @@ public class Variables {
     public static boolean enableRejectReconnect = true;
     public static boolean enableEncryptionToken = false;
     public static boolean enabledCancelEntitiesTIck = false;
+    public static boolean enableCheckTokenPerTick = false;
+    public static boolean forceStopTokenCheck = false;
     public static boolean tokenChanged = false;
     public static int tokenGenerateSize = 1024;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
@@ -80,6 +86,7 @@ public class Variables {
     public static CavaUtil cavas;
     public static String motd = "";
     public static MinecraftServer server;
+    public static MinecraftClient client;
     public static BackupUtil bak;
     public static ModMdoType modMdoType = ModMdoType.NONE;
     public static EncryptionTokenUtil modMdoToken = null;
@@ -100,14 +107,14 @@ public class Variables {
     public static HashSet<String> rankingObjects = new HashSet<>();
     public static HashSet<String> rankingObjectsNoDump = new HashSet<>();
 
-    public static boolean rankingIsStatObject(String ranking) {
-        if(ranking.equals("destroy.blocks")) {
-            return true;
-        } else if(ranking.equals("villager.trades")) {
-            return true;
-        }
+    public static HashSet<String> statObjects = new HashSet<>();
 
-        return false;
+    public static ServerUtil servers = new ServerUtil();
+    public static boolean connectTo = false;
+    public static String wrap = "";
+
+    public static boolean rankingIsStatObject(String ranking) {
+        return statObjects.contains(ranking);
     }
 
     public static String getRandomRankingObject() {
@@ -306,12 +313,17 @@ public class Variables {
         config.set("secure_enchant", secureEnchantStatus());
         config.set("encryption_token", encryptionTokenStatus());
         config.set("reject_reconnect", rejectReconnectStatus());
+        config.set("check_token_per_tick", checkTokenPerTickStatus());
         if(modMdoToken != null)
             config.set("token_by_encryption", modMdoToken.toJSONObject());
     }
 
     public static void updateUserProfiles() {
         config.set("user_profiles", users.toJSONObject());
+    }
+
+    public static void updateServersWrap() {
+        config.set("servers_wrap", servers.toJSONObject());
     }
 
     public static void updateProjects() {
@@ -485,5 +497,9 @@ public class Variables {
 
     public static String rejectReconnectStatus() {
         return enableRejectReconnect ? "enable" : "disable";
+    }
+
+    public static String checkTokenPerTickStatus() {
+        return enableCheckTokenPerTick ? "enable" : "disable";
     }
 }

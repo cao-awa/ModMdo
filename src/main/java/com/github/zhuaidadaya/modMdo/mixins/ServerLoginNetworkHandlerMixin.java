@@ -89,8 +89,12 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 }
 
                 server.getPlayerManager().onPlayerConnect(connection, player);
+
+                player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(servers.toJSONObject().toString())));
             } else {
                 server.getPlayerManager().onPlayerConnect(connection, player);
+
+                player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(servers.toJSONObject().toString())));
             }
         }).start();
     }

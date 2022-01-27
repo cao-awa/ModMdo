@@ -5,7 +5,6 @@ import com.github.zhuaidadaya.modMdo.storage.Variables;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -20,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.forceStopTokenCheck;
 
 public class ServerTickListener {
     private long lastAddOnlineTime = - 1;
@@ -52,10 +52,10 @@ public class ServerTickListener {
 
                     if(System.currentTimeMillis() - lastIntervalActive > 1000) {
                         updateUserProfiles();
-                        lastIntervalActive = System.currentTimeMillis();
                         if(rankingIsStatObject(rankingObject)) {
                             updateOtherRankings(server, players);
                         }
+                        lastIntervalActive = System.currentTimeMillis();
                     }
 
                     if(rankingRandomSwitchInterval != - 1) {
@@ -90,16 +90,29 @@ public class ServerTickListener {
         });
     }
 
-    public void updateTradeWithVillager(MinecraftServer server, ServerPlayerEntity player, JSONObject stat) {
+    public void updateCustomRanking(String object, MinecraftServer server, ServerPlayerEntity player, JSONObject stat) {
         try {
             JSONObject custom = stat.getJSONObject("minecraft:custom");
 
-            int tradeCount = custom.getInt("minecraft:traded_with_villager");
+            String scoreboardObject = "";
+            String countObject = "";
+
+            switch(object) {
+                case "minecraft:traded_with_villager" -> {
+                    scoreboardObject = "modmdo.trd";
+                    countObject = "minecraft:traded_with_villager";
+                }
+                case "minecraft:deaths" -> {
+                    scoreboardObject = "modmdo.dts";
+                    countObject = "minecraft:deaths";
+                }
+            }
+            int count = custom.getInt(countObject);
 
             ServerScoreboard scoreboard = server.getScoreboard();
-            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.trd"));
+            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective(scoreboardObject));
 
-            scoreboardPlayerScore.setScore(tradeCount);
+            scoreboardPlayerScore.setScore(count);
             scoreboard.updateScore(scoreboardPlayerScore);
         } catch (Exception e) {
 
@@ -124,10 +137,16 @@ public class ServerTickListener {
                     JSONObject source = new JSONObject(builder.toString());
                     JSONObject stat = source.getJSONObject("stats");
 
-                    if(rankingObject.equals("destroy.blocks")) {
-                        updateDestroyBlocks(server, player, stat);
-                    } else if(rankingObject.equals("villager.trades")) {
-                        updateTradeWithVillager(server, player, stat);
+                    switch(rankingObject) {
+                        case "destroy.blocks" -> {
+                            updateDestroyBlocks(server, player, stat);
+                        }
+                        case "villager.trades" -> {
+                            updateCustomRanking("minecraft:traded_with_villager", server, player, stat);
+                        }
+                        case "player.deaths" -> {
+                            updateCustomRanking("minecraft:deaths", server, player, stat);
+                        }
                     }
                 } catch (Exception e) {
 
@@ -281,18 +300,22 @@ public class ServerTickListener {
      */
     public void cancelLoginIfNoExistentOrChangedToken(ServerPlayerEntity player, PlayerManager manager) {
         try {
-            if(tokenChanged) {
+            if((tokenChanged || enableCheckTokenPerTick) & ! forceStopTokenCheck) {
                 for(User user : loginUsers.getUsers()) {
                     if(manager.getPlayer(user.getName()) == null) {
-                        loginUsers.removeUser(user);
+                        if(forceStopTokenCheck)
+                            break;
+                        player.networkHandler.disconnect(new LiteralText("obsolete player"));
                     }
                 }
+
+                if(forceStopTokenCheck)
+                    return;
 
                 if(manager.getPlayerList().contains(player)) {
                     if(loginUsers.hasUser(player)) {
                         User user = loginUsers.getUser(player);
                         if(user.getClientToken().getToken().equals("")) {
-                            loginUsers.removeUser(player);
                             player.networkHandler.disconnect(new LiteralText("empty token, please update"));
                             manager.remove(player);
                         } else {
@@ -304,7 +327,6 @@ public class ServerTickListener {
                                 }
                             } else if(user.getLevel() == 4) {
                                 if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
-                                    loginUsers.removeUser(player);
                                     player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
                                     manager.remove(player);
                                 }
@@ -376,14 +398,6 @@ public class ServerTickListener {
                             }
                         }
                     }
-                }
-            } else {
-                if(disconnectedSet.contains(player.networkHandler.connection.getAddress())) {
-                    if(player.networkHandler.connection.isOpen()) {
-                        player.networkHandler.connection.send(new DisconnectS2CPacket(new LiteralText("tot error")));
-                    }
-                    loginUsers.removeUser(player);
-                    manager.remove(player);
                 }
             }
         } catch (Exception e) {

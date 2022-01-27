@@ -10,5 +10,7 @@
     "token/": 1,
     "user/follow": 10,
     "server/": 11,
-    "ranking/": 11
+    "ranking/": 11,
+    "conf/check": 12,
+    "wrap/": 12
 }

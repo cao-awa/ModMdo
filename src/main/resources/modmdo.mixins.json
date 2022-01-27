@@ -4,12 +4,15 @@
     "package": "com.github.zhuaidadaya.modMdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
-        "EntityListMixin",
-        "ItemEntityMixin",
-        "MinecraftServerSession",
+        "ArgumentTypesMixin",
         "ClientConnectionMixin",
         "ClientPlayNetworkHandlerMixin",
         "EnchantmentHelperMixin",
+        "EntityListMixin",
+        "ItemEntityMixin",
+        "MinecraftClientMixin",
+        "MinecraftServerSession",
+        "MouseMixin",
         "PlayerManagerMixin",
         "ServerLoginNetworkHandlerMixin",
         "ServerPlayNetworkHandlerMixin",
@@ -19,7 +22,6 @@
         "AddServerScreenMixin"
     ],
     "server": [
-
     ],
     "injectors": {
         "defaultRequire": 1

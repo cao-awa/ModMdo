@@ -13,7 +13,6 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.rankingRandomSwitchInterval;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -23,7 +22,32 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
         init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("ranking").then(literal("objects").then(literal("tradesWithVillager").then(literal("setDisplay").executes(setTradeDisplay -> {
+            dispatcher.register(literal("ranking").then(literal("objects").then(literal("deaths").then(literal("setDisplay").executes(setDeathDisplay -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(setDeathDisplay), this, setDeathDisplay)) {
+                    config.set("ranking", enableRanking = true);
+
+                    try {
+                        showDeaths(getServer(setDeathDisplay));
+                        sendFeedback(setDeathDisplay, formatObjectShow("deaths"));
+                    } catch (IllegalStateException e) {
+                        sendFeedback(setDeathDisplay, formatObjectNoDef("deaths"));
+                    }
+                }
+                return 0;
+            }).then(argument("rankingDisplayName", TextArgumentType.text()).executes(death -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(death), this, death)) {
+                    config.set("ranking", enableRanking = true);
+
+                    try {
+                        addDeathsScoreboard(getServer(death), TextArgumentType.getTextArgument(death, "rankingDisplayName"));
+                        showDeaths(getServer(death));
+                        sendFeedback(death, formatObjectDefined("deaths"));
+                    } catch (Exception e) {
+
+                    }
+                }
+                return 0;
+            })))).then(literal("tradesWithVillager").then(literal("setDisplay").executes(setTradeDisplay -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(setTradeDisplay), this, setTradeDisplay)) {
                     config.set("ranking", enableRanking = true);
 
@@ -98,7 +122,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                     }
                 }
                 return 0;
-            }))).then(literal("setScale").then(literal("seconds").executes(scaleSecond -> {
+            }))).then(literal("setScale").then(literal("second").executes(scaleSecond -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleSecond), this, scaleSecond)) {
                     config.set("ranking", enableRanking = true);
                     config.set("ranking_online_time_scale", rankingOnlineTimeScale = "second");
@@ -240,6 +264,26 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
         scoreboard.addObjective("modmdo.trd", ScoreboardCriterion.DUMMY, displayName, ScoreboardCriterion.DUMMY.getDefaultRenderType());
     }
 
+    public void showDeaths(MinecraftServer server) throws IllegalStateException {
+        ServerScoreboard scoreboard = server.getScoreboard();
+
+        if(scoreboard.containsObjective("modmdo.dts")) {
+            config.set("ranking_object", rankingObject = "player.deaths");
+
+            ((Scoreboard) scoreboard).setObjectiveSlot(1, scoreboard.getObjective("modmdo.dts"));
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    public void addDeathsScoreboard(MinecraftServer server, Text displayName) {
+        ServerScoreboard scoreboard = server.getScoreboard();
+        if(scoreboard.containsObjective("modmdo.dts")) {
+            scoreboard.removeObjective(scoreboard.getObjective("modmdo.dts"));
+        }
+        scoreboard.addObjective("modmdo.dts", ScoreboardCriterion.DUMMY, displayName, ScoreboardCriterion.DUMMY.getDefaultRenderType());
+    }
+
     public TranslatableText formatObjectNoDef(String ranking) {
         return new TranslatableText("ranking.no.def", ranking);
     }
@@ -275,6 +319,10 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
     @Override
     public void init() {
         LOGGER.info("initializing ranking object");
+
+        statObjects.add("destroy.blocks");
+        statObjects.add("villager.trades");
+        statObjects.add("player.deaths");
 
         String onlineTimeScale = config.getConfigString("ranking_online_time_scale");
         String ranking = config.getConfigString("ranking_object");

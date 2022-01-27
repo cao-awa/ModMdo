@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modMdo;
 
 import com.github.zhuaidadaya.modMdo.commands.*;
 import com.github.zhuaidadaya.modMdo.commands.ranking.RankingCommand;
+import com.github.zhuaidadaya.modMdo.commands.wrap.WrapCommand;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.listeners.ServerStartListener;
 import com.github.zhuaidadaya.modMdo.listeners.ServerTickListener;
@@ -55,6 +56,7 @@ public class ModMdoStdInitializer implements ModInitializer {
             new AnalyzerCommand().register();
             new ServerCommand().register();
             new RankingCommand().register();
+            new WrapCommand().register();
         }).start();
     }
 
@@ -71,6 +73,8 @@ public class ModMdoStdInitializer implements ModInitializer {
             enableSecureEnchant = config.getConfigString("secure_enchant").equals("enable");
         if(config.getConfig("encryption_token") != null)
             enableEncryptionToken = config.getConfigString("encryption_token").equals("enable");
+        if(config.getConfig("check_token_per_tick") != null)
+            enableCheckTokenPerTick = config.getConfigString("check_token_per_tick").equals("enable");
 
         if(config.getConfig("token_by_encryption") != null) {
             LOGGER.info("init token");
