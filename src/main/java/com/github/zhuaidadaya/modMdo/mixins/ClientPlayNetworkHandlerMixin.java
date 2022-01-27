@@ -2,7 +2,7 @@ package com.github.zhuaidadaya.modMdo.mixins;
 
 import com.github.zhuaidadaya.modMdo.commands.init.ArgumentInit;
 import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
-import com.github.zhuaidadaya.modMdo.wrap.server.ServerUtil;
+import com.github.zhuaidadaya.modMdo.jump.server.ServerUtil;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.MinecraftClient;
@@ -101,14 +101,14 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
 
                 }
                 case 106 -> {
-                    String wrapName = "";
+                    String jumpName = "";
                     try {
-                        wrapName = data.readString();
+                        jumpName = data.readString();
                     } catch (Exception ex) {
 
                     }
 
-                    wrap = wrapName;
+                    jump = jumpName;
                     connectTo = true;
                 }
                 case 107 -> {
@@ -121,7 +121,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
 
                     servers = new ServerUtil(new JSONObject(serversInfo));
 
-                    ArgumentInit.initServerWrap();
+                    ArgumentInit.initServerJump();
                 }
             }
         } catch (Exception e) {

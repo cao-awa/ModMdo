@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.wrap.server;
+package com.github.zhuaidadaya.modMdo.jump.server;
 
 import net.minecraft.client.MinecraftClient;
 import org.json.JSONObject;
@@ -27,8 +27,8 @@ public class ServerUtil {
         return servers.get(name);
     }
 
-    public void wrap(String name, MinecraftClient client) {
-        servers.get(name).wrap(client);
+    public void jump(String name, MinecraftClient client) {
+        servers.get(name).jump(client);
     }
 
     public JSONObject toJSONObject() {

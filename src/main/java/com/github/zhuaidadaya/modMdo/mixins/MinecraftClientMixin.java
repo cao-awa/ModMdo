@@ -23,14 +23,14 @@ public abstract class MinecraftClientMixin {
     private boolean handleInp = true;
 
     @Inject(method = "tick", at = @At("RETURN"))
-    private void wrapServer(CallbackInfo ci) {
+    private void jumpServer(CallbackInfo ci) {
         if(connectTo) {
             handleInp = false;
             connectTo = false;
 
             try {
                 if(instance != null & servers.getServers().size() > 0) {
-                    servers.wrap(wrap, instance);
+                    servers.jump(jump, instance);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

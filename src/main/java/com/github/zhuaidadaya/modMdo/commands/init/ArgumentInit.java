@@ -1,7 +1,7 @@
 package com.github.zhuaidadaya.modMdo.commands.init;
 
 import com.github.zhuaidadaya.modMdo.commands.ProjectListArgument;
-import com.github.zhuaidadaya.modMdo.commands.wrap.ServerWrapArgument;
+import com.github.zhuaidadaya.modMdo.commands.jump.ServerJumpArgument;
 import net.minecraft.command.argument.ArgumentTypes;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 
@@ -10,7 +10,7 @@ public class ArgumentInit {
         ArgumentTypes.register("modmdo:projects", ProjectListArgument.class, new ConstantArgumentSerializer<>(ProjectListArgument :: projectList));
     }
 
-    public static void initServerWrap() {
-        ArgumentTypes.register("modmdo:servers_wrap", ServerWrapArgument.class, new ConstantArgumentSerializer<>(ServerWrapArgument :: servers));
+    public static void initServerJump() {
+        ArgumentTypes.register("modmdo:servers_jump", ServerJumpArgument.class, new ConstantArgumentSerializer<>(ServerJumpArgument :: servers));
     }
 }

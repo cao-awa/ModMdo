@@ -1,10 +1,10 @@
-package com.github.zhuaidadaya.modMdo.commands.wrap;
+package com.github.zhuaidadaya.modMdo.commands.jump;
 
 import com.github.zhuaidadaya.modMdo.commands.ConfigurableCommand;
 import com.github.zhuaidadaya.modMdo.commands.SimpleCommandOperation;
 import com.github.zhuaidadaya.modMdo.commands.init.ArgumentInit;
-import com.github.zhuaidadaya.modMdo.wrap.server.ServerInformation;
-import com.github.zhuaidadaya.modMdo.wrap.server.ServerUtil;
+import com.github.zhuaidadaya.modMdo.jump.server.ServerInformation;
+import com.github.zhuaidadaya.modMdo.jump.server.ServerUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.netty.buffer.Unpooled;
@@ -20,22 +20,22 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class WrapCommand extends SimpleCommandOperation implements ConfigurableCommand {
+public class JumpCommand extends SimpleCommandOperation implements ConfigurableCommand {
     @Override
     public void register() {
         init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("wrap").then(literal("remove").requires(level -> level.hasPermissionLevel(4)).then(argument("servers", ServerWrapArgument.servers()).executes(removeServer -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_WRAP, getPlayer(removeServer), this, removeServer)) {
+            dispatcher.register(literal("jump").then(literal("remove").requires(level -> level.hasPermissionLevel(4)).then(argument("servers", ServerJumpArgument.servers()).executes(removeServer -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(removeServer), this, removeServer)) {
                     ServerPlayerEntity player = getPlayer(removeServer);
-                    ServerInformation information = ServerWrapArgument.getServer(removeServer, "servers");
+                    ServerInformation information = ServerJumpArgument.getServer(removeServer, "servers");
                     try {
                         if(information.isError())
                             throw new IllegalStateException("server information is error");
                         servers.remove(information.getName());
-                        updateServersWrap();
-                        ArgumentInit.initServerWrap();
+                        updateServersJump();
+                        ArgumentInit.initServerJump();
                         player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(servers.toJSONObject().toString())));
 
                         sendFeedback(removeServer, formatRemoveSuccess(information.getName()));
@@ -45,15 +45,15 @@ public class WrapCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             }))).then(literal("add").requires(level -> level.hasPermissionLevel(4)).then(argument("name", StringArgumentType.string()).then(argument("host", StringArgumentType.string()).then(argument("port", IntegerArgumentType.integer(1, 65565)).executes(addServer -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_WRAP, getPlayer(addServer), this, addServer)) {
+                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(addServer), this, addServer)) {
                     ServerPlayerEntity player = getPlayer(addServer);
                     String name = StringArgumentType.getString(addServer, "name");
                     String host = StringArgumentType.getString(addServer, "host");
                     int port = IntegerArgumentType.getInteger(addServer, "port");
                     try {
                         servers.add(host, port, name);
-                        updateServersWrap();
-                        ArgumentInit.initServerWrap();
+                        updateServersJump();
+                        ArgumentInit.initServerJump();
                         player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(servers.toJSONObject().toString())));
 
                         sendFeedback(addServer, formatAddSuccess(name));
@@ -62,18 +62,18 @@ public class WrapCommand extends SimpleCommandOperation implements ConfigurableC
                     }
                 }
                 return 0;
-            }))))).then(literal("to").then(argument("servers", ServerWrapArgument.servers()).executes(wrap -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_WRAP, getPlayer(wrap), this, wrap)) {
+            }))))).then(literal("to").then(argument("servers", ServerJumpArgument.servers()).executes(jump -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(jump), this, jump)) {
                     try {
-                        ServerPlayerEntity player = getPlayer(wrap);
+                        ServerPlayerEntity player = getPlayer(jump);
 
-                        ServerInformation wrapTo = ServerWrapArgument.getServer(wrap, "servers");
+                        ServerInformation jumpTo = ServerJumpArgument.getServer(jump, "servers");
 
-                        player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(106).writeString(wrapTo.getName())));
+                        player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(106).writeString(jumpTo.getName())));
 
                         forceStopTokenCheck = true;
 
-                        player.networkHandler.disconnect(new LiteralText("wrap server"));
+                        player.networkHandler.disconnect(new LiteralText("jump server"));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -101,20 +101,20 @@ public class WrapCommand extends SimpleCommandOperation implements ConfigurableC
 
     @Override
     public void init() {
-        LOGGER.info("initializing servers wrap");
+        LOGGER.info("initializing servers jump");
 
-        Object serversWrap = config.getConfig("servers_wrap");
-        if(serversWrap != null) {
-            servers = new ServerUtil(new JSONObject(serversWrap.toString()));
+        Object serversJump = config.getConfig("servers_jump");
+        if(serversJump != null) {
+            servers = new ServerUtil(new JSONObject(serversJump.toString()));
         } else {
             servers = new ServerUtil();
-            config.set("servers_wrap", new JSONObject());
+            config.set("servers_jump", new JSONObject());
         }
 
-        ArgumentInit.initServerWrap();
+        ArgumentInit.initServerJump();
 
-        updateServersWrap();
+        updateServersJump();
 
-        LOGGER.info("initialized servers wrap");
+        LOGGER.info("initialized servers jump");
     }
 }

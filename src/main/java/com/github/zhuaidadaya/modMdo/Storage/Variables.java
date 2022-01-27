@@ -15,7 +15,7 @@ import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
-import com.github.zhuaidadaya.modMdo.wrap.server.ServerUtil;
+import com.github.zhuaidadaya.modMdo.jump.server.ServerUtil;
 import com.github.zhuaidadaya.utils.config.ObjectConfigUtil;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
@@ -54,7 +54,7 @@ public class Variables {
     public static final String MODMDO_COMMAND_USR_FOLLOW = "user/follow";
     public static final String MODMDO_COMMAND_CONF_CHECK = "conf/check";
     public static final String MODMDO_COMMAND_SERVER = "server/";
-    public static final String MODMDO_COMMAND_WRAP = "wrap/";
+    public static final String MODMDO_COMMAND_JUMP = "jump/";
     public static boolean rankingSwitchNoDump = true;
     public static boolean enableRanking = false;
     public static String rankingObject = "Nan";
@@ -111,7 +111,7 @@ public class Variables {
 
     public static ServerUtil servers = new ServerUtil();
     public static boolean connectTo = false;
-    public static String wrap = "";
+    public static String jump = "";
 
     public static boolean rankingIsStatObject(String ranking) {
         return statObjects.contains(ranking);
@@ -322,8 +322,8 @@ public class Variables {
         config.set("user_profiles", users.toJSONObject());
     }
 
-    public static void updateServersWrap() {
-        config.set("servers_wrap", servers.toJSONObject());
+    public static void updateServersJump() {
+        config.set("servers_jump", servers.toJSONObject());
     }
 
     public static void updateProjects() {

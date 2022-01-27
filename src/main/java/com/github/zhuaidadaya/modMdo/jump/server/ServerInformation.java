@@ -1,10 +1,10 @@
-package com.github.zhuaidadaya.modMdo.wrap.server;
+package com.github.zhuaidadaya.modMdo.jump.server;
 
 import net.minecraft.client.MinecraftClient;
 import org.json.JSONObject;
 
 public class ServerInformation {
-    private final ServerWrap serverWrap = new ServerWrap();
+    private final ServerJump serverJump = new ServerJump();
     private String host = "127.0.0.1";
     private int port = 25565;
     private String name = "server";
@@ -59,8 +59,8 @@ public class ServerInformation {
         return error;
     }
 
-    public void wrap(MinecraftClient client) {
-        serverWrap.wrap(host, port, client);
+    public void jump(MinecraftClient client) {
+        serverJump.jump(host, port, client);
     }
 
     public JSONObject toJSONObject() {
