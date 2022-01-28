@@ -74,7 +74,7 @@ public class DimensionHereCommand extends SimpleCommandOperation implements Simp
             convertXYZ.multiplyXZ(8, 8);
         }
 
-        return new TranslatableText("command.dhere", useHerePlayerName, dimensionTips.getDimensionColor(dimension), useHerePlayerName, dimensionTips.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), dimensionTips.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
+        return new TranslatableText("command.dhere",  useHerePlayerName,"", dimensionTips.getDimensionColor(dimension) + useHerePlayerName, dimensionTips.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), dimensionTips.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
     }
 
     @Override

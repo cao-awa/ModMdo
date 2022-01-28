@@ -1,10 +1,17 @@
 package com.github.zhuaidadaya.modMdo.jump.server;
 
+import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+
+import static com.github.zhuaidadaya.modMdo.storage.Variables.modMdoServerChannel;
 
 public class ServerUtil {
     private final LinkedHashMap<String, ServerInformation> servers = new LinkedHashMap<>();
@@ -23,6 +30,18 @@ public class ServerUtil {
         servers.put(name, new ServerInformation(host, port, name));
     }
 
+    public void add(String host, int port, String name, ServerEncryptionToken token) {
+        servers.put(name, new ServerInformation(host, port, name, token));
+    }
+
+    public void set(ServerInformation server) {
+        servers.put(server.getName(),server);
+    }
+
+    public void set(String name, ServerInformation server) {
+        servers.put(name, server);
+    }
+
     public ServerInformation getServer(String name) {
         return servers.get(name);
     }
@@ -39,11 +58,23 @@ public class ServerUtil {
         return json;
     }
 
+    public JSONObject toJSONObjectExceptToken() {
+        JSONObject json = new JSONObject();
+        for(String s : servers.keySet()) {
+            json.put(s, servers.get(s).toJSONObjectExceptToken());
+        }
+        return json;
+    }
+
+    public void updateToPlayer(ClientConnection connection) {
+        connection.send(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(toJSONObjectExceptToken().toString())));
+    }
+
     public Collection<String> getServersName() {
         return servers.keySet();
     }
 
-    public LinkedHashMap<String,ServerInformation> getServers() {
+    public LinkedHashMap<String, ServerInformation> getServers() {
         return servers;
     }
 

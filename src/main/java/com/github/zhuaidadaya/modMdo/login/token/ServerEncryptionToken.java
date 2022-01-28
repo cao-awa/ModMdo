@@ -14,6 +14,10 @@ public class ServerEncryptionToken extends EncryptionToken {
         super(serverToken.getServerDefaultToken(), serverToken.getServerOpsToken());
     }
 
+    public ServerEncryptionToken(JSONObject json) {
+        super(json.getString("default"), json.getString("ops"));
+    }
+
     public static ServerEncryptionToken createServerEncryptionToken() {
         try {
             return new ServerEncryptionToken(new AES().randomGet(1024), new AES().randomGet(1024));
@@ -27,6 +31,6 @@ public class ServerEncryptionToken extends EncryptionToken {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put("default", getToken());
+        return new JSONObject().put("default", getServerDefaultToken()).put("ops", getServerOpsToken());
     }
 }

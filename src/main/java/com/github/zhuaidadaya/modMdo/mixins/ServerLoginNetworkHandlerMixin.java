@@ -73,11 +73,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                             sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "joinServer");
                         }
                         connection.disconnect(new LiteralText("failed to login server"));
-                        try {
-                            rejectUsers.removeUser(player);
-                        } catch (Exception e) {
 
-                        }
                         return;
                     }
 

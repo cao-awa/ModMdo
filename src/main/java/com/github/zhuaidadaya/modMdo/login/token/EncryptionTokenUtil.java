@@ -20,6 +20,15 @@ public class EncryptionTokenUtil {
         setServerToken(serverToken);
     }
 
+    public EncryptionTokenUtil(JSONObject json) {
+        JSONObject clientTokens = json.getJSONObject("client");
+        for(String o : clientTokens.keySet()) {
+            ClientEncryptionToken client = new ClientEncryptionToken(clientTokens.getJSONObject(o));
+            addClientToken(client);
+        }
+        setServerToken(new ServerEncryptionToken(json.getJSONObject("sever")));
+    }
+
     public EncryptionTokenUtil addClientToken(ClientEncryptionToken clientToken) {
         clientTokens.put(clientToken.getAddress(), clientToken);
         return this;

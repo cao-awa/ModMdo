@@ -83,13 +83,21 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
             int id;
             id = data.readVarInt();
 
-            LOGGER.info("server has a payload: " + id);
+            LOGGER.info("server sent a payload id: " + id);
 
             switch(id) {
                 case 99 -> {
                     String address = formatAddress(connection.getAddress());
-                    String token = getModMdoTokenFormat(address, TokenContentType.TOKEN_BY_ENCRYPTION);
                     String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
+                    String token;
+                    if(jumpToken.equals("") & jumpLoginType.equals("")) {
+                        token = getModMdoTokenFormat(address, TokenContentType.TOKEN_BY_ENCRYPTION);
+                    } else {
+                        token = jumpToken;
+                        loginType = jumpLoginType;
+                        jumpLoginType = "";
+                        jumpToken = "";
+                    }
                     UUID uuid = PlayerEntity.getUuidFromProfile(profile);
                     connection.send(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(token).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
                 }
@@ -100,6 +108,33 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                     connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
 
                 }
+                case 105 -> {
+                    String jumpName = "";
+                    try {
+                        jumpName = data.readString();
+                    } catch (Exception ex) {
+
+                    }
+
+                    String token = "";
+                    try {
+                        token = data.readString();
+                    } catch (Exception ex) {
+
+                    }
+
+                    String loginType = "";
+                    try {
+                        loginType = data.readString();
+                    } catch (Exception ex) {
+
+                    }
+
+                    jumpToken = token;
+                    jumpLoginType= loginType;
+                    jump = jumpName;
+                    connectTo = true;
+                }
                 case 106 -> {
                     String jumpName = "";
                     try {
@@ -108,6 +143,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
 
                     }
 
+                    jumpToken = "";
                     jump = jumpName;
                     connectTo = true;
                 }
