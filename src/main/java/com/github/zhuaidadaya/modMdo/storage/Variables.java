@@ -60,8 +60,8 @@ public class Variables {
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static String rankingOnlineTimeScale = "minute";
-    public static String VERSION_ID = "1.0.18";
-    public static int MODMDO_VERSION = 12;
+    public static String VERSION_ID = "1.0.19";
+    public static int MODMDO_VERSION = 13;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean enableHereCommand = true;
@@ -112,6 +112,8 @@ public class Variables {
     public static ServerUtil servers = new ServerUtil();
     public static boolean connectTo = false;
     public static String jump = "";
+    public static String jumpToken = "";
+    public static String jumpLoginType = "";
 
     public static boolean rankingIsStatObject(String ranking) {
         return statObjects.contains(ranking);
@@ -156,6 +158,11 @@ public class Variables {
             bw.close();
             bw = new BufferedWriter(new FileWriter("token/token_ops.txt"));
             bw.write(modMdoToken.getServerToken().checkToken("ops"));
+            bw.close();
+            bw = new BufferedWriter(new FileWriter("token/token.json"));
+            JSONObject tokenJson = modMdoToken.toJSONObject();
+            tokenJson.remove("client");
+            bw.write(tokenJson.toString());
             bw.close();
         } catch (Exception e) {
 

@@ -10,7 +10,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.commandApplyToPlayer;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class DimensionHereCommand extends SimpleCommandOperation implements SimpleCommand, HereCommandFormat {
@@ -75,7 +74,7 @@ public class DimensionHereCommand extends SimpleCommandOperation implements Simp
             convertXYZ.multiplyXZ(8, 8);
         }
 
-        return new TranslatableText("command.dhere", useHerePlayerName, dimensionTips.getDimensionColor(dimension), useHerePlayerName, dimensionTips.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), dimensionTips.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
+        return new TranslatableText("command.dhere",  useHerePlayerName,"", dimensionTips.getDimensionColor(dimension) + useHerePlayerName, dimensionTips.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), dimensionTips.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
     }
 
     @Override

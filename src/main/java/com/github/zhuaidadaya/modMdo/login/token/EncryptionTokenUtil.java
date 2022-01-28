@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import java.util.LinkedHashMap;
 
 public class EncryptionTokenUtil {
-    private LinkedHashMap<String ,ClientEncryptionToken> clientTokens = new LinkedHashMap<>();
+    private final LinkedHashMap<String, ClientEncryptionToken> clientTokens = new LinkedHashMap<>();
     private ServerEncryptionToken serverToken;
 
     public EncryptionTokenUtil() {
@@ -20,13 +20,17 @@ public class EncryptionTokenUtil {
         setServerToken(serverToken);
     }
 
-    public EncryptionTokenUtil addClientToken(ClientEncryptionToken clientToken) {
-        clientTokens.put(clientToken.getAddress(),clientToken);
-        return this;
+    public EncryptionTokenUtil(JSONObject json) {
+        JSONObject clientTokens = json.getJSONObject("client");
+        for(String o : clientTokens.keySet()) {
+            ClientEncryptionToken client = new ClientEncryptionToken(clientTokens.getJSONObject(o));
+            addClientToken(client);
+        }
+        setServerToken(new ServerEncryptionToken(json.getJSONObject("sever")));
     }
 
-    public EncryptionTokenUtil setServerToken(ServerEncryptionToken serverToken) {
-        this.serverToken = serverToken;
+    public EncryptionTokenUtil addClientToken(ClientEncryptionToken clientToken) {
+        clientTokens.put(clientToken.getAddress(), clientToken);
         return this;
     }
 
@@ -36,6 +40,11 @@ public class EncryptionTokenUtil {
 
     public ServerEncryptionToken getServerToken() {
         return serverToken;
+    }
+
+    public EncryptionTokenUtil setServerToken(ServerEncryptionToken serverToken) {
+        this.serverToken = serverToken;
+        return this;
     }
 
     public JSONObject toJSONObject() {

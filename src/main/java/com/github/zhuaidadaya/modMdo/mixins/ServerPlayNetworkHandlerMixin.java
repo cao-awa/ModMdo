@@ -36,7 +36,7 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
  * SKP(Skip)
  * VSD(Version Difference)
  * <p>
- * 手动替换检测: 1.18.x
+ * 手动替换检测: 1.17.x
  */
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
@@ -172,13 +172,17 @@ public abstract class ServerPlayNetworkHandlerMixin {
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
-            if(!rejectUsers.hasUser(player) || loginUsers.hasUser(player)) {
+            if((!rejectUsers.hasUser(player) || loginUsers.hasUser(player)) & server.getPlayerManager().getPlayer(player.getUuid()) != null) {
                 LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
                 this.server.getPlayerManager().broadcast((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
                 this.server.forcePlayerSampleUpdate();
                 this.server.getPlayerManager().remove(this.player);
                 this.player.onDisconnect();
                 this.player.getTextStream().onDisconnect();
+            }
+
+            if(rejectUsers.hasUser(player)) {
+                rejectUsers.removeUser(player);
             }
 
             serverLogin.logout(player);

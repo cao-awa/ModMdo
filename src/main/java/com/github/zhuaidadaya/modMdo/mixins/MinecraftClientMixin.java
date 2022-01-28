@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,6 +44,17 @@ public abstract class MinecraftClientMixin {
         if(! handleInp || player == null) {
             ci.cancel();
             handleInp = true;
+        }
+    }
+
+    @Inject(method = "setScreen",at = @At("HEAD"),cancellable = true)
+    public void setScreen(Screen screen, CallbackInfo ci) {
+        try {
+            if(connectTo) {
+                ci.cancel();
+            }
+        } catch (Exception e) {
+
         }
     }
 }

@@ -1,4 +1,10 @@
 {
+    "argument.server.unknown": "unknown server: %s",
+    "server.remove.token.sus": "§asuccess to remove token of %s §afor %s",
+    "server.remove.token.failed": "§cfailed to remove token of %s",
+    "server.set.token.sus": "§asuccess to set token of %s §afor %s",
+    "server.set.token.failed": "§cfailed to set token of %s",
+    "server.jump.failed": "§cfailed to jump server: %s",
     "server.add.sus": "§asuccess to add server: %s",
     "server.add.failed": "§cfailed to add server: %s",
     "server.remove.sus": "§asuccess to remove server: %s",
@@ -90,11 +96,11 @@
     "language.change": "change the ModMdo language to %s",
     "command.here.rejection": "rejected /here message from anybody",
     "command.here.receive": "receive /here message from anybody",
-    "dimension.overworld": "overworld(主世界)",
-    "dimension.the_nether": "the_nether(下界)",
-    "dimension.the_end": "the_end(末地)",
+    "dimension.overworld": "§aoverworld(主世界)",
+    "dimension.the_nether": "§cthe_nether(下界)",
+    "dimension.the_end": "§ethe_end(末地)",
     "command.here": "%s send a position message to you\n%s%s §eat %s: \n %s",
-    "command.dhere": "%s send a position message to you\n%s%s §eat %s: \n %s\n§dConvert %s coordinate is \n %s",
+    "command.dhere": "%s send a position message to you\n%s%s §eat %s: \n %s\n§dConvert %s §dcoordinate is \n %s",
     "command.here.feedback": "sent position of %s to all player",
     "command.here.failed.feedback": "§ccannot send position to other player"
 }
