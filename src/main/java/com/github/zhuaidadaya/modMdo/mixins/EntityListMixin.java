@@ -1,11 +1,12 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.EntityList;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.function.Consumer;
 
@@ -14,13 +15,35 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.enabledCancelEntit
 @Mixin(EntityList.class)
 public class EntityListMixin {
 
+    @Shadow private Int2ObjectMap<Entity> entities;
+
+    @Shadow private @Nullable Int2ObjectMap<Entity> iterating;
+
+    @Shadow private Int2ObjectMap<Entity> temp;
+
     /**
      * @author 草awa
+     *
+     * @reason
      */
-    @Inject(method = "forEach",at = @At("HEAD"), cancellable = true)
-    public void forEach(Consumer<Entity> action, CallbackInfo ci) {
+    @Overwrite
+    public void forEach(Consumer<Entity> action) {
         if(enabledCancelEntitiesTIck) {
-            ci.cancel();
+            return;
+        }
+
+        if (this.iterating != null) {
+            throw new UnsupportedOperationException("Only one concurrent iteration supported");
+        } else {
+            this.iterating = this.entities;
+
+            try {
+                for(Entity entity : this.entities.values()) {
+                    action.accept(entity);
+                }
+            } finally {
+                this.iterating = null;
+            }
         }
     }
 }

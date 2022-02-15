@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.text.TranslatableText;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.tokenChanged;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class TokenCommand extends SimpleCommandOperation implements SimpleCommand {

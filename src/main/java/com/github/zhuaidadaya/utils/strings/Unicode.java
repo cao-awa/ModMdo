@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.MCH.utils.strings;
+package com.github.zhuaidadaya.utils.strings;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -2,9 +2,9 @@ package com.github.zhuaidadaya.modMdo.mixins;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.TranslatableText;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -13,24 +13,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import static com.github.zhuaidadaya.modMdo.storage.Variables.enableRejectReconnect;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 @Mixin(PlayerManager.class)
 public class PlayerManagerMixin {
     @Shadow
     @Final
-    private MinecraftServer server;
-
-    @Shadow
-    @Final
     private List<ServerPlayerEntity> players;
-
-    @Shadow
-    @Final
-    private Map<UUID, ServerPlayerEntity> playerMap;
 
     /**
      * 当相同的玩家在线时, 禁止重复创建玩家
@@ -44,11 +35,18 @@ public class PlayerManagerMixin {
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         if(enableRejectReconnect) {
             UUID uUID = PlayerEntity.getUuidFromProfile(profile);
-            for(ServerPlayerEntity serverPlayerEntity : this.players) {
-                if(serverPlayerEntity.networkHandler.connection.getAddress() == null)
+            for(ServerPlayerEntity player : this.players) {
+                if(player.networkHandler.connection.getAddress() == null)
                     break;
-                if(serverPlayerEntity.getUuid().equals(uUID))
+                if(player.getUuid().equals(uUID)) {
+                    if(loginUsers.hasUser(player)) {
+                        if(getFeatureCanUse("login/dump/reject", player)) {
+                            sendMessageToPlayer(player,new TranslatableText("login.dump.rejected"),false);
+                        }
+                    }
                     cir.cancel();
+                }
+
             }
         }
     }

@@ -20,7 +20,7 @@ public class ServerCommand extends SimpleCommandOperation implements SimpleComma
             dispatcher.register(literal("server").then(literal("cpu").executes(cpu -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_SERVER, getPlayer(cpu), this, cpu)) {
                     new Thread(() -> {
-                        sendFeedback(cpu, new TranslatableText("server.cpu",  SystemUtil.getCpuTotalUsed() + "(Used)",  SystemUtil.getCpuWait() + "(Wait)"));
+                        sendFeedback(cpu, new TranslatableText("server.cpu", SystemUtil.getCpuTotalUsed() + "(Used)", SystemUtil.getCpuWait() + "(Wait)"));
                     }).start();
                 }
                 return 1;

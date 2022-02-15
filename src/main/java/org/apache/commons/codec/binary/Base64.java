@@ -358,8 +358,8 @@ public class Base64 extends BaseNCodec {
      * @since 1.5
      */
     public static boolean isBase64(final byte[] arrayOctet) {
-        for (int i = 0; i < arrayOctet.length; i++) {
-            if (!isBase64(arrayOctet[i]) && !isWhiteSpace(arrayOctet[i])) {
+        for(byte b : arrayOctet) {
+            if(! isBase64(b) && ! isWhiteSpace(b)) {
                 return false;
             }
         }
@@ -674,24 +674,22 @@ public class Base64 extends BaseNCodec {
 
             // We have some spare bits remaining
             // Output all whole multiples of 8 bits and ignore the rest
-            switch (context.modulus) {
-//              case 0 : // impossible, as excluded above
-                case 1 : // 6 bits - either ignore entirely, or raise an exception
-                    validateTrailingCharacter();
-                    break;
-                case 2 : // 12 bits = 8 + 4
+            switch(context.modulus) {
+                //              case 0 : // impossible, as excluded above
+                case 1 -> // 6 bits - either ignore entirely, or raise an exception
+                        validateTrailingCharacter();
+                case 2 -> { // 12 bits = 8 + 4
                     validateCharacter(MASK_4BITS, context);
                     context.ibitWorkArea = context.ibitWorkArea >> 4; // dump the extra 4 bits
                     buffer[context.pos++] = (byte) ((context.ibitWorkArea) & MASK_8BITS);
-                    break;
-                case 3 : // 18 bits = 8 + 8 + 2
+                }
+                case 3 -> { // 18 bits = 8 + 8 + 2
                     validateCharacter(MASK_2BITS, context);
                     context.ibitWorkArea = context.ibitWorkArea >> 2; // dump 2 bits
                     buffer[context.pos++] = (byte) ((context.ibitWorkArea >> 8) & MASK_8BITS);
                     buffer[context.pos++] = (byte) ((context.ibitWorkArea) & MASK_8BITS);
-                    break;
-                default:
-                    throw new IllegalStateException("Impossible modulus " + context.modulus);
+                }
+                default -> throw new IllegalStateException("Impossible modulus " + context.modulus);
             }
         }
     }

@@ -151,8 +151,12 @@ public class PureConfigUtil implements AbstractConfigUtil {
         logger = LogManager.getLogger("ConfigUtil-" + entrust);
         this.empty = empty;
         this.loadManifest = loadManifest;
-        if(! empty)
-            readConfig(true, false, loadManifest);
+        try {
+            if(! empty)
+                readConfig(true, false, loadManifest);
+        } catch (Exception e) {
+
+        }
     }
 
     public PureConfigUtil setPath(String path) {
@@ -298,15 +302,15 @@ public class PureConfigUtil implements AbstractConfigUtil {
         return configs.get(conf);
     }
 
-    public boolean readConfig() {
+    public boolean readConfig() throws IOException {
         return readConfig(false);
     }
 
-    public boolean readConfig(boolean log) {
+    public boolean readConfig(boolean log) throws IOException {
         return readConfig(log, false, false);
     }
 
-    public boolean readConfig(boolean log, boolean forceLoad, boolean init) {
+    public boolean readConfig(boolean log, boolean forceLoad, boolean init) throws IOException {
         checkShutdown();
 
         if(shuttingDown) {
@@ -361,11 +365,12 @@ public class PureConfigUtil implements AbstractConfigUtil {
                         addToConfig.add(inArray);
                     setListConf(true, configKey, addToConfig);
                 } else {
-                    setConf(true, configKey, configDetailed.get("value").toString());
+                    setConf(true, configKey, configDetailed.get("value"));
                 }
             }
 
-            logger.info("configs parse done, in " + (float) (System.nanoTime() - start) / 1000000f + "ms");
+            if(log)
+                logger.info("configs parse done, in " + (float) (System.nanoTime() - start) / 1000000f + "ms");
 
             if(init) {
                 if(log)
@@ -403,6 +408,7 @@ public class PureConfigUtil implements AbstractConfigUtil {
                         }
                     }
                 }
+                throw e;
             }
 
             canShutdown = true;
@@ -1012,6 +1018,18 @@ public class PureConfigUtil implements AbstractConfigUtil {
         configs.remove(key, configValues);
     }
 
+    public void setIfNoExist(Object key,Object configKeyValues) {
+        if(!configs.containsKey(key)) {
+            set(key,configKeyValues);
+        }
+    }
+
+    public void setListIfNoExist(Object key,Object configKeyValues) {
+        if(!configs.containsKey(key)) {
+            setList(key,configKeyValues);
+        }
+    }
+
     public void set(Object key, Object... configKeysValues) throws IllegalArgumentException {
         checkShutdown();
 
@@ -1169,7 +1187,7 @@ public class PureConfigUtil implements AbstractConfigUtil {
 
         logger.info("invaliding ConfigUtil");
 
-        shutdown();
+        shutdown = true;
 
         logger.info("cleaning configs");
 

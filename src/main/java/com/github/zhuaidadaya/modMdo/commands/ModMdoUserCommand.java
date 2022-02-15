@@ -59,40 +59,40 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
                 return 0;
             }))).then(literal("objects").then(literal("joinServer").then(literal("follow").executes(joinServerFollow -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(joinServerFollow), this, joinServerFollow)) {
-                    String joinGameFollowConfig = config.getConfigString("joinServer").toLowerCase(Locale.ROOT);
+                    String joinGameFollowConfig = config.getConfigString("join_server_follow").toLowerCase(Locale.ROOT);
                     if(joinGameFollowConfig.equals("unable")) {
                         sendFeedback(joinServerFollow, new TranslatableText("follow.join.server.unable.rule.format"));
                     } else {
                         if(joinGameFollowConfig.equals("ops") & ! getPlayer(joinServerFollow).hasPermissionLevel(4)) {
                             sendFeedback(joinServerFollow, new TranslatableText("follow.join.server.ops.rule.format"));
                         } else {
-                            addUserFollow(users.getUser(getPlayer(joinServerFollow)), "joinServer");
+                            addUserFollow(users.getUser(getPlayer(joinServerFollow)), "join_server_follow");
                         }
                     }
                 }
                 return 0;
             })).then(literal("unfollow").executes(joinServerUnfollow -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(joinServerUnfollow), this, joinServerUnfollow)) {
-                    removeUserFollow(users.getUser(getPlayer(joinServerUnfollow)), "joinServer");
+                    removeUserFollow(users.getUser(getPlayer(joinServerUnfollow)), "join_server_follow");
                 }
                 return 1;
             }))).then(literal("runCommand").then(literal("follow").executes(runCommandFollow -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(runCommandFollow), this, runCommandFollow)) {
-                    String joinGameFollowConfig = config.getConfigString("runCommand").toLowerCase(Locale.ROOT);
+                    String joinGameFollowConfig = config.getConfigString("run_command_follow").toLowerCase(Locale.ROOT);
                     if(joinGameFollowConfig.equals("unable")) {
                         sendFeedback(runCommandFollow, new TranslatableText("follow.run.command.unable.rule.format"));
                     } else {
                         if(joinGameFollowConfig.equals("ops") & ! getPlayer(runCommandFollow).hasPermissionLevel(4)) {
                             sendFeedback(runCommandFollow, new TranslatableText("follow.run.command.ops.rule.format"));
                         } else {
-                            addUserFollow(users.getUser(getPlayer(runCommandFollow)), "runCommand");
+                            addUserFollow(users.getUser(getPlayer(runCommandFollow)), "run_command_follow");
                         }
                     }
                 }
                 return 0;
             })).then(literal("unfollow").executes(runCommandUnfollow -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(runCommandUnfollow), this, runCommandUnfollow)) {
-                    removeUserFollow(users.getUser(getPlayer(runCommandUnfollow)), "runCommand");
+                    removeUserFollow(users.getUser(getPlayer(runCommandUnfollow)), "run_command_follow");
                 }
                 return 1;
             })))));

@@ -50,64 +50,31 @@ public class ReformConfigUtil implements AbstractConfigUtil {
     private String note;
 
     public ReformConfigUtil() {
-        defaultUtilConfigs();
-        readConfig(true);
+        build(null,null,null,null,false,false);
     }
 
     public ReformConfigUtil(String entrust) {
-        defaultUtilConfigs();
-        logger = LogManager.getLogger("ConfigUtil-" + entrust);
-        readConfig(true);
+        build(entrust,null,null,null,false,false);
     }
 
     public ReformConfigUtil(String entrust, String configPath) {
-        defaultUtilConfigs();
-        setPath(configPath);
-        logger = LogManager.getLogger("ConfigUtil-" + entrust);
-        readConfig(true);
+        build(entrust,configPath,null,null,false,false);
     }
 
     public ReformConfigUtil(String entrust, String configPath, String configName) {
-        defaultUtilConfigs();
-        setPath(configPath);
-        setName(configName);
-        setEntrust(entrust);
-        logger = LogManager.getLogger("ConfigUtil-" + entrust);
-        readConfig(true);
+        build(entrust,configPath,configName,null,false,false);
     }
 
     public ReformConfigUtil(String entrust, String configPath, String configName, String configVersion) {
-        defaultUtilConfigs();
-        setPath(configPath);
-        setName(configName);
-        setVersion(configVersion);
-        setEntrust(entrust);
-        logger = LogManager.getLogger("ConfigUtil-" + entrust);
-        readConfig(true);
+        build(entrust,configPath,configName,configVersion,false,false);
     }
 
     public ReformConfigUtil(String entrust, String configPath, String configName, String configVersion, boolean empty) {
-        defaultUtilConfigs();
-        setPath(configPath);
-        setName(configName);
-        setVersion(configVersion);
-        setEntrust(entrust);
-        logger = LogManager.getLogger("ConfigUtil-" + entrust);
-        this.empty = empty;
-        if(! empty)
-            readConfig(true);
+        build(entrust,configPath,configName,configVersion,empty,false);
     }
 
     public ReformConfigUtil(String entrust, String configPath, String configName, String configVersion, boolean empty, boolean loadManifest) {
-        defaultUtilConfigs();
-        setPath(configPath);
-        setName(configName);
-        setVersion(configVersion);
-        setEntrust(entrust);
-        logger = LogManager.getLogger("ConfigUtil-" + entrust);
-        this.empty = empty;
-        if(! empty)
-            readConfig(true, false, loadManifest);
+        build(entrust,configPath,configName,configVersion,empty,loadManifest);
     }
 
     public static void main(String[] args) {
@@ -178,8 +145,12 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         logger = LogManager.getLogger("ConfigUtil-" + entrust);
         this.empty = empty;
         this.loadManifest = loadManifest;
-        if(! empty)
-            readConfig(true, false, loadManifest);
+        try {
+            if(! empty)
+                readConfig(true, false, loadManifest);
+        } catch (Exception e) {
+
+        }
     }
 
     public ReformConfigUtil setPath(String path) {
@@ -325,15 +296,15 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         return configs.get(conf);
     }
 
-    public boolean readConfig() {
+    public boolean readConfig() throws IOException {
         return readConfig(false);
     }
 
-    public boolean readConfig(boolean log) {
+    public boolean readConfig(boolean log) throws IOException {
         return readConfig(log, false, false);
     }
 
-    public boolean readConfig(boolean log, boolean forceLoad, boolean init) {
+    public boolean readConfig(boolean log, boolean forceLoad, boolean init) throws IOException {
         checkShutdown();
 
         if(shuttingDown) {
@@ -388,11 +359,12 @@ public class ReformConfigUtil implements AbstractConfigUtil {
                         addToConfig.add(inArray);
                     setListConf(true, configKey, addToConfig);
                 } else {
-                    setConf(true, configKey, configDetailed.get("value").toString());
+                    setConf(true, configKey, configDetailed.get("value"));
                 }
             }
 
-            logger.info("configs parse done, in " + (float) (System.nanoTime() - start) / 1000000f + "ms");
+            if(log)
+                logger.info("configs parse done, in " + (float) (System.nanoTime() - start) / 1000000f + "ms");
 
             if(init) {
                 if(log)
@@ -430,6 +402,7 @@ public class ReformConfigUtil implements AbstractConfigUtil {
                         }
                     }
                 }
+                throw e;
             }
 
             canShutdown = true;
@@ -1039,6 +1012,18 @@ public class ReformConfigUtil implements AbstractConfigUtil {
         configs.remove(key, configValues);
     }
 
+    public void setIfNoExist(Object key,Object configKeyValues) {
+        if(!configs.containsKey(key)) {
+            set(key,configKeyValues);
+        }
+    }
+
+    public void setListIfNoExist(Object key,Object configKeyValues) {
+        if(!configs.containsKey(key)) {
+            setList(key,configKeyValues);
+        }
+    }
+
     public void set(Object key, Object... configKeysValues) throws IllegalArgumentException {
         checkShutdown();
 
@@ -1102,33 +1087,17 @@ public class ReformConfigUtil implements AbstractConfigUtil {
             JSONObject conf = new JSONObject();
             JSONObject inJ = new JSONObject();
 
-            if(config instanceof Object[] | config instanceof List<?>) {
+            if(config instanceof List<?>) {
                 ObjectList<Object> list;
-                if(config instanceof Object[]) {
-                    list = ObjectList.of((Object[]) config);
+                list = ObjectList.of(config);
 
-                    if(list.size() == 1)
-                        list = ObjectList.of(ObjectList.of((Object[]) config).get(0));
-
-                    inJ.put("values", list);
-                } else {
-                    list = ObjectList.of(config);
-
-                    inJ.put("values", (List<?>) config);
-                }
+                inJ.put("values", (List<?>) config);
 
                 inJ.put("totalSize", list.size());
 
                 inJ.put("listTag", true);
             } else {
-                if(config instanceof String)
-                    inJ.put("value", config.toString());
-                else if(config instanceof Boolean)
-                    inJ.put("value", Boolean.parseBoolean(config.toString()));
-                else if(config instanceof Integer)
-                    inJ.put("value", Integer.parseInt(config.toString()));
-                else
-                    inJ.put("value", config);
+                inJ.put("value", config);
 
                 inJ.put("listTag", false);
             }
@@ -1196,7 +1165,7 @@ public class ReformConfigUtil implements AbstractConfigUtil {
 
         logger.info("invaliding ConfigUtil");
 
-        shutdown();
+        shutdown = true;
 
         logger.info("cleaning configs");
 

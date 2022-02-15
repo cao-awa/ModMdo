@@ -139,18 +139,15 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
             }
 
-            if(channel.equals(tokenChannel)) {
-                if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
-                    serverLogin.login(data1, data2, data3, data4, data5, data6);
-                }
-            } else if(channel.equals(loginChannel)) {
+            if(channel.equals(loginChannel)) {
                 if(modMdoType == ModMdoType.SERVER) {
-                    serverLogin.login(data1, data2, data3, data4, data5);
+                    serverLogin.login(data1, data2, data3, data4, data5, data6);
                 }
             }
 
             ci.cancel();
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

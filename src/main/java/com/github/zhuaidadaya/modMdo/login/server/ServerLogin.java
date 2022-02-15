@@ -14,35 +14,33 @@ public class ServerLogin {
             level = 4;
 
         if(! data1.equals("")) {
-            try {
-                if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
+            if(enableEncryptionToken) {
+                try {
+                    if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
+                        LOGGER.info("login player: " + data1);
+
+                        loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)));
+                    } else {
+                        rejectUsers.put(new User(data2, data1, level));
+                    }
+                } catch (NullPointerException e) {
+                    modMdoToken.setServerToken(ServerEncryptionToken.createServerEncryptionToken());
+
+                    rejectUsers.put(new User(data2, data1, level));
+
+                    saveToken();
+
+                    updateModMdoVariables();
+                }
+            } else {
+                try {
                     LOGGER.info("login player: " + data1);
 
                     loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)));
-                } else {
-                    rejectUsers.put(new User(data2, data1, level));
+                } catch (Exception e) {
+
                 }
-            } catch (NullPointerException e) {
-                modMdoToken.setServerToken(ServerEncryptionToken.createServerEncryptionToken());
-
-                rejectUsers.put(new User(data2, data1, level));
-
-                saveToken();
-
-                updateModMdoVariables();
             }
-        }
-    }
-
-    public void login(String data1, String data2, String data3, String data4, String data5) {
-        int level = 1;
-        if(data3.equals("ops"))
-            level = 4;
-
-        if(! data1.equals("")) {
-            LOGGER.info("login player: " + data1);
-
-            loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken("", data3, data4, data5)));
         }
     }
 

@@ -4,6 +4,7 @@ import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.commands.DimensionTips;
 import com.github.zhuaidadaya.modMdo.commands.SimpleCommandOperation;
+import com.github.zhuaidadaya.modMdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.login.server.ServerLogin;
 import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
@@ -11,7 +12,6 @@ import com.github.zhuaidadaya.modMdo.login.token.EncryptionTokenUtil;
 import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
 import com.github.zhuaidadaya.modMdo.mixins.MinecraftServerSession;
-import com.github.zhuaidadaya.modMdo.projects.ProjectUtil;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
@@ -46,7 +46,7 @@ public class Variables {
     public static final String MODMDO_COMMAND_TICK = "modmdo/tick/";
     public static final String MODMDO_COMMAND_HERE = "here/";
     public static final String MODMDO_COMMAND_CAVA = "cava/";
-    public static final String MODMDO_COMMAND_BAK = "bak/";
+    public static final String MODMDO_COMMAND_BAK = "backup/";
     public static final String MODMDO_COMMAND_USR = "user/";
     public static final String MODMDO_COMMAND_ANALYZER = "analyzer/";
     public static final String MODMDO_COMMAND_RANKING = "ranking/";
@@ -55,15 +55,16 @@ public class Variables {
     public static final String MODMDO_COMMAND_CONF_CHECK = "conf/check";
     public static final String MODMDO_COMMAND_SERVER = "server/";
     public static final String MODMDO_COMMAND_JUMP = "jump/";
-    public static boolean rankingSwitchNoDump = true;
-    public static boolean enableRanking = false;
+    public static final String MODMDO_COMMAND_CONF_TIME_ACTIVE = "conf/time/active";
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static String rankingOnlineTimeScale = "minute";
-    public static String VERSION_ID = "1.0.19";
-    public static int MODMDO_VERSION = 13;
+    public static String VERSION_ID = "1.0.21";
+    public static int MODMDO_VERSION = 15;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
+    public static boolean rankingSwitchNoDump = true;
+    public static boolean enableRanking = false;
     public static boolean enableHereCommand = true;
     public static boolean enableDeadMessage = true;
     public static boolean enableCava = true;
@@ -73,23 +74,22 @@ public class Variables {
     public static boolean enabledCancelEntitiesTIck = false;
     public static boolean enableCheckTokenPerTick = false;
     public static boolean forceStopTokenCheck = false;
+    public static boolean timeActive = true;
     public static boolean tokenChanged = false;
     public static int tokenGenerateSize = 1024;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
-    public static Identifier tokenChannel = new Identifier("modmdo:token");
-    public static Identifier loginChannel = new Identifier("modmdo:login");
+    public static Identifier loginChannel = new Identifier("modmdo:token");
     public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
     public static ObjectConfigUtil config;
-    public static ProjectUtil projects;
     public static CavaUtil cavas;
     public static String motd = "";
     public static MinecraftServer server;
     public static MinecraftClient client;
     public static BackupUtil bak;
     public static ModMdoType modMdoType = ModMdoType.NONE;
-    public static EncryptionTokenUtil modMdoToken = null;
+    public static EncryptionTokenUtil modMdoToken;
     public static TextFieldWidget editToken;
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
@@ -114,6 +114,8 @@ public class Variables {
     public static String jump = "";
     public static String jumpToken = "";
     public static String jumpLoginType = "";
+
+    public static ConsoleTextFormat consoleTextFormat;
 
     public static boolean rankingIsStatObject(String ranking) {
         return statObjects.contains(ranking);
@@ -252,34 +254,34 @@ public class Variables {
     }
 
     public static boolean commandApplyToPlayer(String commandBelong, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
-        if(getCommandCanUse(commandBelong, player))
+        if(! command.getServer(source).isDedicated() || player == null || getFeatureCanUse(commandBelong, player))
             return true;
 
-        command.sendError(source, command.formatModMdoVersionRequire(commandBelong));
+        command.sendError(source, command.formatModMdoVersionRequire(commandBelong, player));
         return false;
     }
 
     public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
-        if(getCommandCanUse(versionRequire, player))
+        if(! command.getServer(source).isDedicated() || player == null || getFeatureCanUse(versionRequire, player))
             return true;
 
-        command.sendError(source, command.formatModMdoVersionRequire(versionRequire));
+        command.sendError(source, command.formatModMdoVersionRequire(versionRequire, player));
         return false;
     }
 
     public static boolean commandApplyToPlayer(String commandBelong, ServerPlayerEntity player, SimpleCommandOperation command, ServerCommandSource source) {
-        if(getCommandCanUse(commandBelong, player))
+        if(! source.getServer().isDedicated() || player == null || getFeatureCanUse(commandBelong, player))
             return true;
 
-        source.sendError(command.formatModMdoVersionRequire(commandBelong));
+        source.sendError(command.formatModMdoVersionRequire(commandBelong, player));
         return false;
     }
 
-    public static boolean getCommandCanUse(String commandBelong, ServerPlayerEntity player) {
-        return getCommandCanUse(modMdoCommandVersionMap.getInt(commandBelong), player);
+    public static boolean getFeatureCanUse(String commandBelong, ServerPlayerEntity player) {
+        return getFeatureCanUse(modMdoCommandVersionMap.getInt(commandBelong), player);
     }
 
-    public static boolean getCommandCanUse(int versionRequire, ServerPlayerEntity player) {
+    public static boolean getFeatureCanUse(int versionRequire, ServerPlayerEntity player) {
         return versionRequire <= getPlayerModMdoVersion(player);
     }
 
@@ -323,6 +325,7 @@ public class Variables {
         config.set("check_token_per_tick", checkTokenPerTickStatus());
         if(modMdoToken != null)
             config.set("token_by_encryption", modMdoToken.toJSONObject());
+        config.set("time_active", timeActiveStatus());
     }
 
     public static void updateUserProfiles() {
@@ -331,10 +334,6 @@ public class Variables {
 
     public static void updateServersJump() {
         config.set("servers_jump", servers.toJSONObject());
-    }
-
-    public static void updateProjects() {
-        config.set("projects", projects.toJSONObject());
     }
 
     public static void updateCavas() {
@@ -428,11 +427,11 @@ public class Variables {
 
                     if(staticUser.isFollow(follows)) {
                         if(needOps) {
-                            sendMessageToPlayer(player, message, false);
-                        } else {
                             if(player.hasPermissionLevel(4)) {
                                 sendMessageToPlayer(player, message, false);
                             }
+                        } else {
+                            sendMessageToPlayer(player, message, false);
                         }
                     }
                 }
@@ -508,5 +507,9 @@ public class Variables {
 
     public static String checkTokenPerTickStatus() {
         return enableCheckTokenPerTick ? "enable" : "disable";
+    }
+
+    public static String timeActiveStatus() {
+        return timeActive ? "enable" : "disable";
     }
 }

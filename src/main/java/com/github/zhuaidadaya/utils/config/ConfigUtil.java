@@ -21,7 +21,7 @@ public class ConfigUtil implements AbstractConfigUtil {
     /**
      *
      */
-    private Object2ObjectMap<Object, Config<Object,Object>> configs = new Object2ObjectRBTreeMap<>();
+    private Object2ObjectMap<Object, Config<Object, Object>> configs = new Object2ObjectRBTreeMap<>();
     private EncryptionType encryptionType = EncryptionType.COMPOSITE_SEQUENCE;
     /**
      *
@@ -77,7 +77,7 @@ public class ConfigUtil implements AbstractConfigUtil {
     }
 
     public static void main(String[] args) {
-test1();
+        test1();
     }
 
     public static void test1() {
@@ -149,8 +149,12 @@ test1();
         logger = LogManager.getLogger("ConfigUtil-" + entrust);
         this.empty = empty;
         this.loadManifest = loadManifest;
-        if(! empty)
-            readConfig(true, false, loadManifest);
+        try {
+            if(! empty)
+                readConfig(true, false, loadManifest);
+        } catch (Exception e) {
+
+        }
     }
 
     public ConfigUtil setPath(String path) {
@@ -296,15 +300,15 @@ test1();
         return configs.get(conf);
     }
 
-    public boolean readConfig() {
+    public boolean readConfig() throws IOException {
         return readConfig(false);
     }
 
-    public boolean readConfig(boolean log) {
+    public boolean readConfig(boolean log) throws IOException {
         return readConfig(log, false, false);
     }
 
-    public boolean readConfig(boolean log, boolean forceLoad, boolean init) {
+    public boolean readConfig(boolean log, boolean forceLoad, boolean init) throws IOException {
         checkShutdown();
 
         if(shuttingDown) {
@@ -359,11 +363,12 @@ test1();
                         addToConfig.add(inArray);
                     setListConf(true, configKey, addToConfig);
                 } else {
-                    setConf(true, configKey, configDetailed.get("value").toString());
+                    setConf(true, configKey, configDetailed.get("value"));
                 }
             }
 
-            logger.info("configs parse done, in " + (float) (System.nanoTime() - start) / 1000000f + "ms");
+            if(log)
+                logger.info("configs parse done, in " + (float) (System.nanoTime() - start) / 1000000f + "ms");
 
             if(init) {
                 if(log)
@@ -401,6 +406,7 @@ test1();
                         }
                     }
                 }
+                throw e;
             }
 
             canShutdown = true;
@@ -1010,6 +1016,18 @@ test1();
         configs.remove(key, configValues);
     }
 
+    public void setIfNoExist(Object key, Object configKeyValues) {
+        if(! configs.containsKey(key)) {
+            set(key, configKeyValues);
+        }
+    }
+
+    public void setListIfNoExist(Object key, Object configKeyValues) {
+        if(! configs.containsKey(key)) {
+            setList(key, configKeyValues);
+        }
+    }
+
     public void set(Object key, Object... configKeysValues) throws IllegalArgumentException {
         checkShutdown();
 
@@ -1020,7 +1038,7 @@ test1();
         if(configKeysValues.length > 1) {
             if(configKeysValues.length % 2 != 0)
                 throw new IllegalArgumentException("values argument size need Integral multiple of 2, but argument size " + configKeysValues.length + " not Integral multiple of 2");
-            configs.put(key, new Config<>(key,configKeysValues,false));
+            configs.put(key, new Config<>(key, configKeysValues, false));
         } else {
             configs.put(key, new Config<>(key, configKeysValues[0], false));
         }
@@ -1037,7 +1055,7 @@ test1();
     }
 
     private void setListConf(boolean init, Object key, Object... configValues) {
-        configs.put(key, new Config<>(key,configValues,true));
+        configs.put(key, new Config<>(key, configValues, true));
         if(autoWrite) {
             if(! init)
                 writeConfig();
@@ -1073,33 +1091,17 @@ test1();
             JSONObject conf = new JSONObject();
             JSONObject inJ = new JSONObject();
 
-            if(config instanceof Object[] | config instanceof List<?>) {
+            if(config instanceof List<?>) {
                 ObjectList<Object> list;
-                if(config instanceof Object[]) {
-                    list = ObjectList.of((Object[]) config);
+                list = ObjectList.of(config);
 
-                    if(list.size() == 1)
-                        list = ObjectList.of(ObjectList.of((Object[]) config).get(0));
-
-                    inJ.put("values", list);
-                } else {
-                    list = ObjectList.of(config);
-
-                    inJ.put("values", (List<?>) config);
-                }
+                inJ.put("values", (List<?>) config);
 
                 inJ.put("totalSize", list.size());
 
                 inJ.put("listTag", true);
             } else {
-                if(config instanceof String)
-                    inJ.put("value", config.toString());
-                else if(config instanceof Boolean)
-                    inJ.put("value", Boolean.parseBoolean(config.toString()));
-                else if(config instanceof Integer)
-                    inJ.put("value", Integer.parseInt(config.toString()));
-                else
-                    inJ.put("value", config);
+                inJ.put("value", config);
 
                 inJ.put("listTag", false);
             }
@@ -1167,7 +1169,7 @@ test1();
 
         logger.info("invaliding ConfigUtil");
 
-        shutdown();
+        shutdown = true;
 
         logger.info("cleaning configs");
 
