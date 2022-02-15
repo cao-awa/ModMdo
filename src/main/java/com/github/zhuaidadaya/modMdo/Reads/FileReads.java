@@ -3,7 +3,7 @@ package com.github.zhuaidadaya.modMdo.reads;
 import java.io.BufferedReader;
 
 public class FileReads {
-    public  static  String read(BufferedReader reader) {
+    public static String read(BufferedReader reader) {
         String cache;
         StringBuilder builder = new StringBuilder();
         try {

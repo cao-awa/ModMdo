@@ -99,14 +99,13 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                         jumpToken = "";
                     }
                     UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-                    connection.send(new CustomPayloadC2SPacket(tokenChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(token).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
+                    connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(token).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
                 }
                 case 96 -> {
                     String address = formatAddress(connection.getAddress());
                     String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
                     UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-                    connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
-
+                    connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString("Nan").writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
                 }
                 case 105 -> {
                     String jumpName = "";

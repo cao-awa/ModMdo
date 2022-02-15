@@ -5,6 +5,7 @@ import com.github.zhuaidadaya.modMdo.storage.Variables;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -241,6 +242,9 @@ public class ServerTickListener {
 
             userCache.addOnlineTime(Math.max(0, current - lastAddOnlineTime));
 
+            for(String s : user.getFollows())
+                userCache.addFollows(s);
+
             loginUsers.put(userCache);
             users.put(userCache);
 
@@ -304,6 +308,7 @@ public class ServerTickListener {
                     if(manager.getPlayer(user.getName()) == null) {
                         if(forceStopTokenCheck)
                             break;
+                        player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete player")));
                         player.networkHandler.disconnect(new LiteralText("obsolete player"));
                     }
                 }
@@ -315,19 +320,19 @@ public class ServerTickListener {
                     if(loginUsers.hasUser(player)) {
                         User user = loginUsers.getUser(player);
                         if(user.getClientToken().getToken().equals("")) {
+                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("empty token, please update")));
                             player.networkHandler.disconnect(new LiteralText("empty token, please update"));
-                            manager.remove(player);
                         } else {
                             if(user.getLevel() == 1) {
                                 if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
                                     loginUsers.removeUser(player);
+                                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
                                     player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                                    manager.remove(player);
                                 }
                             } else if(user.getLevel() == 4) {
                                 if(! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
+                                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
                                     player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                                    manager.remove(player);
                                 }
                             }
                         }
@@ -389,12 +394,8 @@ public class ServerTickListener {
                         loginUsers.getUser(player.getUuid());
                     } catch (Exception e) {
                         if(player.networkHandler.connection.getAddress() != null) {
-                            if(player.networkHandler.connection.isOpen()) {
-                                player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
-                                manager.remove(player);
-                            } else {
-                                manager.remove(player);
-                            }
+                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("invalid token, check your login status")));
+                            player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
                         }
                     }
                 }

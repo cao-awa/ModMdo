@@ -177,58 +177,52 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 return 2;
             }))).then(literal("joinServerFollow").executes(getJoinServerFollowLimit -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(getJoinServerFollowLimit), this, getJoinServerFollowLimit)) {
-                    if(config.getConfigString("joinServer") == null)
-                        config.set("joinServer", PermissionLevel.OPS);
-
                     sendFeedback(getJoinServerFollowLimit, formatJoinGameFollow());
                 }
                 return 0;
             }).then(literal("disable").executes(disableJoinServerFollow -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(disableJoinServerFollow), this, disableJoinServerFollow)) {
-                    config.set("joinServer", PermissionLevel.UNABLE);
+                    config.set("join_server_follow", PermissionLevel.UNABLE);
 
                     sendFeedback(disableJoinServerFollow, formatJoinGameFollow());
                 }
                 return 1;
             })).then(literal("all").executes(enableJoinServerFollowForAll -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(enableJoinServerFollowForAll), this, enableJoinServerFollowForAll)) {
-                    config.set("joinServer", PermissionLevel.ALL);
+                    config.set("join_server_follow", PermissionLevel.ALL);
 
                     sendFeedback(enableJoinServerFollowForAll, formatJoinGameFollow());
                 }
                 return 2;
             })).then(literal("ops").executes(enableJoinServerFollowForOps -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(enableJoinServerFollowForOps), this, enableJoinServerFollowForOps)) {
-                    config.set("joinServer", PermissionLevel.OPS);
+                    config.set("join_server_follow", PermissionLevel.OPS);
 
                     sendFeedback(enableJoinServerFollowForOps, formatJoinGameFollow());
                 }
                 return 3;
             }))).then(literal("runCommandFollow").executes(getJoinServerFollowLimit -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(getJoinServerFollowLimit), this, getJoinServerFollowLimit)) {
-                    if(config.getConfigString("runCommand") == null)
-                        config.set("runCommand", PermissionLevel.OPS);
-
                     sendFeedback(getJoinServerFollowLimit, formatRunCommandFollow());
                 }
                 return 0;
             }).then(literal("disable").executes(disableJoinServerFollow -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(disableJoinServerFollow), this, disableJoinServerFollow)) {
-                    config.set("runCommand", PermissionLevel.UNABLE);
+                    config.set("run_command_follow", PermissionLevel.UNABLE);
 
                     sendFeedback(disableJoinServerFollow, formatRunCommandFollow());
                 }
                 return 1;
             })).then(literal("all").executes(enableJoinServerFollowForAll -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(enableJoinServerFollowForAll), this, enableJoinServerFollowForAll)) {
-                    config.set("runCommand", PermissionLevel.ALL);
+                    config.set("run_command_follow", PermissionLevel.ALL);
 
                     sendFeedback(enableJoinServerFollowForAll, formatRunCommandFollow());
                 }
                 return 2;
             })).then(literal("ops").executes(enableJoinServerFollowForOps -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(enableJoinServerFollowForOps), this, enableJoinServerFollowForOps)) {
-                    config.set("runCommand", PermissionLevel.OPS);
+                    config.set("run_command_follow", PermissionLevel.OPS);
 
                     sendFeedback(enableJoinServerFollowForOps, formatRunCommandFollow());
                 }
@@ -256,6 +250,29 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     sendFeedback(noCheck, formatConfigReturnMessage("check_token_per_tick"));
                 }
                 return 0;
+            }))).then(literal("timeActive").executes(getTimeActive -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF_TIME_ACTIVE, getPlayer(getTimeActive), this, getTimeActive)) {
+                    sendFeedback(getTimeActive, formatConfigReturnMessage("time_active"));
+                }
+                return 0;
+            }).then(literal("enable").executes(enableTimeActive -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF_TIME_ACTIVE, getPlayer(enableTimeActive), this, enableTimeActive)) {
+                    timeActive = true;
+
+                    updateModMdoVariables();
+
+                    sendFeedback(enableTimeActive, formatConfigReturnMessage("time_active"));
+                }
+                return 0;
+            })).then(literal("disable").executes(disableTimeActive -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF_TIME_ACTIVE, getPlayer(disableTimeActive), this, disableTimeActive)) {
+                    timeActive = false;
+
+                    updateModMdoVariables();
+
+                    sendFeedback(disableTimeActive, formatConfigReturnMessage("time_active"));
+                }
+                return 0;
             }))));
         });
     }
@@ -269,11 +286,11 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     }
 
     public TranslatableText formatJoinGameFollow() {
-        return formatConfigReturnMessage("follow.join.server", config.getConfigString("joinServer").toLowerCase(Locale.ROOT));
+        return formatConfigReturnMessage("follow.join.server", config.getConfigString("join_server_follow").toLowerCase(Locale.ROOT));
     }
 
     public TranslatableText formatRunCommandFollow() {
-        return formatConfigReturnMessage("follow.run.command", config.getConfigString("runCommand").toLowerCase(Locale.ROOT));
+        return formatConfigReturnMessage("follow.run.command", config.getConfigString("run_command_follow").toLowerCase(Locale.ROOT));
     }
 
     public TranslatableText formatTickingEntitiesTick() {

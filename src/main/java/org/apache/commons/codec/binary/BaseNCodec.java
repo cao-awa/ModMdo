@@ -228,9 +228,7 @@ public abstract class BaseNCodec implements BinaryEncoder, BinaryDecoder {
         // Integer.MAX_VALUE length array.
         // The result is that we may have to allocate an array of this size more than once if
         // the capacity must be expanded again.
-        return (minCapacity > MAX_BUFFER_SIZE) ?
-            minCapacity :
-            MAX_BUFFER_SIZE;
+        return Math.max(minCapacity, MAX_BUFFER_SIZE);
     }
 
     /**
@@ -252,15 +250,10 @@ public abstract class BaseNCodec implements BinaryEncoder, BinaryDecoder {
      * @return true if byte is whitespace, false otherwise
      */
     protected static boolean isWhiteSpace(final byte byteToCheck) {
-        switch (byteToCheck) {
-            case ' ' :
-            case '\n' :
-            case '\r' :
-            case '\t' :
-                return true;
-            default :
-                return false;
-        }
+        return switch(byteToCheck) {
+            case ' ', '\n', '\r', '\t' -> true;
+            default -> false;
+        };
     }
 
     /**

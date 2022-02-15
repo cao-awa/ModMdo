@@ -139,18 +139,15 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
             }
 
-            if(channel.equals(tokenChannel)) {
-                if(enableEncryptionToken & modMdoType == ModMdoType.SERVER) {
-                    serverLogin.login(data1, data2, data3, data4, data5, data6);
-                }
-            } else if(channel.equals(loginChannel)) {
+            if(channel.equals(loginChannel)) {
                 if(modMdoType == ModMdoType.SERVER) {
-                    serverLogin.login(data1, data2, data3, data4, data5);
+                    serverLogin.login(data1, data2, data3, data4, data5, data6);
                 }
             }
 
             ci.cancel();
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -172,7 +169,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
-            if((!rejectUsers.hasUser(player) || loginUsers.hasUser(player)) & server.getPlayerManager().getPlayer(player.getUuid()) != null) {
+            if((! rejectUsers.hasUser(player) || loginUsers.hasUser(player)) & server.getPlayerManager().getPlayer(player.getUuid()) != null) {
                 LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
                 this.server.getPlayerManager().broadcastChatMessage((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
                 this.server.forcePlayerSampleUpdate();
@@ -310,14 +307,13 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "executeCommand", at = @At("HEAD"), cancellable = true)
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
-        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.try", player.getName().asString(), input), "runCommand");
+        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.try", player.getName().asString(), input), "run_command_follow");
         if(! loginUsers.hasUser(player) & enableEncryptionToken) {
             LOGGER.info("rejected command request: not login user");
-            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.rejected.without.login", player.getName().asString()), "runCommand");
+            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.rejected.without.login", player.getName().asString()), "run_command_follow");
             ci.cancel();
         }
-
-        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command", player.getName().asString(), input), "runCommand");
+        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command", player.getName().asString(), input), "run_command_follow");
     }
 
     /**

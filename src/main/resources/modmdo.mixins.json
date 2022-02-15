@@ -16,6 +16,7 @@
         "PlayerManagerMixin",
         "ServerLoginNetworkHandlerMixin",
         "ServerPlayNetworkHandlerMixin",
+        "ServerWorldMixin",
         "StopServerRconMixin"
     ],
     "client": [

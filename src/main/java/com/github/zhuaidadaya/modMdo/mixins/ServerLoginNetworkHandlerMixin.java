@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
+import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
@@ -53,24 +54,24 @@ public abstract class ServerLoginNetworkHandlerMixin {
             try {
                 new ServerPlayNetworkHandler(server, connection, player).sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(enableEncryptionToken ? 99 : 96)));
 
-                sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.try", player.getName().asString()), "joinServer");
+                sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.try", player.getName().asString()), "join_server_follow");
             } catch (Exception e) {
 
             }
 
-            if(enableEncryptionToken) {
+            if(modMdoType == ModMdoType.SERVER & enableEncryptionToken) {
                 while(! loginUsers.hasUser(player)) {
                     if(rejectUsers.hasUser(player)) {
                         connection.send(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
                         LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player provided a bad token");
-                        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.bad.token", player.getName().asString()), "joinServer");
+                        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.bad.token", player.getName().asString()), "join_server_follow");
                         waiting = 0;
                     }
                     if(System.currentTimeMillis() - waiting > 3000) {
                         if(! rejectUsers.hasUser(player)) {
                             connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with token")));
                             LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
-                            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "joinServer");
+                            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "join_server_follow");
                         }
                         connection.disconnect(new LiteralText("failed to login server"));
 
@@ -83,15 +84,22 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
                     }
                 }
-
-                server.getPlayerManager().onPlayerConnect(connection, player);
-
-                player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(servers.toJSONObject().toString())));
-            } else {
-                server.getPlayerManager().onPlayerConnect(connection, player);
-
-                player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(servers.toJSONObject().toString())));
             }
+
+            try {
+                try {
+                    server.getPlayerManager().onPlayerConnect(connection, player);
+                } catch (Exception e) {
+                    LOGGER.info("player " + player.getName() + " lost status synchronize");
+
+                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("invalid server status, please connect again")));
+
+                    player.networkHandler.disconnect(new LiteralText("invalid server status"));
+                }
+            } catch (Exception e) {
+
+            }
+            player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(servers.toJSONObject().toString())));
         }).start();
     }
 }

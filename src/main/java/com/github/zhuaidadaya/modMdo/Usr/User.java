@@ -165,6 +165,10 @@ public class User {
         return this;
     }
 
+    public ObjectRBTreeSet<String> getFollows() {
+        return follows;
+    }
+
     public void removeFollow(String follow) {
         this.follows.remove(follow);
     }
