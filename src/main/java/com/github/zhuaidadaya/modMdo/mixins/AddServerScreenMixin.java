@@ -61,7 +61,7 @@ public abstract class AddServerScreenMixin extends Screen {
     @Inject(method = "init", at = @At("RETURN"))
     public void init(CallbackInfo ci) {
         editToken = new TextFieldWidget(textRenderer, width / 2 - 60, 30, 160, 20, new TranslatableText("oops"));
-        editToken.setMaxLength(2048);
+        editToken.setMaxLength(Integer.MAX_VALUE);
         editToken.setText(getModMdoTokenFormat(addressField.getText(), TokenContentType.TOKEN_BY_ENCRYPTION));
         editToken.setChangedListener((address) -> {
             setToken();
