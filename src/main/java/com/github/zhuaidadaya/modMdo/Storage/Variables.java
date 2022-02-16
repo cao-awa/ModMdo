@@ -60,8 +60,8 @@ public class Variables {
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static String rankingOnlineTimeScale = "minute";
-    public static String VERSION_ID = "1.0.22";
-    public static int MODMDO_VERSION = 16;
+    public static String VERSION_ID = "1.0.23";
+    public static int MODMDO_VERSION = 17;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean rankingSwitchNoDump = true;
