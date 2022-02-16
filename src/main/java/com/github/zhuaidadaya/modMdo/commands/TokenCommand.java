@@ -3,7 +3,10 @@ package com.github.zhuaidadaya.modMdo.commands;
 import com.github.zhuaidadaya.modMdo.login.token.Encryption.AES;
 import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
@@ -19,7 +22,7 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
 
                     saveToken();
 
-                    sendFeedback(token, formatGeneratedToken());
+                    feedbackGenerated(token);
 
                     updateModMdoVariables();
                 }
@@ -29,7 +32,7 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                     try {
                         generateDefault(tokenGenerateSize);
 
-                        sendFeedback(def, formatGeneratedToken());
+                        feedbackGenerated(def);
                     } catch (Exception e) {
                         sendError(def, new TranslatableText("token.regenerate.failed.format"));
                     }
@@ -42,7 +45,7 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                     try {
                         generateOps(tokenGenerateSize);
 
-                        sendFeedback(ops, formatGeneratedToken());
+                        feedbackGenerated(ops);
                     } catch (Exception e) {
                         sendError(ops, new TranslatableText("token.regenerate.failed.format"));
                     }
@@ -56,7 +59,7 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                     try {
                         generateAll(tokenGenerateSize);
 
-                        sendFeedback(all, formatGeneratedToken());
+                        feedbackGenerated(all);
                     } catch (Exception e) {
                         sendError(all, new TranslatableText("token.regenerate.failed.format"));
                     }
@@ -131,5 +134,11 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
 
     public void setGenerateSize(int size) {
         tokenGenerateSize = size;
+    }
+
+    public void feedbackGenerated(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
+        if(commandApplyToPlayer(16, getPlayer(source), this, source)) {
+            sendFeedback(source, formatGeneratedToken());
+        }
     }
 }
