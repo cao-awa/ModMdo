@@ -49,6 +49,7 @@
     "token.regenerate.set.size": "set token size: %s",
     "token.regenerate.failed.format": "failed to regenerate token",
     "command.vec.format": "§aVec3\n§ax: %s\n§ay: %s\n§az: %s\n§6Vec2\n§6x: %s\n§6y: %s\n§dDimension\n§dDim: %s",
+    "checker_time_limit.rule.format": "token check will done in %sms",
     "follow.run.command.ops.rule.format": "need ops permission to follow the run command event",
     "follow.run.command.all.rule.format": "needless any permission to follow the run command event",
     "follow.run.command.unable.rule.format": "run command event are disabled, cannot to follow",

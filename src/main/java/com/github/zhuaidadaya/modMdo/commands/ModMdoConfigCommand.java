@@ -273,6 +273,20 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     sendFeedback(disableTimeActive, formatConfigReturnMessage("time_active"));
                 }
                 return 0;
+            }))).then(literal("tokenCheckTimeLimit").executes(getTimeLimit -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF_TOKEN_CHECK_TIME_LIMIT, getPlayer(getTimeLimit), this, getTimeLimit)) {
+                    sendFeedback(getTimeLimit, formatCheckerTimeLimit());
+                }
+                return 0;
+            }).then(argument("ms", IntegerArgumentType.integer(500)).executes(setTimeLimit -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_CONF_TOKEN_CHECK_TIME_LIMIT, getPlayer(setTimeLimit), this, setTimeLimit)) {
+                    tokenCheckTimeLimit = IntegerArgumentType.getInteger(setTimeLimit,"ms");
+
+                    updateModMdoVariables();
+
+                    sendFeedback(setTimeLimit, formatCheckerTimeLimit());
+                }
+                return 0;
             }))));
         });
     }
@@ -283,6 +297,10 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
 
     public TranslatableText formatConfigReturnMessage(String head, String info) {
         return new TranslatableText(head + "." + info + ".rule.format");
+    }
+
+    public TranslatableText formatCheckerTimeLimit() {
+        return new TranslatableText("checker_time_limit.rule.format",  tokenCheckTimeLimit);
     }
 
     public TranslatableText formatJoinGameFollow() {
