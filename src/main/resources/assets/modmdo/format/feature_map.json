@@ -14,5 +14,6 @@
     "conf/check": 12,
     "jump/": 13,
     "conf/time/active": 15,
-    "login/dump/reject": 15
+    "login/dump/reject": 15,
+    "conf/checker/time/limit": 16
 }

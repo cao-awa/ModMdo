@@ -49,6 +49,7 @@
     "token.regenerate.set.size": "设置token大小: %s",
     "token.regenerate.failed.format": "无法重新生成token",
     "command.vec.format": "§aVec3\n§ax: %s\n§ay: %s\n§az: %s\n§6Vec2\n§6x: %s\n§6y: %s\n§d维度\n§dDim: %s",
+    "checker_time_limit.rule.format": "token检查将会在%s毫秒内完成",
     "follow.run.command.ops.rule.format": "需要ops权限才能订阅加入游戏事件",
     "follow.run.command.all.rule.format": "不需要权限即可订阅加入游戏事件",
     "follow.run.command.unable.rule.format": "已禁用加入游戏事件的订阅",

@@ -5,6 +5,7 @@ import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modMdo.commands.DimensionTips;
 import com.github.zhuaidadaya.modMdo.commands.SimpleCommandOperation;
 import com.github.zhuaidadaya.modMdo.format.console.ConsoleTextFormat;
+import com.github.zhuaidadaya.modMdo.jump.server.ServerUtil;
 import com.github.zhuaidadaya.modMdo.lang.Language;
 import com.github.zhuaidadaya.modMdo.login.server.ServerLogin;
 import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
@@ -15,7 +16,6 @@ import com.github.zhuaidadaya.modMdo.mixins.MinecraftServerSession;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
-import com.github.zhuaidadaya.modMdo.jump.server.ServerUtil;
 import com.github.zhuaidadaya.utils.config.ObjectConfigUtil;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
@@ -56,11 +56,12 @@ public class Variables {
     public static final String MODMDO_COMMAND_SERVER = "server/";
     public static final String MODMDO_COMMAND_JUMP = "jump/";
     public static final String MODMDO_COMMAND_CONF_TIME_ACTIVE = "conf/time/active";
+    public static final String MODMDO_COMMAND_CONF_TOKEN_CHECK_TIME_LIMIT = "conf/checker/time/limit";
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static String rankingOnlineTimeScale = "minute";
-    public static String VERSION_ID = "1.0.21";
-    public static int MODMDO_VERSION = 15;
+    public static String VERSION_ID = "1.0.22";
+    public static int MODMDO_VERSION = 16;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean rankingSwitchNoDump = true;
@@ -77,6 +78,7 @@ public class Variables {
     public static boolean timeActive = true;
     public static boolean tokenChanged = false;
     public static int tokenGenerateSize = 1024;
+    public static int tokenCheckTimeLimit = 3000;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
     public static Identifier loginChannel = new Identifier("modmdo:token");
     public static UserUtil rejectUsers;
@@ -326,6 +328,7 @@ public class Variables {
         if(modMdoToken != null)
             config.set("token_by_encryption", modMdoToken.toJSONObject());
         config.set("time_active", timeActiveStatus());
+        config.set("checker_time_limit", tokenCheckTimeLimit);
     }
 
     public static void updateUserProfiles() {

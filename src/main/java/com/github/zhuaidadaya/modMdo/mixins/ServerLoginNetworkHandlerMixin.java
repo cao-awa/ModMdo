@@ -21,7 +21,6 @@ import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin {
-
     @Shadow
     @Final
     public ClientConnection connection;
@@ -50,6 +49,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
             Thread.currentThread().setName("ModMdo accepting");
 
             long waiting = System.currentTimeMillis();
+            long nano = System.nanoTime();
+
+            LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
 
             try {
                 new ServerPlayNetworkHandler(server, connection, player).sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(enableEncryptionToken ? 99 : 96)));
@@ -65,17 +67,24 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         connection.send(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
                         LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player provided a bad token");
                         sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.bad.token", player.getName().asString()), "join_server_follow");
-                        waiting = 0;
-                    }
-                    if(System.currentTimeMillis() - waiting > 3000) {
-                        if(! rejectUsers.hasUser(player)) {
+                        connection.disconnect(new LiteralText("failed to login server"));
+
+                        LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
+                        return;
+                    } else {
+                        if(System.currentTimeMillis() - waiting > tokenCheckTimeLimit) {
                             connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with token")));
                             LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
                             sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "join_server_follow");
-                        }
-                        connection.disconnect(new LiteralText("failed to login server"));
+                            connection.disconnect(new LiteralText("failed to login server"));
 
-                        return;
+                            LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
+                            return;
+                        }
+                    }
+
+                    if(! connection.isOpen()) {
+                        break;
                     }
 
                     try {
@@ -88,13 +97,18 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
             try {
                 try {
-                    server.getPlayerManager().onPlayerConnect(connection, player);
+                    if(connection.isOpen()) {
+                        server.getPlayerManager().onPlayerConnect(connection, player);
+                        LOGGER.info("accepted nano: " + nano + " (" + player.getName().asString() + ")");
+                    } else {
+                        LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
+                    }
                 } catch (Exception e) {
                     LOGGER.info("player " + player.getName() + " lost status synchronize");
 
-                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("invalid server status, please connect again")));
+                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("lost status synchronize, please connect again")));
 
-                    player.networkHandler.disconnect(new LiteralText("invalid server status"));
+                    player.networkHandler.disconnect(new LiteralText("lost status synchronize"));
                 }
             } catch (Exception e) {
 

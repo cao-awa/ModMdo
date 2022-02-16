@@ -25,12 +25,9 @@ import java.io.InputStreamReader;
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
 
 public class ModMdoStdInitializer implements ModInitializer {
-
     @Override
     public void onInitialize() {
-        new Thread(() -> {
-            Thread.currentThread().setName("ModMdo");
-
+        Thread thread = new Thread(() -> {
             LOGGER.info("loading ModMdo " + VERSION_ID + " (step 1/2)");
             LOGGER.info("ModMdo Std Initiator running");
             LOGGER.info("loading for ModMdo Std init");
@@ -73,7 +70,11 @@ public class ModMdoStdInitializer implements ModInitializer {
             resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
             resource.set(Language.ENGLISH, "/assets/modmdo/lang/en_us.json");
             consoleTextFormat = new ConsoleTextFormat(resource);
-        }).start();
+        });
+
+        thread.setName("ModMdo");
+
+        thread.start();
     }
 
     public void initModMdoVariables() {
@@ -93,6 +94,8 @@ public class ModMdoStdInitializer implements ModInitializer {
             enableCheckTokenPerTick = config.getConfigString("check_token_per_tick").equals("enable");
         if(config.getConfig("time_active") != null)
             enableSecureEnchant = config.getConfigString("time_active").equals("enable");
+        if(config.getConfig("checker_time_limit") != null)
+            tokenCheckTimeLimit = config.getConfigInt("checker_time_limit");
 
         if(config.getConfig("token_by_encryption") != null) {
             LOGGER.info("init token");
