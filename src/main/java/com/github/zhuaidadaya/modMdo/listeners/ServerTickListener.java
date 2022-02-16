@@ -34,7 +34,7 @@ public class ServerTickListener {
     public void listener() {
         lastAddOnlineTime = System.currentTimeMillis();
 
-        new Thread(() -> {
+        Thread subListener = new Thread(() -> {
             while(server == null) {
                 try {
                     Thread.sleep(100);
@@ -73,21 +73,31 @@ public class ServerTickListener {
 
                 }
             }
-        }).start();
+        });
+
+        subListener.setName("ModMdo sub listener thread");
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            PlayerManager players = server.getPlayerManager();
+            Thread listener = new Thread(() -> {
+                PlayerManager players = server.getPlayerManager();
 
-            randomRankingSwitchTick++;
+                randomRankingSwitchTick++;
 
-            Variables.server = server;
+                Variables.server = server;
 
-            try {
-                eachPlayer(players);
-            } catch (Exception e) {
+                try {
+                    eachPlayer(players);
+                } catch (Exception e) {
 
-            }
+                }
+            });
+
+            listener.setName("ModMdo listener thread");
+
+            listener.start();
         });
+
+        subListener.start();
     }
 
     public void updateCustomRanking(String object, MinecraftServer server, ServerPlayerEntity player, JSONObject stat) {

@@ -1,4 +1,5 @@
 {
+    "token.regenerated": "regenerated new token done",
     "login.dump.rejected": "§cModMdo warning\n§cModMdo rejected your account dump login\n§cif not login by your self, then maybe has someone try disconnect you\n§eif are login by your self, please disconnect this client and try again",
     "argument.server.unknown": "unknown server: %s",
     "server.remove.token.sus": "§asuccess to remove token of %s §afor %s",

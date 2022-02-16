@@ -2,11 +2,12 @@ package com.github.zhuaidadaya.modMdo.commands;
 
 import com.github.zhuaidadaya.modMdo.login.token.Encryption.AES;
 import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.text.TranslatableText;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.tokenChanged;
+import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class TokenCommand extends SimpleCommandOperation implements SimpleCommand {
@@ -15,6 +16,11 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
             dispatcher.register(literal("token").requires(level -> level.hasPermissionLevel(4)).then(literal("regenerate").executes(token -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(token), this, token)) {
                     modMdoToken.setServerToken(ServerEncryptionToken.createServerEncryptionToken());
+
+                    saveToken();
+
+                    sendFeedback(token, formatGeneratedToken());
+
                     updateModMdoVariables();
                 }
                 return 4;
@@ -22,6 +28,8 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                 if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(def), this, def)) {
                     try {
                         generateDefault(tokenGenerateSize);
+
+                        sendFeedback(def, formatGeneratedToken());
                     } catch (Exception e) {
                         sendError(def, new TranslatableText("token.regenerate.failed.format"));
                     }
@@ -33,6 +41,8 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                 if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(ops), this, ops)) {
                     try {
                         generateOps(tokenGenerateSize);
+
+                        sendFeedback(ops, formatGeneratedToken());
                     } catch (Exception e) {
                         sendError(ops, new TranslatableText("token.regenerate.failed.format"));
                     }
@@ -45,6 +55,8 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
 
                     try {
                         generateAll(tokenGenerateSize);
+
+                        sendFeedback(all, formatGeneratedToken());
                     } catch (Exception e) {
                         sendError(all, new TranslatableText("token.regenerate.failed.format"));
                     }
@@ -58,34 +70,45 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
 
                     sendFeedback(setSize128, formatSetTokenSize());
                 }
-                return 128;
+                return 0;
             })).then(literal("256").executes(setSize256 -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(setSize256), this, setSize256)) {
                     setGenerateSize(256);
 
                     sendFeedback(setSize256, formatSetTokenSize());
                 }
-                return 256;
+                return 0;
             })).then(literal("512").executes(setSize512 -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(setSize512), this, setSize512)) {
                     setGenerateSize(512);
 
                     sendFeedback(setSize512, formatSetTokenSize());
                 }
-                return 512;
+                return 0;
             })).then(literal("1024").executes(setSize1024 -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(setSize1024), this, setSize1024)) {
                     setGenerateSize(1024);
 
                     sendFeedback(setSize1024, formatSetTokenSize());
                 }
-                return 1024;
-            }))));
+                return 0;
+            })).then(literal("custom").then(argument("size", IntegerArgumentType.integer(128, 4096)).executes(customSize -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(customSize), this, customSize)) {
+                    setGenerateSize(IntegerArgumentType.getInteger(customSize, "size"));
+
+                    sendFeedback(customSize, formatSetTokenSize());
+                }
+                return 0;
+            })))));
         });
     }
 
     public TranslatableText formatSetTokenSize() {
         return new TranslatableText("token.regenerate.set.size", tokenGenerateSize);
+    }
+
+    public TranslatableText formatGeneratedToken() {
+        return new TranslatableText("token.regenerated");
     }
 
     public void generateDefault(int size) throws Exception {
