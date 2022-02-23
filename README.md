@@ -2,6 +2,11 @@
 a fabric mod for minecraft server<br>
 and minecraft client
 
+# notice
+<b>this mod are testing, attention for bugs</b>\
+if modmdo crushed your minecraft, please create a issue\
+let we know the problems 
+
 # indexes
 
 ### for minecraft 1.18<br>
