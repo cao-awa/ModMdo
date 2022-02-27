@@ -315,7 +315,7 @@ public class ServerTickListener {
         try {
             if((tokenChanged || enableCheckTokenPerTick) & ! forceStopTokenCheck) {
                 for(User user : loginUsers.getUsers()) {
-                    if(manager.getPlayer(user.getName()) == null) {
+                    if(manager.getPlayer(user.getUuid()) == null) {
                         if(forceStopTokenCheck)
                             break;
                         player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete player")));

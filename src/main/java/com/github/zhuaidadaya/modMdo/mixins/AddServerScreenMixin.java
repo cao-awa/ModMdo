@@ -37,6 +37,8 @@ public abstract class AddServerScreenMixin extends Screen {
     @Shadow
     private TextFieldWidget serverNameField;
 
+    private boolean enableGui = true;
+
     protected AddServerScreenMixin(Text title) {
         super(title);
     }
@@ -60,25 +62,31 @@ public abstract class AddServerScreenMixin extends Screen {
      */
     @Inject(method = "init", at = @At("RETURN"))
     public void init(CallbackInfo ci) {
-        editToken = new TextFieldWidget(textRenderer, width / 2 - 60, 30, 160, 20, new TranslatableText("oops"));
-        editToken.setMaxLength(Integer.MAX_VALUE);
-        editToken.setText(getModMdoTokenFormat(addressField.getText(), TokenContentType.TOKEN_BY_ENCRYPTION));
-        editToken.setChangedListener((address) -> {
-            setToken();
-        });
-        addSelectableChild(editToken);
+        if (configCached.getConfigString("token_editing_gui") == null || configCached.getConfigString("token_editing_gui").equals("enable")) {
+            editToken = new TextFieldWidget(textRenderer, width / 2 - 60, 30, 160, 20, new TranslatableText("oops"));
+            editToken.setMaxLength(Integer.MAX_VALUE);
+            editToken.setText(getModMdoTokenFormat(addressField.getText(), TokenContentType.TOKEN_BY_ENCRYPTION));
+            editToken.setChangedListener((address) -> {
+                setToken();
+            });
+            addSelectableChild(editToken);
 
-        editLoginType = new TextFieldWidget(textRenderer, width / 2 + 100, 30, 100, 20, new TranslatableText("oops2"));
-        editLoginType.setText(getModMdoTokenFormat(addressField.getText(), TokenContentType.LOGIN_TYPE));
-        editLoginType.setChangedListener((validType) -> {
-            String loginType = editLoginType.getText();
-            addButton.active = (ServerAddress.isValid(this.addressField.getText()) && ! this.serverNameField.getText().isEmpty()) & (loginType.equals("default") | loginType.equals("ops"));
-        });
+            editLoginType = new TextFieldWidget(textRenderer, width / 2 + 100, 30, 100, 20, new TranslatableText("oops2"));
+            editLoginType.setText(getModMdoTokenFormat(addressField.getText(), TokenContentType.LOGIN_TYPE));
+            editLoginType.setChangedListener((validType) -> {
+                String loginType = editLoginType.getText();
+                addButton.active = (ServerAddress.isValid(this.addressField.getText()) && !this.serverNameField.getText().isEmpty()) & (loginType.equals("default") | loginType.equals("ops"));
+            });
 
-        addSelectableChild(editLoginType);
+            addSelectableChild(editLoginType);
 
-        tokenTip = new TextFieldWidget(textRenderer, width / 2 - 100, 30, 40, 20, new TranslatableText("token"));
-        tokenTip.setText("Token");
+            tokenTip = new TextFieldWidget(textRenderer, width / 2 - 100, 30, 40, 20, new TranslatableText("token"));
+            tokenTip.setText("Token");
+
+            enableGui = true;
+        } else {
+            enableGui = false;
+        }
     }
 
     /**
@@ -87,8 +95,10 @@ public abstract class AddServerScreenMixin extends Screen {
      * @author 草awa
      */
     public void setToken() {
-        modMdoToken.addClientToken(new ClientEncryptionToken(editToken.getText(), addressField.getText(), editLoginType.getText(), VERSION_ID));
-        updateModMdoVariables();
+        if (enableGui) {
+            modMdoToken.addClientToken(new ClientEncryptionToken(editToken.getText(), addressField.getText(), editLoginType.getText(), VERSION_ID));
+            updateModMdoVariables();
+        }
     }
 
     /**
@@ -122,8 +132,10 @@ public abstract class AddServerScreenMixin extends Screen {
      */
     @Inject(method = "render", at = @At("RETURN"))
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        editToken.render(matrices, mouseX, mouseY, delta);
-        editLoginType.render(matrices, mouseX, mouseY, delta);
-        tokenTip.render(matrices, mouseX, mouseY, delta);
+        if (enableGui) {
+            editToken.render(matrices, mouseX, mouseY, delta);
+            editLoginType.render(matrices, mouseX, mouseY, delta);
+            tokenTip.render(matrices, mouseX, mouseY, delta);
+        }
     }
 }
