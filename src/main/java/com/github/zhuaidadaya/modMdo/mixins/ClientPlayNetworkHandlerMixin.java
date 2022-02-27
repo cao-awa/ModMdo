@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modMdo.storage.Variables.configCached;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketListener {
@@ -98,6 +99,12 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                         jumpLoginType = "";
                         jumpToken = "";
                     }
+                    if (token.equals("") & configCached.getConfigString("specified_token") != null) {
+                        token = configCached.getConfigString("specified_token");
+                        loginType = "default";
+                        System.out.println(configCached.getConfigString("specified_token"));
+                    }
+                    System.out.println(token);
                     UUID uuid = PlayerEntity.getUuidFromProfile(profile);
                     connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(token).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
                 }

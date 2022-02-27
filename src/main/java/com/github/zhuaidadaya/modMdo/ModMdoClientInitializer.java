@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modMdo;
 
+import com.github.zhuaidadaya.modMdo.identifier.RandomIdentifier;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import net.fabricmc.api.ClientModInitializer;
 
@@ -14,6 +15,8 @@ public class ModMdoClientInitializer implements ClientModInitializer {
             LOGGER.info("loading for ModMdo Client (step 2/2)");
 
             modMdoType = ModMdoType.CLIENT;
+
+            config.setIfNoExist("identifier", RandomIdentifier.randomIdentifier());
         });
 
         thread.setName("ModMdo Client");

@@ -22,7 +22,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     /**
      *
      */
-    private Object2ObjectMap<Object, Object> configs = new Object2ObjectRBTreeMap<>();
+    private Object2ObjectLinkedOpenHashMap<Object, Object> configs = new Object2ObjectLinkedOpenHashMap<>();
     private EncryptionType encryptionType = EncryptionType.COMPOSITE_SEQUENCE;
     /**
      *
@@ -41,7 +41,12 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     private boolean autoWrite = true;
     private boolean encryptionHead = false;
     private boolean encryption = false;
+    private boolean saving = false;
+    private boolean forceSaving = false;
+    private boolean backgroundSave = false;
     private int inseparableLevel = 3;
+
+    private Thread saveThread;
 
     private String entrust;
     private String version;
@@ -93,26 +98,27 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
         Random r = new Random();
         int limit = config.getConfigTotal();
+        System.out.println(limit);
 
         //        int count = config.getConfigTotal() - 100;
         //        System.out.println(config.get("test"));
 
         config.setList("test", "teeeeeeeeeeeeeeeeeeeeeeeeest");
-        while(true) {
+        while (true) {
             int count = 0;
             Scanner sc = new Scanner(System.in);
             String ope = sc.nextLine();
 
-            switch(ope) {
+            switch (ope) {
                 case "set" -> {
                     long startTime = System.nanoTime();
-                    while(true) {
+                    while (true) {
                         try {
                             count++;
                             config.set("test" + count, "teeeeeeeeeeeeeeeeeeeeeeeeest" + count);
                             //                                                config.set("test" + 1500, "teeeeeeeeeeeeeeeeeeeeeeeeest" + 1500);
 
-                            if(count > 100000) {
+                            if (count > 100000) {
                                 config.writeConfig();
 
                                 break;
@@ -126,13 +132,13 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
                 }
                 case "query" -> {
                     long startTime = System.nanoTime();
-                    while(true) {
+                    while (true) {
                         try {
                             count++;
                             //                            config.getConfigString("test" + r.nextInt(limit));
                             config.getConfigString("test" + 13652);
 
-                            if(count > 10000000) {
+                            if (count > 10000000) {
                                 config.writeConfig();
 
                                 break;
@@ -151,27 +157,42 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
                 }
                 case "mixin" -> {
                     long startTime = System.nanoTime();
-                    while(true) {
-                        try {
-                            count++;
-                            config.set("test" + count, "teeeeeeeeeeeeeeeeeeeeeeeeest" + count);
-                            //                        config.getConfigString("test" + count);
-                            config.getConfigString("test" + r.nextInt(limit));
+                    try {
+                        config.enableBackgroundSave();
+                        while (true) {
+                            try {
+                                count++;
+                                config.set("test" + count, "teeeeeeeeeeeeeeeeeeeeeeeeest" + count);
+                                //                        config.getConfigString("test" + count);
+                                config.getConfigString("test" + r.nextInt(limit));
 
-                            if(count > 100000) {
-                                config.writeConfig();
+                                if (count > 200000) {
+//                                config.save();
+                                    config.writeConfig();
 
+                                    break;
+                                }
+
+//                            logger.info("sus: " + count);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                logger.info("test failed after " + count + ", CU have " + config.getConfigTotal() + " configs");
                                 break;
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            logger.info("test failed after " + count + ", CU have " + config.getConfigTotal() + " configs");
-                            break;
+
+//                        try {
+//                            Thread.sleep(1);
+//                        } catch (InterruptedException e) {
+//
+//                        }
                         }
+                        logger.info("set done in " + (double) (System.nanoTime() - startTime) / 1000000d + "ms, load " + config.getConfigTotal() + " configs, try " + count + "times");
+                    } catch (Error error) {
+                        logger.info("test failed after " + count + ", CU have " + config.getConfigTotal() + " configs");
+                        logger.info("in " + (double) (System.nanoTime() - startTime) / 1000000d + "ms");
                     }
-                    logger.info("set done in " + (double) (System.nanoTime() - startTime) / 1000000d + "ms, load " + config.getConfigTotal() + " configs, try " + count + "times");
                 }
-                default -> System.exit(- 1);
+                default -> System.exit(-1);
             }
         }
     }
@@ -182,20 +203,20 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
     private void build(@Nullable String entrust, @Nullable String configPath, @Nullable String configName, @Nullable String configVersion, boolean empty, boolean loadManifest) {
         defaultUtilConfigs();
-        configs = new Object2ObjectRBTreeMap<>();
-        if(configPath != null)
+        configs = new Object2ObjectLinkedOpenHashMap<>();
+        if (configPath != null)
             setPath(configPath);
-        if(configName != null)
+        if (configName != null)
             setName(configName);
-        if(configVersion != null)
+        if (configVersion != null)
             setVersion(configVersion);
-        if(entrust != null)
+        if (entrust != null)
             setEntrust(entrust);
         logger = LogManager.getLogger("ConfigUtil-" + entrust);
         this.empty = empty;
         this.loadManifest = loadManifest;
         try {
-            if(! empty)
+            if (!empty)
                 readConfig(true, false, loadManifest);
         } catch (Exception e) {
 
@@ -247,14 +268,14 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     public ObjectConfigUtil setInseparableLevel(int inseparableLevel) {
         checkShutdown();
 
-        this.inseparableLevel = inseparableLevel > - 1 ? inseparableLevel < 4 ? inseparableLevel : 3 : 0;
+        this.inseparableLevel = inseparableLevel > -1 ? inseparableLevel < 4 ? inseparableLevel : 3 : 0;
         return this;
     }
 
     public ObjectConfigUtil setLibraryOffset(int offset) {
         checkShutdown();
 
-        if(offset != - 1)
+        if (offset != -1)
             this.libraryOffset = Math.max(1, offset);
         else
             this.libraryOffset = 1024;
@@ -314,7 +335,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     public ObjectConfigUtil fuse(ObjectConfigUtil parent) {
         checkShutdown();
 
-        for(Object o : parent.configs.keySet())
+        for (Object o : parent.configs.keySet())
             this.setConf(true, o.toString(), parent.configs.get(o.toString()));
         return this;
     }
@@ -323,7 +344,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
         checkShutdown();
 
         this.encryption = encryption;
-        if(autoWrite) {
+        if (autoWrite) {
             try {
                 writeConfig();
             } catch (Exception e) {
@@ -356,19 +377,19 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     public boolean readConfig(boolean log, boolean forceLoad, boolean init) throws IOException {
         checkShutdown();
 
-        if(shuttingDown) {
+        if (shuttingDown) {
             return false;
         }
         canShutdown = false;
 
-        if(empty) {
+        if (empty) {
             canShutdown = true;
 
             return false;
         }
         int configSize = 0;
         try {
-            if(log)
+            if (log)
                 logger.info("loading config from: " + name);
 
             File configFile = new File(path + "/" + name);
@@ -389,22 +410,19 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
             JSONArray configs = source.getJSONArray("configs");
             configSize = builder.length();
 
-            if(log)
+            if (log)
                 logger.info("loading configs");
 
             long start = System.nanoTime();
 
-            for(Object o : configs) {
-                if(! init & o.toString().contains("CU%")) {
-                    continue;
-                }
+            for (Object o : configs) {
                 JSONObject config = new JSONObject(o.toString());
                 String configKey = config.keySet().toArray()[0].toString();
                 JSONObject configDetailed = config.getJSONObject(configKey);
-                if(configDetailed.getBoolean("listTag")) {
+                if (configDetailed.getBoolean("listTag")) {
                     JSONArray array = configDetailed.getJSONArray("values");
-                    ObjectBigArrayBigList<Object> addToConfig = new ObjectBigArrayBigList<>();
-                    for(Object inArray : array)
+                    ObjectOpenHashSet<Object> addToConfig = new ObjectOpenHashSet<>();
+                    for (Object inArray : array)
                         addToConfig.add(inArray);
                     setListConf(true, configKey, addToConfig);
                 } else {
@@ -412,20 +430,20 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
                 }
             }
 
-            if(log)
+            if (log)
                 logger.info("configs parse done, in " + (float) (System.nanoTime() - start) / 1000000f + "ms");
 
-            if(init) {
-                if(log)
+            if (init) {
+                if (log)
                     logger.info("loading manifest");
 
                 JSONObject manifest = source.getJSONObject("manifest");
-                for(String s : manifest.keySet()) {
+                for (String s : manifest.keySet()) {
                     manifestLoading(s, manifest.get(s));
                 }
             }
 
-            if(log)
+            if (log)
                 logger.info("load config done");
 
             canShutdown = true;
@@ -436,11 +454,11 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
             throw e;
         } catch (Exception e) {
-            if(! shuttingDown) {
+            if (!shuttingDown) {
                 logger.error(empty ? ("failed to load config") : ("failed to load config: " + name));
-                if(! empty) {
+                if (!empty) {
                     File configFile = new File(path + "/" + name);
-                    if(! configFile.isFile() || configFile.length() == 0 || configSize == 0) {
+                    if (!configFile.isFile() || configFile.length() == 0 || configSize == 0) {
                         try {
                             configFile.getParentFile().mkdirs();
                             configFile.createNewFile();
@@ -461,7 +479,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     }
 
     private void manifestLoading(String key, Object value) {
-        switch(key) {
+        switch (key) {
             case "config" -> {
                 String c = value.toString().replace("\\", "/");
                 this.name = c.substring(c.indexOf("/") + 1);
@@ -515,18 +533,18 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
         try {
             StringBuilder builder = new StringBuilder();
             String cache = reader.readLine();
-            if(cache == null) {
+            if (cache == null) {
                 return null;
             }
             int encryptionType = cache.chars().toArray()[0];
             String encryptionEnable = cache.substring(2);
             boolean encrypted = encryptionEnable.startsWith("encryption") | encryptionEnable.startsWith("MCH DB");
-            if(encrypted) {
-                switch(encryptionType) {
+            if (encrypted) {
+                switch (encryptionType) {
                     case 0 -> {
-                        while((cache = reader.readLine()) != null) {
-                            if(! cache.startsWith("/**") & ! cache.startsWith(" *") & ! cache.startsWith(" */")) {
-                                if(cache.length() > 0)
+                        while ((cache = reader.readLine()) != null) {
+                            if (!cache.startsWith("/**") & !cache.startsWith(" *") & !cache.startsWith(" */")) {
+                                if (cache.length() > 0)
                                     builder.append(cache).append("\n");
                             }
                         }
@@ -536,15 +554,15 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
                         BufferedReader configRead = new BufferedReader(new StringReader(builder.toString()));
 
                         StringBuilder s1 = new StringBuilder();
-                        while((cache = configRead.readLine()) != null) {
+                        while ((cache = configRead.readLine()) != null) {
                             int lim = cache.length() > 1 ? cache.chars().toArray()[0] : 0;
 
                             boolean checkSkip = false;
 
-                            for(Object o : cache.chars().toArray()) {
-                                if(checkSkip) {
+                            for (Object o : cache.chars().toArray()) {
+                                if (checkSkip) {
                                     int details = Integer.parseInt(o.toString());
-                                    if(details != 10) {
+                                    if (details != 10) {
                                         s1.append((char) (details - lim - checkCode));
                                     }
                                 }
@@ -555,9 +573,9 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
                         return s1;
                     }
                     case 1 -> {
-                        while((cache = reader.readLine()) != null) {
-                            if(! cache.startsWith("/**") & ! cache.startsWith(" *") & ! cache.startsWith(" */")) {
-                                if(cache.length() > 0)
+                        while ((cache = reader.readLine()) != null) {
+                            if (!cache.startsWith("/**") & !cache.startsWith(" *") & !cache.startsWith(" */")) {
+                                if (cache.length() > 0)
                                     builder.append(cache).append("\n");
                             }
                         }
@@ -566,8 +584,8 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
                         BufferedReader configRead = new BufferedReader(new StringReader(builder.toString()));
 
-                        while((cache = configRead.readLine()) != null) {
-                            if(cache.startsWith("LIBRARY ")) {
+                        while ((cache = configRead.readLine()) != null) {
+                            if (cache.startsWith("LIBRARY ")) {
                                 break;
                             }
                         }
@@ -576,8 +594,8 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
                         StringBuilder libraryInformation = new StringBuilder();
 
-                        while((cache = configRead.readLine()) != null) {
-                            if(cache.startsWith("INFORMATION ")) {
+                        while ((cache = configRead.readLine()) != null) {
+                            if (cache.startsWith("INFORMATION ")) {
                                 break;
                             }
                             libraryInformation.append(cache.replace("\b", "\n")).append("\n");
@@ -585,22 +603,22 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
                         BufferedReader libraryRead = new BufferedReader(new StringReader(libraryInformation.toString()));
 
-                        while((cache = libraryRead.readLine()) != null) {
+                        while ((cache = libraryRead.readLine()) != null) {
                             int headCode = cache.chars().toArray()[0];
                             String[] libraryLine = cache.substring(1).split("\t");
-                            for(String s : libraryLine) {
+                            for (String s : libraryLine) {
                                 StringBuilder charCode = new StringBuilder();
-                                int signCode = - 1;
+                                int signCode = -1;
                                 boolean in = false;
-                                for(int i : s.chars().toArray()) {
-                                    if(! in) {
+                                for (int i : s.chars().toArray()) {
+                                    if (!in) {
                                         signCode = i;
                                         in = true;
                                         continue;
                                     }
                                     charCode.append((char) (i - checkCode - headCode));
                                 }
-                                if(! charCode.toString().equals(""))
+                                if (!charCode.toString().equals(""))
                                     libraryMap.put(signCode, Integer.parseInt(charCode.toString()));
                             }
                         }
@@ -609,7 +627,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
                         StringBuilder information = new StringBuilder();
 
-                        while((cache = configRead.readLine()) != null) {
+                        while ((cache = configRead.readLine()) != null) {
                             information.append(cache.substring(1));
                         }
 
@@ -618,7 +636,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
                         StringBuilder recodeInformation = new StringBuilder();
 
                         try {
-                            for(int i : information.chars().toArray()) {
+                            for (int i : information.chars().toArray()) {
                                 recodeInformation.append((char) libraryMap.get(i));
                             }
                         } catch (Exception e) {
@@ -628,21 +646,21 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
                         return recodeInformation;
                     }
                     default -> {
-                        if(! forceLoad)
+                        if (!forceLoad)
                             throw new IllegalArgumentException("unsupported encryption type: " + encryptionType);
                     }
                 }
 
             } else {
-                while(true) {
+                while (true) {
                     String startWith = reader.readLine();
-                    if(startWith.replace(" ", "").startsWith("{")) {
+                    if (startWith.replace(" ", "").startsWith("{")) {
                         builder.append(startWith);
                         break;
                     }
                 }
-                while((cache = reader.readLine()) != null) {
-                    if(! cache.startsWith("/**") || cache.startsWith(" *") || cache.startsWith(" */"))
+                while ((cache = reader.readLine()) != null) {
+                    if (!cache.startsWith("/**") || cache.startsWith(" *") || cache.startsWith(" */"))
                         builder.append(cache);
                 }
 
@@ -656,42 +674,47 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     }
 
     public void writeConfig() {
-        checkShutdown();
+        if (backgroundSave & saving) {
+            logger.warn("background save are enabled, call write maybe suspend threads");
+        }
+        synchronized (this) {
+            checkShutdown();
 
-        try {
-            if(shuttingDown) {
-                return;
-            }
-
-            canShutdown = false;
-
-            StringBuilder write = new StringBuilder(this.toJSONObject().toString());
-
-            StringBuilder builder = new StringBuilder();
-
-            Random r = new Random();
-
-            if(encryption) {
-                switch(encryptionType.getId()) {
-                    case 0 -> {
-                        builder = encryptionByRandomSequence(write, r);
-                    }
-                    case 1 -> {
-                        builder = encryptionByCompositeSequence(write);
-                    }
+            try {
+                if (shuttingDown) {
+                    return;
                 }
-            } else {
-                builder = new StringBuilder();
-                builder.append("no encryption config: [config_size=").append(write.length()).append(", config_version=").append(version).append("]").append("\n").append(formatNote()).append("\n\n").append(write);
+
+                canShutdown = false;
+
+                StringBuilder write = new StringBuilder(this.toJSONObject().toString());
+
+                StringBuilder builder = new StringBuilder();
+
+                Random r = new Random();
+
+                if (encryption) {
+                    switch (encryptionType.getId()) {
+                        case 0 -> {
+                            builder = encryptionByRandomSequence(write, r);
+                        }
+                        case 1 -> {
+                            builder = encryptionByCompositeSequence(write);
+                        }
+                    }
+                } else {
+                    builder = new StringBuilder();
+                    builder.append("no encryption config: [config_size=").append(write.length()).append(", config_version=").append(version).append("]").append("\n").append(formatNote()).append("\n\n").append(write);
+                }
+
+                BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + name, Charset.forName("unicode"), false));
+                write(writer, builder.toString());
+                writer.close();
+
+                canShutdown = true;
+            } catch (Exception e) {
+                canShutdown = true;
             }
-
-            BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + name, Charset.forName("unicode"), false));
-            write(writer, builder.toString());
-            writer.close();
-
-            canShutdown = true;
-        } catch (Exception e) {
-            canShutdown = true;
         }
     }
 
@@ -728,15 +751,15 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
         StringBuilder builder = new StringBuilder();
 
-        if(encryption) {
+        if (encryption) {
             int wrap = splitRange;
 
-            for(; wrap > 0; wrap--) {
+            for (; wrap > 0; wrap--) {
                 int splitIndex = r.nextInt(100);
-                if(splitIndex < 50) {
+                if (splitIndex < 50) {
                     splitIndex += 50;
                 }
-                if((splitIndex + split) < information.length()) {
+                if ((splitIndex + split) < information.length()) {
                     split += splitIndex - 1;
                     information.insert(split, "\n");
                 } else {
@@ -749,7 +772,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
         builder.append((char) 0);
 
-        if(! encryptionHead) {
+        if (!encryptionHead) {
             builder.append(" encryption: [" + "type=").append(encryptionType.getName()).append(", ");
             builder.append("SUPPORT=MCH -> https://github.com/zhuaidadaya/ConfigUtil , ");
             builder.append("check code=").append(checkingCode).append(", ");
@@ -784,13 +807,13 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
         builder.append((char) checkingCode);
 
         int count = 0;
-        for(Object o : charArray) {
+        for (Object o : charArray) {
             count++;
-            if(Integer.parseInt(o.toString()) == 10) {
+            if (Integer.parseInt(o.toString()) == 10) {
                 int rand = r.nextInt(checkingCodeRange);
                 builder.append((char) 10);
                 checkingCode = rand > 13 ? rand : 14;
-                if(count != charArray.length)
+                if (count != charArray.length)
                     builder.append((char) checkingCode);
             } else {
                 builder.append((char) (Integer.parseInt(o.toString()) + checkingCode + checkingCodeRange));
@@ -813,7 +836,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
         builder.append((char) 1);
 
-        if(! encryptionHead) {
+        if (!encryptionHead) {
             builder.append(" encryption: [");
             builder.append("type=").append(encryptionType.getName()).append(", ");
             builder.append("SUPPORT=MCH -> https://github.com/zhuaidadaya/ConfigUtil , ");
@@ -862,18 +885,18 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
         int offset;
 
-        if(libraryLimit * charArray.length > 10000000) {
+        if (libraryLimit * charArray.length > 10000000) {
             logger.warn(libraryLimit * charArray.length + " sequence building, maybe build a long time");
         }
 
         //  generate library
-        for(Object o : charArray) {
+        for (Object o : charArray) {
             offset = 0;
 
             int sourceChar = Integer.parseInt(o.toString());
 
             try {
-                if(libraryOffsetIndex.get(sourceChar) > libraryLimit) {
+                if (libraryOffsetIndex.get(sourceChar) > libraryLimit) {
                     continue;
                 }
             } catch (Exception e) {
@@ -892,20 +915,20 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
             int writeChar = sourceChar + checkingCode + head;
 
-            while(libraryMap.containsValue(writeChar)) {
+            while (libraryMap.containsValue(writeChar)) {
                 dump = true;
                 head++;
                 writeChar = sourceChar + checkingCode + head;
             }
 
-            if(dump) {
+            if (dump) {
                 builder.append("\b");
                 builder.append((char) head);
             }
 
-            if(count > split) {
+            if (count > split) {
                 builder.append((char) 10);
-                switch(inseparableLevel) {
+                switch (inseparableLevel) {
                     case 0 -> split = r.nextInt(15);
                     case 1 -> split = r.nextInt(30);
                     case 2 -> split = r.nextInt(50);
@@ -918,11 +941,11 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
             builder.append((char) writeChar);
 
-            for(Object o2 : o.toString().chars().toArray()) {
+            for (Object o2 : o.toString().chars().toArray()) {
                 builder.append((char) (Integer.parseInt(o2.toString()) + checkingCode + head));
             }
 
-            if(libraryMap.containsKey(sourceChar + "-0")) {
+            if (libraryMap.containsKey(sourceChar + "-0")) {
                 libraryOffsetIndex.put(sourceChar, offset);
                 libraryMap.put(sourceChar + "-" + offset, writeChar);
             } else {
@@ -935,8 +958,8 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
         StringBuilder writeInformation = new StringBuilder();
 
-        for(int c : charArray) {
-            if(libraryOffsetIndex.get(c) == 0)
+        for (int c : charArray) {
+            if (libraryOffsetIndex.get(c) == 0)
                 writeInformation.append((char) libraryMap.get(c + "-0").intValue());
             else
                 writeInformation.append((char) libraryMap.get(c + "-" + r.nextInt(libraryOffsetIndex.get(c))).intValue());
@@ -958,12 +981,12 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
         head = lim > 13 ? lim : 14;
         split = 300;
         builder.append((char) head);
-        for(int c : writeInformation.chars().toArray()) {
+        for (int c : writeInformation.chars().toArray()) {
             count++;
             tabCount++;
-            if(count > split) {
+            if (count > split) {
                 builder.append((char) 10);
-                switch(inseparableLevel) {
+                switch (inseparableLevel) {
                     case 0 -> split = r.nextInt(300);
                     case 1 -> split = Math.max(150, r.nextInt(300));
                     case 2 -> split = Math.max(200, r.nextInt(300));
@@ -973,9 +996,9 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
                 lim = r.nextInt(checkingCodeRange);
                 head = lim > 13 ? lim : 14;
                 builder.append((char) head);
-            } else if(tabCount > tab & ! (inseparableLevel == 3)) {
+            } else if (tabCount > tab & !(inseparableLevel == 3)) {
                 builder.append("\t");
-                switch(inseparableLevel) {
+                switch (inseparableLevel) {
                     case 0 -> tab = r.nextInt(15);
                     case 1 -> tab = r.nextInt(30);
                     case 2 -> tab = r.nextInt(50);
@@ -996,7 +1019,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     private void writeRandomByte(StringBuilder writer, int limit, int bytes) {
         Random r = new Random();
         try {
-            for(int i = 0; i < bytes; i++) {
+            for (int i = 0; i < bytes; i++) {
                 int next = r.nextInt(limit);
                 writer.append((char) (next > 13 ? next : 14));
             }
@@ -1024,7 +1047,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     private void writeRandomByte(Writer writer, int limit, int bytes) {
         Random r = new Random();
         try {
-            for(int i = 0; i < bytes; i++) {
+            for (int i = 0; i < bytes; i++) {
                 int next = r.nextInt(limit);
                 writer.write(next > 13 ? next : 14);
             }
@@ -1062,13 +1085,13 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     }
 
     public void setIfNoExist(Object key, Object configKeyValues) {
-        if(! configs.containsKey(key)) {
+        if (!configs.containsKey(key)) {
             set(key, configKeyValues);
         }
     }
 
     public void setListIfNoExist(Object key, Object configKeyValues) {
-        if(! configs.containsKey(key)) {
+        if (!configs.containsKey(key)) {
             setList(key, configKeyValues);
         }
     }
@@ -1080,15 +1103,19 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     }
 
     private void setConf(boolean init, Object key, Object... configKeysValues) throws IllegalArgumentException {
-        if(configKeysValues.length > 1) {
-            if(configKeysValues.length % 2 != 0)
-                throw new IllegalArgumentException("values argument size need Integral multiple of 2, but argument size " + configKeysValues.length + " not Integral multiple of 2");
-            configs.put(key, configKeysValues);
-        } else {
+        if (init) {
             configs.put(key, configKeysValues[0]);
+        } else {
+            if (configKeysValues.length > 1) {
+                if (configKeysValues.length % 2 != 0)
+                    throw new IllegalArgumentException("values argument size need Integral multiple of 2, but argument size " + configKeysValues.length + " not Integral multiple of 2");
+                configs.put(key, configKeysValues);
+            } else {
+                configs.put(key, configKeysValues[0]);
+            }
         }
-        if(autoWrite) {
-            if(! init)
+        if (autoWrite) {
+            if (!init)
                 writeConfig();
         }
     }
@@ -1101,8 +1128,8 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
     private void setListConf(boolean init, Object key, Object... configValues) {
         configs.put(key, configValues);
-        if(autoWrite) {
-            if(! init)
+        if (autoWrite) {
+            if (!init)
                 writeConfig();
         }
     }
@@ -1112,7 +1139,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
         checkShutdown();
 
         StringBuilder builder = new StringBuilder();
-        for(Object o : configs.keySet()) {
+        for (Object o : configs.keySet()) {
             builder.append(o.toString()).append("=").append(configs.get(o).toString()).append(", ");
         }
 
@@ -1130,18 +1157,18 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
         JSONObject json = new JSONObject();
         JSONArray addToConfig = new JSONArray();
-        for(Object configKey : configs.keySet()) {
+        for (Object configKey : configs.keySet()) {
             Object config = configs.get(configKey);
 
             JSONObject conf = new JSONObject();
             JSONObject inJ = new JSONObject();
 
-            if(config instanceof Object[] | config instanceof List<?>) {
+            if (config instanceof Object[] | config instanceof List<?>) {
                 ObjectList<Object> list;
-                if(config instanceof Object[]) {
+                if (config instanceof Object[]) {
                     list = ObjectList.of((Object[]) config);
 
-                    if(list.size() == 1)
+                    if (list.size() == 1)
                         list = ObjectList.of(ObjectList.of((Object[]) config).get(0));
 
                     inJ.put("values", list);
@@ -1155,11 +1182,11 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
                 inJ.put("listTag", true);
             } else {
-                if(config instanceof String)
+                if (config instanceof String)
                     inJ.put("value", config.toString());
-                else if(config instanceof Boolean)
+                else if (config instanceof Boolean)
                     inJ.put("value", Boolean.parseBoolean(config.toString()));
-                else if(config instanceof Integer)
+                else if (config instanceof Integer)
                     inJ.put("value", Integer.parseInt(config.toString()));
                 else
                     inJ.put("value", config);
@@ -1190,13 +1217,13 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     }
 
     private String formatNote() {
-        if(note != null) {
+        if (note != null) {
             try {
                 BufferedReader reader = new BufferedReader(new StringReader(note));
                 StringBuilder builder = new StringBuilder("/**\n");
 
                 String cache;
-                while((cache = reader.readLine()) != null)
+                while ((cache = reader.readLine()) != null)
                     builder.append(" * ").append(cache).append("\n");
                 builder.append(" */");
 
@@ -1243,7 +1270,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
         checkShutdown();
         logger.info("saving configs and shutting down ConfigUtil");
         try {
-            while(! canShutdown()) {
+            while (!canShutdown()) {
                 try {
                     Thread.sleep(20);
                 } catch (InterruptedException e) {
@@ -1260,7 +1287,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
             logger.error("failed to save configs, shutting down");
         }
         setShuttingDown();
-        while(! canShutdown()) {
+        while (!canShutdown()) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -1272,7 +1299,7 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
     }
 
     private void checkShutdown() {
-        if(shutdown) {
+        if (shutdown) {
             throw new IllegalStateException("this ConfigUtil already shutdown, invoke rebuild() to build again");
         }
     }
@@ -1315,6 +1342,44 @@ public class ObjectConfigUtil implements AbstractConfigUtil {
 
     public JSONArray getConfigJSONArray(Object config) {
         return new JSONArray(getConfigString(config));
+    }
+
+    public void save() {
+        saving = true;
+        forceSaving = true;
+    }
+
+    public void enableBackgroundSave() {
+        Thread thread = new Thread(() -> {
+            while (!shutdown) {
+                if (saving & backgroundSave) {
+                    writeConfig();
+
+                    try {
+                        for (int i = 100; i > 0 & !forceSaving; i++) {
+                            Thread.sleep(10);
+                        }
+                        forceSaving = false;
+                    } catch (InterruptedException e) {
+
+                    }
+                } else {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+
+                    }
+                }
+            }
+        });
+        backgroundSave = true;
+        if (saveThread == null) {
+            saveThread = thread;
+        } else {
+            if (!saveThread.isAlive()) {
+                saveThread = thread;
+            }
+        }
     }
 }
 
