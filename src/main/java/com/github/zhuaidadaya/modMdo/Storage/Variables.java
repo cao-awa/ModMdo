@@ -16,6 +16,7 @@ import com.github.zhuaidadaya.modMdo.mixins.MinecraftServerSession;
 import com.github.zhuaidadaya.modMdo.type.ModMdoType;
 import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.modMdo.usr.UserUtil;
+import com.github.zhuaidadaya.utils.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.utils.config.ObjectConfigUtil;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
@@ -60,8 +61,8 @@ public class Variables {
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static String rankingOnlineTimeScale = "minute";
-    public static String VERSION_ID = "1.0.23";
-    public static int MODMDO_VERSION = 17;
+    public static String VERSION_ID = "1.0.24";
+    public static int MODMDO_VERSION = 18;
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean rankingSwitchNoDump = true;
@@ -84,6 +85,7 @@ public class Variables {
     public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
+    public static DiskObjectConfigUtil configCached;
     public static ObjectConfigUtil config;
     public static CavaUtil cavas;
     public static String motd = "";
