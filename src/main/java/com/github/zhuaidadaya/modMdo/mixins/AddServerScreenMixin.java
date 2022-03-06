@@ -53,9 +53,7 @@ public abstract class AddServerScreenMixin extends Screen {
      * 在编辑服务器的页面添加token的文本栏
      * 以及连接类型的文本栏
      *
-     * @param ci
-     *         callback
-     *
+     * @param ci callback
      * @author zhuaidadaya
      * @author 草二号机
      * @author 草awa
@@ -96,7 +94,8 @@ public abstract class AddServerScreenMixin extends Screen {
      */
     public void setToken() {
         if (enableGui) {
-            modMdoToken.addClientToken(new ClientEncryptionToken(editToken.getText(), addressField.getText(), editLoginType.getText(), VERSION_ID));
+            String address = addressField.getText();
+            modMdoToken.addClientToken(new ClientEncryptionToken(editToken.getText(), address.contains(":") ? address : "25565", editLoginType.getText(), VERSION_ID));
             updateModMdoVariables();
         }
     }
@@ -104,9 +103,7 @@ public abstract class AddServerScreenMixin extends Screen {
     /**
      * 保存服务器信息时同时保存token
      *
-     * @param ci
-     *         callback
-     *
+     * @param ci callback
      * @author 草awa
      */
     @Inject(method = "addAndClose", at = @At("HEAD"))
@@ -117,17 +114,11 @@ public abstract class AddServerScreenMixin extends Screen {
     /**
      * 渲染三个新添加的文本栏
      *
-     * @param matrices
-     *         matrices
-     * @param mouseX
-     *         mouseX
-     * @param mouseY
-     *         mouseY
-     * @param delta
-     *         delta
-     * @param ci
-     *         callback
-     *
+     * @param matrices matrices
+     * @param mouseX   mouseX
+     * @param mouseY   mouseY
+     * @param delta    delta
+     * @param ci       callback
      * @author zhuaidadaya
      */
     @Inject(method = "render", at = @At("RETURN"))

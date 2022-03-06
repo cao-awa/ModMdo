@@ -125,7 +125,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
             }))).then(literal("setScale").then(literal("second").executes(scaleSecond -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleSecond), this, scaleSecond)) {
                     config.set("ranking", enableRanking = true);
-                    config.set("ranking_online_time_scale", rankingOnlineTimeScale = "second");
+                    setOnlineTimeScale("second");
 
                     sendFeedback(scaleSecond,formatTimeScale(rankingOnlineTimeScale));
                 }
@@ -133,7 +133,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
             })).then(literal("minute").executes(scaleMinute -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleMinute), this, scaleMinute)) {
                     config.set("ranking", enableRanking = true);
-                    config.set("ranking_online_time_scale", rankingOnlineTimeScale = "minute");
+                    setOnlineTimeScale("minute");
 
                     sendFeedback(scaleMinute,formatTimeScale(rankingOnlineTimeScale));
                 }
@@ -141,7 +141,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
             })).then(literal("hour").executes(scaleHour -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleHour), this, scaleHour)) {
                     config.set("ranking", enableRanking = true);
-                    config.set("ranking_online_time_scale", rankingOnlineTimeScale = "hour");
+                    setOnlineTimeScale("hour");
 
                     sendFeedback(scaleHour,formatTimeScale(rankingOnlineTimeScale));
                 }
@@ -149,7 +149,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
             })).then(literal("day").executes(scaleDay -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleDay), this, scaleDay)) {
                     config.set("ranking", enableRanking = true);
-                    config.set("ranking_online_time_scale", rankingOnlineTimeScale = "day");
+                    setOnlineTimeScale("day");
 
                     sendFeedback(scaleDay,formatTimeScale(rankingOnlineTimeScale));
                 }
@@ -157,9 +157,74 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
             })).then(literal("month").executes(scaleMonth -> {
                 if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleMonth), this, scaleMonth)) {
                     config.set("ranking", enableRanking = true);
-                    config.set("ranking_online_time_scale", rankingOnlineTimeScale = "month");
+                    setOnlineTimeScale("month");
 
                     sendFeedback(scaleMonth,formatTimeScale(rankingOnlineTimeScale));
+                }
+                return 0;
+            })))).then(literal("gameOnlineTimes").then(literal("setDisplay").executes(setOtsDisplay -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(setOtsDisplay), this, setOtsDisplay)) {
+                    config.set("ranking", enableRanking = true);
+
+                    try {
+                        showGameOnlineTime(getServer(setOtsDisplay));
+                        sendFeedback(setOtsDisplay, formatObjectShow("gameOnlineTime"));
+                    } catch (IllegalStateException e) {
+                        sendFeedback(setOtsDisplay, formatObjectNoDef("gameOnlineTime"));
+                    }
+                }
+                return 0;
+            }).then(argument("rankingDisplayName", TextArgumentType.text()).executes(onlineTime -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(onlineTime), this, onlineTime)) {
+                    config.set("ranking", enableRanking = true);
+
+                    try {
+                        addGameOnlineTimeScoreboard(getServer(onlineTime), TextArgumentType.getTextArgument(onlineTime, "rankingDisplayName"));
+                        showGameOnlineTime(getServer(onlineTime));
+                        sendFeedback(onlineTime, formatObjectDefined("gameOnlineTime"));
+                    } catch (Exception e) {
+
+                    }
+                }
+                return 0;
+            }))).then(literal("setScale").then(literal("second").executes(scaleSecond -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleSecond), this, scaleSecond)) {
+                    config.set("ranking", enableRanking = true);
+                    setGameOnlineTimeScale("second");
+
+                    sendFeedback(scaleSecond,formatTimeScale(rankingGameOnlineTimeScale));
+                }
+                return 0;
+            })).then(literal("minute").executes(scaleMinute -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleMinute), this, scaleMinute)) {
+                    config.set("ranking", enableRanking = true);
+                    setGameOnlineTimeScale("minute");
+
+                    sendFeedback(scaleMinute,formatTimeScale(rankingGameOnlineTimeScale));
+                }
+                return 0;
+            })).then(literal("hour").executes(scaleHour -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleHour), this, scaleHour)) {
+                    config.set("ranking", enableRanking = true);
+                    setGameOnlineTimeScale("hour");
+
+                    sendFeedback(scaleHour,formatTimeScale(rankingGameOnlineTimeScale));
+                }
+                return 0;
+            })).then(literal("day").executes(scaleDay -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleDay), this, scaleDay)) {
+                    config.set("ranking", enableRanking = true);
+                    setGameOnlineTimeScale("day");
+
+                    sendFeedback(scaleDay,formatTimeScale(rankingGameOnlineTimeScale));
+                }
+                return 0;
+            })).then(literal("month").executes(scaleMonth -> {
+                if(commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleMonth), this, scaleMonth)) {
+                    config.set("ranking", enableRanking = true);
+                    setGameOnlineTimeScale("month");
+
+                    sendFeedback(scaleMonth,formatTimeScale(rankingGameOnlineTimeScale));
                 }
                 return 0;
             }))))).then(literal("disable").executes(disableRanking -> {
@@ -204,6 +269,20 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
         });
     }
 
+    public void setOnlineTimeScale(String scale) {
+        if (!scale.equals(rankingOnlineTimeScale)) {
+            rankingOnlineTimeScaleChanged = true;
+            config.set("ranking_online_time_scale", rankingOnlineTimeScale = scale);
+        }
+    }
+
+    public void setGameOnlineTimeScale(String scale) {
+        if (!scale.equals(rankingGameOnlineTimeScale)) {
+            rankingGameOnlineTimeScaleChanged = true;
+            config.set("ranking_game_online_time_scale", rankingGameOnlineTimeScale = scale);
+        }
+    }
+
     public void showOnlineTime(MinecraftServer server) throws IllegalStateException {
         ServerScoreboard scoreboard = server.getScoreboard();
 
@@ -222,6 +301,26 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
             scoreboard.removeObjective(scoreboard.getObjective("modmdo.ots"));
         }
         scoreboard.addObjective("modmdo.ots", ScoreboardCriterion.DUMMY, displayName, ScoreboardCriterion.DUMMY.getDefaultRenderType());
+    }
+
+    public void showGameOnlineTime(MinecraftServer server) throws IllegalStateException {
+        ServerScoreboard scoreboard = server.getScoreboard();
+
+        if(scoreboard.containsObjective("modmdo.gots")) {
+            config.set("ranking_object", rankingObject = "game.online.times");
+
+            ((Scoreboard) scoreboard).setObjectiveSlot(1, scoreboard.getObjective("modmdo.gots"));
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    public void addGameOnlineTimeScoreboard(MinecraftServer server, Text displayName) {
+        ServerScoreboard scoreboard = server.getScoreboard();
+        if(scoreboard.containsObjective("modmdo.gots")) {
+            scoreboard.removeObjective(scoreboard.getObjective("modmdo.gots"));
+        }
+        scoreboard.addObjective("modmdo.gots", ScoreboardCriterion.DUMMY, displayName, ScoreboardCriterion.DUMMY.getDefaultRenderType());
     }
 
     public void showDestroys(MinecraftServer server) throws IllegalStateException {
@@ -323,19 +422,20 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
         statObjects.add("destroy.blocks");
         statObjects.add("villager.trades");
         statObjects.add("player.deaths");
+        statObjects.add("game.online.times");
 
+        String gameOnlineTimeScale = config.getConfigString("ranking_game_online_time_scale");
         String onlineTimeScale = config.getConfigString("ranking_online_time_scale");
         String ranking = config.getConfigString("ranking_object");
 
         if(ranking != null)
             rankingObject = ranking;
-        else
-            config.set("ranking_object", "Nan");
 
         if(onlineTimeScale != null)
             rankingOnlineTimeScale = onlineTimeScale;
-        else
-            config.set("ranking_online_time_scale", "minute");
+
+        if(onlineTimeScale != null)
+            rankingGameOnlineTimeScale = gameOnlineTimeScale;
 
         try {
             enableRanking = config.getConfigBoolean("ranking");
