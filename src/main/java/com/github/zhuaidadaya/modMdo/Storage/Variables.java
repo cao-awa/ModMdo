@@ -42,6 +42,8 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
+    public static String VERSION_ID = "1.0.24";
+    public static int MODMDO_VERSION = 18;
     public static final String MODMDO_COMMAND_ROOT = "/";
     public static final String MODMDO_COMMAND_CONF = "modmdo/";
     public static final String MODMDO_COMMAND_TICK = "modmdo/tick/";
@@ -60,9 +62,10 @@ public class Variables {
     public static final String MODMDO_COMMAND_CONF_TOKEN_CHECK_TIME_LIMIT = "conf/checker/time/limit";
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
+    public static boolean rankingOnlineTimeScaleChanged = false;
+    public static boolean rankingGameOnlineTimeScaleChanged = false;
     public static String rankingOnlineTimeScale = "minute";
-    public static String VERSION_ID = "1.0.24";
-    public static int MODMDO_VERSION = 18;
+    public static String rankingGameOnlineTimeScale = "minute";
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean rankingSwitchNoDump = true;

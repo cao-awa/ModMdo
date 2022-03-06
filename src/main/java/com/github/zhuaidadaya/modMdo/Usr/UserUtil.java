@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modMdo.usr;
 
+import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.json.JSONObject;
@@ -14,7 +15,7 @@ public class UserUtil {
     }
 
     public UserUtil(JSONObject json) {
-        for(String o : json.keySet())
+        for (String o : json.keySet())
             users.put(o, json.getJSONObject(o));
     }
 
@@ -27,20 +28,18 @@ public class UserUtil {
     }
 
     public JSONObject getJSONObject(Object target) {
-        if(users.get(target.toString()) == null)
-            throw new IllegalStateException();
+        if (users.get(target.toString()) == null) throw new IllegalStateException();
         return users.get(target.toString());
     }
 
     public Object getUserConfig(String targetUuid, Object getConfig) {
-        if(users.get(targetUuid) == null)
-            throw new IllegalStateException();
+        if (users.get(targetUuid) == null) throw new IllegalStateException();
         return users.get(targetUuid).get(getConfig.toString()).toString();
     }
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
-        for(Object o : users.keySet())
+        for (Object o : users.keySet())
             json.put(o.toString(), users.get(o.toString()));
         return json;
     }
@@ -48,7 +47,7 @@ public class UserUtil {
     public User[] getUsers() {
         User[] userList = new User[users.size()];
         int i = 0;
-        for(Object o : users.keySet()) {
+        for (Object o : users.keySet()) {
             JSONObject userJSON = users.get(o.toString());
             userList[i++] = new User(userJSON);
         }
@@ -56,8 +55,8 @@ public class UserUtil {
     }
 
     public User getUser(ServerPlayerEntity player) {
-        if(users.get(player.getUuid().toString()) == null)
-            put(player.getUuid().toString(), new User(player.getName().asString(), player.getUuid()).toJSONObject());
+        if (users.get(player.getUuid().toString()) == null)
+            put(player.getUuid().toString(), new User(player.getName().asString(), player.getUuid().toString(), 0, new ClientEncryptionToken("", "unknown", "unknown", "unknown")).toJSONObject());
         return new User(users.get(player.getUuid().toString()));
     }
 
