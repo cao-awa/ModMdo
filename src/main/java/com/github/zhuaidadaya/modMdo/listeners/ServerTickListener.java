@@ -7,6 +7,7 @@ import com.github.zhuaidadaya.modMdo.usr.User;
 import com.github.zhuaidadaya.utils.times.TimeUtils;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
+import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -21,7 +22,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.rankingGameOnlineTimeScale;
 
 public class ServerTickListener {
     private long lastAddOnlineTime = -1;
@@ -195,8 +195,20 @@ public class ServerTickListener {
             ServerScoreboard scoreboard = server.getScoreboard();
             ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.ots"));
             if (rankingOnlineTimeScaleChanged) {
-                scoreboardPlayerScore.clearScore();
+                for (ScoreboardPlayerScore score : scoreboardPlayerScore.getScoreboard().getAllPlayerScores(scoreboardPlayerScore.getObjective())) {
+                    updateOnlineTime(server, score.getPlayerName());
+                }
+                rankingOnlineTimeScaleChanged = false;
             }
+        }
+        updateOnlineTime(server, user.getName());
+    }
+
+    public void updateOnlineTime(MinecraftServer server, String name) {
+        User user = users.getUserFromName(name);
+        if (user != null) {
+            ServerScoreboard scoreboard = server.getScoreboard();
+            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(name, scoreboard.getObjective("modmdo.ots"));
             long showOnlineTime;
             switch (rankingOnlineTimeScale) {
                 case "second" -> {
@@ -226,7 +238,10 @@ public class ServerTickListener {
             ServerScoreboard scoreboard = server.getScoreboard();
             ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.gots"));
             if (rankingGameOnlineTimeScaleChanged) {
-                scoreboardPlayerScore.clearScore();
+                for (ScoreboardObjective objective : scoreboard.getObjectives()) {
+                    scoreboard.removeObjective(objective);
+                }
+                rankingGameOnlineTimeScaleChanged = false;
             }
             long gameTime = stat.getJSONObject("minecraft:custom").getLong("minecraft:play_time") * 50;
             long showOnlineTime;
@@ -313,11 +328,15 @@ public class ServerTickListener {
             if (scoreboard.containsObjective("modmdo.ots")) {
                 rankingObjects.add("online.times");
             }
+            if (scoreboard.containsObjective("modmdo.gots")) {
+                rankingObjects.add("online.times");
+            }
             if (scoreboard.containsObjective("modmdo.trd")) {
                 rankingObjects.add("villager.trades");
             }
 
             switch (rankingObject) {
+                case "game.online.times" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.gots"));
                 case "online.times" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.ots"));
                 case "destroy.blocks" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.dsy"));
                 case "villager.trades" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.trd"));
@@ -327,6 +346,8 @@ public class ServerTickListener {
                 scoreboard.removeObjective(scoreboard.getObjective("modmdo.dsy"));
             if (scoreboard.containsObjective("modmdo.ots"))
                 scoreboard.removeObjective(scoreboard.getObjective("modmdo.ots"));
+            if (scoreboard.containsObjective("modmdo.gots"))
+                scoreboard.removeObjective(scoreboard.getObjective("modmdo.gots"));
             if (scoreboard.containsObjective("modmdo.trd"))
                 scoreboard.removeObjective(scoreboard.getObjective("modmdo.trd"));
         }
