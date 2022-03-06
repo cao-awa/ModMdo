@@ -8,8 +8,8 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -30,10 +30,6 @@ public abstract class PlayerSkinTextureMixin extends ResourceTexture {
 
     @Shadow
     @Final
-    private static Logger LOGGER;
-
-    @Shadow
-    @Final
     private @Nullable File cacheFile;
 
     @Shadow
@@ -46,6 +42,8 @@ public abstract class PlayerSkinTextureMixin extends ResourceTexture {
     @Shadow
     @Final
     private String url;
+
+    @Shadow @Final private static Logger LOGGER;
 
     public PlayerSkinTextureMixin(Identifier location) {
         super(location);

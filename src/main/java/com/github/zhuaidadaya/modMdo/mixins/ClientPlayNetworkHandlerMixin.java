@@ -1,8 +1,8 @@
 package com.github.zhuaidadaya.modMdo.mixins;
 
 import com.github.zhuaidadaya.modMdo.commands.init.ArgumentInit;
-import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
 import com.github.zhuaidadaya.modMdo.jump.server.ServerUtil;
+import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.MinecraftClient;
@@ -17,7 +17,6 @@ import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerAbilitiesS2CPacket;
-import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.json.JSONObject;
@@ -32,7 +31,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modMdo.storage.Variables.configCached;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketListener {
@@ -46,9 +44,6 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
 
     @Shadow
     private Set<RegistryKey<World>> worldKeys;
-
-    @Shadow
-    private DynamicRegistryManager registryManager;
 
     @Shadow
     private int chunkLoadDistance;

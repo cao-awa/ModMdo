@@ -248,34 +248,66 @@ public class User {
         this.onlineTime = onlineTime;
     }
 
-    public long getOnlineSecond() {
+    public long formatOnlineSecond() {
         return onlineTime / 1000;
     }
 
-    public long getOnlineMinute() {
+    public long formatOnlineMinute() {
         if(getOnlineSecond() > 59)
             return getOnlineSecond() / 60;
         else
             return 0;
     }
 
-    public long getOnlineHour() {
+    public long formatOnlineHour() {
         if(getOnlineMinute() > 59)
             return getOnlineMinute() / 60;
         else
             return 0;
     }
 
-    public long getOnlineDay() {
+    public long formatOnlineDay() {
         if(getOnlineHour() > 23)
             return getOnlineHour() / 24;
         else
             return 0;
     }
 
+    public long formatOnlineMonth() {
+        if(getOnlineDay() > 29)
+            return getOnlineDay() / 30;
+        else
+            return 0;
+    }
+
+    public long getOnlineSecond() {
+        return formatOnlineSecond();
+    }
+
+    public long getOnlineMinute() {
+        if(getOnlineSecond() > 59)
+            return formatOnlineMinute();
+        else
+            return 0;
+    }
+
+    public long getOnlineHour() {
+        if(getOnlineMinute() > 59)
+            return formatOnlineHour();
+        else
+            return 0;
+    }
+
+    public long getOnlineDay() {
+        if(getOnlineHour() > 23)
+            return formatOnlineDay();
+        else
+            return 0;
+    }
+
     public long getOnlineMonth() {
         if(getOnlineSecond() > 29)
-            return getOnlineDay() / 30;
+            return formatOnlineMonth();
         else
             return 0;
     }
