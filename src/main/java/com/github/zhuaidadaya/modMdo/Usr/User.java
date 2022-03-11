@@ -90,6 +90,11 @@ public class User {
         }
     }
 
+    public User setDummy(boolean dummy) {
+        this.dummyPlayer = dummy;
+        return this;
+    }
+
     public String getName() {
         return name;
     }

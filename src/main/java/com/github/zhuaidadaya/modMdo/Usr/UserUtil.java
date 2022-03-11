@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public class UserUtil {
     private final Object2ObjectRBTreeMap<String, JSONObject> users = new Object2ObjectRBTreeMap<>();
+    private final Object2ObjectRBTreeMap<String, String> userNameIdMap = new Object2ObjectRBTreeMap<>();
 
     public UserUtil() {
 
@@ -21,10 +22,16 @@ public class UserUtil {
 
     public void put(String target, JSONObject value) {
         users.put(target, value);
+        try {
+            userNameIdMap.put(target, value.getString("uuid"));
+        } catch (Exception e) {
+
+        }
     }
 
     public void put(User user) {
         users.put(user.getID(), user.toJSONObject());
+        userNameIdMap.put(user.getName(), user.getID());
     }
 
     public JSONObject getJSONObject(Object target) {
@@ -58,6 +65,10 @@ public class UserUtil {
         if (users.get(player.getUuid().toString()) == null)
             put(player.getUuid().toString(), new User(player.getName().asString(), player.getUuid().toString(), 0, new ClientEncryptionToken("", "unknown", "unknown", "unknown")).toJSONObject());
         return new User(users.get(player.getUuid().toString()));
+    }
+
+    public User getUserFromName(String name) {
+        return getUser(userNameIdMap.get(name));
     }
 
     public User getUser(UUID uuid) {
