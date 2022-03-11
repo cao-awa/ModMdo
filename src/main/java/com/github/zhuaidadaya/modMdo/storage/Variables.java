@@ -42,8 +42,8 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.24";
-    public static int MODMDO_VERSION = 18;
+    public static String VERSION_ID = "1.0.25";
+    public static int MODMDO_VERSION = 19;
     public static final String MODMDO_COMMAND_ROOT = "/";
     public static final String MODMDO_COMMAND_CONF = "modmdo/";
     public static final String MODMDO_COMMAND_TICK = "modmdo/tick/";

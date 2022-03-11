@@ -22,7 +22,11 @@ public class UserUtil {
 
     public void put(String target, JSONObject value) {
         users.put(target, value);
-        userNameIdMap.put(target, value.getString("uuid"));
+        try {
+            userNameIdMap.put(target, value.getString("uuid"));
+        } catch (Exception e) {
+
+        }
     }
 
     public void put(User user) {
