@@ -1,13 +1,13 @@
-package com.github.zhuaidadaya.modMdo.cavas;
+package com.github.zhuaidadaya.modmdo.cavas;
 
-import com.github.zhuaidadaya.modMdo.usr.User;
+import com.github.zhuaidadaya.modmdo.usr.User;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
 
-import static com.github.zhuaidadaya.modMdo.storage.Variables.updateCavas;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.updateCavas;
 
 public class CavaUtil {
     private final Object2ObjectRBTreeMap<Object, Cava> cavas = new Object2ObjectRBTreeMap<>();

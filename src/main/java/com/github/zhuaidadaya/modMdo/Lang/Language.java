@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modMdo.lang;
+package com.github.zhuaidadaya.modmdo.lang;
 
 public enum Language {
     CHINESE(0, "Chinese"), ENGLISH(1, "English"), CHINESE_TW(2, "Chinese_tw"), AUTO(3, "Auto");

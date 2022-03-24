@@ -1,28 +1,34 @@
-package com.github.zhuaidadaya.modMdo.storage;
+package com.github.zhuaidadaya.modmdo.storage;
 
-import com.github.zhuaidadaya.modMdo.bak.BackupUtil;
-import com.github.zhuaidadaya.modMdo.cavas.CavaUtil;
-import com.github.zhuaidadaya.modMdo.commands.DimensionTips;
-import com.github.zhuaidadaya.modMdo.commands.SimpleCommandOperation;
-import com.github.zhuaidadaya.modMdo.format.console.ConsoleTextFormat;
-import com.github.zhuaidadaya.modMdo.jump.server.ServerUtil;
-import com.github.zhuaidadaya.modMdo.lang.Language;
-import com.github.zhuaidadaya.modMdo.login.server.ServerLogin;
-import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
-import com.github.zhuaidadaya.modMdo.login.token.EncryptionTokenUtil;
-import com.github.zhuaidadaya.modMdo.login.token.ServerEncryptionToken;
-import com.github.zhuaidadaya.modMdo.login.token.TokenContentType;
-import com.github.zhuaidadaya.modMdo.mixins.MinecraftServerSession;
-import com.github.zhuaidadaya.modMdo.type.ModMdoType;
-import com.github.zhuaidadaya.modMdo.usr.User;
-import com.github.zhuaidadaya.modMdo.usr.UserUtil;
-import com.github.zhuaidadaya.utils.config.DiskObjectConfigUtil;
-import com.github.zhuaidadaya.utils.config.ObjectConfigUtil;
+import com.github.zhuaidadaya.modmdo.bak.BackupUtil;
+import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
+import com.github.zhuaidadaya.modmdo.commands.DimensionTips;
+import com.github.zhuaidadaya.modmdo.commands.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
+import com.github.zhuaidadaya.modmdo.jump.server.ServerUtil;
+import com.github.zhuaidadaya.modmdo.lang.Language;
+import com.github.zhuaidadaya.modmdo.login.server.ServerLogin;
+import com.github.zhuaidadaya.modmdo.login.token.ClientEncryptionToken;
+import com.github.zhuaidadaya.modmdo.login.token.EncryptionTokenUtil;
+import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
+import com.github.zhuaidadaya.modmdo.login.token.TokenContentType;
+import com.github.zhuaidadaya.modmdo.mixins.MinecraftServerSession;
+import com.github.zhuaidadaya.modmdo.ranking.Rank;
+import com.github.zhuaidadaya.modmdo.type.ModMdoType;
+import com.github.zhuaidadaya.modmdo.usr.User;
+import com.github.zhuaidadaya.modmdo.usr.UserUtil;
+import com.github.zhuaidadaya.modmdo.utils.config.DiskObjectConfigUtil;
+import com.github.zhuaidadaya.modmdo.utils.config.ObjectConfigUtil;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.ScoreboardCriterion;
+import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -42,8 +48,8 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static String VERSION_ID = "1.0.24";
-    public static int MODMDO_VERSION = 17;
+    public static String VERSION_ID = "1.0.26";
+    public static int MODMDO_VERSION = 20;
     public static final String MODMDO_COMMAND_ROOT = "/";
     public static final String MODMDO_COMMAND_CONF = "modmdo/";
     public static final String MODMDO_COMMAND_TICK = "modmdo/tick/";
@@ -111,10 +117,9 @@ public class Variables {
 
     public static LinkedHashSet<SocketAddress> disconnectedSet = new LinkedHashSet<>();
 
-    public static HashSet<String> rankingObjects = new HashSet<>();
-    public static HashSet<String> rankingObjectsNoDump = new HashSet<>();
-
-    public static HashSet<String> statObjects = new HashSet<>();
+    public static ObjectArrayList<Rank> rankingObjects = new ObjectArrayList<>();
+    public static ObjectArrayList<Rank> rankingObjectsNoDump = new ObjectArrayList<>();
+    public static Object2ObjectArrayMap<String,Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
 
     public static ServerUtil servers = new ServerUtil();
     public static boolean connectTo = false;
@@ -124,8 +129,31 @@ public class Variables {
 
     public static ConsoleTextFormat consoleTextFormat;
 
+    public static void showScoreboard(MinecraftServer server,String name,String display) {
+        ServerScoreboard scoreboard = server.getScoreboard();
+
+        if(scoreboard.containsObjective(name)) {
+            config.set("ranking_object", rankingObject = display);
+
+            ((Scoreboard) scoreboard).setObjectiveSlot(1, scoreboard.getObjective(name));
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    public static void addScoreboard(MinecraftServer server,Text displayName,String id) {
+        ServerScoreboard scoreboard = server.getScoreboard();
+        if(scoreboard.containsObjective(id)) {
+            scoreboard.removeObjective(scoreboard.getObjective(id));
+        }
+        scoreboard.addObjective(id, ScoreboardCriterion.DUMMY, displayName, ScoreboardCriterion.DUMMY.getDefaultRenderType());
+    }
+
     public static boolean rankingIsStatObject(String ranking) {
-        return statObjects.contains(ranking);
+        if (supportedRankingObjects.get(ranking) == null) {
+            return false;
+        }
+        return supportedRankingObjects.get(ranking).isStat();
     }
 
     public static String getRandomRankingObject() {
@@ -143,9 +171,9 @@ public class Variables {
         }
         if(rankingObjectsNoDump.size() > 0) {
             Random r = new Random();
-            String ranking = rankingObjectsNoDump.toArray()[Math.max(0, r.nextInt(rankingObjectsNoDump.size()))].toString();
+            Rank ranking = (Rank) rankingObjectsNoDump.toArray()[Math.max(0, r.nextInt(rankingObjectsNoDump.size()))];
             rankingObjectsNoDump.remove(ranking);
-            return ranking;
+            return ranking.getName();
         } else {
             return "Nan";
         }

@@ -1,8 +1,8 @@
-package com.github.zhuaidadaya.modMdo.cavas;
+package com.github.zhuaidadaya.modmdo.cavas;
 
-import com.github.zhuaidadaya.MCH.times.TimeType;
-import com.github.zhuaidadaya.MCH.times.Times;
-import com.github.zhuaidadaya.modMdo.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.times.TimeType;
+import com.github.zhuaidadaya.modmdo.utils.times.Times;
+import com.github.zhuaidadaya.modmdo.usr.User;
 import org.json.JSONObject;
 
 import java.util.UUID;

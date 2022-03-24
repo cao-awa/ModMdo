@@ -1,6 +1,6 @@
-package com.github.zhuaidadaya.modMdo.usr;
+package com.github.zhuaidadaya.modmdo.usr;
 
-import com.github.zhuaidadaya.modMdo.login.token.ClientEncryptionToken;
+import com.github.zhuaidadaya.modmdo.login.token.ClientEncryptionToken;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import org.json.JSONArray;
 import org.json.JSONObject;

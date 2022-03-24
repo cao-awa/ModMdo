@@ -1,10 +1,11 @@
-package com.github.zhuaidadaya.modMdo.listeners;
+package com.github.zhuaidadaya.modmdo.listeners;
 
-import com.github.zhuaidadaya.modMdo.simple.vec.XYZ;
-import com.github.zhuaidadaya.modMdo.storage.Variables;
-import com.github.zhuaidadaya.modMdo.type.ModMdoType;
-import com.github.zhuaidadaya.modMdo.usr.User;
-import com.github.zhuaidadaya.utils.times.TimeUtils;
+import com.github.zhuaidadaya.modmdo.ranking.Rank;
+import com.github.zhuaidadaya.modmdo.simple.vec.XYZ;
+import com.github.zhuaidadaya.modmdo.storage.Variables;
+import com.github.zhuaidadaya.modmdo.type.ModMdoType;
+import com.github.zhuaidadaya.modmdo.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
@@ -20,9 +21,10 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
-import static com.github.zhuaidadaya.modMdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ServerTickListener {
+    private MinecraftServer server;
     private long lastAddOnlineTime = -1;
     private long lastIntervalActive = System.currentTimeMillis();
     private int randomRankingSwitchTick = 0;
@@ -34,6 +36,27 @@ public class ServerTickListener {
      */
     public void listener() {
         lastAddOnlineTime = System.currentTimeMillis();
+
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            this.server = server;
+            Thread listener = new Thread(() -> {
+                PlayerManager players = server.getPlayerManager();
+
+                randomRankingSwitchTick++;
+
+                Variables.server = server;
+
+                try {
+                    eachPlayer(players);
+                } catch (Exception e) {
+
+                }
+            });
+
+            listener.setName("ModMdo listener thread");
+
+            listener.start();
+        });
 
         Thread subListener = new Thread(() -> {
             while (server == null) {
@@ -71,32 +94,12 @@ public class ServerTickListener {
 
                     Thread.sleep(20);
                 } catch (Exception e) {
-
+                    e.printStackTrace();
                 }
             }
         });
 
         subListener.setName("ModMdo sub listener thread");
-
-        ServerTickEvents.END_SERVER_TICK.register(server -> {
-            Thread listener = new Thread(() -> {
-                PlayerManager players = server.getPlayerManager();
-
-                randomRankingSwitchTick++;
-
-                Variables.server = server;
-
-                try {
-                    eachPlayer(players);
-                } catch (Exception e) {
-
-                }
-            });
-
-            listener.setName("ModMdo listener thread");
-
-            listener.start();
-        });
 
         subListener.start();
     }
@@ -118,7 +121,12 @@ public class ServerTickListener {
                     countObject = "minecraft:deaths";
                 }
             }
-            int count = custom.getInt(countObject);
+            int count = 0;
+            try {
+                custom.getInt(countObject);
+            } catch (Exception e) {
+
+            }
 
             ServerScoreboard scoreboard = server.getScoreboard();
             ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective(scoreboardObject));
@@ -149,21 +157,21 @@ public class ServerTickListener {
                     JSONObject stat = source.getJSONObject("stats");
 
                     switch (rankingObject) {
-                        case "destroy.blocks" -> {
+                        case "destroyBlocks" -> {
                             updateDestroyBlocks(server, player, stat);
                         }
-                        case "villager.trades" -> {
+                        case "tradesWithVillager" -> {
                             updateCustomRanking("minecraft:traded_with_villager", server, player, stat);
                         }
-                        case "player.deaths" -> {
+                        case "deaths" -> {
                             updateCustomRanking("minecraft:deaths", server, player, stat);
                         }
-                        case "game.online.times" -> {
+                        case "gameOnlineTimes" -> {
                             updateGameOnlineTime(stat, server, player);
                         }
                     }
                 } catch (Exception e) {
-
+                    e.printStackTrace();
                 }
             }
         }
@@ -171,12 +179,16 @@ public class ServerTickListener {
 
     public void updateDestroyBlocks(MinecraftServer server, ServerPlayerEntity player, JSONObject stat) {
         try {
-            JSONObject mined = stat.getJSONObject("minecraft:mined");
-
             int minedCount = 0;
 
-            for (String s : mined.keySet()) {
-                minedCount += mined.getInt(s);
+            try {
+                JSONObject mined = stat.getJSONObject("minecraft:mined");
+
+                for (String s : mined.keySet()) {
+                    minedCount += mined.getInt(s);
+                }
+            } catch (Exception e) {
+
             }
 
             ServerScoreboard scoreboard = server.getScoreboard();
@@ -185,7 +197,7 @@ public class ServerTickListener {
             scoreboardPlayerScore.setScore(minedCount);
             scoreboard.updateScore(scoreboardPlayerScore);
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
@@ -246,19 +258,19 @@ public class ServerTickListener {
             long showOnlineTime;
             switch (rankingGameOnlineTimeScale) {
                 case "second" -> {
-                    showOnlineTime = TimeUtils.formatSecond(gameTime);
+                    showOnlineTime = TimeUtil.formatSecond(gameTime);
                 }
                 case "hour" -> {
-                    showOnlineTime = TimeUtils.formatHour(gameTime);
+                    showOnlineTime = TimeUtil.formatHour(gameTime);
                 }
                 case "day" -> {
-                    showOnlineTime = TimeUtils.formatDay(gameTime);
+                    showOnlineTime = TimeUtil.formatDay(gameTime);
                 }
                 case "month" -> {
-                    showOnlineTime = TimeUtils.formatMonth(gameTime);
+                    showOnlineTime = TimeUtil.formatMonth(gameTime);
                 }
                 default -> {
-                    showOnlineTime = TimeUtils.formatMinute(gameTime);
+                    showOnlineTime = TimeUtil.formatMinute(gameTime);
                 }
             }
             scoreboardPlayerScore.setScore((int) showOnlineTime);
@@ -346,27 +358,27 @@ public class ServerTickListener {
 
         if (enableRanking) {
             if (scoreboard.containsObjective("modmdo.dts")) {
-                rankingObjects.add("player.deaths");
+                rankingObjects.add(new Rank("deaths","player.deaths", "modmdo.dts", true));
             }
             if (scoreboard.containsObjective("modmdo.dsy")) {
-                rankingObjects.add("destroy.blocks");
+                rankingObjects.add(new Rank("destroyBlocks", "destroy.blocks", "modmdo.dsy", true));
             }
             if (scoreboard.containsObjective("modmdo.ots")) {
-                rankingObjects.add("online.times");
+                rankingObjects.add(new Rank("onlineTimes","online.times", "modmdo.ots", false));
             }
             if (scoreboard.containsObjective("modmdo.gots")) {
-                rankingObjects.add("online.times");
+                rankingObjects.add(new Rank("gameOnlineTimes","online.times", "modmdo.gots", true));
             }
             if (scoreboard.containsObjective("modmdo.trd")) {
-                rankingObjects.add("villager.trades");
+                rankingObjects.add(new Rank("tradesWithVillager", "villager.trades", "modmdo.trd", true));
             }
 
             switch (rankingObject) {
-                case "player.deaths" -> scoreboard.setObjectiveSlot(1,scoreboard.getObjective("modmdo.dts"));
-                case "game.online.times" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.gots"));
-                case "online.times" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.ots"));
-                case "destroy.blocks" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.dsy"));
-                case "villager.trades" -> scoreboard.setObjectiveSlot(1, scoreboard.getObjective("modmdo.trd"));
+                case "deaths" -> showScoreboard(server,"modmdo.dts", "deaths");
+                case "gameOnlineTimes" -> showScoreboard(server,"modmdo.gots", "gameOnlineTimes");
+                case "onlineTimes" -> showScoreboard(server,"modmdo.ots", "onlineTimes");
+                case "destroyBlocks" -> showScoreboard(server,"modmdo.dsy", "destroyBlocks");
+                case "tradesWithVillager" -> showScoreboard(server,"modmdo.trd", "tradesWithVillager");
             }
         } else {
             if (scoreboard.containsObjective("modmdo.dts"))

@@ -22,13 +22,13 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.github.zhuaidadaya.modMdo.ModMdoStdInitializer"
+      "com.github.zhuaidadaya.modmdo.ModMdoStdInitializer"
     ],
     "client": [
-      "com.github.zhuaidadaya.modMdo.ModMdoClientInitializer"
+      "com.github.zhuaidadaya.modmdo.ModMdoClientInitializer"
     ],
     "server": [
-      "com.github.zhuaidadaya.modMdo.ModMdoServerInitializer"
+      "com.github.zhuaidadaya.modmdo.ModMdoServerInitializer"
     ]
   },
   "mixins": [
