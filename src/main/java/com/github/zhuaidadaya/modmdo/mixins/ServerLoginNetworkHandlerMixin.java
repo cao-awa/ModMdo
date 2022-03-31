@@ -48,6 +48,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
+            System.out.println(player.getRotationVecClient().toString());
+
             long waiting = System.currentTimeMillis();
             long nano = System.nanoTime();
 

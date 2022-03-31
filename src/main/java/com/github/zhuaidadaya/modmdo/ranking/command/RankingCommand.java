@@ -21,50 +21,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
         init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("ranking").then(literal("create").then(argument("ranks", RankingArgumentType.ranks()).executes(create -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(create), this, create)) {
-                    config.set("ranking", enableRanking = true);
-
-                    Rank rank = RankingArgumentType.getRankArgument(create, "ranks");
-
-                    try {
-                        addScoreboard(getServer(create), new TranslatableText(rank.getName()), rank.getRankId());
-                        showScoreboard(getServer(create), rank.getRankId(), rank.getName());
-                        sendFeedback(create, formatObjectShow(rank.getName()));
-                    } catch (IllegalStateException e) {
-
-                    }
-                }
-                return 0;
-            }).then(argument("rankingDisplayName", TextArgumentType.text()).executes(display -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(display), this, display)) {
-                    config.set("ranking", enableRanking = true);
-
-                    Rank rank = RankingArgumentType.getRankArgument(display, "ranks");
-
-                    try {
-                        addScoreboard(getServer(display), TextArgumentType.getTextArgument(display, "rankingDisplayName"), rank.getRankId());
-                        showDeaths(getServer(display));
-                        sendFeedback(display, formatObjectDefined(rank.getName()));
-                    } catch (Exception e) {
-
-                    }
-                }
-                return 0;
-            })).then(argument("rankingDisplayName", StringArgumentType.greedyString()).executes(death -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(death), this, death)) {
-                    config.set("ranking", enableRanking = true);
-
-                    try {
-                        addDeathsScoreboard(getServer(death), new TranslatableText(StringArgumentType.getString(death, "rankingDisplayName")));
-                        showDeaths(getServer(death));
-                        sendFeedback(death, formatObjectDefined("deaths"));
-                    } catch (Exception e) {
-
-                    }
-                }
-                return 0;
-            })))).then(literal("objects").then(literal("deaths").then(literal("setDisplay").executes(setDeathDisplay -> {
+            dispatcher.register(literal("ranking").then(literal("create").then(literal("deaths").then(literal("setDisplay").executes(setDeathDisplay -> {
                 if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(setDeathDisplay), this, setDeathDisplay)) {
                     config.set("ranking", enableRanking = true);
 

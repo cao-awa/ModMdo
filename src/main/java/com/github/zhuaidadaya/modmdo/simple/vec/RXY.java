@@ -7,9 +7,9 @@ public class RXY {
     public double x;
     public double y;
 
-    public RXY(double X, double Y) {
-        this.x = X;
-        this.y = Y;
+    public RXY(double x, double y) {
+        this.x = x;
+        this.y = y;
     }
 
     public RXY(RXY rxy) {
@@ -67,9 +67,9 @@ public class RXY {
         return new JSONObject().put("x", x).put("y", y);
     }
 
-    public boolean equal(RXY xyz) {
-        boolean b = xyz.x == x;
-        b = b && xyz.y == y;
+    public boolean equal(RXY rxy) {
+        boolean b = rxy.x == x;
+        b = b && rxy.y == y;
         return b;
     }
 }

@@ -2,22 +2,22 @@ package com.github.zhuaidadaya.modmdo;
 
 import com.github.zhuaidadaya.modmdo.commands.*;
 import com.github.zhuaidadaya.modmdo.commands.jump.JumpCommand;
-import com.github.zhuaidadaya.modmdo.ranking.command.RankingCommand;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modmdo.format.console.LanguageResource;
 import com.github.zhuaidadaya.modmdo.identifier.RandomIdentifier;
 import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.listeners.ServerStartListener;
-import com.github.zhuaidadaya.modmdo.listeners.ServerTickListener;
 import com.github.zhuaidadaya.modmdo.login.token.EncryptionTokenUtil;
 import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
+import com.github.zhuaidadaya.modmdo.ranking.command.RankingCommand;
 import com.github.zhuaidadaya.modmdo.reads.FileReads;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
 import com.github.zhuaidadaya.modmdo.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.ObjectConfigUtil;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.server.MinecraftServer;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -37,21 +37,16 @@ public class ModMdoStdInitializer implements ModInitializer {
             config = new ObjectConfigUtil(entrust, "config/", "ModMdo.mhf");
             configCached = new DiskObjectConfigUtil(entrust, "config/modmdo/");
 
-            try {
-                initModMdoVariables();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            updateModMdoVariables();
-
             loginUsers = new UserUtil();
             rejectUsers = new UserUtil();
+
+            parseMapFormat();
+
+            new ServerStartListener().listener();
 
             new HereCommand().register();
             new DimensionHereCommand().register();
             new ModMdoUserCommand().register();
-            new ServerTickListener().listener();
-            new ServerStartListener().listener();
             new CavaCommand().register();
             new ModMdoConfigCommand().register();
             new TokenCommand().register();
@@ -59,8 +54,6 @@ public class ModMdoStdInitializer implements ModInitializer {
             new AnalyzerCommand().register();
             new RankingCommand().register();
             new JumpCommand().register();
-
-            parseMapFormat();
 
             LanguageResource resource = new LanguageResource();
             resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
@@ -73,7 +66,18 @@ public class ModMdoStdInitializer implements ModInitializer {
         thread.start();
     }
 
-    public void initModMdoVariables() {
+    public static void initForLevel(MinecraftServer server) {
+        config = new ObjectConfigUtil(entrust, getServerLevelPath(server), "modmdo.mhf");
+
+        try {
+            initModMdoVariables();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        updateModMdoVariables();
+    }
+
+    public static void initModMdoVariables() {
         if (config.getConfig("default_language") != null)
             language = Language.getLanguageForName(config.getConfigString("default_language"));
         if (config.getConfig("here_command") != null)
@@ -95,7 +99,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         if (config.getConfig("identifier") == null) config.set("identifier", RandomIdentifier.randomIdentifier());
 
         if (config.getConfig("token_by_encryption") != null) {
-            LOGGER.info("init token");
             initModMdoToken();
         } else {
             if (enableEncryptionToken) {

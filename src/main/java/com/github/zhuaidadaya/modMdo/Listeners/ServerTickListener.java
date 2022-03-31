@@ -39,24 +39,19 @@ public class ServerTickListener {
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             this.server = server;
-            Thread listener = new Thread(() -> {
-                PlayerManager players = server.getPlayerManager();
+            PlayerManager players = server.getPlayerManager();
 
-                randomRankingSwitchTick++;
+            randomRankingSwitchTick++;
 
-                Variables.server = server;
+            Variables.server = server;
 
-                try {
-                    eachPlayer(players);
-                } catch (Exception e) {
+            try {
+                eachPlayer(players);
+            } catch (Exception e) {
 
-                }
-            });
-
-            listener.setName("ModMdo listener thread");
-
-            listener.start();
+            }
         });
+
 
         Thread subListener = new Thread(() -> {
             while (server == null) {
@@ -86,8 +81,7 @@ public class ServerTickListener {
                         if (randomRankingSwitchTick > rankingRandomSwitchInterval) {
                             if (rankingSwitchNoDump)
                                 config.set("ranking_object", rankingObject = getRandomRankingObjectNoDump());
-                            else
-                                config.set("ranking_object", rankingObject = getRandomRankingObject());
+                            else config.set("ranking_object", rankingObject = getRandomRankingObject());
                             randomRankingSwitchTick = 0;
                         }
                     }
@@ -358,27 +352,27 @@ public class ServerTickListener {
 
         if (enableRanking) {
             if (scoreboard.containsObjective("modmdo.dts")) {
-                rankingObjects.add(new Rank("deaths","player.deaths", "modmdo.dts", true));
+                rankingObjects.add(new Rank("deaths", "player.deaths", "modmdo.dts", true));
             }
             if (scoreboard.containsObjective("modmdo.dsy")) {
                 rankingObjects.add(new Rank("destroyBlocks", "destroy.blocks", "modmdo.dsy", true));
             }
             if (scoreboard.containsObjective("modmdo.ots")) {
-                rankingObjects.add(new Rank("onlineTimes","online.times", "modmdo.ots", false));
+                rankingObjects.add(new Rank("onlineTimes", "online.times", "modmdo.ots", false));
             }
             if (scoreboard.containsObjective("modmdo.gots")) {
-                rankingObjects.add(new Rank("gameOnlineTimes","online.times", "modmdo.gots", true));
+                rankingObjects.add(new Rank("gameOnlineTimes", "online.times", "modmdo.gots", true));
             }
             if (scoreboard.containsObjective("modmdo.trd")) {
                 rankingObjects.add(new Rank("tradesWithVillager", "villager.trades", "modmdo.trd", true));
             }
 
             switch (rankingObject) {
-                case "deaths" -> showScoreboard(server,"modmdo.dts", "deaths");
-                case "gameOnlineTimes" -> showScoreboard(server,"modmdo.gots", "gameOnlineTimes");
-                case "onlineTimes" -> showScoreboard(server,"modmdo.ots", "onlineTimes");
-                case "destroyBlocks" -> showScoreboard(server,"modmdo.dsy", "destroyBlocks");
-                case "tradesWithVillager" -> showScoreboard(server,"modmdo.trd", "tradesWithVillager");
+                case "deaths" -> showScoreboard(server, "modmdo.dts", "deaths");
+                case "gameOnlineTimes" -> showScoreboard(server, "modmdo.gots", "gameOnlineTimes");
+                case "onlineTimes" -> showScoreboard(server, "modmdo.ots", "onlineTimes");
+                case "destroyBlocks" -> showScoreboard(server, "modmdo.dsy", "destroyBlocks");
+                case "tradesWithVillager" -> showScoreboard(server, "modmdo.trd", "tradesWithVillager");
             }
         } else {
             if (scoreboard.containsObjective("modmdo.dts"))
