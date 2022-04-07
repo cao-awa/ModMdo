@@ -25,7 +25,7 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ServerTickListener {
     private MinecraftServer server;
-    private long lastAddOnlineTime = -1;
+    private long lastAddOnlineTime = - 1;
     private long lastIntervalActive = System.currentTimeMillis();
     private int randomRankingSwitchTick = 0;
 
@@ -77,7 +77,7 @@ public class ServerTickListener {
                         lastIntervalActive = System.currentTimeMillis();
                     }
 
-                    if (rankingRandomSwitchInterval != -1) {
+                    if (rankingRandomSwitchInterval != - 1) {
                         if (randomRankingSwitchTick > rankingRandomSwitchInterval) {
                             if (rankingSwitchNoDump)
                                 config.set("ranking_object", rankingObject = getRandomRankingObjectNoDump());
@@ -96,6 +96,45 @@ public class ServerTickListener {
         subListener.setName("ModMdo sub listener thread");
 
         subListener.start();
+    }
+
+    public void updateOtherRankings(MinecraftServer server, PlayerManager manager) {
+        for (ServerPlayerEntity player : manager.getPlayerList()) {
+            User user = users.getUser(player);
+            if (! user.isDummyPlayer()) {
+                try {
+                    BufferedReader reader = new BufferedReader(new FileReader(getServerLevelPath(server) + "stats/" + player.getUuid().toString() + ".json"));
+
+                    player.getStatHandler().save();
+
+                    String cache;
+                    StringBuilder builder = new StringBuilder();
+                    while ((cache = reader.readLine()) != null) {
+                        builder.append(cache);
+                    }
+
+                    JSONObject source = new JSONObject(builder.toString());
+                    JSONObject stat = source.getJSONObject("stats");
+
+                    switch (rankingObject) {
+                        case "destroyBlocks" -> {
+                            updateDestroyBlocks(server, player, stat);
+                        }
+                        case "tradesWithVillager" -> {
+                            updateCustomRanking("minecraft:traded_with_villager", server, player, stat);
+                        }
+                        case "deaths" -> {
+                            updateCustomRanking("minecraft:deaths", server, player, stat);
+                        }
+                        case "gameOnlineTimes" -> {
+                            updateGameOnlineTime(stat, server, player);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public void updateCustomRanking(String object, MinecraftServer server, ServerPlayerEntity player, JSONObject stat) {
@@ -132,45 +171,6 @@ public class ServerTickListener {
         }
     }
 
-    public void updateOtherRankings(MinecraftServer server, PlayerManager manager) {
-        for (ServerPlayerEntity player : manager.getPlayerList()) {
-            User user = users.getUser(player);
-            if (!user.isDummyPlayer()) {
-                try {
-                    BufferedReader reader = new BufferedReader(new FileReader(getServerLevelPath(server) + "stats/" + player.getUuid().toString() + ".json"));
-
-                    player.getStatHandler().save();
-
-                    String cache;
-                    StringBuilder builder = new StringBuilder();
-                    while ((cache = reader.readLine()) != null) {
-                        builder.append(cache);
-                    }
-
-                    JSONObject source = new JSONObject(builder.toString());
-                    JSONObject stat = source.getJSONObject("stats");
-
-                    switch (rankingObject) {
-                        case "destroyBlocks" -> {
-                            updateDestroyBlocks(server, player, stat);
-                        }
-                        case "tradesWithVillager" -> {
-                            updateCustomRanking("minecraft:traded_with_villager", server, player, stat);
-                        }
-                        case "deaths" -> {
-                            updateCustomRanking("minecraft:deaths", server, player, stat);
-                        }
-                        case "gameOnlineTimes" -> {
-                            updateGameOnlineTime(stat, server, player);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     public void updateDestroyBlocks(MinecraftServer server, ServerPlayerEntity player, JSONObject stat) {
         try {
             int minedCount = 0;
@@ -195,51 +195,24 @@ public class ServerTickListener {
         }
     }
 
-    public void updateOnlineTime(MinecraftServer server, ServerPlayerEntity player) {
+    public void updateGameOnlineTime(JSONObject stat, MinecraftServer server, ServerPlayerEntity player) {
         User user = users.getUser(player);
         ServerScoreboard scoreboard = server.getScoreboard();
-        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.ots"));
+        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.gots"));
+
         for (ScoreboardPlayerScore score : scoreboardPlayerScore.getScoreboard().getAllPlayerScores(scoreboardPlayerScore.getObjective())) {
             User each = users.getUserFromName(score.getPlayerName());
-            if (!each.isDummyPlayer()) {
-                if (rankingOnlineTimeScaleChanged) {
-                    updateOnlineTime(server, score.getPlayerName());
-                    rankingOnlineTimeScaleChanged = false;
+            if (! each.isDummyPlayer()) {
+                if (rankingGameOnlineTimeScaleChanged) {
+                    updateGameOnlineTime(server, user.getName(), stat);
+                    rankingGameOnlineTimeScaleChanged = false;
                 }
             } else {
                 scoreboard.resetPlayerScore(score.getPlayerName(), score.getObjective());
             }
         }
-        if (!user.isDummyPlayer()) {
-            updateOnlineTime(server, user.getName());
-        }
-    }
-
-    public void updateOnlineTime(MinecraftServer server, String name) {
-        User user = users.getUserFromName(name);
-        if (user != null) {
-            ServerScoreboard scoreboard = server.getScoreboard();
-            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(name, scoreboard.getObjective("modmdo.ots"));
-            long showOnlineTime;
-            switch (rankingOnlineTimeScale) {
-                case "second" -> {
-                    showOnlineTime = user.getOnlineSecond();
-                }
-                case "hour" -> {
-                    showOnlineTime = user.getOnlineHour();
-                }
-                case "day" -> {
-                    showOnlineTime = user.getOnlineDay();
-                }
-                case "month" -> {
-                    showOnlineTime = user.getOnlineMonth();
-                }
-                default -> {
-                    showOnlineTime = user.getOnlineMinute();
-                }
-            }
-            scoreboardPlayerScore.setScore((int) showOnlineTime);
-            scoreboard.updateScore(scoreboardPlayerScore);
+        if (! user.isDummyPlayer()) {
+            updateGameOnlineTime(server, user.getName(), stat);
         }
     }
 
@@ -272,31 +245,11 @@ public class ServerTickListener {
         }
     }
 
-    public void updateGameOnlineTime(JSONObject stat, MinecraftServer server, ServerPlayerEntity player) {
-        User user = users.getUser(player);
-        ServerScoreboard scoreboard = server.getScoreboard();
-        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.gots"));
-
-        for (ScoreboardPlayerScore score : scoreboardPlayerScore.getScoreboard().getAllPlayerScores(scoreboardPlayerScore.getObjective())) {
-            User each = users.getUserFromName(score.getPlayerName());
-            if (!each.isDummyPlayer()) {
-                if (rankingGameOnlineTimeScaleChanged) {
-                    updateGameOnlineTime(server, user.getName(), stat);
-                    rankingGameOnlineTimeScaleChanged = false;
-                }
-            } else {
-                scoreboard.resetPlayerScore(score.getPlayerName(), score.getObjective());
-            }
-        }
-        if (!user.isDummyPlayer()) {
-            updateGameOnlineTime(server, user.getName(), stat);
-        }
-    }
-
     /**
      * 遍历每一位玩家执行操作
      *
-     * @param players 玩家管理器
+     * @param players
+     *         玩家管理器
      * @author 草awa
      * @author 草二号机
      */
@@ -313,6 +266,154 @@ public class ServerTickListener {
             }
             if (enableDeadMessage) detectPlayerDead(player);
         }
+    }
+
+    /**
+     * 当玩家不存在时, 清除登入信息<br>
+     * (多个位置都有尝试清除, 保证一定能够移除登入状态)<br>
+     * <br>
+     * 或者服务器Token改变时, 也清除登入信息<br>
+     * (当token不符合时移除玩家, 换用新token即可)<br>
+     * 这种情况一般在手动生成新的token时使用, 否则一般不会
+     *
+     * @param player
+     *         玩家
+     * @param manager
+     *         玩家管理器
+     * @author 草awa
+     */
+    public void cancelLoginIfNoExistentOrChangedToken(ServerPlayerEntity player, PlayerManager manager) {
+        try {
+            if ((tokenChanged || enableCheckTokenPerTick) & ! forceStopTokenCheck) {
+                for (User user : loginUsers.getUsers()) {
+                    if (manager.getPlayer(user.getUuid()) == null) {
+                        if (forceStopTokenCheck) break;
+                        player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete player")));
+                        player.networkHandler.disconnect(new LiteralText("obsolete player"));
+                    }
+                }
+
+                if (forceStopTokenCheck) return;
+
+                if (manager.getPlayerList().contains(player)) {
+                    if (loginUsers.hasUser(player)) {
+                        User user = loginUsers.getUser(player);
+                        if (user.getClientToken().getToken().equals("")) {
+                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("empty token, please update")));
+                            player.networkHandler.disconnect(new LiteralText("empty token, please update"));
+                        } else {
+                            if (user.getLevel() == 1) {
+                                if (! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
+                                    loginUsers.removeUser(player);
+                                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
+                                    player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
+                                }
+                            } else if (user.getLevel() == 4) {
+                                if (! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
+                                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
+                                    player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                tokenChanged = false;
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    /**
+     * 设置玩家的权限等级, 处理使用不同的token登录时获得的不同权限等级
+     *
+     * @param player
+     *         玩家
+     * @param manager
+     *         玩家管理器
+     * @author 草二号机
+     * @author 草awa
+     */
+    public void setPlayerLevel(ServerPlayerEntity player, PlayerManager manager) {
+        try {
+            int level = loginUsers.getUserLevel(player);
+
+            if (manager.isOperator(player.getGameProfile())) {
+                if (level == 1) manager.removeFromOperators(player.getGameProfile());
+            } else if (level == 4) {
+                manager.addToOperators(player.getGameProfile());
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    /**
+     * 检查玩家的登入状态, 如果超过指定时间没有登入则断开连接并提示检查token
+     *
+     * @param player
+     *         玩家
+     * @author zhuaidadaya
+     * @author 草awa
+     * @author 草二号机
+     */
+    public void checkLoginStat(ServerPlayerEntity player, PlayerManager manager) {
+        try {
+            if (! loginUsers.hasUser(player)) {
+                if (skipMap.get(player) == null) skipMap.put(player, System.currentTimeMillis());
+
+                if (System.currentTimeMillis() - skipMap.get(player) > 1000) {
+                    skipMap.put(player, System.currentTimeMillis());
+                    try {
+                        loginUsers.getUser(player.getUuid());
+                    } catch (Exception e) {
+                        if (player.networkHandler.connection.getAddress() != null) {
+                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("invalid token, check your login status")));
+                            player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    /**
+     * 检测玩家的死亡状态, 如果死亡时间为1则发送当时的坐标和维度信息
+     * (如果该玩家愿意接收才发送)
+     *
+     * @param player
+     *         玩家
+     * @author 草二号机
+     */
+    public void detectPlayerDead(ServerPlayerEntity player) {
+        try {
+            if (isUserDeadMessageReceive(player.getUuid()) & enableDeadMessage) {
+                if (player.deathTime == 1) {
+                    XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
+                    player.sendMessage(formatDeathMessage(player, xyz), false);
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    /**
+     * 对死亡时的位置、维度进行格式化
+     *
+     * @param player
+     *         玩家
+     * @param xyz
+     *         等同于vec3d
+     * @return 格式化过后的信息
+     * @author 草二号机
+     */
+    public TranslatableText formatDeathMessage(ServerPlayerEntity player, XYZ xyz) {
+        String dimension = dimensionUtil.getDimension(player);
+        return new TranslatableText("dead.deadIn", dimensionUtil.getDimensionColor(dimension), dimensionUtil.getDimensionName(dimension), xyz.getIntegerXYZ());
     }
 
     public void setOnlineTimeAndRanking(MinecraftServer server, PlayerManager players) {
@@ -345,6 +446,54 @@ public class ServerTickListener {
             }
         }
         lastAddOnlineTime = System.currentTimeMillis();
+    }
+
+    public void updateOnlineTime(MinecraftServer server, ServerPlayerEntity player) {
+        User user = users.getUser(player);
+        ServerScoreboard scoreboard = server.getScoreboard();
+        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.ots"));
+        for (ScoreboardPlayerScore score : scoreboardPlayerScore.getScoreboard().getAllPlayerScores(scoreboardPlayerScore.getObjective())) {
+            User each = users.getUserFromName(score.getPlayerName());
+            if (! each.isDummyPlayer()) {
+                if (rankingOnlineTimeScaleChanged) {
+                    updateOnlineTime(server, score.getPlayerName());
+                    rankingOnlineTimeScaleChanged = false;
+                }
+            } else {
+                scoreboard.resetPlayerScore(score.getPlayerName(), score.getObjective());
+            }
+        }
+        if (! user.isDummyPlayer()) {
+            updateOnlineTime(server, user.getName());
+        }
+    }
+
+    public void updateOnlineTime(MinecraftServer server, String name) {
+        User user = users.getUserFromName(name);
+        if (user != null) {
+            ServerScoreboard scoreboard = server.getScoreboard();
+            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(name, scoreboard.getObjective("modmdo.ots"));
+            long showOnlineTime;
+            switch (rankingOnlineTimeScale) {
+                case "second" -> {
+                    showOnlineTime = user.getOnlineSecond();
+                }
+                case "hour" -> {
+                    showOnlineTime = user.getOnlineHour();
+                }
+                case "day" -> {
+                    showOnlineTime = user.getOnlineDay();
+                }
+                case "month" -> {
+                    showOnlineTime = user.getOnlineMonth();
+                }
+                default -> {
+                    showOnlineTime = user.getOnlineMinute();
+                }
+            }
+            scoreboardPlayerScore.setScore((int) showOnlineTime);
+            scoreboard.updateScore(scoreboardPlayerScore);
+        }
     }
 
     public void updateRankingShow(MinecraftServer server) {
@@ -386,145 +535,5 @@ public class ServerTickListener {
             if (scoreboard.containsObjective("modmdo.trd"))
                 scoreboard.removeObjective(scoreboard.getObjective("modmdo.trd"));
         }
-    }
-
-    /**
-     * 当玩家不存在时, 清除登入信息<br>
-     * (多个位置都有尝试清除, 保证一定能够移除登入状态)<br>
-     * <br>
-     * 或者服务器Token改变时, 也清除登入信息<br>
-     * (当token不符合时移除玩家, 换用新token即可)<br>
-     * 这种情况一般在手动生成新的token时使用, 否则一般不会
-     *
-     * @param player  玩家
-     * @param manager 玩家管理器
-     * @author 草awa
-     */
-    public void cancelLoginIfNoExistentOrChangedToken(ServerPlayerEntity player, PlayerManager manager) {
-        try {
-            if ((tokenChanged || enableCheckTokenPerTick) & !forceStopTokenCheck) {
-                for (User user : loginUsers.getUsers()) {
-                    if (manager.getPlayer(user.getUuid()) == null) {
-                        if (forceStopTokenCheck) break;
-                        player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete player")));
-                        player.networkHandler.disconnect(new LiteralText("obsolete player"));
-                    }
-                }
-
-                if (forceStopTokenCheck) return;
-
-                if (manager.getPlayerList().contains(player)) {
-                    if (loginUsers.hasUser(player)) {
-                        User user = loginUsers.getUser(player);
-                        if (user.getClientToken().getToken().equals("")) {
-                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("empty token, please update")));
-                            player.networkHandler.disconnect(new LiteralText("empty token, please update"));
-                        } else {
-                            if (user.getLevel() == 1) {
-                                if (!user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
-                                    loginUsers.removeUser(player);
-                                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
-                                    player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                                }
-                            } else if (user.getLevel() == 4) {
-                                if (!user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
-                                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
-                                    player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                                }
-                            }
-                        }
-                    }
-                }
-
-                tokenChanged = false;
-            }
-        } catch (Exception e) {
-
-        }
-    }
-
-    /**
-     * 设置玩家的权限等级, 处理使用不同的token登录时获得的不同权限等级
-     *
-     * @param player  玩家
-     * @param manager 玩家管理器
-     * @author 草二号机
-     * @author 草awa
-     */
-    public void setPlayerLevel(ServerPlayerEntity player, PlayerManager manager) {
-        try {
-            int level = loginUsers.getUserLevel(player);
-
-            if (manager.isOperator(player.getGameProfile())) {
-                if (level == 1) manager.removeFromOperators(player.getGameProfile());
-            } else if (level == 4) {
-                manager.addToOperators(player.getGameProfile());
-            }
-        } catch (Exception e) {
-
-        }
-    }
-
-    /**
-     * 检查玩家的登入状态, 如果超过指定时间没有登入则断开连接并提示检查token
-     *
-     * @param player 玩家
-     * @author zhuaidadaya
-     * @author 草awa
-     * @author 草二号机
-     */
-    public void checkLoginStat(ServerPlayerEntity player, PlayerManager manager) {
-        try {
-            if (!loginUsers.hasUser(player)) {
-                if (skipMap.get(player) == null) skipMap.put(player, System.currentTimeMillis());
-
-                if (System.currentTimeMillis() - skipMap.get(player) > 1000) {
-                    skipMap.put(player, System.currentTimeMillis());
-                    try {
-                        loginUsers.getUser(player.getUuid());
-                    } catch (Exception e) {
-                        if (player.networkHandler.connection.getAddress() != null) {
-                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("invalid token, check your login status")));
-                            player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-
-        }
-    }
-
-    /**
-     * 检测玩家的死亡状态, 如果死亡时间为1则发送当时的坐标和维度信息
-     * (如果该玩家愿意接收才发送)
-     *
-     * @param player 玩家
-     * @author 草二号机
-     */
-    public void detectPlayerDead(ServerPlayerEntity player) {
-        try {
-            if (isUserDeadMessageReceive(player.getUuid()) & enableDeadMessage) {
-                if (player.deathTime == 1) {
-                    XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
-                    player.sendMessage(formatDeathMessage(player, xyz), false);
-                }
-            }
-        } catch (Exception e) {
-
-        }
-    }
-
-    /**
-     * 对死亡时的位置、维度进行格式化
-     *
-     * @param player 玩家
-     * @param xyz    等同于vec3d
-     * @return 格式化过后的信息
-     * @author 草二号机
-     */
-    public TranslatableText formatDeathMessage(ServerPlayerEntity player, XYZ xyz) {
-        String dimension = dimensionTips.getDimension(player);
-        return new TranslatableText("dead.deadIn", dimensionTips.getDimensionColor(dimension), dimensionTips.getDimensionName(dimension), xyz.getIntegerXYZ());
     }
 }

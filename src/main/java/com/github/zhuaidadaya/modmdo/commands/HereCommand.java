@@ -13,11 +13,11 @@ import net.minecraft.text.TranslatableText;
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class HereCommand extends SimpleCommandOperation implements SimpleCommand, HereCommandFormat {
+public class HereCommand extends SimpleCommandOperation implements SimpleCommand {
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("here").executes(here -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_HERE, getPlayer(here), this, here)) {
+                if(commandApplyToPlayer(1, getPlayer(here), this, here)) {
                     ServerCommandSource source = here.getSource();
                     if(enableHereCommand) {
                         try {
@@ -26,7 +26,7 @@ public class HereCommand extends SimpleCommandOperation implements SimpleCommand
                             XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
                             String dimension = whoUseHere.getEntityWorld().getDimension().getEffects().getPath();
                             for(ServerPlayerEntity player : p.getPlayerList()) {
-                                if(commandApplyToPlayer(MODMDO_COMMAND_HERE, getPlayer(here), this, here)) {
+                                if(commandApplyToPlayer(1, getPlayer(here), this, here)) {
                                     if(isUserHereReceive(player.getUuid())) {
                                         TranslatableText hereMessage = formatHereTip(dimension, xyz, player, whoUseHere);
                                         player.sendMessage(hereMessage, false);
@@ -53,24 +53,20 @@ public class HereCommand extends SimpleCommandOperation implements SimpleCommand
         });
     }
 
-    @Override
     public TranslatableText formatHereDisabled() {
         return new TranslatableText("here_command.disable.rule.format");
     }
 
-    @Override
     public TranslatableText formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity player, ServerPlayerEntity whoUseHere) {
         String useHerePlayerName = whoUseHere.getName().asString();
 
-        return new TranslatableText("command.here", useHerePlayerName,"",dimensionTips.getDimensionColor(dimension) + useHerePlayerName,dimensionTips.getDimensionName(dimension),"§e" + xyz.getIntegerXYZ());
+        return new TranslatableText("command.here", useHerePlayerName,"", dimensionUtil.getDimensionColor(dimension) + useHerePlayerName, dimensionUtil.getDimensionName(dimension),"§e" + xyz.getIntegerXYZ());
     }
 
-    @Override
     public TranslatableText formatHereFeedBack(ServerPlayerEntity player) {
         return new TranslatableText("command.here.feedback", player.getName().asString());
     }
 
-    @Override
     public TranslatableText formatHereFailedFeedBack(ServerPlayerEntity player) {
         return new TranslatableText("command.here.failed.feedback");
     }

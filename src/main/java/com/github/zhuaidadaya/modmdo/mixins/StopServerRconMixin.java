@@ -17,7 +17,7 @@ public class StopServerRconMixin {
     /**
      * @author 草awa
      */
-    @Inject(at = @At("HEAD"),method = "stop", cancellable = true)
+    @Inject(at = @At("HEAD"),method = "stop")
     public void stop(CallbackInfo ci) {
         boolean in = false;
         if(server.isRunning()) {
@@ -33,12 +33,10 @@ public class StopServerRconMixin {
 
                         if(i > 5) {
                             LOGGER.info("failed to stop server in 5 times try, ModMdo trying force stop task");
-                            Runtime.getRuntime().exit(0);
-                            LOGGER.info("failed to invoke Runtime.exit(I) to stop");
                             break;
                         }
                     } catch(Exception ex) {
-
+                        break;
                     }
                 }
             }

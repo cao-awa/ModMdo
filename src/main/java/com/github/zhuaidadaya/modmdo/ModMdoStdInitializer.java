@@ -7,6 +7,7 @@ import com.github.zhuaidadaya.modmdo.format.console.LanguageResource;
 import com.github.zhuaidadaya.modmdo.identifier.RandomIdentifier;
 import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.listeners.ServerStartListener;
+import com.github.zhuaidadaya.modmdo.listeners.ServerTickListener;
 import com.github.zhuaidadaya.modmdo.login.token.EncryptionTokenUtil;
 import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
@@ -43,6 +44,7 @@ public class ModMdoStdInitializer implements ModInitializer {
             parseMapFormat();
 
             new ServerStartListener().listener();
+            new ServerTickListener().listener();
 
             new HereCommand().register();
             new DimensionHereCommand().register();
@@ -68,6 +70,8 @@ public class ModMdoStdInitializer implements ModInitializer {
 
     public static void initForLevel(MinecraftServer server) {
         config = new ObjectConfigUtil(entrust, getServerLevelPath(server), "modmdo.mhf");
+
+        allDefault();
 
         try {
             initModMdoVariables();
@@ -120,7 +124,6 @@ public class ModMdoStdInitializer implements ModInitializer {
 
     public void parseMapFormat() {
         try {
-            JSONObject commandMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/versions/feature_map.json", getClass()), StandardCharsets.UTF_8))));
             JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/versions/versions_map.json", getClass()), StandardCharsets.UTF_8))));
 
             for (String s : versionMap.keySet())
@@ -128,9 +131,6 @@ public class ModMdoStdInitializer implements ModInitializer {
 
             for (String s : versionMap.keySet())
                 modMdoVersionToIdMap.put(versionMap.getString(s), Integer.valueOf(s).intValue());
-
-            for (String s : commandMap.keySet())
-                modMdoCommandVersionMap.put(s, commandMap.getInt(s));
         } catch (Exception e) {
 
         }

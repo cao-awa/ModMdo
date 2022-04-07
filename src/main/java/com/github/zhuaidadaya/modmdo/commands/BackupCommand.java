@@ -25,22 +25,22 @@ public class BackupCommand extends SimpleCommandOperation implements Configurabl
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("backup").executes(defaultBackup -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_BAK, getPlayer(defaultBackup), this, defaultBackup)) {
+                if(commandApplyToPlayer(1, getPlayer(defaultBackup), this, defaultBackup)) {
                     backup(null, dedicated, defaultBackup.getSource());
                 }
                 return 0;
             }).then(literal("name").then(argument("asName", StringArgumentType.string()).executes(asNameBackup -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_BAK, getPlayer(asNameBackup), this, asNameBackup)) {
+                if(commandApplyToPlayer(1, getPlayer(asNameBackup), this, asNameBackup)) {
                     backup(asNameBackup.getInput().split(" ")[1], dedicated, asNameBackup.getSource());
                 }
                 return 1;
             }))).then(literal("stop").executes(stop -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_BAK, getPlayer(stop), this, stop)) {
+                if(commandApplyToPlayer(1, getPlayer(stop), this, stop)) {
                     stopBackup(stop.getSource());
                 }
                 return - 1;
             })).then(literal("status").executes(status -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_BAK, getPlayer(status), this, status)) {
+                if(commandApplyToPlayer(1, getPlayer(status), this, status)) {
                     sendFeedback(status, bak.isSynchronizing() ? new TranslatableText("backup.running") : new TranslatableText("backup.no.task"));
                 }
                 return 2;
@@ -71,7 +71,7 @@ public class BackupCommand extends SimpleCommandOperation implements Configurabl
             try {
                 if(! bak.isSynchronizing()) {
                     for(ServerPlayerEntity player : players.getPlayerList()) {
-                        if(commandApplyToPlayer(MODMDO_COMMAND_BAK, player, this, source)) {
+                        if(commandApplyToPlayer(1, player, this, source)) {
                             player.sendMessage(result, false);
                         }
                     }
@@ -80,7 +80,7 @@ public class BackupCommand extends SimpleCommandOperation implements Configurabl
                     result = bak.createBackup(new Backup(name, "backup/" + levelName + "/" + Times.getTime(TimeType.AS_SECOND), sourcePath));
 
                     for(ServerPlayerEntity player : players.getPlayerList()) {
-                        if(commandApplyToPlayer(MODMDO_COMMAND_BAK, player, this, source)) {
+                        if(commandApplyToPlayer(1, player, this, source)) {
                             player.sendMessage(result, false);
                         }
                     }
