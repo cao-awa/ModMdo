@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modmdo.commands;
 
 import com.github.zhuaidadaya.modmdo.login.token.Encryption.AES;
 import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;

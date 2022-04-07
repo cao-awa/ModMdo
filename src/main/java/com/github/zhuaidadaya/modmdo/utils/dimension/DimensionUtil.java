@@ -3,6 +3,9 @@ package com.github.zhuaidadaya.modmdo.utils.dimension;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
+import static com.github.zhuaidadaya.modmdo.storage.Variables.consoleTextFormat;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.minecraftTextFormat;
+
 public class DimensionUtil {
     public String getDimensionColor(String dimension) {
         String result;
@@ -19,8 +22,8 @@ public class DimensionUtil {
         return "dimension." + dimension;
     }
 
-    public TranslatableText getDimensionName(String dimension) {
-        return new TranslatableText(getDimensionKey(dimension));
+    public String getDimensionName(String dimension) {
+        return consoleTextFormat.format(getDimensionKey(dimension));
     }
 
     public String getDimension(ServerPlayerEntity player) {

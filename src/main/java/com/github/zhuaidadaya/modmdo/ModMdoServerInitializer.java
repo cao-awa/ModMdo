@@ -8,19 +8,12 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 public class ModMdoServerInitializer implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
-        Thread thread = new Thread(() -> {
-            Thread.currentThread().setName("ModMdo");
+        Thread.currentThread().setName("ModMdo");
 
-            LOGGER.info("loading for ModMdo Server (step 2/2)");
+        LOGGER.info("loading for ModMdo Server (step 2/2)");
 
-            modMdoType = ModMdoType.SERVER;
+        modMdoType = ModMdoType.SERVER;
 
-            if(modMdoToken != null)
-                saveToken();
-        });
-
-        thread.setName("ModMdo Server");
-
-        thread.start();
+        if (modMdoToken != null) saveToken();
     }
 }

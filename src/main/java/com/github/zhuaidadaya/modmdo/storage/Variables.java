@@ -1,8 +1,7 @@
 package com.github.zhuaidadaya.modmdo.storage;
 
-import com.github.zhuaidadaya.modmdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
-import com.github.zhuaidadaya.modmdo.commands.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.zhuaidadaya.modmdo.jump.server.ServerUtil;
@@ -43,7 +42,6 @@ import org.json.JSONObject;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.SyncFailedException;
 import java.net.SocketAddress;
 import java.text.NumberFormat;
 import java.util.*;
@@ -86,7 +84,6 @@ public class Variables {
     public static String motd = "";
     public static MinecraftServer server;
     public static MinecraftClient client;
-    public static BackupUtil bak;
     public static ModMdoType modMdoType = ModMdoType.NONE;
     public static EncryptionTokenUtil modMdoToken;
     public static TextFieldWidget editToken;
@@ -104,7 +101,7 @@ public class Variables {
 
     public static ObjectArrayList<Rank> rankingObjects = new ObjectArrayList<>();
     public static ObjectArrayList<Rank> rankingObjectsNoDump = new ObjectArrayList<>();
-    public static Object2ObjectArrayMap<String,Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
+    public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
 
     public static ServerUtil servers = new ServerUtil();
     public static boolean connectTo = false;
@@ -135,7 +132,7 @@ public class Variables {
         rankingObject = "Nan";
         rankingRandomSwitchInterval = 20 * 60 * 8;
         rankingOnlineTimeScaleChanged = false;
-         rankingGameOnlineTimeScaleChanged = false;
+        rankingGameOnlineTimeScaleChanged = false;
         rankingOnlineTimeScale = "minute";
         rankingGameOnlineTimeScale = "minute";
         language = Language.ENGLISH;
@@ -161,8 +158,8 @@ public class Variables {
         users = new UserUtil();
         cavas = new CavaUtil();
         motd = "";
-        bak = new BackupUtil();
         itemDespawnAge = 6000;
+        language = Language.ENGLISH;
 
         rankingObjects = new ObjectArrayList<>();
         rankingObjectsNoDump = new ObjectArrayList<>();
@@ -174,10 +171,10 @@ public class Variables {
         jumpLoginType = "";
     }
 
-    public static void showScoreboard(MinecraftServer server,String name,String display) {
+    public static void showScoreboard(MinecraftServer server, String name, String display) {
         ServerScoreboard scoreboard = server.getScoreboard();
 
-        if(scoreboard.containsObjective(name)) {
+        if (scoreboard.containsObjective(name)) {
             config.set("ranking_object", rankingObject = display);
 
             ((Scoreboard) scoreboard).setObjectiveSlot(1, scoreboard.getObjective(name));
@@ -186,9 +183,9 @@ public class Variables {
         }
     }
 
-    public static void addScoreboard(MinecraftServer server,Text displayName,String id) {
+    public static void addScoreboard(MinecraftServer server, Text displayName, String id) {
         ServerScoreboard scoreboard = server.getScoreboard();
-        if(scoreboard.containsObjective(id)) {
+        if (scoreboard.containsObjective(id)) {
             scoreboard.removeObjective(scoreboard.getObjective(id));
         }
         scoreboard.addObjective(id, ScoreboardCriterion.DUMMY, displayName, ScoreboardCriterion.DUMMY.getDefaultRenderType());
@@ -202,7 +199,7 @@ public class Variables {
     }
 
     public static String getRandomRankingObject() {
-        if(rankingObjects.size() > 0) {
+        if (rankingObjects.size() > 0) {
             Random r = new Random();
             return rankingObjects.toArray()[Math.max(0, r.nextInt(rankingObjects.size()))].toString();
         } else {
@@ -211,10 +208,10 @@ public class Variables {
     }
 
     public static String getRandomRankingObjectNoDump() {
-        if(rankingObjectsNoDump.size() == 0) {
+        if (rankingObjectsNoDump.size() == 0) {
             rankingObjectsNoDump.addAll(rankingObjects.stream().toList());
         }
-        if(rankingObjectsNoDump.size() > 0) {
+        if (rankingObjectsNoDump.size() > 0) {
             Random r = new Random();
             Rank ranking = (Rank) rankingObjectsNoDump.toArray()[Math.max(0, r.nextInt(rankingObjectsNoDump.size()))];
             rankingObjectsNoDump.remove(ranking);
@@ -224,12 +221,12 @@ public class Variables {
         }
     }
 
-    public static String getServerLevelNamePath(MinecraftServer server) {
-        return ((MinecraftServerSession) server).getSession().getDirectoryName() + "/";
-    }
-
     public static String getServerLevelPath(MinecraftServer server) {
         return (server.isDedicated() ? "" : "saves/") + getServerLevelNamePath(server);
+    }
+
+    public static String getServerLevelNamePath(MinecraftServer server) {
+        return ((MinecraftServerSession) server).getSession().getDirectoryName() + "/";
     }
 
     public static void saveToken() {
@@ -251,16 +248,12 @@ public class Variables {
         }
     }
 
-    public static void sendMessageToPlayer(ServerPlayerEntity player, Text message, boolean actionBar) {
-        player.sendMessage(message, actionBar);
+    public static String getApply(SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
+        return getApply(command.getServer(source));
     }
 
     public static String getApply(MinecraftServer server) {
         return ((MinecraftServerSession) server).getSession().getDirectoryName() + "/";
-    }
-
-    public static String getApply(SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
-        return getApply(command.getServer(source));
     }
 
     public static String getApply() {
@@ -268,8 +261,12 @@ public class Variables {
     }
 
     public static void sendMessageToAllPlayer(Text message, boolean actionBar) {
-        for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
-            sendMessageToPlayer(player, message, actionBar);
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
+            sendMessage(player, message, actionBar);
+    }
+
+    public static void sendMessage(ServerPlayerEntity player, Text message, boolean actionBar) {
+        player.sendMessage(message, actionBar);
     }
 
     public static String formatAddress(SocketAddress socketAddress) {
@@ -287,9 +284,7 @@ public class Variables {
      *         通过指定IP查询
      * @param contentType
      *         查询类型, 可选查询token和登入方式
-     *
      * @return 返回查询结果(或默认值)
-     *
      * @author 草awa
      * @author 草二号机
      */
@@ -297,7 +292,7 @@ public class Variables {
         String tokenString;
         String loginType;
         try {
-            switch(contentType) {
+            switch (contentType) {
                 case TOKEN_BY_ENCRYPTION -> {
                     tokenString = modMdoToken.getClientToken(address).getToken();
                     return tokenString;
@@ -308,7 +303,7 @@ public class Variables {
                 }
             }
         } catch (Exception e) {
-            switch(contentType) {
+            switch (contentType) {
                 case TOKEN_BY_ENCRYPTION -> {
                     return "";
                 }
@@ -321,6 +316,10 @@ public class Variables {
         return "";
     }
 
+    public static boolean equalsModMdoVersion(ServerPlayerEntity player) {
+        return getPlayerModMdoVersion(player) == MODMDO_VERSION;
+    }
+
     public static int getPlayerModMdoVersion(ServerPlayerEntity player) {
         try {
             return Integer.parseInt(loginUsers.getUser(player).getClientToken().getVersion());
@@ -329,16 +328,12 @@ public class Variables {
         }
     }
 
-    public static boolean equalsModMdoVersion(ServerPlayerEntity player) {
-        return getPlayerModMdoVersion(player) == MODMDO_VERSION;
-    }
-
     public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
         return commandApplyToPlayer(versionRequire, player, command, source.getSource());
     }
 
     public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, ServerCommandSource source) {
-        if(! command.getServer(source).isDedicated() || player == null || getFeatureCanUse(versionRequire, player))
+        if (! command.getServer(source).isDedicated() || player == null || getFeatureCanUse(versionRequire, player))
             return true;
 
         command.sendError(source, command.formatModMdoVersionRequire(versionRequire, player));
@@ -358,7 +353,7 @@ public class Variables {
             try {
                 JSONObject clientTokens = token.getJSONObject("client");
 
-                for(Object o : clientTokens.keySet()) {
+                for (Object o : clientTokens.keySet()) {
                     JSONObject clientToken = clientTokens.getJSONObject(o.toString());
                     modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type"), VERSION_ID));
                 }
@@ -383,14 +378,41 @@ public class Variables {
         config.set("encryption_token", encryptionTokenStatus());
         config.set("reject_reconnect", rejectReconnectStatus());
         config.set("check_token_per_tick", checkTokenPerTickStatus());
-        if(modMdoToken != null)
-            config.set("token_by_encryption", modMdoToken.toJSONObject());
+        if (modMdoToken != null) config.set("token_by_encryption", modMdoToken.toJSONObject());
         config.set("time_active", timeActiveStatus());
         config.set("checker_time_limit", tokenCheckTimeLimit);
     }
 
-    public static void updateUserProfiles() {
-        config.set("user_profiles", users.toJSONObject());
+    public static String hereCommandStatus() {
+        return enableHereCommand ? "enable" : "disable";
+    }
+
+    public static String deadMessageStatus() {
+        return enableDeadMessage ? "enable" : "disable";
+    }
+
+    public static String cavaStatus() {
+        return enableCava ? "enable" : "disable";
+    }
+
+    public static String secureEnchantStatus() {
+        return enableSecureEnchant ? "enable" : "disable";
+    }
+
+    public static String encryptionTokenStatus() {
+        return enableEncryptionToken ? "enable" : "disable";
+    }
+
+    public static String rejectReconnectStatus() {
+        return enableRejectReconnect ? "enable" : "disable";
+    }
+
+    public static String checkTokenPerTickStatus() {
+        return enableCheckTokenPerTick ? "enable" : "disable";
+    }
+
+    public static String timeActiveStatus() {
+        return timeActive ? "enable" : "disable";
     }
 
     public static void updateServersJump() {
@@ -399,14 +421,6 @@ public class Variables {
 
     public static void updateCavas() {
         config.set("cavas", cavas.toJSONObject());
-    }
-
-    public static void updateBackups() {
-        try {
-            config.set("backups", bak.toJSONObject());
-        } catch (SyncFailedException e) {
-
-        }
     }
 
     public static void setUserProfile(User user, String changeKey, String changeValue) {
@@ -420,6 +434,10 @@ public class Variables {
         users.put(user.getID(), userInfo);
 
         updateUserProfiles();
+    }
+
+    public static void updateUserProfiles() {
+        config.set("user_profiles", users.toJSONObject());
     }
 
     public static void addUserFollow(User user, String... follows) {
@@ -445,7 +463,7 @@ public class Variables {
         }
         user = new User(userInfo);
 
-        for(String s : follows) {
+        for (String s : follows) {
             user.removeFollow(s);
         }
 
@@ -470,29 +488,28 @@ public class Variables {
 
     public static void sendFollowingMessage(PlayerManager players, Text message, String... follows) {
         try {
-            for(ServerPlayerEntity player : players.getPlayerList()) {
+            for (ServerPlayerEntity player : players.getPlayerList()) {
                 User staticUser = users.getUser(player.getUuid());
                 HashSet<String> permissions = new HashSet<>();
 
                 boolean unableToSend = false;
 
-                for(String s : follows) {
+                for (String s : follows) {
                     permissions.add(config.getConfigString(s).toLowerCase(Locale.ROOT));
                 }
 
-                if(permissions.contains("unable"))
-                    unableToSend = true;
+                if (permissions.contains("unable")) unableToSend = true;
 
-                if(! unableToSend) {
+                if (! unableToSend) {
                     boolean needOps = permissions.contains("ops");
 
-                    if(staticUser.isFollow(follows)) {
-                        if(needOps) {
-                            if(player.hasPermissionLevel(4)) {
-                                sendMessageToPlayer(player, message, false);
+                    if (staticUser.isFollow(follows)) {
+                        if (needOps) {
+                            if (player.hasPermissionLevel(4)) {
+                                sendMessage(player, message, false);
                             }
                         } else {
-                            sendMessageToPlayer(player, message, false);
+                            sendMessage(player, message, false);
                         }
                     }
                 }
@@ -540,37 +557,5 @@ public class Variables {
         } catch (Exception e) {
             return enableDeadMessage ? "receive" : "rejected";
         }
-    }
-
-    public static String hereCommandStatus() {
-        return enableHereCommand ? "enable" : "disable";
-    }
-
-    public static String deadMessageStatus() {
-        return enableDeadMessage ? "enable" : "disable";
-    }
-
-    public static String cavaStatus() {
-        return enableCava ? "enable" : "disable";
-    }
-
-    public static String secureEnchantStatus() {
-        return enableSecureEnchant ? "enable" : "disable";
-    }
-
-    public static String encryptionTokenStatus() {
-        return enableEncryptionToken ? "enable" : "disable";
-    }
-
-    public static String rejectReconnectStatus() {
-        return enableRejectReconnect ? "enable" : "disable";
-    }
-
-    public static String checkTokenPerTickStatus() {
-        return enableCheckTokenPerTick ? "enable" : "disable";
-    }
-
-    public static String timeActiveStatus() {
-        return timeActive ? "enable" : "disable";
     }
 }

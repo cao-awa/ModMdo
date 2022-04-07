@@ -1,7 +1,7 @@
 package com.github.zhuaidadaya.modmdo.commands.jump;
 
 import com.github.zhuaidadaya.modmdo.commands.ConfigurableCommand;
-import com.github.zhuaidadaya.modmdo.commands.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.commands.init.ArgumentInit;
 import com.github.zhuaidadaya.modmdo.jump.server.ServerInformation;
 import com.github.zhuaidadaya.modmdo.jump.server.ServerUtil;
