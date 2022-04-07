@@ -22,7 +22,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("ranking").then(literal("create").then(literal("deaths").then(literal("setDisplay").executes(setDeathDisplay -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(setDeathDisplay), this, setDeathDisplay)) {
+                if (commandApplyToPlayer(11, getPlayer(setDeathDisplay), this, setDeathDisplay)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -34,7 +34,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             }).then(argument("rankingDisplayName", TextArgumentType.text()).executes(death -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(death), this, death)) {
+                if (commandApplyToPlayer(11, getPlayer(death), this, death)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -47,7 +47,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(argument("rankingDisplayName", StringArgumentType.greedyString()).executes(death -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(death), this, death)) {
+                if (commandApplyToPlayer(11, getPlayer(death), this, death)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -60,7 +60,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })))).then(literal("tradesWithVillager").then(literal("setDisplay").executes(setTradeDisplay -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(setTradeDisplay), this, setTradeDisplay)) {
+                if (commandApplyToPlayer(11, getPlayer(setTradeDisplay), this, setTradeDisplay)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -72,7 +72,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             }).then(argument("rankingDisplayName", TextArgumentType.text()).executes(trade -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(trade), this, trade)) {
+                if (commandApplyToPlayer(11, getPlayer(trade), this, trade)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -85,7 +85,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(argument("rankingDisplayName", StringArgumentType.greedyString()).executes(trade -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(trade), this, trade)) {
+                if (commandApplyToPlayer(11, getPlayer(trade), this, trade)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -98,7 +98,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })))).then(literal("destroyBlocks").then(literal("setDisplay").executes(setDsyDisplay -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(setDsyDisplay), this, setDsyDisplay)) {
+                if (commandApplyToPlayer(11, getPlayer(setDsyDisplay), this, setDsyDisplay)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -110,7 +110,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             }).then(argument("rankingDisplayName", TextArgumentType.text()).executes(destroy -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(destroy), this, destroy)) {
+                if (commandApplyToPlayer(11, getPlayer(destroy), this, destroy)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -123,7 +123,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(argument("rankingDisplayName", StringArgumentType.greedyString()).executes(destroy -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(destroy), this, destroy)) {
+                if (commandApplyToPlayer(11, getPlayer(destroy), this, destroy)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -136,7 +136,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })))).then(literal("onlineTimes").then(literal("setDisplay").executes(setOtsDisplay -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(setOtsDisplay), this, setOtsDisplay)) {
+                if (commandApplyToPlayer(11, getPlayer(setOtsDisplay), this, setOtsDisplay)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -148,7 +148,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             }).then(argument("rankingDisplayName", TextArgumentType.text()).executes(onlineTime -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(onlineTime), this, onlineTime)) {
+                if (commandApplyToPlayer(11, getPlayer(onlineTime), this, onlineTime)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -161,7 +161,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then((argument("rankingDisplayName", StringArgumentType.greedyString()).executes(onlineTime -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(onlineTime), this, onlineTime)) {
+                if (commandApplyToPlayer(11, getPlayer(onlineTime), this, onlineTime)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -174,7 +174,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })))).then(literal("setScale").then(literal("second").executes(scaleSecond -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleSecond), this, scaleSecond)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleSecond), this, scaleSecond)) {
                     config.set("ranking", enableRanking = true);
                     setOnlineTimeScale("second");
 
@@ -182,7 +182,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(literal("minute").executes(scaleMinute -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleMinute), this, scaleMinute)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleMinute), this, scaleMinute)) {
                     config.set("ranking", enableRanking = true);
                     setOnlineTimeScale("minute");
 
@@ -190,7 +190,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(literal("hour").executes(scaleHour -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleHour), this, scaleHour)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleHour), this, scaleHour)) {
                     config.set("ranking", enableRanking = true);
                     setOnlineTimeScale("hour");
 
@@ -198,7 +198,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(literal("day").executes(scaleDay -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleDay), this, scaleDay)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleDay), this, scaleDay)) {
                     config.set("ranking", enableRanking = true);
                     setOnlineTimeScale("day");
 
@@ -206,7 +206,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(literal("month").executes(scaleMonth -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleMonth), this, scaleMonth)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleMonth), this, scaleMonth)) {
                     config.set("ranking", enableRanking = true);
                     setOnlineTimeScale("month");
 
@@ -214,7 +214,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })))).then(literal("gameOnlineTimes").then(literal("setDisplay").executes(setOtsDisplay -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(setOtsDisplay), this, setOtsDisplay)) {
+                if (commandApplyToPlayer(11, getPlayer(setOtsDisplay), this, setOtsDisplay)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -226,7 +226,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             }).then(argument("rankingDisplayName", TextArgumentType.text()).executes(onlineTime -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(onlineTime), this, onlineTime)) {
+                if (commandApplyToPlayer(11, getPlayer(onlineTime), this, onlineTime)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -239,7 +239,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then((argument("rankingDisplayName", StringArgumentType.greedyString()).executes(onlineTime -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(onlineTime), this, onlineTime)) {
+                if (commandApplyToPlayer(11, getPlayer(onlineTime), this, onlineTime)) {
                     config.set("ranking", enableRanking = true);
 
                     try {
@@ -252,7 +252,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })))).then(literal("setScale").then(literal("second").executes(scaleSecond -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleSecond), this, scaleSecond)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleSecond), this, scaleSecond)) {
                     config.set("ranking", enableRanking = true);
                     setGameOnlineTimeScale("second");
 
@@ -260,7 +260,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(literal("minute").executes(scaleMinute -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleMinute), this, scaleMinute)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleMinute), this, scaleMinute)) {
                     config.set("ranking", enableRanking = true);
                     setGameOnlineTimeScale("minute");
 
@@ -268,7 +268,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(literal("hour").executes(scaleHour -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleHour), this, scaleHour)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleHour), this, scaleHour)) {
                     config.set("ranking", enableRanking = true);
                     setGameOnlineTimeScale("hour");
 
@@ -276,7 +276,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(literal("day").executes(scaleDay -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleDay), this, scaleDay)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleDay), this, scaleDay)) {
                     config.set("ranking", enableRanking = true);
                     setGameOnlineTimeScale("day");
 
@@ -284,7 +284,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(literal("month").executes(scaleMonth -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(scaleMonth), this, scaleMonth)) {
+                if (commandApplyToPlayer(11, getPlayer(scaleMonth), this, scaleMonth)) {
                     config.set("ranking", enableRanking = true);
                     setGameOnlineTimeScale("month");
 
@@ -292,7 +292,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             }))))).then(literal("disable").executes(disableRanking -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(disableRanking), this, disableRanking)) {
+                if (commandApplyToPlayer(11, getPlayer(disableRanking), this, disableRanking)) {
                     config.set("ranking", enableRanking = false);
                     config.set("ranking_object", rankingObject = "Nan");
 
@@ -300,7 +300,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             })).then(literal("randomSwitch").executes(randomSwitch -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(randomSwitch), this, randomSwitch)) {
+                if (commandApplyToPlayer(11, getPlayer(randomSwitch), this, randomSwitch)) {
                     try {
                         config.set("ranking_object", rankingObject = getRandomRankingObject());
                     } catch (Exception e) {
@@ -309,12 +309,12 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             }).then(literal("interval").executes(getInterval -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(getInterval), this, getInterval)) {
+                if (commandApplyToPlayer(11, getPlayer(getInterval), this, getInterval)) {
                     sendFeedback(getInterval, formatInterval(rankingRandomSwitchInterval));
                 }
                 return 0;
             }).then(argument("ticks", IntegerArgumentType.integer(-1)).executes(internalRandomSwitch -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(internalRandomSwitch), this, internalRandomSwitch)) {
+                if (commandApplyToPlayer(11, getPlayer(internalRandomSwitch), this, internalRandomSwitch)) {
                     config.set("ranking_random_switch_interval", rankingRandomSwitchInterval = IntegerArgumentType.getInteger(internalRandomSwitch, "ticks"));
                     config.set("ranking_nodump", rankingSwitchNoDump = false);
 
@@ -322,7 +322,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                 }
                 return 0;
             }).then(literal("nodump").executes(nodumpSwitch -> {
-                if (commandApplyToPlayer(MODMDO_COMMAND_RANKING, getPlayer(nodumpSwitch), this, nodumpSwitch)) {
+                if (commandApplyToPlayer(11, getPlayer(nodumpSwitch), this, nodumpSwitch)) {
                     config.set("ranking_random_switch_interval", rankingRandomSwitchInterval = IntegerArgumentType.getInteger(nodumpSwitch, "ticks"));
                     config.set("ranking_nodump", rankingSwitchNoDump = true);
 

@@ -17,7 +17,7 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("token").requires(level -> level.hasPermissionLevel(4)).then(literal("regenerate").executes(token -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(token), this, token)) {
+                if(commandApplyToPlayer(1, getPlayer(token), this, token)) {
                     modMdoToken.setServerToken(ServerEncryptionToken.createServerEncryptionToken());
 
                     saveToken();
@@ -28,7 +28,7 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                 }
                 return 4;
             }).then(literal("default").executes(def -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(def), this, def)) {
+                if(commandApplyToPlayer(1, getPlayer(def), this, def)) {
                     try {
                         generateDefault(tokenGenerateSize);
 
@@ -41,7 +41,7 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                 }
                 return 3;
             })).then(literal("ops").executes(ops -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(ops), this, ops)) {
+                if(commandApplyToPlayer(1, getPlayer(ops), this, ops)) {
                     try {
                         generateOps(tokenGenerateSize);
 
@@ -54,7 +54,7 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                 }
                 return 2;
             })).then(literal("all").executes(all -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(all), this, all)) {
+                if(commandApplyToPlayer(1, getPlayer(all), this, all)) {
 
                     try {
                         generateAll(tokenGenerateSize);
@@ -67,7 +67,7 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                 }
                 return 1;
             }))).then(literal("size").then(literal("128").executes(setSize128 -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(setSize128), this, setSize128)) {
+                if(commandApplyToPlayer(1, getPlayer(setSize128), this, setSize128)) {
 
                     setGenerateSize(128);
 
@@ -75,28 +75,28 @@ public class TokenCommand extends SimpleCommandOperation implements SimpleComman
                 }
                 return 0;
             })).then(literal("256").executes(setSize256 -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(setSize256), this, setSize256)) {
+                if(commandApplyToPlayer(1, getPlayer(setSize256), this, setSize256)) {
                     setGenerateSize(256);
 
                     sendFeedback(setSize256, formatSetTokenSize());
                 }
                 return 0;
             })).then(literal("512").executes(setSize512 -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(setSize512), this, setSize512)) {
+                if(commandApplyToPlayer(1, getPlayer(setSize512), this, setSize512)) {
                     setGenerateSize(512);
 
                     sendFeedback(setSize512, formatSetTokenSize());
                 }
                 return 0;
             })).then(literal("1024").executes(setSize1024 -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(setSize1024), this, setSize1024)) {
+                if(commandApplyToPlayer(1, getPlayer(setSize1024), this, setSize1024)) {
                     setGenerateSize(1024);
 
                     sendFeedback(setSize1024, formatSetTokenSize());
                 }
                 return 0;
             })).then(literal("custom").then(argument("size", IntegerArgumentType.integer(128, 4096)).executes(customSize -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_TOKEN, getPlayer(customSize), this, customSize)) {
+                if(commandApplyToPlayer(1, getPlayer(customSize), this, customSize)) {
                     setGenerateSize(IntegerArgumentType.getInteger(customSize, "size"));
 
                     sendFeedback(customSize, formatSetTokenSize());

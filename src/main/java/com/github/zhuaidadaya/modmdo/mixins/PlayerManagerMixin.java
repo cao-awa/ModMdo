@@ -34,19 +34,18 @@ public class PlayerManagerMixin {
     @Inject(method = "createPlayer",at = @At("HEAD"))
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         if(enableRejectReconnect) {
-            UUID uUID = PlayerEntity.getUuidFromProfile(profile);
+            UUID uuid = PlayerEntity.getUuidFromProfile(profile);
             for(ServerPlayerEntity player : this.players) {
                 if(player.networkHandler.connection.getAddress() == null)
                     break;
-                if(player.getUuid().equals(uUID)) {
+                if(player.getUuid().equals(uuid)) {
                     if(loginUsers.hasUser(player)) {
-                        if(getFeatureCanUse("login/dump/reject", player)) {
+                        if(getFeatureCanUse(15, player)) {
                             sendMessageToPlayer(player,new TranslatableText("login.dump.rejected"),false);
                         }
                     }
                     cir.cancel();
                 }
-
             }
         }
     }

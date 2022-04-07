@@ -1,9 +1,9 @@
-package com.github.zhuaidadaya.modmdo.commands;
+package com.github.zhuaidadaya.modmdo.utils.dimension;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
-public class DimensionTips {
+public class DimensionUtil {
     public String getDimensionColor(String dimension) {
         String result;
         switch(dimension) {

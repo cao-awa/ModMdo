@@ -91,4 +91,12 @@ public class TimeUtil {
     public static long ticksMillionTotal(long ticks) {
         return ticks * 50;
     }
+
+    public static long currentMillions() {
+        return System.currentTimeMillis();
+    }
+
+    public static long processedTime(long start) {
+        return currentMillions() - start;
+    }
 }

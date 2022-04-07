@@ -12,11 +12,11 @@ import net.minecraft.text.TranslatableText;
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class DimensionHereCommand extends SimpleCommandOperation implements SimpleCommand, HereCommandFormat {
+public class DimensionHereCommand extends SimpleCommandOperation implements SimpleCommand {
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("dhere").executes(dhere -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_HERE, getPlayer(dhere), this, dhere)) {
+                if(commandApplyToPlayer(1, getPlayer(dhere), this, dhere)) {
 
                     ServerCommandSource source = dhere.getSource();
                     if(enableHereCommand) {
@@ -24,9 +24,9 @@ public class DimensionHereCommand extends SimpleCommandOperation implements Simp
                             ServerPlayerEntity whoUseHere = source.getPlayer();
                             PlayerManager p = source.getServer().getPlayerManager();
                             XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
-                            String dimension = dimensionTips.getDimension(whoUseHere);
+                            String dimension = dimensionUtil.getDimension(whoUseHere);
                             for(ServerPlayerEntity player : p.getPlayerList()) {
-                                if(commandApplyToPlayer(MODMDO_COMMAND_HERE, player, this, dhere)) {
+                                if(commandApplyToPlayer(1, player, this, dhere)) {
                                     if(isUserHereReceive(player.getUuid())) {
                                         TranslatableText hereMessage = formatHereTip(dimension, xyz, player, whoUseHere);
                                         player.sendMessage(hereMessage, false);
@@ -53,12 +53,10 @@ public class DimensionHereCommand extends SimpleCommandOperation implements Simp
         });
     }
 
-    @Override
     public TranslatableText formatHereDisabled() {
         return new TranslatableText("here_command.disable.rule.format");
     }
 
-    @Override
     public TranslatableText formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity player, ServerPlayerEntity whoUseHere) {
         String useHerePlayerName = whoUseHere.getName().asString();
         String convertTarget = "";
@@ -74,16 +72,14 @@ public class DimensionHereCommand extends SimpleCommandOperation implements Simp
             convertXYZ.multiplyXZ(8, 8);
         }
 
-        return new TranslatableText("command.dhere",  useHerePlayerName,"", dimensionTips.getDimensionColor(dimension) + useHerePlayerName, dimensionTips.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), dimensionTips.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
+        return new TranslatableText("command.dhere",  useHerePlayerName,"", dimensionUtil.getDimensionColor(dimension) + useHerePlayerName, dimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), dimensionUtil.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
     }
 
-    @Override
     public TranslatableText formatHereFeedBack(ServerPlayerEntity player) {
         String playerName = player.getName().asString();
         return new TranslatableText("command.here.feedback", playerName);
     }
 
-    @Override
     public TranslatableText formatHereFailedFeedBack(ServerPlayerEntity player) {
         return new TranslatableText("command.here.failed.feedback");
     }

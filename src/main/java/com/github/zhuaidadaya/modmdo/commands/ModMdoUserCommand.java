@@ -18,47 +18,47 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("user").then(literal("hereMessage").executes(getHereReceive -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(getHereReceive), this, getHereReceive)) {
+                if(commandApplyToPlayer(1, getPlayer(getHereReceive), this, getHereReceive)) {
                     ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
                     getHereReceive.getSource().sendFeedback(formatProfileReturnMessage("receiveHereMessage", getUserHereReceive(player.getUuid())), false);
                 }
                 return 2;
             }).then(literal("receive").executes(receive -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(receive), this, receive)) {
+                if(commandApplyToPlayer(1, getPlayer(receive), this, receive)) {
                     ServerPlayerEntity player = receive.getSource().getPlayer();
                     setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "receive");
                     receive.getSource().sendFeedback(receiveHereMessage(), false);
                 }
                 return 1;
             })).then(literal("rejection").executes(rejection -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(rejection), this, rejection)) {
+                if(commandApplyToPlayer(1, getPlayer(rejection), this, rejection)) {
                     ServerPlayerEntity player = rejection.getSource().getPlayer();
                     setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveHereMessage", "rejection");
                     rejection.getSource().sendFeedback(rejectionHereMessage(), false);
                 }
                 return 0;
             }))).then(literal("deadMessage").executes(getHereReceive -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(getHereReceive), this, getHereReceive)) {
+                if(commandApplyToPlayer(1, getPlayer(getHereReceive), this, getHereReceive)) {
                     ServerPlayerEntity player = getHereReceive.getSource().getPlayer();
                     getHereReceive.getSource().sendFeedback(formatProfileReturnMessage("receiveDeadMessage", getUserDeadMessageReceive(player.getUuid())), false);
                 }
                 return 2;
             }).then(literal("receive").executes(receive -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(receive), this, receive)) {
+                if(commandApplyToPlayer(1, getPlayer(receive), this, receive)) {
                     ServerPlayerEntity player = receive.getSource().getPlayer();
                     setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveDeadMessage", "receive");
                     receive.getSource().sendFeedback(receiveDeadMessage(), false);
                 }
                 return 1;
             })).then(literal("rejection").executes(rejection -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR, getPlayer(rejection), this, rejection)) {
+                if(commandApplyToPlayer(1, getPlayer(rejection), this, rejection)) {
                     ServerPlayerEntity player = rejection.getSource().getPlayer();
                     setUserProfile(new User(player.getName().asString(), player.getUuid()), "receiveDeadMessage", "rejection");
                     rejection.getSource().sendFeedback(rejectionDeadMessage(), false);
                 }
                 return 0;
             }))).then(literal("objects").then(literal("joinServer").then(literal("follow").executes(joinServerFollow -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(joinServerFollow), this, joinServerFollow)) {
+                if(commandApplyToPlayer(10, getPlayer(joinServerFollow), this, joinServerFollow)) {
                     String joinGameFollowConfig = config.getConfigString("join_server_follow").toLowerCase(Locale.ROOT);
                     if(joinGameFollowConfig.equals("unable")) {
                         sendFeedback(joinServerFollow, new TranslatableText("follow.join.server.unable.rule.format"));
@@ -72,12 +72,12 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
                 }
                 return 0;
             })).then(literal("unfollow").executes(joinServerUnfollow -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(joinServerUnfollow), this, joinServerUnfollow)) {
+                if(commandApplyToPlayer(10, getPlayer(joinServerUnfollow), this, joinServerUnfollow)) {
                     removeUserFollow(users.getUser(getPlayer(joinServerUnfollow)), "join_server_follow");
                 }
                 return 1;
             }))).then(literal("runCommand").then(literal("follow").executes(runCommandFollow -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(runCommandFollow), this, runCommandFollow)) {
+                if(commandApplyToPlayer(10, getPlayer(runCommandFollow), this, runCommandFollow)) {
                     String joinGameFollowConfig = config.getConfigString("run_command_follow").toLowerCase(Locale.ROOT);
                     if(joinGameFollowConfig.equals("unable")) {
                         sendFeedback(runCommandFollow, new TranslatableText("follow.run.command.unable.rule.format"));
@@ -91,7 +91,7 @@ public class ModMdoUserCommand extends SimpleCommandOperation implements Configu
                 }
                 return 0;
             })).then(literal("unfollow").executes(runCommandUnfollow -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_USR_FOLLOW, getPlayer(runCommandUnfollow), this, runCommandUnfollow)) {
+                if(commandApplyToPlayer(10, getPlayer(runCommandUnfollow), this, runCommandUnfollow)) {
                     removeUserFollow(users.getUser(getPlayer(runCommandUnfollow)), "run_command_follow");
                 }
                 return 1;

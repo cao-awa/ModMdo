@@ -16,7 +16,6 @@ public class ServerStartListener {
             }
             motd = server.getServerMotd();
             Variables.server = server;
-            new ServerTickListener().listener();
         });
     }
 }

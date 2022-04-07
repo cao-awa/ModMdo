@@ -2,7 +2,7 @@ package com.github.zhuaidadaya.modmdo.storage;
 
 import com.github.zhuaidadaya.modmdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
-import com.github.zhuaidadaya.modmdo.commands.DimensionTips;
+import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.commands.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modmdo.jump.server.ServerUtil;
@@ -44,28 +44,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.SyncFailedException;
 import java.net.SocketAddress;
+import java.text.NumberFormat;
 import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static String VERSION_ID = "1.0.26";
     public static int MODMDO_VERSION = 20;
-    public static final String MODMDO_COMMAND_ROOT = "/";
-    public static final String MODMDO_COMMAND_CONF = "modmdo/";
-    public static final String MODMDO_COMMAND_TICK = "modmdo/tick/";
-    public static final String MODMDO_COMMAND_HERE = "here/";
-    public static final String MODMDO_COMMAND_CAVA = "cava/";
-    public static final String MODMDO_COMMAND_BAK = "backup/";
-    public static final String MODMDO_COMMAND_USR = "user/";
-    public static final String MODMDO_COMMAND_ANALYZER = "analyzer/";
-    public static final String MODMDO_COMMAND_RANKING = "ranking/";
-    public static final String MODMDO_COMMAND_TOKEN = "token/";
-    public static final String MODMDO_COMMAND_USR_FOLLOW = "user/follow";
-    public static final String MODMDO_COMMAND_CONF_CHECK = "conf/check";
-    public static final String MODMDO_COMMAND_SERVER = "server/";
-    public static final String MODMDO_COMMAND_JUMP = "jump/";
-    public static final String MODMDO_COMMAND_CONF_TIME_ACTIVE = "conf/time/active";
-    public static final String MODMDO_COMMAND_CONF_TOKEN_CHECK_TIME_LIMIT = "conf/checker/time/limit";
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static boolean rankingOnlineTimeScaleChanged = false;
@@ -82,7 +67,7 @@ public class Variables {
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
     public static boolean enableEncryptionToken = false;
-    public static boolean enabledCancelEntitiesTIck = false;
+    public static boolean cancelEntitiesTick = false;
     public static boolean enableCheckTokenPerTick = false;
     public static boolean forceStopTokenCheck = false;
     public static boolean timeActive = true;
@@ -106,10 +91,9 @@ public class Variables {
     public static TextFieldWidget editToken;
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
-    public static DimensionTips dimensionTips = new DimensionTips();
+    public static DimensionUtil dimensionUtil = new DimensionUtil();
     public static Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
-    public static Object2IntRBTreeMap<String> modMdoCommandVersionMap = new Object2IntRBTreeMap<>();
     public static int itemDespawnAge = 6000;
 
     public static ServerLogin serverLogin = new ServerLogin();
@@ -128,6 +112,65 @@ public class Variables {
     public static String jumpLoginType = "";
 
     public static ConsoleTextFormat consoleTextFormat;
+
+    public static NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
+    public static NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();
+    public static NumberFormat fractionDigits0 = NumberFormat.getNumberInstance();
+
+    public static void allDefault() {
+        fractionDigits0.setGroupingUsed(false);
+        fractionDigits0.setMinimumFractionDigits(0);
+        fractionDigits0.setMaximumFractionDigits(0);
+
+        fractionDigits1.setGroupingUsed(false);
+        fractionDigits1.setMinimumFractionDigits(1);
+        fractionDigits1.setMaximumFractionDigits(1);
+
+        fractionDigits2.setGroupingUsed(false);
+        fractionDigits2.setMinimumFractionDigits(2);
+        fractionDigits2.setMaximumFractionDigits(2);
+
+        rankingObject = "Nan";
+        rankingRandomSwitchInterval = 20 * 60 * 8;
+        rankingOnlineTimeScaleChanged = false;
+        rankingGameOnlineTimeScaleChanged = false;
+        rankingOnlineTimeScale = "minute";
+        rankingGameOnlineTimeScale = "minute";
+        language = Language.ENGLISH;
+        rankingSwitchNoDump = true;
+        enableRanking = false;
+        enableHereCommand = true;
+        enableDeadMessage = true;
+        enableCava = true;
+        enableSecureEnchant = true;
+        enableRejectReconnect = true;
+        enableEncryptionToken = false;
+        cancelEntitiesTick = false;
+        enableCheckTokenPerTick = false;
+        forceStopTokenCheck = false;
+        timeActive = true;
+        tokenChanged = false;
+        tokenGenerateSize = 1024;
+        tokenCheckTimeLimit = 3000;
+        modMdoServerChannel = new Identifier("modmdo:server");
+        loginChannel = new Identifier("modmdo:token");
+        rejectUsers = new UserUtil();
+        loginUsers = new UserUtil();
+        users = new UserUtil();
+        cavas = new CavaUtil();
+        motd = "";
+        bak = new BackupUtil();
+        itemDespawnAge = 6000;
+
+        rankingObjects = new ObjectArrayList<>();
+        rankingObjectsNoDump = new ObjectArrayList<>();
+
+        servers = new ServerUtil();
+        connectTo = false;
+        jump = "";
+        jumpToken = "";
+        jumpLoginType = "";
+    }
 
     public static void showScoreboard(MinecraftServer server,String name,String display) {
         ServerScoreboard scoreboard = server.getScoreboard();
@@ -288,15 +331,11 @@ public class Variables {
         return getPlayerModMdoVersion(player) == MODMDO_VERSION;
     }
 
-    public static boolean commandApplyToPlayer(String commandBelong, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
-        if(! command.getServer(source).isDedicated() || player == null || getFeatureCanUse(commandBelong, player))
-            return true;
-
-        command.sendError(source, command.formatModMdoVersionRequire(commandBelong, player));
-        return false;
+    public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
+        return commandApplyToPlayer(versionRequire, player, command, source.getSource());
     }
 
-    public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
+    public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, ServerCommandSource source) {
         if(! command.getServer(source).isDedicated() || player == null || getFeatureCanUse(versionRequire, player))
             return true;
 
@@ -304,24 +343,8 @@ public class Variables {
         return false;
     }
 
-    public static boolean commandApplyToPlayer(String commandBelong, ServerPlayerEntity player, SimpleCommandOperation command, ServerCommandSource source) {
-        if(! source.getServer().isDedicated() || player == null || getFeatureCanUse(commandBelong, player))
-            return true;
-
-        source.sendError(command.formatModMdoVersionRequire(commandBelong, player));
-        return false;
-    }
-
-    public static boolean getFeatureCanUse(String commandBelong, ServerPlayerEntity player) {
-        return getFeatureCanUse(modMdoCommandVersionMap.getInt(commandBelong), player);
-    }
-
     public static boolean getFeatureCanUse(int versionRequire, ServerPlayerEntity player) {
         return versionRequire <= getPlayerModMdoVersion(player);
-    }
-
-    public static String getCommandRequestVersion(String commandBelong) {
-        return modMdoIdToVersionMap.get(modMdoCommandVersionMap.getInt(commandBelong));
     }
 
     public static void initModMdoToken() {

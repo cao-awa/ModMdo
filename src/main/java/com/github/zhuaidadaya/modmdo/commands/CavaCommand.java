@@ -20,7 +20,7 @@ public class CavaCommand extends SimpleCommandOperation implements ConfigurableC
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("cava").executes(cava -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_CAVA, getPlayer(cava), this, cava)) {
+                if(commandApplyToPlayer(1, getPlayer(cava), this, cava)) {
                     ServerCommandSource source = cava.getSource();
 
                     if(enableCava) {
@@ -35,7 +35,7 @@ public class CavaCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             }).then(literal("create").then(argument("cava_message", StringArgumentType.greedyString()).executes(createCava -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_CAVA, getPlayer(createCava), this, createCava)) {
+                if(commandApplyToPlayer(1, getPlayer(createCava), this, createCava)) {
                     ServerCommandSource source = createCava.getSource();
                     ServerPlayerEntity player = getPlayer(createCava);
                     if(enableCava) {
@@ -58,7 +58,7 @@ public class CavaCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 1;
             }))).then(literal("deleteLast").requires(level -> level.hasPermissionLevel(4)).executes(deleteCava -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_CAVA, getPlayer(deleteCava), this, deleteCava)) {
+                if(commandApplyToPlayer(1, getPlayer(deleteCava), this, deleteCava)) {
                     ServerCommandSource source = deleteCava.getSource();
                     ServerPlayerEntity player = source.getPlayer();
 

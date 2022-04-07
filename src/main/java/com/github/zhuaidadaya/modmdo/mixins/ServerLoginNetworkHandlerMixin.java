@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
+import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
@@ -48,7 +49,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
-            long waiting = System.currentTimeMillis();
+            System.out.println(player.getRotationVecClient().toString());
+
+            long waiting = TimeUtil.currentMillions();
             long nano = System.nanoTime();
 
             LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
@@ -72,7 +75,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
                         return;
                     } else {
-                        if(System.currentTimeMillis() - waiting > tokenCheckTimeLimit) {
+                        if(TimeUtil.processedTime(waiting) > tokenCheckTimeLimit) {
                             connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with token")));
                             LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
                             sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "join_server_follow");
@@ -104,11 +107,15 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
                     }
                 } catch (Exception e) {
-                    LOGGER.info("player " + player.getName() + " lost status synchronize");
+                    if (!server.isHost(player.getGameProfile())) {
+                        LOGGER.info("player " + player.getName().asString() + " lost status synchronize");
 
-                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("lost status synchronize, please connect again")));
+                        player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("lost status synchronize, please connect again")));
 
-                    player.networkHandler.disconnect(new LiteralText("lost status synchronize"));
+                        player.networkHandler.disconnect(new LiteralText("lost status synchronize"));
+                    } else {
+                        LOGGER.info("player " + player.getName().asString() + " lost status synchronize, but will not be process");
+                    }
                 }
             } catch (Exception e) {
 

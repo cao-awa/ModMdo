@@ -32,7 +32,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("jump").then(literal("remove").requires(level -> level.hasPermissionLevel(4)).then(argument("servers", ServerJumpArgument.servers()).executes(removeServer -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(removeServer), this, removeServer)) {
+                if(commandApplyToPlayer(13, getPlayer(removeServer), this, removeServer)) {
                     ServerPlayerEntity player = getPlayer(removeServer);
                     ServerInformation information = ServerJumpArgument.getServer(removeServer, "servers");
                     try {
@@ -50,7 +50,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             }))).then(literal("add").requires(level -> level.hasPermissionLevel(4)).then(argument("name", StringArgumentType.string()).then(argument("host", StringArgumentType.string()).then(argument("port", IntegerArgumentType.integer(1, 65565)).executes(addServer -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(addServer), this, addServer)) {
+                if(commandApplyToPlayer(13, getPlayer(addServer), this, addServer)) {
                     ServerPlayerEntity player = getPlayer(addServer);
                     String name = StringArgumentType.getString(addServer, "name");
                     String host = StringArgumentType.getString(addServer, "host");
@@ -68,7 +68,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             }))))).then(literal("to").then(argument("servers", ServerJumpArgument.servers()).executes(jump -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(jump), this, jump)) {
+                if(commandApplyToPlayer(13, getPlayer(jump), this, jump)) {
                     ServerInformation jumpTo = ServerJumpArgument.getServer(jump, "servers");
                     try {
                         ServerPlayerEntity player = getPlayer(jump);
@@ -84,7 +84,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             }).then(literal("default").executes(jumpAsDefault -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(jumpAsDefault), this, jumpAsDefault)) {
+                if(commandApplyToPlayer(13, getPlayer(jumpAsDefault), this, jumpAsDefault)) {
                     ServerInformation jumpTo = ServerJumpArgument.getServer(jumpAsDefault, "servers");
                     try {
                         ServerPlayerEntity player = getPlayer(jumpAsDefault);
@@ -103,7 +103,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             })).then(literal("ops").requires(level -> level.hasPermissionLevel(4)).executes(jumpAsOps -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(jumpAsOps), this, jumpAsOps)) {
+                if(commandApplyToPlayer(13, getPlayer(jumpAsOps), this, jumpAsOps)) {
                     ServerInformation jumpTo = ServerJumpArgument.getServer(jumpAsOps, "servers");
                     try {
                         ServerPlayerEntity player = getPlayer(jumpAsOps);
@@ -126,7 +126,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             })))).then(literal("token").requires(level -> level.hasPermissionLevel(4)).then(literal("set").then(argument("server", ServerJumpArgument.servers()).then(literal("default").then(literal("from").then(literal("this").executes(setDefaultToken -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(setDefaultToken), this, setDefaultToken)) {
+                if(commandApplyToPlayer(13, getPlayer(setDefaultToken), this, setDefaultToken)) {
                     try {
                         ServerInformation server = ServerJumpArgument.getServer(setDefaultToken, "server");
 
@@ -149,7 +149,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 return 0;
             })).then(literal("sourceFile").then(argument("file", StringArgumentType.string()).executes(setDefaultFromSource -> {
                 ServerInformation server = ServerJumpArgument.getServer(setDefaultFromSource, "server");
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(setDefaultFromSource), this, setDefaultFromSource)) {
+                if(commandApplyToPlayer(13, getPlayer(setDefaultFromSource), this, setDefaultFromSource)) {
                     try {
                         File f = new File(StringArgumentType.getString(setDefaultFromSource, "file"));
 
@@ -182,7 +182,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 return 0;
             }))).then(literal("jsonFile").then(argument("file", StringArgumentType.string()).executes(setDefaultFromJson -> {
                 ServerInformation server = ServerJumpArgument.getServer(setDefaultFromJson, "server");
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(setDefaultFromJson), this, setDefaultFromJson)) {
+                if(commandApplyToPlayer(13, getPlayer(setDefaultFromJson), this, setDefaultFromJson)) {
                     try {
                         File f = new File(StringArgumentType.getString(setDefaultFromJson, "file"));
 
@@ -216,7 +216,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             }))))).then(literal("ops").then(literal("from").then(literal("this").executes(setOpsFromThis -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(setOpsFromThis), this, setOpsFromThis)) {
+                if(commandApplyToPlayer(13, getPlayer(setOpsFromThis), this, setOpsFromThis)) {
                     try {
                         ServerInformation server = ServerJumpArgument.getServer(setOpsFromThis, "server");
 
@@ -238,7 +238,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             })).then(literal("sourceFile").then(argument("file", StringArgumentType.string()).executes(setOpsFromSource -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(setOpsFromSource), this, setOpsFromSource)) {
+                if(commandApplyToPlayer(13, getPlayer(setOpsFromSource), this, setOpsFromSource)) {
                     ServerInformation server = ServerJumpArgument.getServer(setOpsFromSource, "server");
                     try {
                         File f = new File(StringArgumentType.getString(setOpsFromSource, "file"));
@@ -271,7 +271,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             }))).then(literal("jsonFile").then(argument("file", StringArgumentType.string()).executes(setOpsFromJson -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(setOpsFromJson), this, setOpsFromJson)) {
+                if(commandApplyToPlayer(13, getPlayer(setOpsFromJson), this, setOpsFromJson)) {
                     ServerInformation server = ServerJumpArgument.getServer(setOpsFromJson, "server");
                     try {
                         File f = new File(StringArgumentType.getString(setOpsFromJson, "file"));
@@ -306,7 +306,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             }))))))).then(literal("remove").then(argument("server", ServerJumpArgument.servers()).executes(removeAllToken -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(removeAllToken), this, removeAllToken)) {
+                if(commandApplyToPlayer(13, getPlayer(removeAllToken), this, removeAllToken)) {
                     ServerInformation server = ServerJumpArgument.getServer(removeAllToken, "server");
                     try {
                         if(server.isError())
@@ -341,7 +341,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             }).then(literal("default").executes(removeDefault -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(removeDefault), this, removeDefault)) {
+                if(commandApplyToPlayer(13, getPlayer(removeDefault), this, removeDefault)) {
                     ServerInformation server = ServerJumpArgument.getServer(removeDefault, "server");
                     try {
                         if(server.isError())
@@ -362,7 +362,7 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
                 }
                 return 0;
             })).then(literal("ops").executes(removeOps -> {
-                if(commandApplyToPlayer(MODMDO_COMMAND_JUMP, getPlayer(removeOps), this, removeOps)) {
+                if(commandApplyToPlayer(13, getPlayer(removeOps), this, removeOps)) {
                     ServerInformation server = ServerJumpArgument.getServer(removeOps, "server");
                     try {
                         if(server.isError())
@@ -424,8 +424,6 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
 
     @Override
     public void init() {
-        LOGGER.info("initializing servers jump");
-
         Object serversJump = config.getConfig("servers_jump");
         if(serversJump != null) {
             servers = new ServerUtil(new JSONObject(serversJump.toString()));
@@ -437,7 +435,5 @@ public class JumpCommand extends SimpleCommandOperation implements ConfigurableC
         ArgumentInit.initServerJump();
 
         updateServersJump();
-
-        LOGGER.info("initialized servers jump");
     }
 }
