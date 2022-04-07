@@ -1,4 +1,5 @@
 {
+    "command.require.version": "此命令需要最低%s版本的ModMdo运行",
     "language.chinese": "中文",
     "language.english": "英文",
     "language.default": "当前默认语言为: %s",

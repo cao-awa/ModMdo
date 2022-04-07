@@ -15,7 +15,7 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 public class SimpleCommandOperation {
     public static LiteralText formatModMdoVersionRequire(int versionRequire, ServerPlayerEntity player) {
         sendToSub(player);
-        return new LiteralText("this command minimum ModMdo version require: " + Variables.modMdoIdToVersionMap.get(versionRequire));
+        return new LiteralText(consoleTextFormat.format("command.require.version", modMdoIdToVersionMap.get(versionRequire)));
     }
 
     public static void sendToSub(ServerPlayerEntity player) {
