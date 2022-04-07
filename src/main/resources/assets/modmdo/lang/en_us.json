@@ -1,4 +1,13 @@
 {
+    "language.chinese": "chinese",
+    "language.english": "english",
+    "language.default": "current default language is: %s",
+    "subscribe.remove.from": "unsubscribed: %s",
+    "subscribe.add.to": "subscribed: %s",
+    "subscribable.tps.not.running": "§ctps monitor not running",
+    "subscribable.tps.stopped": "tps monitor stopped",
+    "subscribable.tps.started": "tps monitor started",
+    "subscribable.tps.already.running": "§ctps monitor already running",
     "argument.ranks.invalid": "invalid rank: %s",
     "token.regenerated": "regenerated new token done",
     "login.dump.rejected": "§cModMdo warning\n§cModMdo rejected your account dump login\n§cif not login by your self, then maybe has someone try disconnect you\n§eif are login by your self, please disconnect this client and try again",

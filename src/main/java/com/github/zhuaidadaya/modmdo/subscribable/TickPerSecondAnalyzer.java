@@ -1,10 +1,12 @@
-package com.github.zhuaidadaya.modmdo.subscribeable;
+package com.github.zhuaidadaya.modmdo.subscribable;
 
-import com.github.zhuaidadaya.modmdo.commands.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.storage.Variables;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 import java.util.Collection;
 
@@ -77,7 +79,7 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
                         String tpsTarget = fractionDigits2.format(targetTps);
                         for (ServerPlayerEntity player : subs) {
                             if (player.networkHandler.connection.isOpen()) {
-                                sendMessageToPlayer(player, new LiteralText("§etick-" + countTicks + ": §b(mspt: §a[r: " + realMspt + "ms, sub: " + subTps + "ms]§b, tps: §a[r: " + tpsCurrent + "§a, target: " + tpsTarget + "]§b)"), true);
+                                Variables.sendMessage(player, new LiteralText("§etick-" + countTicks + ": §b(mspt: §a[r: " + realMspt + "ms, sub: " + subTps + "ms]§b, tps: §a[r: " + tpsCurrent + "§a, target: " + tpsTarget + "]§b)"), true);
                             } else {
                                 cancelSub(player);
                             }
@@ -100,10 +102,12 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
 
     public void cancelSub(ServerPlayerEntity player) {
         subs.remove(player);
+        sendMessage(player, new TranslatableText("subscribe.remove.from", "tps"), false, 20);
     }
 
     public void addSub(ServerPlayerEntity player) {
         subs.add(player);
+        sendMessage(player, new TranslatableText("subscribe.add.to", "tps"), false, 20);
     }
 
     public boolean hasSub(ServerPlayerEntity player) {

@@ -1,7 +1,7 @@
 package com.github.zhuaidadaya.modmdo.ranking.command;
 
 import com.github.zhuaidadaya.modmdo.commands.ConfigurableCommand;
-import com.github.zhuaidadaya.modmdo.commands.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.ranking.Rank;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;

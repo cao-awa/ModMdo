@@ -1,8 +1,9 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
-import com.github.zhuaidadaya.modmdo.subscribeable.TickPerSecondAnalyzer;
+import com.github.zhuaidadaya.modmdo.subscribable.TickPerSecondAnalyzer;
 import com.github.zhuaidadaya.modmdo.system.SystemUtil;
 import com.github.zhuaidadaya.modmdo.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.utils.player.PlayerUtil;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -38,66 +39,50 @@ public class AnalyzerCommand extends SimpleCommandOperation implements SimpleCom
 
                 }
                 return 0;
-            })).then(literal("onlineTime").executes(onlineTime -> {
-                if (commandApplyToPlayer(11, getPlayer(onlineTime), this, onlineTime)) {
-                    ServerPlayerEntity player = getPlayer(onlineTime);
-
-                    sendFeedback(onlineTime, formatOnlineTime(player));
-                }
-                return 0;
             })).then(literal("gameOnlineTime").executes(onlineTime -> {
-                if (commandApplyToPlayer(11, getPlayer(onlineTime), this, onlineTime)) {
-                    ServerPlayerEntity player = getPlayer(onlineTime);
+                ServerPlayerEntity player = getPlayer(onlineTime);
 
-                    sendFeedback(onlineTime, formatGameOnlineTime(player));
-                }
+                sendFeedback(onlineTime, formatGameOnlineTime(player), 11);
                 return 0;
             }))).then(literal("server").then(literal("cpu").executes(cpu -> {
-                if (commandApplyToPlayer(11, getPlayer(cpu), this, cpu)) {
-                    new Thread(() -> {
-                        sendFeedback(cpu, new TranslatableText("server.cpu", SystemUtil.getCpuTotalUsed() + "(Used)", SystemUtil.getCpuWait() + "(Wait)"));
-                    }).start();
-                }
+                new Thread(() -> {
+                    sendFeedback(cpu, new TranslatableText("server.cpu", SystemUtil.getCpuTotalUsed() + "(Used)", SystemUtil.getCpuWait() + "(Wait)"), 11);
+                }).start();
                 return 1;
             })).then(literal("memory").executes(memory -> {
-                if (commandApplyToPlayer(11, getPlayer(memory), this, memory)) {
-                    MemoryMXBean memoryMx = ManagementFactory.getMemoryMXBean();
-                    MemoryUsage memoryUsage = memoryMx.getHeapMemoryUsage();
+                MemoryMXBean memoryMx = ManagementFactory.getMemoryMXBean();
+                MemoryUsage memoryUsage = memoryMx.getHeapMemoryUsage();
 
-                    float usedMemory = memoryUsage.getUsed() / 1024f / 1024f;
-                    float totalMemory = memoryUsage.getMax() / 1024f / 1024f;
+                float usedMemory = memoryUsage.getUsed() / 1024f / 1024f;
+                float totalMemory = memoryUsage.getMax() / 1024f / 1024f;
 
-                    String formatMemoryTag = "§" + (totalMemory / usedMemory < 0.9f ? "d" : (totalMemory / usedMemory < 0.7f ? "c" : "a"));
+                String formatMemoryTag = "§" + (totalMemory / usedMemory < 0.9f ? "d" : (totalMemory / usedMemory < 0.7f ? "c" : "a"));
 
-                    sendFeedback(memory, new TranslatableText("server.memory", formatMemoryTag + totalMemory, formatMemoryTag + usedMemory));
-                }
+                sendFeedback(memory, new TranslatableText("server.memory", formatMemoryTag + totalMemory, formatMemoryTag + usedMemory), 11);
                 return - 1;
             })).then(literal("tps").executes(tps -> {
-                if (commandApplyToPlayer(11, getPlayer(tps), this, tps)) {
-                    analyzeTickPerSecond(tps, 20);
-                }
+                analyzeTickPerSecond(tps, 20);
                 return 2;
             }).then(literal("while").then(argument("target", IntegerArgumentType.integer(20, 10000)).executes(tps -> {
-                if (commandApplyToPlayer(11, getPlayer(tps), this, tps)) {
-                    analyzeTickPerSecond(tps, IntegerArgumentType.getInteger(tps, "target"));
-                }
+                analyzeTickPerSecond(tps, IntegerArgumentType.getInteger(tps, "target"));
                 return 2;
             }))).then(literal("keep").executes(keep -> {
-                if (commandApplyToPlayer(11, getPlayer(keep), this, keep)) {
-                    analyzeTickPerSecond(keep, - 1);
-                }
+                analyzeTickPerSecond(keep, - 1);
                 return 1;
             })).then(literal("stop").executes(stop -> {
-                if (commandApplyToPlayer(11, getPlayer(stop), this, stop)) {
-                    tps.stop();
-                }
+                tps.stop();
+                sendFeedback(stop, new TranslatableText("subscribable.tps.stopped"), 20);
                 return 3;
             })).then(literal("subscribe").executes(sub -> {
-                ServerPlayerEntity player = getPlayer(sub);
-                if (tps.hasSub(player)) {
-                    tps.cancelSub(player);
+                if (tps.isRunning()) {
+                    ServerPlayerEntity player = getPlayer(sub);
+                    if (tps.hasSub(player)) {
+                        tps.cancelSub(player);
+                    } else {
+                        tps.addSub(player);
+                    }
                 } else {
-                    tps.addSub(player);
+                    sendFeedback(sub, new TranslatableText("subscribable.tps.not.running"), 20);
                 }
                 return 3;
             })))));
@@ -133,12 +118,11 @@ public class AnalyzerCommand extends SimpleCommandOperation implements SimpleCom
     public void analyzeTickPerSecond(CommandContext<ServerCommandSource> source, long target) throws CommandSyntaxException {
         if (! tps.isRunning()) {
             tps.init(getServer(source), target);
+            sendFeedback(source, new TranslatableText("subscribable.tps.started"), 20);
             ServerPlayerEntity player = getPlayer(source);
-            if (tps.hasSub(player)) {
-                tps.cancelSub(player);
-            } else {
-                tps.addSub(player);
-            }
+            tps.addSub(player);
+        } else {
+            sendFeedback(source, new TranslatableText("subscribable.tps.already.running"), 20);
         }
     }
 

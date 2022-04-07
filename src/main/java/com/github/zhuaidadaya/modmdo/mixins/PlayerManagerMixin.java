@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.PlayerManager;
@@ -27,22 +28,22 @@ public class PlayerManagerMixin {
      * 当相同的玩家在线时, 禁止重复创建玩家
      * 几乎解决了玩家异地登录下线的问题
      *
+     * @param profile
+     *         即将加入的玩家
+     * @param cir
+     *         callback
      * @author 草二号机
-     * @param profile 即将加入的玩家
-     * @param cir callback
      */
-    @Inject(method = "createPlayer",at = @At("HEAD"))
+    @Inject(method = "createPlayer", at = @At("HEAD"))
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
-        if(enableRejectReconnect) {
+        if (enableRejectReconnect) {
             UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-            for(ServerPlayerEntity player : this.players) {
-                if(player.networkHandler.connection.getAddress() == null)
+            for (ServerPlayerEntity player : this.players) {
+                if (player.networkHandler.connection.getAddress() == null)
                     break;
-                if(player.getUuid().equals(uuid)) {
-                    if(loginUsers.hasUser(player)) {
-                        if(getFeatureCanUse(15, player)) {
-                            sendMessageToPlayer(player,new TranslatableText("login.dump.rejected"),false);
-                        }
+                if (player.getUuid().equals(uuid)) {
+                    if (loginUsers.hasUser(player)) {
+                        SimpleCommandOperation.sendMessage(player, new TranslatableText("login.dump.rejected"), false, 15);
                     }
                     cir.cancel();
                 }

@@ -3,7 +3,8 @@ package com.github.zhuaidadaya.modmdo;
 import com.github.zhuaidadaya.modmdo.commands.*;
 import com.github.zhuaidadaya.modmdo.commands.jump.JumpCommand;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
-import com.github.zhuaidadaya.modmdo.format.console.LanguageResource;
+import com.github.zhuaidadaya.modmdo.format.LanguageResource;
+import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.zhuaidadaya.modmdo.identifier.RandomIdentifier;
 import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.listeners.ServerStartListener;
@@ -28,46 +29,6 @@ import java.nio.charset.StandardCharsets;
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ModMdoStdInitializer implements ModInitializer {
-    @Override
-    public void onInitialize() {
-        Thread thread = new Thread(() -> {
-            LOGGER.info("loading ModMdo " + VERSION_ID + " (step 1/2)");
-            LOGGER.info("ModMdo Std Initiator running");
-            LOGGER.info("loading for ModMdo Std init");
-
-            config = new ObjectConfigUtil(entrust, "config/", "ModMdo.mhf");
-            configCached = new DiskObjectConfigUtil(entrust, "config/modmdo/");
-
-            loginUsers = new UserUtil();
-            rejectUsers = new UserUtil();
-
-            parseMapFormat();
-
-            new ServerStartListener().listener();
-            new ServerTickListener().listener();
-
-            new HereCommand().register();
-            new DimensionHereCommand().register();
-            new ModMdoUserCommand().register();
-            new CavaCommand().register();
-            new ModMdoConfigCommand().register();
-            new TokenCommand().register();
-            new BackupCommand().register();
-            new AnalyzerCommand().register();
-            new RankingCommand().register();
-            new JumpCommand().register();
-
-            LanguageResource resource = new LanguageResource();
-            resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
-            resource.set(Language.ENGLISH, "/assets/modmdo/lang/en_us.json");
-            consoleTextFormat = new ConsoleTextFormat(resource);
-        });
-
-        thread.setName("ModMdo");
-
-        thread.start();
-    }
-
     public static void initForLevel(MinecraftServer server) {
         config = new ObjectConfigUtil(entrust, getServerLevelPath(server), "modmdo.mhf");
 
@@ -100,7 +61,8 @@ public class ModMdoStdInitializer implements ModInitializer {
             enableSecureEnchant = config.getConfigString("time_active").equals("enable");
         if (config.getConfig("checker_time_limit") != null)
             tokenCheckTimeLimit = config.getConfigInt("checker_time_limit");
-        if (config.getConfig("identifier") == null) config.set("identifier", RandomIdentifier.randomIdentifier());
+        if (config.getConfig("identifier") == null)
+            config.set("identifier", RandomIdentifier.randomIdentifier());
 
         if (config.getConfig("token_by_encryption") != null) {
             initModMdoToken();
@@ -118,8 +80,44 @@ public class ModMdoStdInitializer implements ModInitializer {
             }
         }
 
-        if (config.getConfigString("run_command_follow") == null) config.set("run_command_follow", PermissionLevel.OPS);
-        if (config.getConfigString("join_server_follow") == null) config.set("join_server_follow", PermissionLevel.OPS);
+        if (config.getConfigString("run_command_follow") == null)
+            config.set("run_command_follow", PermissionLevel.OPS);
+        if (config.getConfigString("join_server_follow") == null)
+            config.set("join_server_follow", PermissionLevel.OPS);
+    }
+
+    @Override
+    public void onInitialize() {
+        LOGGER.info("loading ModMdo " + VERSION_ID + " (step 1/2)");
+        LOGGER.info("ModMdo Std Initiator running");
+        LOGGER.info("loading for ModMdo Std init");
+
+        config = new ObjectConfigUtil(entrust, "config/", "ModMdo.mhf");
+        configCached = new DiskObjectConfigUtil(entrust, "config/modmdo/");
+
+        loginUsers = new UserUtil();
+        rejectUsers = new UserUtil();
+
+        parseMapFormat();
+
+        new ServerStartListener().listener();
+        new ServerTickListener().listener();
+
+        new HereCommand().register();
+        new DimensionHereCommand().register();
+        new ModMdoUserCommand().register();
+        new CavaCommand().register();
+        new ModMdoConfigCommand().register();
+        new TokenCommand().register();
+        new AnalyzerCommand().register();
+        new RankingCommand().register();
+        new JumpCommand().register();
+
+        LanguageResource resource = new LanguageResource();
+        resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
+        resource.set(Language.ENGLISH, "/assets/modmdo/lang/en_us.json");
+        consoleTextFormat = new ConsoleTextFormat(resource);
+        minecraftTextFormat = new MinecraftTextFormat(resource);
     }
 
     public void parseMapFormat() {

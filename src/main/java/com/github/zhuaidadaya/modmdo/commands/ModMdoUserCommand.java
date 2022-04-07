@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modmdo.commands;
 
 import com.github.zhuaidadaya.modmdo.usr.User;
 import com.github.zhuaidadaya.modmdo.usr.UserUtil;
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;

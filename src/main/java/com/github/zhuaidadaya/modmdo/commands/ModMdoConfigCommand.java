@@ -1,9 +1,11 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
+import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.login.token.EncryptionTokenUtil;
 import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.storage.Variables;
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.utils.translate.TranslateUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -287,6 +289,19 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
 
                     sendFeedback(setTimeLimit, formatCheckerTimeLimit());
                 }
+                return 0;
+            }))).then(literal("language").executes(getLanguage -> {
+                sendFeedback(getLanguage, new TranslatableText("language.default", language), 20);
+                return 0;
+            }).then(literal("chinese").executes(chinese -> {
+                language = Language.CHINESE;
+                updateModMdoVariables();
+                sendFeedback(chinese, new TranslatableText("language.default", language), 20);
+                return 0;
+            })).then(literal("english").executes(english -> {
+                language = Language.ENGLISH;
+                updateModMdoVariables();
+                sendFeedback(english, new TranslatableText("language.default", language), 20);
                 return 0;
             }))));
         });
