@@ -1,4 +1,5 @@
 {
+    "command.require.version": "this command minimum ModMdo version require: %s",
     "language.chinese": "chinese",
     "language.english": "english",
     "language.default": "current default language is: %s",
