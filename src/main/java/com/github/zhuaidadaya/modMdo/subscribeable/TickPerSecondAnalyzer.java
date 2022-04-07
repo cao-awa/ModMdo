@@ -114,3 +114,4 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
         return subs.contains(player);
     }
 }
+
