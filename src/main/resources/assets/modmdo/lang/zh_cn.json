@@ -5,7 +5,7 @@
     "language.default": "当前默认语言为: %s",
     "subscribe.remove.from": "已取消订阅: %s",
     "subscribe.add.to": "已订阅: %s",
-    "subscribable.tps.not.running": "§ctps没有在运行",
+    "subscribable.tps.not.running": "§ctps监测没有在运行",
     "subscribable.tps.stopped": "tps监测已关闭",
     "subscribable.tps.started": "tps监测已启动",
     "subscribable.tps.already.running": "§ctps监测已在运行中",
