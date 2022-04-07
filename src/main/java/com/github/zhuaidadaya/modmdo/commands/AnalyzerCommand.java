@@ -30,12 +30,9 @@ public class AnalyzerCommand extends SimpleCommandOperation implements SimpleCom
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("analyzer").then(literal("self").then(literal("vec").executes(vec -> {
-                if (commandApplyToPlayer(1, getPlayer(vec), this, vec)) {
-                    ServerPlayerEntity player = getPlayer(vec);
+                ServerPlayerEntity player = getPlayer(vec);
 
-                    sendFeedback(vec, formatVecMessage(player.getPos(), player.getRotationClient(), dimensionUtil.getDimension(player)));
-
-                }
+                sendFeedback(vec, formatVecMessage(player.getPos(), player.getRotationClient(), dimensionUtil.getDimension(player)), 1);
                 return 0;
             })).then(literal("onlineTime").executes(onlineTime -> {
                 if (commandApplyToPlayer(11, getPlayer(onlineTime), this, onlineTime)) {

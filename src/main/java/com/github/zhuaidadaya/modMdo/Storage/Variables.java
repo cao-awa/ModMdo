@@ -2,9 +2,9 @@ package com.github.zhuaidadaya.modmdo.storage;
 
 import com.github.zhuaidadaya.modmdo.bak.BackupUtil;
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
-import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.commands.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
+import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.zhuaidadaya.modmdo.jump.server.ServerUtil;
 import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.login.server.ServerLogin;
@@ -19,6 +19,7 @@ import com.github.zhuaidadaya.modmdo.usr.User;
 import com.github.zhuaidadaya.modmdo.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.ObjectConfigUtil;
+import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -112,6 +113,7 @@ public class Variables {
     public static String jumpLoginType = "";
 
     public static ConsoleTextFormat consoleTextFormat;
+    public static MinecraftTextFormat minecraftTextFormat;
 
     public static NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
     public static NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();

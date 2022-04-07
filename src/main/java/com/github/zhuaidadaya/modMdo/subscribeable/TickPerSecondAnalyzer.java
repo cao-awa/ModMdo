@@ -55,6 +55,10 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
                         planTickTimeTarget = (server.getTimeReference() - time) / Math.max(1, server.getTicks() - lastTicks);
                     }
 
+                    if (ticks > 25565) {
+                        ticks = 0;
+                    }
+
                     if (! skip) {
                         tickTime = server.getTickTime();
                         ticks++;

@@ -3,7 +3,8 @@ package com.github.zhuaidadaya.modmdo;
 import com.github.zhuaidadaya.modmdo.commands.*;
 import com.github.zhuaidadaya.modmdo.commands.jump.JumpCommand;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
-import com.github.zhuaidadaya.modmdo.format.console.LanguageResource;
+import com.github.zhuaidadaya.modmdo.format.LanguageResource;
+import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.zhuaidadaya.modmdo.identifier.RandomIdentifier;
 import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.listeners.ServerStartListener;
@@ -61,6 +62,7 @@ public class ModMdoStdInitializer implements ModInitializer {
             resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
             resource.set(Language.ENGLISH, "/assets/modmdo/lang/en_us.json");
             consoleTextFormat = new ConsoleTextFormat(resource);
+            minecraftTextFormat = new MinecraftTextFormat(resource);
         });
 
         thread.setName("ModMdo");

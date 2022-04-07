@@ -1,16 +1,17 @@
-package com.github.zhuaidadaya.modmdo.format.console;
+package com.github.zhuaidadaya.modmdo.format.minecraft;
 
 import com.github.zhuaidadaya.modmdo.format.LanguageResource;
 import com.github.zhuaidadaya.modmdo.format.TextFormat;
+import net.minecraft.text.LiteralText;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.language;
 
-public class ConsoleTextFormat extends TextFormat<String> {
-    public ConsoleTextFormat(LanguageResource languageResource) {
+public class MinecraftTextFormat extends TextFormat<LiteralText> {
+    public MinecraftTextFormat(LanguageResource languageResource) {
         super(languageResource);
     }
 
-    public String format(String source, Object... args) {
+    public LiteralText format(String source, Object... args) {
         try {
             String formatReturn = format.get(language).getString(source);
 
@@ -18,12 +19,12 @@ public class ConsoleTextFormat extends TextFormat<String> {
                 try {
                     formatReturn = formatReturn.replaceFirst("%s" ,o.toString());
                 } catch (Exception ex) {
-                    return formatReturn;
+                    return new LiteralText(formatReturn);
                 }
             }
-            return formatReturn;
+            return new LiteralText(formatReturn);
         } catch (Exception e) {
-            return "";
+            return new LiteralText("");
         }
     }
 }

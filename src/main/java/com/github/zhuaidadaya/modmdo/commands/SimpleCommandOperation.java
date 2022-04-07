@@ -23,32 +23,28 @@ public class SimpleCommandOperation {
         sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.rejected.bad.modmdo.version", player.getName().asString()), "run_command_follow");
     }
 
-    public void sendFeedback(CommandContext<ServerCommandSource> source, Text message) {
-        sendFeedback(source.getSource(), message);
-    }
-
-    public void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, Text message) {
-        sendFeedbackAndInform(source.getSource(), message);
-    }
-
-    public void sendError(CommandContext<ServerCommandSource> source, Text message) {
-        sendError(source.getSource(), message);
+    public void sendFeedback(CommandContext<ServerCommandSource> source, TranslatableText message, int version) throws CommandSyntaxException {
+        if (commandApplyToPlayer(version, getPlayer(source), this, source)) {
+            sendFeedback(source, message);
+        } else {
+            sendMessageToPlayer(getPlayer(source), minecraftTextFormat.format(message.getKey(), message.getArgs()), false);
+        }
     }
 
     public ServerPlayerEntity getPlayer(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
         return getPlayer(source.getSource());
     }
 
-    public MinecraftServer getServer(CommandContext<ServerCommandSource> source) {
-        return getServer(source.getSource());
+    public ServerPlayerEntity getPlayer(ServerCommandSource source) throws CommandSyntaxException {
+        try {
+            return source.getPlayer();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    public String getInput(CommandContext<ServerCommandSource> source) {
-        return source.getInput();
-    }
-
-    public ClientConnection getConnection(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
-        return getConnection(source.getSource());
+    public void sendFeedback(CommandContext<ServerCommandSource> source, Text message) {
+        sendFeedback(source.getSource(), message);
     }
 
     public void sendFeedback(ServerCommandSource source, Text message) {
@@ -61,6 +57,10 @@ public class SimpleCommandOperation {
         }
     }
 
+    public void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, Text message) {
+        sendFeedbackAndInform(source.getSource(), message);
+    }
+
     public void sendFeedbackAndInform(ServerCommandSource source, Text message) {
         try {
             source.getPlayer();
@@ -69,6 +69,10 @@ public class SimpleCommandOperation {
             TranslatableText text = (TranslatableText) message;
             LOGGER.info(consoleTextFormat.format(text.getKey(), text.getArgs()));
         }
+    }
+
+    public void sendError(CommandContext<ServerCommandSource> source, Text message) {
+        sendError(source.getSource(), message);
     }
 
     public void sendError(ServerCommandSource source, Text message) {
@@ -81,19 +85,31 @@ public class SimpleCommandOperation {
         }
     }
 
-    public ServerPlayerEntity getPlayer(ServerCommandSource source) throws CommandSyntaxException {
-        try {
-            return source.getPlayer();
-        } catch (Exception e) {
-            return null;
-        }
+    public MinecraftServer getServer(CommandContext<ServerCommandSource> source) {
+        return getServer(source.getSource());
     }
 
     public MinecraftServer getServer(ServerCommandSource source) {
         return source.getServer();
     }
 
+    public String getInput(CommandContext<ServerCommandSource> source) {
+        return source.getInput();
+    }
+
+    public ClientConnection getConnection(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
+        return getConnection(source.getSource());
+    }
+
     public ClientConnection getConnection(ServerCommandSource source) throws CommandSyntaxException {
         return source.getPlayer().networkHandler.connection;
+    }
+
+    public void sendFeedback(ServerCommandSource source, TranslatableText message, int version) throws CommandSyntaxException {
+        if (commandApplyToPlayer(version, getPlayer(source), this, source)) {
+            sendFeedback(source, message);
+        } else {
+            sendMessageToPlayer(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
+        }
     }
 }
