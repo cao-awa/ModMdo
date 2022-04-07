@@ -36,12 +36,6 @@ public abstract class AddServerScreenMixin extends Screen {
         super(title);
     }
 
-    @Shadow
-    protected abstract void updateAddButton();
-
-    @Shadow
-    protected abstract void addAndClose();
-
     /**
      * 在编辑服务器的页面添加token的文本栏
      * 以及连接类型的文本栏
