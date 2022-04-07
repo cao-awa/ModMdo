@@ -36,7 +36,7 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
  * SKP(Skip)
  * VSD(Version Difference)
  * <p>
- * 手动替换检测: 1.17.x
+ * 手动替换检测: 1.18.x
  */
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
