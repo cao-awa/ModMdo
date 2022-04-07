@@ -23,17 +23,10 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 @Mixin(AddServerScreen.class)
 public abstract class AddServerScreenMixin extends Screen {
-
-    @Shadow
-    @Final
-    private ServerInfo server;
     @Shadow
     private TextFieldWidget addressField;
     @Shadow
     private ButtonWidget addButton;
-    @Shadow
-    @Final
-    private BooleanConsumer callback;
     @Shadow
     private TextFieldWidget serverNameField;
 
