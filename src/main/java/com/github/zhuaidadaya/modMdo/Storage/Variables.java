@@ -574,4 +574,3 @@ public class Variables {
         return timeActive ? "enable" : "disable";
     }
 }
-
