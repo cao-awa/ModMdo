@@ -1,3 +1,0 @@
-[09:59:42] [main/WARN]: Configuration conflict: there is more than one oshi.properties file on the classpath
-[09:59:43] [main/WARN]: Configuration conflict: there is more than one oshi.architecture.properties file on the classpath
-[09:59:44] [main/WARN]: COM exception querying MSAcpi_ThermalZoneTemperature, which might not be on your system. Will not attempt to query it again. Error was -2147217405: Failed to enumerate results.
