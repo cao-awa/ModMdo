@@ -1,4 +1,13 @@
 {
+    "player.no.fall.cheat.receive": "已允许所有无摔落伤害作弊",
+    "player.no.fall.cheat.reject": "已拒绝所有无摔落伤害作弊",
+    "enchantment.level.controller.disabled": "已禁用附魔等级控制",
+    "enchantment.level.controller.enabled": "已启用附魔等级控制",
+    "enchantment_clear_if_level_too_high.enabled.rule.format": "已启用等级过高时清除物品上所有附魔",
+    "enchantment_clear_if_level_too_high.disabled.rule.format": "已禁用等级过高时清除物品上所有附魔",
+    "enchantment.max.level.limit.all.default": "已恢复全部魔咒的默认最高等级",
+    "enchantment.max.level.limit.all": "已将全部魔咒的最高等级设为: %s",
+    "enchantment.max.level.limit": "当前的 %s 最大等级为 %s",
     "command.require.version": "此命令需要最低%s版本的ModMdo运行",
     "language.chinese": "中文",
     "language.english": "英文",

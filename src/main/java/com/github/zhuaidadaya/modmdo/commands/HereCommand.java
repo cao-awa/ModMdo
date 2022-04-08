@@ -2,11 +2,17 @@ package com.github.zhuaidadaya.modmdo.commands;
 
 import com.github.zhuaidadaya.modmdo.simple.vec.XYZ;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.server.PlayerManager;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.function.CommandFunction;
+import net.minecraft.server.function.CommandFunctionManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
@@ -53,7 +59,7 @@ public class HereCommand extends SimpleCommandOperation implements SimpleCommand
     public TranslatableText formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity whoUseHere) {
         String useHerePlayerName = whoUseHere.getName().asString();
 
-        return new TranslatableText("command.here", useHerePlayerName, "", dimensionUtil.getDimensionColor(dimension) + useHerePlayerName, dimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ());
+        return new TranslatableText("command.here", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ());
     }
 
     public TranslatableText formatHereFeedBack(ServerPlayerEntity player) {

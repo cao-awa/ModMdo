@@ -5,6 +5,7 @@ import com.github.zhuaidadaya.modmdo.simple.vec.XYZ;
 import com.github.zhuaidadaya.modmdo.storage.Variables;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.modmdo.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
@@ -88,7 +89,7 @@ public class ServerTickListener {
 
                     Thread.sleep(20);
                 } catch (Exception e) {
-                    e.printStackTrace();
+
                 }
             }
         });
@@ -255,6 +256,9 @@ public class ServerTickListener {
      */
     public void eachPlayer(PlayerManager players) {
         for (ServerPlayerEntity player : players.getPlayerList()) {
+            if (needSync) {
+                player.getInventory().updateItems();
+            }
             if (modMdoType == ModMdoType.SERVER & enableEncryptionToken) {
                 checkLoginStat(player, players);
                 try {
@@ -412,8 +416,8 @@ public class ServerTickListener {
      * @author 草二号机
      */
     public TranslatableText formatDeathMessage(ServerPlayerEntity player, XYZ xyz) {
-        String dimension = dimensionUtil.getDimension(player);
-        return new TranslatableText("dead.deadIn", dimensionUtil.getDimensionColor(dimension), dimensionUtil.getDimensionName(dimension), xyz.getIntegerXYZ());
+        String dimension = DimensionUtil.getDimension(player);
+        return new TranslatableText("dead.deadIn", DimensionUtil.getDimensionColor(dimension), DimensionUtil.getDimensionName(dimension), xyz.getIntegerXYZ());
     }
 
     public void setOnlineTimeAndRanking(MinecraftServer server, PlayerManager players) {

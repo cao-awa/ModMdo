@@ -9,7 +9,10 @@ import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.utils.translate.TranslateUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.command.argument.EnchantmentArgumentType;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 
 import java.util.Locale;
 
@@ -302,6 +305,74 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 language = Language.ENGLISH;
                 updateModMdoVariables();
                 sendFeedback(english, new TranslatableText("language.default", language), 20);
+                return 0;
+            }))).then(literal("maxEnchantmentLevel").executes(getEnchantControlEnable -> {
+                sendFeedback(getEnchantControlEnable, TranslateUtil.translatableText(enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"), 21);
+                return 0;
+            }).then(literal("enable").executes(enableEnchantLimit -> {
+                enchantLevelController.setEnabledControl(true);
+                saveEnchantmentMaxLevel();
+                sendFeedback(enableEnchantLimit, TranslateUtil.translatableText(enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"), 21);
+                return 0;
+            })).then(literal("disable").executes(disableEnchantLimit -> {
+                enchantLevelController.setEnabledControl(false);
+                saveEnchantmentMaxLevel();
+                sendFeedback(disableEnchantLimit, TranslateUtil.translatableText(enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"), 21);
+                return 0;
+            })).then(literal("limit").then(literal("all").then(argument("all", IntegerArgumentType.integer(0, Short.MAX_VALUE)).executes(setDef -> {
+                short level = (short) IntegerArgumentType.getInteger(setDef, "all");
+                enchantLevelController.setAll(level);
+                sendFeedback(setDef, new TranslatableText("enchantment.max.level.limit.all", level), 21);
+                return 0;
+            })).then(literal("default").executes(recoveryAll -> {
+                enchantLevelController.allDefault();
+                sendFeedback(recoveryAll, new TranslatableText("enchantment.max.level.limit.all.default"), 21);
+                return 0;
+            }))).then(literal("appoint").then(argument("appoint", EnchantmentArgumentType.enchantment()).executes(getLimit -> {
+                Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(getLimit, "appoint"));
+                short level = enchantLevelController.get(name).getMax();
+                sendFeedback(getLimit, new TranslatableText("enchantment.max.level.limit", name, level), 21);
+                saveEnchantmentMaxLevel();
+                return 0;
+            }).then(argument("limit", IntegerArgumentType.integer(0, Short.MAX_VALUE)).executes(setLimit -> {
+                Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(setLimit, "appoint"));
+                short level = (short) IntegerArgumentType.getInteger(setLimit, "limit");
+                enchantLevelController.set(name, level);
+                saveEnchantmentMaxLevel();
+                sendFeedback(setLimit, new TranslatableText("enchantment.max.level.limit", name, level), 21);
+                return 0;
+            })).then(literal("default").executes(recoveryLevel -> {
+                Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(recoveryLevel, "appoint"));
+                short level = enchantLevelController.get(name).getDefaultMax();
+                enchantLevelController.set(name, level);
+                saveEnchantmentMaxLevel();
+                sendFeedback(recoveryLevel, new TranslatableText("enchantment.max.level.limit", name, level), 21);
+                return 0;
+            })))))).then(literal("clearEnchantIfLevelTooHigh").executes(getClear -> {
+                sendFeedback(getClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh ? "enabled" : "disabled"), 21);
+                return 0;
+            }).then(literal("enable").executes(enableClear -> {
+                clearEnchantIfLevelTooHigh = true;
+                updateModMdoVariables();
+                sendFeedback(enableClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", "enabled"), 21);
+                return 0;
+            })).then(literal("disable").executes(disableClear -> {
+                clearEnchantIfLevelTooHigh = false;
+                updateModMdoVariables();
+                sendFeedback(disableClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", "disabled"), 21);
+                return 0;
+            }))).then(literal("rejectNoFallCheat").executes(getRejectNoFall -> {
+                sendFeedback(getRejectNoFall, new TranslatableText(rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
+                return 0;
+            }).then(literal("enable").executes(reject -> {
+                rejectNoFallCheat = true;
+                updateModMdoVariables();
+                sendFeedback(reject, new TranslatableText(rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
+                return 0;
+            })).then(literal("disable").executes(receive -> {
+                rejectNoFallCheat = false;
+                updateModMdoVariables();
+                sendFeedback(receive, new TranslatableText(rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
                 return 0;
             }))));
         });
