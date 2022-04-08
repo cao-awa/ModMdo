@@ -43,84 +43,88 @@ public abstract class ServerLoginNetworkHandlerMixin {
      */
     @Overwrite
     private void addToServer(ServerPlayerEntity player) {
-        if(player == null)
+        if (player == null)
             return;
 
-        new Thread(() -> {
-            Thread.currentThread().setName("ModMdo accepting");
+        if (!server.isHost(player.getGameProfile())) {
+            new Thread(() -> {
+                Thread.currentThread().setName("ModMdo accepting");
 
-            System.out.println(player.getRotationVecClient().toString());
+                System.out.println(player.getRotationVecClient().toString());
 
-            long waiting = TimeUtil.currentMillions();
-            long nano = System.nanoTime();
+                long waiting = TimeUtil.currentMillions();
+                long nano = System.nanoTime();
 
-            LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
+                LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
 
-            try {
-                new ServerPlayNetworkHandler(server, connection, player).sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(enableEncryptionToken ? 99 : 96)));
+                try {
+                    new ServerPlayNetworkHandler(server, connection, player).sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(enableEncryptionToken ? 99 : 96)));
 
-                sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.try", player.getName().asString()), "join_server_follow");
-            } catch (Exception e) {
+                    sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.try", player.getName().asString()), "join_server_follow");
+                } catch (Exception e) {
 
-            }
+                }
 
-            if(modMdoType == ModMdoType.SERVER & enableEncryptionToken) {
-                while(! loginUsers.hasUser(player)) {
-                    if(rejectUsers.hasUser(player)) {
-                        connection.send(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
-                        LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player provided a bad token");
-                        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.bad.token", player.getName().asString()), "join_server_follow");
-                        connection.disconnect(new LiteralText("failed to login server"));
-
-                        LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
-                        return;
-                    } else {
-                        if(TimeUtil.processedTime(waiting) > tokenCheckTimeLimit) {
-                            connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with token")));
-                            LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
-                            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "join_server_follow");
+                if (modMdoType == ModMdoType.SERVER & enableEncryptionToken) {
+                    while (! loginUsers.hasUser(player)) {
+                        if (rejectUsers.hasUser(player)) {
+                            connection.send(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
+                            LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player provided a bad token");
+                            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.bad.token", player.getName().asString()), "join_server_follow");
                             connection.disconnect(new LiteralText("failed to login server"));
 
                             LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
                             return;
+                        } else {
+                            if (TimeUtil.processedTime(waiting) > tokenCheckTimeLimit) {
+                                connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with token")));
+                                LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
+                                sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "join_server_follow");
+                                connection.disconnect(new LiteralText("failed to login server"));
+
+                                LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
+                                return;
+                            }
+                        }
+
+                        if (! connection.isOpen()) {
+                            break;
+                        }
+
+                        try {
+                            Thread.sleep(25);
+                        } catch (InterruptedException e) {
+
                         }
                     }
-
-                    if(! connection.isOpen()) {
-                        break;
-                    }
-
-                    try {
-                        Thread.sleep(25);
-                    } catch (InterruptedException e) {
-
-                    }
                 }
-            }
 
-            try {
                 try {
-                    if(connection.isOpen()) {
-                        server.getPlayerManager().onPlayerConnect(connection, player);
-                        LOGGER.info("accepted nano: " + nano + " (" + player.getName().asString() + ")");
-                    } else {
-                        LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
+                    try {
+                        if (connection.isOpen()) {
+                            server.getPlayerManager().onPlayerConnect(connection, player);
+                            LOGGER.info("accepted nano: " + nano + " (" + player.getName().asString() + ")");
+                        } else {
+                            LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
+                        }
+                    } catch (Exception e) {
+                        if (! server.isHost(player.getGameProfile())) {
+                            LOGGER.info("player " + player.getName().asString() + " lost status synchronize");
+
+                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("lost status synchronize, please connect again")));
+
+                            player.networkHandler.disconnect(new LiteralText("lost status synchronize"));
+                        } else {
+                            LOGGER.info("player " + player.getName().asString() + " lost status synchronize, but will not be process");
+                        }
                     }
                 } catch (Exception e) {
-                    if (!server.isHost(player.getGameProfile())) {
-                        LOGGER.info("player " + player.getName().asString() + " lost status synchronize");
 
-                        player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("lost status synchronize, please connect again")));
-
-                        player.networkHandler.disconnect(new LiteralText("lost status synchronize"));
-                    } else {
-                        LOGGER.info("player " + player.getName().asString() + " lost status synchronize, but will not be process");
-                    }
                 }
-            } catch (Exception e) {
-
-            }
-            player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(servers.toJSONObject().toString())));
-        }).start();
+                player.networkHandler.sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(107).writeString(servers.toJSONObject().toString())));
+            }).start();
+        } else {
+            this.server.getPlayerManager().onPlayerConnect(this.connection, player);
+        }
     }
 }

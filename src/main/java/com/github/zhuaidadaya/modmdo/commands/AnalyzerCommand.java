@@ -4,6 +4,7 @@ import com.github.zhuaidadaya.modmdo.subscribable.TickPerSecondAnalyzer;
 import com.github.zhuaidadaya.modmdo.system.SystemUtil;
 import com.github.zhuaidadaya.modmdo.usr.User;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.utils.player.PlayerUtil;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -21,7 +22,6 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
-import static com.github.zhuaidadaya.modmdo.storage.Variables.dimensionUtil;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -32,12 +32,9 @@ public class AnalyzerCommand extends SimpleCommandOperation implements SimpleCom
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("analyzer").then(literal("self").then(literal("vec").executes(vec -> {
-                if (commandApplyToPlayer(1, getPlayer(vec), this, vec)) {
-                    ServerPlayerEntity player = getPlayer(vec);
+                ServerPlayerEntity player = getPlayer(vec);
 
-                    sendFeedback(vec, formatVecMessage(player.getPos(), player.getRotationClient(), dimensionUtil.getDimension(player)));
-
-                }
+                sendFeedback(vec, formatVecMessage(player.getPos(), player.getRotationClient(), DimensionUtil.getDimension(player)), 1);
                 return 0;
             })).then(literal("gameOnlineTime").executes(onlineTime -> {
                 ServerPlayerEntity player = getPlayer(onlineTime);

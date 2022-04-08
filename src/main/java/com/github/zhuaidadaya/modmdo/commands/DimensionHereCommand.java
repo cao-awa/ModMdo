@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modmdo.commands;
 
 import com.github.zhuaidadaya.modmdo.simple.vec.XYZ;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -23,7 +24,7 @@ public class DimensionHereCommand extends SimpleCommandOperation implements Simp
                         ServerPlayerEntity whoUseHere = source.getPlayer();
                         PlayerManager p = source.getServer().getPlayerManager();
                         XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
-                        String dimension = dimensionUtil.getDimension(whoUseHere);
+                        String dimension = DimensionUtil.getDimension(whoUseHere);
                         for (ServerPlayerEntity player : p.getPlayerList()) {
                             if (isUserHereReceive(player.getUuid())) {
                                 TranslatableText hereMessage = formatHereTip(dimension, xyz, whoUseHere);
@@ -65,7 +66,7 @@ public class DimensionHereCommand extends SimpleCommandOperation implements Simp
             convertXYZ.multiplyXZ(8, 8);
         }
 
-        return new TranslatableText("command.dhere", useHerePlayerName, "", dimensionUtil.getDimensionColor(dimension) + useHerePlayerName, dimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), dimensionUtil.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
+        return new TranslatableText("command.dhere", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), DimensionUtil.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
     }
 
     public TranslatableText formatHereFeedBack(ServerPlayerEntity player) {
