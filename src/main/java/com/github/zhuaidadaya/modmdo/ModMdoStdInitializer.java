@@ -2,8 +2,11 @@ package com.github.zhuaidadaya.modmdo;
 
 import com.github.zhuaidadaya.modmdo.commands.*;
 import com.github.zhuaidadaya.modmdo.commands.jump.JumpCommand;
+import com.github.zhuaidadaya.modmdo.extra.loader.ExtraArgs;
+import com.github.zhuaidadaya.modmdo.extra.loader.ModMdo;
+import com.github.zhuaidadaya.modmdo.extra.loader.ModMdoExtraLoader;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
-import com.github.zhuaidadaya.modmdo.format.LanguageResource;
+import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.zhuaidadaya.modmdo.identifier.RandomIdentifier;
 import com.github.zhuaidadaya.modmdo.lang.Language;
@@ -18,6 +21,7 @@ import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
 import com.github.zhuaidadaya.modmdo.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.ObjectConfigUtil;
+import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
 import org.json.JSONObject;
@@ -25,44 +29,41 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ModMdoStdInitializer implements ModInitializer {
     public static void initForLevel(MinecraftServer server) {
-        config = new ObjectConfigUtil(entrust, getServerLevelPath(server), "modmdo.mhf");
-
-        allDefault();
-
-        try {
-            initModMdoVariables();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        updateModMdoVariables();
+        extras.setArg(extraId, new ExtraArgs().set("server", server));
+        extras.load();
     }
 
     public static void initModMdoVariables() {
         if (config.getConfig("default_language") != null)
             language = Language.getLanguageForName(config.getConfigString("default_language"));
         if (config.getConfig("here_command") != null)
-            enableHereCommand = config.getConfigString("here_command").equals("enable");
+            enableHereCommand = config.getConfigBoolean("here_command");
         if (config.getConfig("dead_message") != null)
-            enableDeadMessage = config.getConfigString("dead_message").equals("enable");
+            enableDeadMessage = config.getConfigBoolean("dead_message");
         if (config.getConfig("cava") != null)
-            enableCava = config.getConfigString("cava").equals("enable");
+            enableCava = config.getConfigBoolean("cava");
         if (config.getConfig("secure_enchant") != null)
-            enableSecureEnchant = config.getConfigString("secure_enchant").equals("enable");
+            enableSecureEnchant = config.getConfigBoolean("secure_enchant");
         if (config.getConfig("encryption_token") != null)
-            enableEncryptionToken = config.getConfigString("encryption_token").equals("enable");
+            enableEncryptionToken = config.getConfigBoolean("encryption_token");
         if (config.getConfig("check_token_per_tick") != null)
-            enableCheckTokenPerTick = config.getConfigString("check_token_per_tick").equals("enable");
+            enableCheckTokenPerTick = config.getConfigBoolean("check_token_per_tick");
         if (config.getConfig("time_active") != null)
-            enableSecureEnchant = config.getConfigString("time_active").equals("enable");
+            enableSecureEnchant = config.getConfigBoolean("time_active");
         if (config.getConfig("checker_time_limit") != null)
             tokenCheckTimeLimit = config.getConfigInt("checker_time_limit");
         if (config.getConfig("identifier") == null)
             config.set("identifier", RandomIdentifier.randomIdentifier());
+        if (config.getConfig("enchantment_clear_if_level_too_high") != null)
+            clearEnchantIfLevelTooHigh = config.getConfigBoolean("enchantment_clear_if_level_too_high");
+        if (config.getConfig("reject_no_fall_cheat") != null)
+            rejectNoFallCheat = config.getConfigBoolean("reject_no_fall_chest");
 
         if (config.getConfig("token_by_encryption") != null) {
             initModMdoToken();
@@ -113,11 +114,22 @@ public class ModMdoStdInitializer implements ModInitializer {
         new RankingCommand().register();
         new JumpCommand().register();
 
-        LanguageResource resource = new LanguageResource();
+        Resource<Language> resource = new Resource<>();
         resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
         resource.set(Language.ENGLISH, "/assets/modmdo/lang/en_us.json");
         consoleTextFormat = new ConsoleTextFormat(resource);
         minecraftTextFormat = new MinecraftTextFormat(resource);
+        Resource<String> enchant = new Resource<>();
+        enchant.set("enchantment_level", "/assets/modmdo/format/enchantment_level.json");
+        enchantLevelController = new EnchantLevelController(enchant);
+
+        extras = new ModMdoExtraLoader();
+
+        LOGGER.info("registering for ModMdo extra");
+
+        extras.register(extraId, new ModMdo().setName("ModMdo"));
+
+        loaded = true;
     }
 
     public void parseMapFormat() {

@@ -4,6 +4,7 @@ import com.github.zhuaidadaya.modmdo.subscribable.TickPerSecondAnalyzer;
 import com.github.zhuaidadaya.modmdo.system.SystemUtil;
 import com.github.zhuaidadaya.modmdo.usr.User;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
+import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.utils.player.PlayerUtil;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -33,7 +34,7 @@ public class AnalyzerCommand extends SimpleCommandOperation implements SimpleCom
             dispatcher.register(literal("analyzer").then(literal("self").then(literal("vec").executes(vec -> {
                 ServerPlayerEntity player = getPlayer(vec);
 
-                sendFeedback(vec, formatVecMessage(player.getPos(), player.getRotationClient(), dimensionUtil.getDimension(player)), 1);
+                sendFeedback(vec, formatVecMessage(player.getPos(), player.getRotationClient(), DimensionUtil.getDimension(player)), 1);
                 return 0;
             })).then(literal("gameOnlineTime").executes(onlineTime -> {
                 ServerPlayerEntity player = getPlayer(onlineTime);

@@ -1,30 +1,31 @@
 package com.github.zhuaidadaya.modmdo.format;
 
 import com.github.zhuaidadaya.modmdo.lang.Language;
-import com.github.zhuaidadaya.modmdo.reads.FileReads;
-import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
+import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TextFormat<T> {
-    protected final Map<Language, JSONObject> format = new HashMap<>();
+import static com.github.zhuaidadaya.modmdo.storage.Variables.language;
 
-    public TextFormat(LanguageResource languageResource) {
-        set(languageResource);
+public abstract class TextFormat<T> {
+    protected final Map<Language, Map<String, String>> format = new Object2ObjectLinkedOpenHashMap<>();
+
+    public TextFormat(Resource<Language> resource) {
+        set(resource);
     }
 
-    public void set(LanguageResource languageResource) {
-        for (Language lang : languageResource.getNames()) {
-            String resource = languageResource.get(lang);
-
+    public void set(Resource<Language> resource) {
+        for (Language lang : resource.getNames()) {
             try {
-                JSONObject json = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource(resource, getClass()), StandardCharsets.UTF_8))));
-                format.put(lang, json);
+                Map<String, String> map = new Object2ObjectLinkedOpenHashMap<>();
+                JSONObject json = new JSONObject(resource.read(lang));
+                for (String s : json.keySet()) {
+                    map.put(s, json.getString(s));
+                }
+                format.put(lang, map);
             } catch (Exception e) {
 
             }
@@ -32,4 +33,21 @@ public abstract class TextFormat<T> {
     }
 
     public abstract T format(String key, Object... args);
+
+    public String formatted(String key, Object... args) {
+        try {
+            String formatReturn = format.get(language).get(key);
+
+            for (Object o : args) {
+                try {
+                    formatReturn = formatReturn.replaceFirst("%s", o.toString());
+                } catch (Exception ex) {
+                    return formatReturn;
+                }
+            }
+            return formatReturn;
+        } catch (Exception e) {
+            return "";
+        }
+    }
 }

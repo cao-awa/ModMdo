@@ -7,7 +7,7 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.consoleTextFormat;
 import static com.github.zhuaidadaya.modmdo.storage.Variables.minecraftTextFormat;
 
 public class DimensionUtil {
-    public String getDimensionColor(String dimension) {
+    public static String getDimensionColor(String dimension) {
         String result;
         switch(dimension) {
             case "overworld" -> result = "§a";
@@ -18,15 +18,15 @@ public class DimensionUtil {
         return result;
     }
 
-    public String getDimensionKey(String dimension) {
+    public static String getDimensionKey(String dimension) {
         return "dimension." + dimension;
     }
 
-    public String getDimensionName(String dimension) {
+    public static String getDimensionName(String dimension) {
         return consoleTextFormat.format(getDimensionKey(dimension));
     }
 
-    public String getDimension(ServerPlayerEntity player) {
+    public static String getDimension(ServerPlayerEntity player) {
         return player.getEntityWorld().getDimension().getEffects().getPath();
     }
 }

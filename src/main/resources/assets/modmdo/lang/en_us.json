@@ -1,4 +1,13 @@
 {
+    "player.no.fall.cheat.receive": "received all no fall damage cheating",
+    "player.no.fall.cheat.reject": "rejected all no fall damage cheating",
+    "enchantment.level.controller.disabled": "disabled enchant level controller",
+    "enchantment.level.controller.enabled": "disabled enchant level controller",
+    "enchantment_clear_if_level_too_high.enabled.rule.format": "clear enchant of item if level to high is disabled",
+    "enchantment_clear_if_level_too_high.disabled.rule.format": "clear enchant of item if level to high is disabled",
+    "enchantment.max.level.limit.all.default": "recovered default level of all enchantment",
+    "enchantment.max.level.limit.all": "max level of all enchantment will be: %s",
+    "enchantment.max.level.limit": "current maximum level for %s is %s",
     "command.require.version": "this command minimum ModMdo version require: %s",
     "language.chinese": "chinese",
     "language.english": "english",

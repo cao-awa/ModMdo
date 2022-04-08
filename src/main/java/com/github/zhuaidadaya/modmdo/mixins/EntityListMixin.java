@@ -1,6 +1,8 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Identifier;
@@ -20,6 +22,8 @@ public class EntityListMixin {
     private Int2ObjectMap<Entity> entities;
     @Shadow
     private @Nullable Int2ObjectMap<Entity> iterating;
+
+    @Shadow private Int2ObjectMap<Entity> temp;
 
     /**
      * @author 草awa
@@ -49,6 +53,29 @@ public class EntityListMixin {
                 }
             } finally {
                 this.iterating = null;
+            }
+        }
+    }
+
+    /**
+     * @author 草awa
+     * @reason
+     */
+    @Overwrite
+    private void ensureSafe() {
+        if (this.iterating == this.entities) {
+            try {
+                this.temp.clear();
+
+                for (Int2ObjectMap.Entry<Entity> entityEntry : Int2ObjectMaps.fastIterable(this.entities)) {
+                    this.temp.put(entityEntry.getIntKey(), entityEntry.getValue());
+                }
+
+                Int2ObjectMap<Entity> int2ObjectMap = this.entities;
+                this.entities = this.temp;
+                this.temp = int2ObjectMap;
+            } catch (Exception e) {
+
             }
         }
     }
