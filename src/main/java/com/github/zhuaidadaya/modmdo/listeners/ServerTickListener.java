@@ -255,6 +255,7 @@ public class ServerTickListener {
      */
     public void eachPlayer(PlayerManager players) {
         for (ServerPlayerEntity player : players.getPlayerList()) {
+            System.out.println(player.getPos());
             if (modMdoType == ModMdoType.SERVER & enableEncryptionToken) {
                 checkLoginStat(player, players);
                 try {
