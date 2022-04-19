@@ -5,6 +5,8 @@ import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.Vec3i;
 import org.json.JSONObject;
 
+import static com.github.zhuaidadaya.modmdo.storage.Variables.fractionDigits2;
+
 public class XYZ {
     public double x;
     public double y;
@@ -160,7 +162,7 @@ public class XYZ {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put("x", x).put("y", y).put("z", z);
+        return new JSONObject().put("x", fractionDigits2.format(x)).put("y", fractionDigits2.format(y)).put("z", fractionDigits2.format(z));
     }
 
     public boolean equal(XYZ xyz) {

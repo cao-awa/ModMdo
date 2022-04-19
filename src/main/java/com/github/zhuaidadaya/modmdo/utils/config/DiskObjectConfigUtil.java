@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modmdo.utils.config;
 
+import com.github.zhuaidadaya.modmdo.utils.file.FileUtil;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;

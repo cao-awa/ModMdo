@@ -2,7 +2,7 @@ package com.github.zhuaidadaya.modmdo.login.server;
 
 import com.github.zhuaidadaya.modmdo.login.token.ClientEncryptionToken;
 import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
-import com.github.zhuaidadaya.modmdo.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;

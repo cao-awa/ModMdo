@@ -15,11 +15,10 @@ import com.github.zhuaidadaya.modmdo.login.token.TokenContentType;
 import com.github.zhuaidadaya.modmdo.mixins.MinecraftServerSession;
 import com.github.zhuaidadaya.modmdo.ranking.Rank;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
-import com.github.zhuaidadaya.modmdo.usr.User;
-import com.github.zhuaidadaya.modmdo.usr.UserUtil;
+import com.github.zhuaidadaya.modmdo.utils.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.ObjectConfigUtil;
-import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.*;
@@ -118,6 +117,8 @@ public class Variables {
 
     public static ModMdoExtraLoader extras;
     public static boolean loaded = false;
+
+    public static boolean testing = false;
 
     public static final NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
     public static final NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();

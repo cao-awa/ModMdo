@@ -26,13 +26,7 @@ public abstract class ItemStackMixin {
     private NbtCompound nbt;
 
     @Shadow
-    public abstract boolean isFood();
-
-    @Shadow
     public abstract Text getName();
-
-    @Shadow
-    public abstract Item getItem();
 
     @Inject(method = "setNbt", at = @At("RETURN"))
     public void setNbt(NbtCompound nbt, CallbackInfo ci) {

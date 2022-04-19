@@ -18,8 +18,6 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class RankingCommand extends SimpleCommandOperation implements ConfigurableCommand {
     @Override
     public void register() {
-        init();
-
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("ranking").then(literal("create").then(literal("deaths").then(literal("setDisplay").executes(setDeathDisplay -> {
                 if (commandApplyToPlayer(11, getPlayer(setDeathDisplay), this, setDeathDisplay)) {

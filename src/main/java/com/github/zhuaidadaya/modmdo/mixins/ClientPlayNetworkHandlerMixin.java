@@ -44,21 +44,6 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     private ClientConnection connection;
 
     @Shadow
-    private Set<RegistryKey<World>> worldKeys;
-
-    @Shadow
-    private DynamicRegistryManager registryManager;
-
-    @Shadow
-    private int chunkLoadDistance;
-
-    @Shadow
-    private ClientWorld.Properties worldProperties;
-
-    @Shadow
-    private ClientWorld world;
-
-    @Shadow
     @Final
     private GameProfile profile;
 
@@ -72,7 +57,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      *         callback
      *
      * @author 草二号机
-     * @author 草
+     * @author 草awa
      * @author zhuaidadaya
      */
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)

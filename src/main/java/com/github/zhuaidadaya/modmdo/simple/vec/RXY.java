@@ -3,6 +3,8 @@ package com.github.zhuaidadaya.modmdo.simple.vec;
 import net.minecraft.util.math.Vec2f;
 import org.json.JSONObject;
 
+import static com.github.zhuaidadaya.modmdo.storage.Variables.fractionDigits2;
+
 public class RXY {
     public double x;
     public double y;
@@ -64,7 +66,7 @@ public class RXY {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put("x", x).put("y", y);
+        return new JSONObject().put("x", fractionDigits2.format(x)).put("y", fractionDigits2.format(y));
     }
 
     public boolean equal(RXY rxy) {

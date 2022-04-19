@@ -2,7 +2,7 @@ package com.github.zhuaidadaya.modmdo.commands;
 
 import com.github.zhuaidadaya.modmdo.cavas.Cava;
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
-import com.github.zhuaidadaya.modmdo.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -17,8 +17,6 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class CavaCommand extends SimpleCommandOperation implements ConfigurableCommand {
     public void register() {
-        init();
-
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("cava").executes(cava -> {
                 ServerCommandSource source = cava.getSource();

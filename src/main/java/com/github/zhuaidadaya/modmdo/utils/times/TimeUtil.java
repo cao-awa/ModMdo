@@ -92,11 +92,19 @@ public class TimeUtil {
         return ticks * 50;
     }
 
-    public static long currentMillions() {
+    public static long millions() {
         return System.currentTimeMillis();
     }
 
-    public static long processedTime(long start) {
-        return currentMillions() - start;
+    public static long nano() {
+        return System.nanoTime();
+    }
+
+    public static long processMillion(long million) {
+        return millions() - million;
+    }
+
+    public static long processNano(long nano) {
+        return nano() - nano;
     }
 }

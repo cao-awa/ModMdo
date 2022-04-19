@@ -46,24 +46,13 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Shadow
     @Final
     public ClientConnection connection;
-    private boolean firstKeepAlive = false;
+
     @Shadow
     @Final
     private MinecraftServer server;
-    @Shadow
-    private boolean waitingForKeepAlive;
-
-    @Shadow
-    private long keepAliveId;
-
-    @Shadow
-    private long lastKeepAliveTime;
 
     @Shadow
     protected abstract boolean isHost();
-
-    @Shadow
-    public abstract void disconnect(Text reason);
 
     /**
      * 解析玩家发送的数据包, 如果identifier为 <code>modmdo:token</code> 则检查token<br>
@@ -193,16 +182,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }).start();
     }
 
-    /**
-     * 不登入不给使用命令
-     *
-     * @param input
-     *         命令
-     * @param ci
-     *         callback
-     *
-     * @author 草二号机
-     */
     @Inject(method = "executeCommand", at = @At("HEAD"), cancellable = true)
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);

@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modmdo.utils.config;
+package com.github.zhuaidadaya.modmdo.utils.file;
 
 import java.io.*;
 import java.util.Enumeration;
@@ -8,8 +8,8 @@ import java.util.zip.ZipFile;
 public class FileUtil {
     public static void deleteFiles(String path) {
         File file = new File(path);
-        for(File f : file.listFiles()) {
-            if(f.isFile()) {
+        for (File f : file.listFiles()) {
+            if (f.isFile()) {
                 f.delete();
             } else {
                 deleteFiles(f.getAbsolutePath());
@@ -23,15 +23,15 @@ public class FileUtil {
         try {
             zipFile = new ZipFile(zip);
             Enumeration<?> entries = zipFile.entries();
-            while(entries.hasMoreElements()) {
+            while (entries.hasMoreElements()) {
                 ZipEntry entry = (ZipEntry) entries.nextElement();
-                if(entry.isDirectory()) {
+                if (entry.isDirectory()) {
                     String dirPath = path + "/" + entry.getName();
                     File dir = new File(dirPath);
                     dir.mkdirs();
                 } else {
                     File targetFile = new File(path + "/" + entry.getName());
-                    if(! targetFile.getParentFile().exists()) {
+                    if (! targetFile.getParentFile().exists()) {
                         targetFile.getParentFile().mkdirs();
                     }
                     targetFile.createNewFile();
@@ -39,7 +39,7 @@ public class FileUtil {
                     FileOutputStream fos = new FileOutputStream(targetFile);
                     int len;
                     byte[] buf = new byte[1024 * 1024];
-                    while((len = is.read(buf)) != - 1) {
+                    while ((len = is.read(buf)) != - 1) {
                         fos.write(buf, 0, len);
                     }
                     fos.close();
@@ -49,7 +49,7 @@ public class FileUtil {
         } catch (Exception e) {
             throw new RuntimeException("failed to unzip: " + zip, e);
         } finally {
-            if(zipFile != null) {
+            if (zipFile != null) {
                 try {
                     zipFile.close();
                 } catch (IOException e) {
@@ -63,7 +63,7 @@ public class FileUtil {
         String cache;
         StringBuilder builder = new StringBuilder();
         try {
-            while((cache = reader.readLine()) != null)
+            while ((cache = reader.readLine()) != null)
                 builder.append(cache).append("\n");
         } catch (Exception e) {
             return "";
@@ -76,7 +76,7 @@ public class FileUtil {
         StringBuilder builder = new StringBuilder();
         try {
             boolean into = false;
-            while((cache = reader.readLine()) != null) {
+            while ((cache = reader.readLine()) != null) {
                 builder.append(cache).append(into ? "\n" : "");
                 into = true;
             }
@@ -96,6 +96,62 @@ public class FileUtil {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
             writer.write(information);
             writer.close();
+        } catch (Exception e) {
+
+        }
+    }
+
+    public static void createFile(File f) {
+        try {
+            createParent(f);
+            f.createNewFile();
+        } catch (IOException e) {
+
+        }
+    }
+
+    public static void createParent(File f) {
+        try {
+            f.getParentFile().mkdirs();
+        } catch (Exception e) {
+
+        }
+    }
+
+    public static void insertToHead(File file, String inf) {
+        insert(file,0, inf + "\n");
+    }
+
+    public static void insert(File file, int pos, String inf) {
+        try {
+            if (! (file.exists() && file.isFile())) {
+                return;
+            }
+            if ((pos < 0) || (pos > file.length())) {
+                return;
+            }
+
+            File f = new File(file.getPath() + ".cache");
+            FileOutputStream outputStream = new FileOutputStream(f);
+            FileInputStream inputStream = new FileInputStream(f);
+            f.deleteOnExit();
+
+            RandomAccessFile rw = new RandomAccessFile(file, "rw");
+            rw.seek(pos);
+
+            int cache;
+            while ((cache = rw.read()) != - 1) {
+                outputStream.write(cache);
+            }
+            rw.seek(pos);
+            rw.write(inf.getBytes());
+
+            while ((cache = inputStream.read()) != - 1) {
+                rw.write(cache);
+            }
+            rw.close();
+            outputStream.close();
+            inputStream.close();
         } catch (Exception e) {
 
         }

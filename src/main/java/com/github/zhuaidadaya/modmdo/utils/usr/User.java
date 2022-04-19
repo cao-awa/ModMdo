@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modmdo.usr;
+package com.github.zhuaidadaya.modmdo.utils.usr;
 
 import com.github.zhuaidadaya.modmdo.login.token.ClientEncryptionToken;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
