@@ -4,9 +4,10 @@ import com.github.zhuaidadaya.modmdo.ranking.Rank;
 import com.github.zhuaidadaya.modmdo.simple.vec.XYZ;
 import com.github.zhuaidadaya.modmdo.storage.Variables;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
-import com.github.zhuaidadaya.modmdo.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
+import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
@@ -20,6 +21,7 @@ import net.minecraft.text.TranslatableText;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
@@ -53,7 +55,6 @@ public class ServerTickListener {
             }
         });
 
-
         Thread subListener = new Thread(() -> {
             while (server == null) {
                 try {
@@ -82,7 +83,8 @@ public class ServerTickListener {
                         if (randomRankingSwitchTick > rankingRandomSwitchInterval) {
                             if (rankingSwitchNoDump)
                                 config.set("ranking_object", rankingObject = getRandomRankingObjectNoDump());
-                            else config.set("ranking_object", rankingObject = getRandomRankingObject());
+                            else
+                                config.set("ranking_object", rankingObject = getRandomRankingObject());
                             randomRankingSwitchTick = 0;
                         }
                     }
@@ -268,7 +270,8 @@ public class ServerTickListener {
                 }
                 setPlayerLevel(player, players);
             }
-            if (enableDeadMessage) detectPlayerDead(player);
+            if (enableDeadMessage)
+                detectPlayerDead(player);
         }
     }
 
@@ -291,13 +294,15 @@ public class ServerTickListener {
             if ((tokenChanged || enableCheckTokenPerTick) & ! forceStopTokenCheck) {
                 for (User user : loginUsers.getUsers()) {
                     if (manager.getPlayer(user.getUuid()) == null) {
-                        if (forceStopTokenCheck) break;
+                        if (forceStopTokenCheck)
+                            break;
                         player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete player")));
                         player.networkHandler.disconnect(new LiteralText("obsolete player"));
                     }
                 }
 
-                if (forceStopTokenCheck) return;
+                if (forceStopTokenCheck)
+                    return;
 
                 if (manager.getPlayerList().contains(player)) {
                     if (loginUsers.hasUser(player)) {
@@ -344,7 +349,8 @@ public class ServerTickListener {
             int level = loginUsers.getUserLevel(player);
 
             if (manager.isOperator(player.getGameProfile())) {
-                if (level == 1) manager.removeFromOperators(player.getGameProfile());
+                if (level == 1)
+                    manager.removeFromOperators(player.getGameProfile());
             } else if (level == 4) {
                 manager.addToOperators(player.getGameProfile());
             }
@@ -365,7 +371,8 @@ public class ServerTickListener {
     public void checkLoginStat(ServerPlayerEntity player, PlayerManager manager) {
         try {
             if (! loginUsers.hasUser(player)) {
-                if (skipMap.get(player) == null) skipMap.put(player, System.currentTimeMillis());
+                if (skipMap.get(player) == null)
+                    skipMap.put(player, System.currentTimeMillis());
 
                 if (System.currentTimeMillis() - skipMap.get(player) > 1000) {
                     skipMap.put(player, System.currentTimeMillis());

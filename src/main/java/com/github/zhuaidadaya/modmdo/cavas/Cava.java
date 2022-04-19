@@ -2,7 +2,7 @@ package com.github.zhuaidadaya.modmdo.cavas;
 
 import com.github.zhuaidadaya.modmdo.utils.times.TimeType;
 import com.github.zhuaidadaya.modmdo.utils.times.Times;
-import com.github.zhuaidadaya.modmdo.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import org.json.JSONObject;
 
 import java.util.UUID;

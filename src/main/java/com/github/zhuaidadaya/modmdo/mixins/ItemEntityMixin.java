@@ -23,13 +23,12 @@ public abstract class ItemEntityMixin extends Entity {
 
 
     /**
+     * 草二号机取消了重写, 重做了方法
+     *
      * @author 草awa
      * @author 草二号机
      *
-     * 草二号机取消了重写, 重做了方法
      */
-
-
     @Inject(method = "tick",at = @At("RETURN"))
     public void tick(CallbackInfo ci) {
         if (age == -1) {

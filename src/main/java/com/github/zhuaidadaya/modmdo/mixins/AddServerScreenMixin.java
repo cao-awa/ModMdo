@@ -41,6 +41,7 @@ public abstract class AddServerScreenMixin extends Screen {
      * 以及连接类型的文本栏
      *
      * @param ci callback
+     *
      * @author zhuaidadaya
      * @author 草二号机
      * @author 草awa

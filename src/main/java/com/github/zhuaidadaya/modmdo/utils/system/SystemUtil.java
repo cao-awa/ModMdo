@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modmdo.system;
+package com.github.zhuaidadaya.modmdo.utils.system;
 
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;

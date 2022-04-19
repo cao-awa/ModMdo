@@ -18,7 +18,7 @@ import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.ranking.command.RankingCommand;
 import com.github.zhuaidadaya.modmdo.reads.FileReads;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
-import com.github.zhuaidadaya.modmdo.usr.UserUtil;
+import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.ObjectConfigUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
@@ -29,7 +29,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
@@ -93,7 +92,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         LOGGER.info("ModMdo Std Initiator running");
         LOGGER.info("loading for ModMdo Std init");
 
-        config = new ObjectConfigUtil(entrust, "config/", "ModMdo.mhf");
         configCached = new DiskObjectConfigUtil(entrust, "config/modmdo/");
 
         loginUsers = new UserUtil();
@@ -104,15 +102,20 @@ public class ModMdoStdInitializer implements ModInitializer {
         new ServerStartListener().listener();
         new ServerTickListener().listener();
 
-        new HereCommand().register();
-        new DimensionHereCommand().register();
-        new ModMdoUserCommand().register();
-        new CavaCommand().register();
-        new ModMdoConfigCommand().register();
-        new TokenCommand().register();
-        new AnalyzerCommand().register();
-        new RankingCommand().register();
-        new JumpCommand().register();
+        try {
+            new ModMdoUserCommand().register();
+            new HereCommand().register();
+            new DimensionHereCommand().register();
+            new CavaCommand().register();
+            new ModMdoConfigCommand().register();
+            new TokenCommand().register();
+            new AnalyzerCommand().register();
+            new RankingCommand().register();
+            new JumpCommand().register();
+            new TestCommand().register();
+        } catch (Exception e) {
+
+        }
 
         Resource<Language> resource = new Resource<>();
         resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
