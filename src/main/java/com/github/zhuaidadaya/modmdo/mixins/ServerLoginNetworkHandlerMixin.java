@@ -52,7 +52,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
                 System.out.println(player.getRotationVecClient().toString());
 
-                long waiting = TimeUtil.currentMillions();
+                long waiting = TimeUtil.millions();
                 long nano = System.nanoTime();
 
                 LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
@@ -76,7 +76,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                             LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
                             return;
                         } else {
-                            if (TimeUtil.processedTime(waiting) > tokenCheckTimeLimit) {
+                            if (TimeUtil.processMillion(waiting) > tokenCheckTimeLimit) {
                                 connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with token")));
                                 LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
                                 sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "join_server_follow");

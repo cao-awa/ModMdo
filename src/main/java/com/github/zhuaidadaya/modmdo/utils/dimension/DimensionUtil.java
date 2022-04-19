@@ -1,7 +1,13 @@
 package com.github.zhuaidadaya.modmdo.utils.dimension;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.consoleTextFormat;
 import static com.github.zhuaidadaya.modmdo.storage.Variables.minecraftTextFormat;
@@ -28,5 +34,9 @@ public class DimensionUtil {
 
     public static String getDimension(ServerPlayerEntity player) {
         return player.getEntityWorld().getDimension().getEffects().getPath();
+    }
+
+    public static String getDimension(World world) {
+        return world.getDimension().getEffects().getPath();
     }
 }

@@ -1,17 +1,17 @@
 package com.github.zhuaidadaya.modmdo.cavas;
 
-import com.github.zhuaidadaya.modmdo.usr.User;
+import com.github.zhuaidadaya.modmdo.utils.usr.User;
+import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
+import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.updateCavas;
 
 public class CavaUtil {
-    private final LinkedHashMap<Object, Cava> cavas = new LinkedHashMap<>();
-    private final LinkedHashSet<String> cavaMessages = new LinkedHashSet<>();
+    private final Object2ObjectRBTreeMap<Object, Cava> cavas = new Object2ObjectRBTreeMap<>();
+    private final ObjectRBTreeSet<String> cavaMessages = new ObjectRBTreeSet<>();
 
     public CavaUtil() {
 

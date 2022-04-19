@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modmdo.extra.loader;
 
+import com.github.zhuaidadaya.modmdo.commands.ModMdoUserCommand;
 import com.github.zhuaidadaya.modmdo.reads.FileReads;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
 import com.github.zhuaidadaya.modmdo.utils.config.ObjectConfigUtil;
@@ -18,6 +19,8 @@ public class ModMdo extends ModMdoExtra {
         config = new ObjectConfigUtil(entrust, getServerLevelPath((MinecraftServer) getArgs().get("server")), "modmdo.mhf");
 
         allDefault();
+
+        new ModMdoUserCommand().init();
 
         try {
             initModMdoVariables();
