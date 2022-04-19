@@ -1,11 +1,11 @@
 package com.github.zhuaidadaya.modmdo.commands.jump;
 
 import com.github.zhuaidadaya.modmdo.commands.ConfigurableCommand;
-import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.commands.init.ArgumentInit;
 import com.github.zhuaidadaya.modmdo.jump.server.ServerInformation;
 import com.github.zhuaidadaya.modmdo.jump.server.ServerUtil;
 import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
+import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.netty.buffer.Unpooled;
@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.zip.ZipInputStream;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -29,7 +28,6 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class JumpCommand extends SimpleCommandOperation implements ConfigurableCommand {
     @Override
     public void register() {
-        ZipInputStream.
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("jump").then(literal("remove").requires(level -> level.hasPermissionLevel(4)).then(argument("servers", ServerJumpArgument.servers()).executes(removeServer -> {
                 if(commandApplyToPlayer(13, getPlayer(removeServer), this, removeServer)) {
