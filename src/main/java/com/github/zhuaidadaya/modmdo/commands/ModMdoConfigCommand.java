@@ -374,8 +374,15 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 updateModMdoVariables();
                 sendFeedback(receive, new TranslatableText(rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
                 return 0;
-            }))));
+            })).then(literal("registerPlayerUuid").then(literal("ops").executes(registerOps -> {
+                return 0;
+            })).then(literal("all").executes(registerAll -> {
+                return 0;
+            })).then(literal("disable").executes(disableRegister -> {
+                return 0;
+            }))).then(literal("registerPlayerNameRegex"))));
         });
+        String s;
     }
 
     public TranslatableText formatConfigReturnMessage(String config) {
