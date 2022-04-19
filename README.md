@@ -8,7 +8,7 @@ usually, we recommend your build on other fork\
 do not build jar in this fork
 
 but if you wanna, also can build in here\
-current ``` main ``` is build as 1.17.1\
+current ``` main ``` is build as 1.17.1
 
 if you know how to modify version\
 then you can build as other version on ``` main ```
