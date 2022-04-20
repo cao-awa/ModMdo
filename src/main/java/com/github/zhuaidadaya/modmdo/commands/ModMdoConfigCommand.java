@@ -7,12 +7,16 @@ import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.storage.Variables;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.utils.translate.TranslateUtil;
+import com.github.zhuaidadaya.rikaishinikui.handler.entrust.EntrustExecution;
+import com.github.zhuaidadaya.rikaishinikui.handler.config.ObjectConfigUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.command.argument.EnchantmentArgumentType;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
+import org.json.JSONObject;
 
 import java.util.Locale;
 
@@ -24,16 +28,12 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("modmdo").requires(level -> level.hasPermissionLevel(4)).then(literal("here").executes(here -> {
-                if (commandApplyToPlayer(1, getPlayer(here), this, here)) {
-                    sendFeedback(here, formatConfigReturnMessage("here_command"));
-                }
+                sendFeedback(here, formatConfigReturnMessage("here_command"), 1);
                 return 2;
             }).then(literal("enable").executes(enableHere -> {
-                if (commandApplyToPlayer(1, getPlayer(enableHere), this, enableHere)) {
-                    enableHereCommand = true;
-                    updateModMdoVariables();
-                    sendFeedback(enableHere, formatEnableHere());
-                }
+                enableHereCommand = true;
+                updateModMdoVariables();
+                sendFeedback(enableHere, formatEnableHere(), 1);
                 return 1;
             })).then(literal("disable").executes(disableHere -> {
                 if (commandApplyToPlayer(1, getPlayer(disableHere), this, disableHere)) {
@@ -374,15 +374,34 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 updateModMdoVariables();
                 sendFeedback(receive, new TranslatableText(rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
                 return 0;
-            })).then(literal("registerPlayerUuid").then(literal("ops").executes(registerOps -> {
+            }))).then(literal("registerPlayerUuid").then(literal("ops").executes(registerOps -> {
+                registerPlayerUuid = PermissionLevel.OPS;
+                updateModMdoVariables();
+                EntrustExecution.before(config, first -> {
+                    for (ServerPlayerEntity player : getServer(registerOps).getPlayerManager().getPlayerList()) {
+                        playerCached.put(player.getName().asString(), new JSONObject().put("uuid", player.getUuid().toString()).put("name", player.getName().asString()));
+                    }
+                    updateModMdoVariables();
+                }, ObjectConfigUtil::save);
                 return 0;
             })).then(literal("all").executes(registerAll -> {
+                registerPlayerUuid = PermissionLevel.ALL;
+                updateModMdoVariables();
+                EntrustExecution.before(config, first -> {
+                    for (ServerPlayerEntity player : getServer(registerAll).getPlayerManager().getPlayerList()) {
+                        playerCached.put(player.getName().asString(), new JSONObject().put("uuid", player.getUuid().toString()).put("name", player.getName().asString()));
+                    }
+                    updateModMdoVariables();
+                }, ObjectConfigUtil::save);
                 return 0;
             })).then(literal("disable").executes(disableRegister -> {
+                registerPlayerUuid = PermissionLevel.UNABLE;
+                updateModMdoVariables();
                 return 0;
-            }))).then(literal("registerPlayerNameRegex"))));
+            }))).then(literal("registerPlayerNameRegex").executes(e -> {
+                return 0;
+            })));
         });
-        String s;
     }
 
     public TranslatableText formatConfigReturnMessage(String config) {

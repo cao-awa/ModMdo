@@ -7,7 +7,6 @@ import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
-import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
@@ -21,7 +20,6 @@ import net.minecraft.text.TranslatableText;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
@@ -72,7 +70,6 @@ public class ServerTickListener {
                     updateRankingShow(server);
 
                     if (System.currentTimeMillis() - lastIntervalActive > 1000) {
-                        updateUserProfiles();
                         if (rankingIsStatObject(rankingObject)) {
                             updateOtherRankings(server, players);
                         }
@@ -201,14 +198,14 @@ public class ServerTickListener {
     public void updateGameOnlineTime(JSONObject stat, MinecraftServer server, ServerPlayerEntity player) {
         User user = users.getUser(player);
         ServerScoreboard scoreboard = server.getScoreboard();
-        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.gots"));
+        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.ots"));
 
         for (ScoreboardPlayerScore score : scoreboardPlayerScore.getScoreboard().getAllPlayerScores(scoreboardPlayerScore.getObjective())) {
             User each = users.getUserFromName(score.getPlayerName());
             if (! each.isDummyPlayer()) {
-                if (rankingGameOnlineTimeScaleChanged) {
+                if (rankingOnlineTimeScaleChanged) {
                     updateGameOnlineTime(server, user.getName(), stat);
-                    rankingGameOnlineTimeScaleChanged = false;
+                    rankingOnlineTimeScaleChanged = false;
                 }
             } else {
                 scoreboard.resetPlayerScore(score.getPlayerName(), score.getObjective());
@@ -223,10 +220,10 @@ public class ServerTickListener {
         User user = users.getUserFromName(name);
         if (user != null) {
             ServerScoreboard scoreboard = server.getScoreboard();
-            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(name, scoreboard.getObjective("modmdo.gots"));
+            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(name, scoreboard.getObjective("modmdo.ots"));
             long gameTime = stat.getJSONObject("minecraft:custom").getLong("minecraft:play_time") * 50;
             long showOnlineTime;
-            switch (rankingGameOnlineTimeScale) {
+            switch (rankingOnlineTimeScale) {
                 case "second" -> {
                     showOnlineTime = TimeUtil.formatSecond(gameTime);
                 }
@@ -449,62 +446,8 @@ public class ServerTickListener {
 
             loginUsers.put(userCache);
             users.put(userCache);
-
-            if (enableRanking) {
-                if (rankingObject.equals("online.times")) {
-                    updateOnlineTime(server, player);
-                }
-            }
         }
         lastAddOnlineTime = System.currentTimeMillis();
-    }
-
-    public void updateOnlineTime(MinecraftServer server, ServerPlayerEntity player) {
-        User user = users.getUser(player);
-        ServerScoreboard scoreboard = server.getScoreboard();
-        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.ots"));
-        for (ScoreboardPlayerScore score : scoreboardPlayerScore.getScoreboard().getAllPlayerScores(scoreboardPlayerScore.getObjective())) {
-            User each = users.getUserFromName(score.getPlayerName());
-            if (! each.isDummyPlayer()) {
-                if (rankingOnlineTimeScaleChanged) {
-                    updateOnlineTime(server, score.getPlayerName());
-                    rankingOnlineTimeScaleChanged = false;
-                }
-            } else {
-                scoreboard.resetPlayerScore(score.getPlayerName(), score.getObjective());
-            }
-        }
-        if (! user.isDummyPlayer()) {
-            updateOnlineTime(server, user.getName());
-        }
-    }
-
-    public void updateOnlineTime(MinecraftServer server, String name) {
-        User user = users.getUserFromName(name);
-        if (user != null) {
-            ServerScoreboard scoreboard = server.getScoreboard();
-            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(name, scoreboard.getObjective("modmdo.ots"));
-            long showOnlineTime;
-            switch (rankingOnlineTimeScale) {
-                case "second" -> {
-                    showOnlineTime = user.getOnlineSecond();
-                }
-                case "hour" -> {
-                    showOnlineTime = user.getOnlineHour();
-                }
-                case "day" -> {
-                    showOnlineTime = user.getOnlineDay();
-                }
-                case "month" -> {
-                    showOnlineTime = user.getOnlineMonth();
-                }
-                default -> {
-                    showOnlineTime = user.getOnlineMinute();
-                }
-            }
-            scoreboardPlayerScore.setScore((int) showOnlineTime);
-            scoreboard.updateScore(scoreboardPlayerScore);
-        }
     }
 
     public void updateRankingShow(MinecraftServer server) {
@@ -520,16 +463,12 @@ public class ServerTickListener {
             if (scoreboard.containsObjective("modmdo.ots")) {
                 rankingObjects.add(new Rank("onlineTimes", "online.times", "modmdo.ots", false));
             }
-            if (scoreboard.containsObjective("modmdo.gots")) {
-                rankingObjects.add(new Rank("gameOnlineTimes", "online.times", "modmdo.gots", true));
-            }
             if (scoreboard.containsObjective("modmdo.trd")) {
                 rankingObjects.add(new Rank("tradesWithVillager", "villager.trades", "modmdo.trd", true));
             }
 
             switch (rankingObject) {
                 case "deaths" -> showScoreboard(server, "modmdo.dts", "deaths");
-                case "gameOnlineTimes" -> showScoreboard(server, "modmdo.gots", "gameOnlineTimes");
                 case "onlineTimes" -> showScoreboard(server, "modmdo.ots", "onlineTimes");
                 case "destroyBlocks" -> showScoreboard(server, "modmdo.dsy", "destroyBlocks");
                 case "tradesWithVillager" -> showScoreboard(server, "modmdo.trd", "tradesWithVillager");
@@ -541,8 +480,6 @@ public class ServerTickListener {
                 scoreboard.removeObjective(scoreboard.getObjective("modmdo.dsy"));
             if (scoreboard.containsObjective("modmdo.ots"))
                 scoreboard.removeObjective(scoreboard.getObjective("modmdo.ots"));
-            if (scoreboard.containsObjective("modmdo.gots"))
-                scoreboard.removeObjective(scoreboard.getObjective("modmdo.gots"));
             if (scoreboard.containsObjective("modmdo.trd"))
                 scoreboard.removeObjective(scoreboard.getObjective("modmdo.trd"));
         }

@@ -1,4 +1,5 @@
 {
+    "player.login.rejected.obsolete.uuid": "§c已拒绝 %s §c登录服务器, 因为此玩家使用了错误的UUID登录",
     "player.no.fall.cheat.receive": "已允许所有无摔落伤害作弊",
     "player.no.fall.cheat.reject": "已拒绝所有无摔落伤害作弊",
     "enchantment.level.controller.disabled": "已禁用附魔等级控制",
