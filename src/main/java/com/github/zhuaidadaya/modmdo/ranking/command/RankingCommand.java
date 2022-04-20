@@ -139,9 +139,9 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
 
                     try {
                         showOnlineTime(getServer(setOtsDisplay));
-                        sendFeedback(setOtsDisplay, formatObjectShow("onlineTimes"));
+                        sendFeedback(setOtsDisplay, formatObjectShow("onlineTime"));
                     } catch (IllegalStateException e) {
-                        sendFeedback(setOtsDisplay, formatObjectNoDef("onlineTimes"));
+                        sendFeedback(setOtsDisplay, formatObjectNoDef("onlineTime"));
                     }
                 }
                 return 0;
@@ -152,7 +152,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                     try {
                         addOnlineTimeScoreboard(getServer(onlineTime), TextArgumentType.getTextArgument(onlineTime, "rankingDisplayName"));
                         showOnlineTime(getServer(onlineTime));
-                        sendFeedback(onlineTime, formatObjectDefined("onlineTimes"));
+                        sendFeedback(onlineTime, formatObjectDefined("onlineTime"));
                     } catch (Exception e) {
 
                     }
@@ -165,7 +165,7 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                     try {
                         addOnlineTimeScoreboard(getServer(onlineTime), new TranslatableText(StringArgumentType.getString(onlineTime, "rankingDisplayName")));
                         showOnlineTime(getServer(onlineTime));
-                        sendFeedback(onlineTime, formatObjectDefined("onlineTimes"));
+                        sendFeedback(onlineTime, formatObjectDefined("onlineTime"));
                     } catch (Exception e) {
 
                     }
@@ -209,84 +209,6 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
                     setOnlineTimeScale("month");
 
                     sendFeedback(scaleMonth, formatTimeScale(rankingOnlineTimeScale));
-                }
-                return 0;
-            })))).then(literal("gameOnlineTimes").then(literal("setDisplay").executes(setOtsDisplay -> {
-                if (commandApplyToPlayer(11, getPlayer(setOtsDisplay), this, setOtsDisplay)) {
-                    config.set("ranking", enableRanking = true);
-
-                    try {
-                        showGameOnlineTime(getServer(setOtsDisplay));
-                        sendFeedback(setOtsDisplay, formatObjectShow("gameOnlineTime"));
-                    } catch (IllegalStateException e) {
-                        sendFeedback(setOtsDisplay, formatObjectNoDef("gameOnlineTime"));
-                    }
-                }
-                return 0;
-            }).then(argument("rankingDisplayName", TextArgumentType.text()).executes(onlineTime -> {
-                if (commandApplyToPlayer(11, getPlayer(onlineTime), this, onlineTime)) {
-                    config.set("ranking", enableRanking = true);
-
-                    try {
-                        addGameOnlineTimeScoreboard(getServer(onlineTime), TextArgumentType.getTextArgument(onlineTime, "rankingDisplayName"));
-                        showGameOnlineTime(getServer(onlineTime));
-                        sendFeedback(onlineTime, formatObjectDefined("gameOnlineTime"));
-                    } catch (Exception e) {
-
-                    }
-                }
-                return 0;
-            })).then((argument("rankingDisplayName", StringArgumentType.greedyString()).executes(onlineTime -> {
-                if (commandApplyToPlayer(11, getPlayer(onlineTime), this, onlineTime)) {
-                    config.set("ranking", enableRanking = true);
-
-                    try {
-                        addGameOnlineTimeScoreboard(getServer(onlineTime), new TranslatableText(StringArgumentType.getString(onlineTime, "rankingDisplayName")));
-                        showGameOnlineTime(getServer(onlineTime));
-                        sendFeedback(onlineTime, formatObjectDefined("gameOnlineTime"));
-                    } catch (Exception e) {
-
-                    }
-                }
-                return 0;
-            })))).then(literal("setScale").then(literal("second").executes(scaleSecond -> {
-                if (commandApplyToPlayer(11, getPlayer(scaleSecond), this, scaleSecond)) {
-                    config.set("ranking", enableRanking = true);
-                    setGameOnlineTimeScale("second");
-
-                    sendFeedback(scaleSecond, formatTimeScale(rankingGameOnlineTimeScale));
-                }
-                return 0;
-            })).then(literal("minute").executes(scaleMinute -> {
-                if (commandApplyToPlayer(11, getPlayer(scaleMinute), this, scaleMinute)) {
-                    config.set("ranking", enableRanking = true);
-                    setGameOnlineTimeScale("minute");
-
-                    sendFeedback(scaleMinute, formatTimeScale(rankingGameOnlineTimeScale));
-                }
-                return 0;
-            })).then(literal("hour").executes(scaleHour -> {
-                if (commandApplyToPlayer(11, getPlayer(scaleHour), this, scaleHour)) {
-                    config.set("ranking", enableRanking = true);
-                    setGameOnlineTimeScale("hour");
-
-                    sendFeedback(scaleHour, formatTimeScale(rankingGameOnlineTimeScale));
-                }
-                return 0;
-            })).then(literal("day").executes(scaleDay -> {
-                if (commandApplyToPlayer(11, getPlayer(scaleDay), this, scaleDay)) {
-                    config.set("ranking", enableRanking = true);
-                    setGameOnlineTimeScale("day");
-
-                    sendFeedback(scaleDay, formatTimeScale(rankingGameOnlineTimeScale));
-                }
-                return 0;
-            })).then(literal("month").executes(scaleMonth -> {
-                if (commandApplyToPlayer(11, getPlayer(scaleMonth), this, scaleMonth)) {
-                    config.set("ranking", enableRanking = true);
-                    setGameOnlineTimeScale("month");
-
-                    sendFeedback(scaleMonth, formatTimeScale(rankingGameOnlineTimeScale));
                 }
                 return 0;
             }))))).then(literal("disable").executes(disableRanking -> {
@@ -338,27 +260,12 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
         }
     }
 
-    public void setGameOnlineTimeScale(String scale) {
-        if (!scale.equals(rankingGameOnlineTimeScale)) {
-            rankingGameOnlineTimeScaleChanged = true;
-            config.set("ranking_game_online_time_scale", rankingGameOnlineTimeScale = scale);
-        }
-    }
-
     public void showOnlineTime(MinecraftServer server) throws IllegalStateException {
-        showScoreboard(server, "modmdo.ots", "online.times");
+        showScoreboard(server, "modmdo.ots", "game.online.times");
     }
 
     public void addOnlineTimeScoreboard(MinecraftServer server, Text displayName) {
         addScoreboard(server, displayName, "modmdo.ots");
-    }
-
-    public void showGameOnlineTime(MinecraftServer server) throws IllegalStateException {
-        showScoreboard(server, "modmdo.gots", "game.online.times");
-    }
-
-    public void addGameOnlineTimeScoreboard(MinecraftServer server, Text displayName) {
-        addScoreboard(server, displayName, "modmdo.gots");
     }
 
     public void showDestroys(MinecraftServer server) throws IllegalStateException {
@@ -422,18 +329,14 @@ public class RankingCommand extends SimpleCommandOperation implements Configurab
         supportedRankingObjects.put("destroyBlocks", new Rank("destroyBlocks", "destroy.blocks", "modmdo.dsy", true));
         supportedRankingObjects.put("tradesWithVillager", new Rank("tradesWithVillager", "villager.trades", "modmdo.trd", true));
         supportedRankingObjects.put("deaths", new Rank("deaths", "player.deaths", "modmdo.dts", true));
-        supportedRankingObjects.put("gameOnlineTimes", new Rank("gameOnlineTimes", "game.online.times", "modmdo.gots", true));
         supportedRankingObjects.put("onlineTimes", new Rank("onlineTimes", "online.times", "modmdo.ots", false));
 
-        String gameOnlineTimeScale = config.getConfigString("ranking_game_online_time_scale");
         String onlineTimeScale = config.getConfigString("ranking_online_time_scale");
         String ranking = config.getConfigString("ranking_object");
 
         if (ranking != null) rankingObject = ranking;
 
         if (onlineTimeScale != null) rankingOnlineTimeScale = onlineTimeScale;
-
-        if (onlineTimeScale != null) rankingGameOnlineTimeScale = gameOnlineTimeScale;
 
         try {
             enableRanking = config.getConfigBoolean("ranking");

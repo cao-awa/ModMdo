@@ -119,7 +119,7 @@ public class FileUtil {
     }
 
     public static void insertToHead(File file, String inf) {
-        insert(file,0, inf + "\n");
+        insert(file, 0, inf + "\n");
     }
 
     public static void insert(File file, int pos, String inf) {
@@ -155,5 +155,17 @@ public class FileUtil {
         } catch (Exception e) {
 
         }
+    }
+
+    public static String strictRead(BufferedReader reader) {
+        String cache;
+        StringBuilder builder = new StringBuilder();
+        try {
+            while ((cache = reader.readLine()) != null)
+                builder.append(cache).append("\n");
+        } catch (Exception e) {
+            return "";
+        }
+        return builder.delete(builder.length() - 1, builder.length()).toString();
     }
 }

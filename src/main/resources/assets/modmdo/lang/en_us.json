@@ -1,4 +1,5 @@
 {
+    "player.login.rejected.obsolete.uuid": "§crejected %s §clogin request, because player try login with bad UUID",
     "player.no.fall.cheat.receive": "received all no fall damage cheating",
     "player.no.fall.cheat.reject": "rejected all no fall damage cheating",
     "enchantment.level.controller.disabled": "disabled enchant level controller",

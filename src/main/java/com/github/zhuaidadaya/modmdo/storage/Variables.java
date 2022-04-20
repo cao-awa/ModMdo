@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modmdo.storage;
 
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modmdo.extra.loader.ModMdoExtraLoader;
+import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
@@ -17,9 +18,10 @@ import com.github.zhuaidadaya.modmdo.ranking.Rank;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
-import com.github.zhuaidadaya.modmdo.utils.config.DiskObjectConfigUtil;
-import com.github.zhuaidadaya.modmdo.utils.config.ObjectConfigUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
+import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
+import com.github.zhuaidadaya.rikaishinikui.handler.config.ObjectConfigUtil;
+import com.github.zhuaidadaya.rikaishinikui.handler.entrust.EntrustExecution;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.client.MinecraftClient;
@@ -37,9 +39,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.*;
 import java.net.SocketAddress;
 import java.text.NumberFormat;
 import java.util.*;
@@ -49,12 +49,17 @@ public class Variables {
     public static final String VERSION_ID = "1.0.27";
     public static final int MODMDO_VERSION = 21;
     public static final UUID extraId = UUID.randomUUID();
+    public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
+    public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
+    public static final LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
+    public static final LinkedHashSet<SocketAddress> disconnectedSet = new LinkedHashSet<>();
+    public static final NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
+    public static final NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();
+    public static final NumberFormat fractionDigits0 = NumberFormat.getNumberInstance();
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static boolean rankingOnlineTimeScaleChanged = false;
-    public static boolean rankingGameOnlineTimeScaleChanged = false;
     public static String rankingOnlineTimeScale = "minute";
-    public static String rankingGameOnlineTimeScale = "minute";
     public static String entrust = "ModMdo";
     public static Language language = Language.ENGLISH;
     public static boolean rankingSwitchNoDump = true;
@@ -71,6 +76,7 @@ public class Variables {
     public static boolean timeActive = true;
     public static boolean tokenChanged = false;
     public static boolean rejectNoFallCheat = true;
+    public static PermissionLevel registerPlayerUuid = PermissionLevel.UNABLE;
     public static int tokenGenerateSize = 1024;
     public static int tokenCheckTimeLimit = 3000;
     public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
@@ -89,40 +95,25 @@ public class Variables {
     public static TextFieldWidget editToken;
     public static TextFieldWidget editLoginType;
     public static TextFieldWidget tokenTip;
-    public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
-    public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
     public static int itemDespawnAge = 6000;
-
     public static EnchantLevelController enchantLevelController;
     public static boolean needSync = false;
     public static boolean clearEnchantIfLevelTooHigh = false;
-
     public static ServerLogin serverLogin = new ServerLogin();
-    public static final LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
-
-    public static final LinkedHashSet<SocketAddress> disconnectedSet = new LinkedHashSet<>();
-
     public static ObjectArrayList<Rank> rankingObjects = new ObjectArrayList<>();
     public static ObjectArrayList<Rank> rankingObjectsNoDump = new ObjectArrayList<>();
     public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
-
+    public static JSONObject playerCached = new JSONObject();
     public static ServerUtil servers = new ServerUtil();
     public static boolean connectTo = false;
     public static String jump = "";
     public static String jumpToken = "";
     public static String jumpLoginType = "";
-
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
-
     public static ModMdoExtraLoader extras;
     public static boolean loaded = false;
-
     public static boolean testing = false;
-
-    public static final NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
-    public static final NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();
-    public static final NumberFormat fractionDigits0 = NumberFormat.getNumberInstance();
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
@@ -140,9 +131,7 @@ public class Variables {
         rankingObject = "Nan";
         rankingRandomSwitchInterval = 20 * 60 * 8;
         rankingOnlineTimeScaleChanged = false;
-        rankingGameOnlineTimeScaleChanged = false;
         rankingOnlineTimeScale = "minute";
-        rankingGameOnlineTimeScale = "minute";
         language = Language.ENGLISH;
         rankingSwitchNoDump = true;
         enableRanking = false;
@@ -186,6 +175,16 @@ public class Variables {
         try {
             JSONObject json = config.getConfigJSONObject("enchantment_level_limit");
             enchantLevelController.set(json);
+        } catch (Exception e) {
+
+        }
+    }
+
+    public static void resetPlayerCache() {
+        playerCached = new JSONObject();
+
+        try {
+            playerCached = config.getConfigJSONObject("register_player_uuid");
         } catch (Exception e) {
 
         }
@@ -402,12 +401,15 @@ public class Variables {
         config.set("encryption_token", enableEncryptionToken);
         config.set("reject_reconnect", enableRejectReconnect);
         config.set("check_token_per_tick", enableCheckTokenPerTick);
-        if (modMdoToken != null)
-            config.set("token_by_encryption", modMdoToken.toJSONObject());
+        EntrustExecution.notNull(modMdoToken, e -> {
+            config.set("token_by_encryption", e.toJSONObject());
+        });
         config.set("time_active", timeActive);
         config.set("checker_time_limit", tokenCheckTimeLimit);
         config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
         config.set("reject_no_fall_chest", rejectNoFallCheat);
+        config.set("requires_register_player", registerPlayerUuid);
+        config.set("register_player_uuid", playerCached);
     }
 
     public static void updateServersJump() {

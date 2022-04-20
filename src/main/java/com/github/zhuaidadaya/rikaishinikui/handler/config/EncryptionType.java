@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.modmdo.utils.config;
+package com.github.zhuaidadaya.rikaishinikui.handler.config;
 
 public enum EncryptionType {
     /**

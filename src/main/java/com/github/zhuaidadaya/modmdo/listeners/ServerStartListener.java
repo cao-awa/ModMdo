@@ -14,13 +14,13 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 public class ServerStartListener {
     public void listener() {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            Variables.server = server;
             try {
                 ModMdoStdInitializer.initForLevel(server);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             motd = server.getServerMotd();
-            Variables.server = server;
         });
     }
 }
