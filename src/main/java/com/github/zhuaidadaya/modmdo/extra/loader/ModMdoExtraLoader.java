@@ -49,6 +49,7 @@ public class ModMdoExtraLoader {
                 }
             }
         }).start();
+
         for (UUID id : extras.keySet()) {
             long startLoad = TimeUtil.millions();
             loadingId = id;

@@ -1,7 +1,9 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
+import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
+import com.github.zhuaidadaya.rikaishinikui.handler.entrust.EntrustExecution;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
@@ -13,10 +15,13 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
+import org.json.JSONObject;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
@@ -36,7 +41,6 @@ public abstract class ServerLoginNetworkHandlerMixin {
      *
      * @param player
      *         玩家
-     *
      * @author 草awa
      * @author 草二号机
      * @reason
@@ -46,16 +50,52 @@ public abstract class ServerLoginNetworkHandlerMixin {
         if (player == null)
             return;
 
-        if (!server.isHost(player.getGameProfile())) {
+        if (! server.isHost(player.getGameProfile())) {
             new Thread(() -> {
                 Thread.currentThread().setName("ModMdo accepting");
+                long nano = System.nanoTime();
+                LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
 
-                System.out.println(player.getRotationVecClient().toString());
+                if (registerPlayerUuid != PermissionLevel.UNABLE) {
+                    EntrustExecution.before(config, first -> {
+                        try {
+                            config.readConfig();
+                            resetPlayerCache();
+                        } catch (Exception e) {
+
+                        }
+                    }, before -> {
+                        if (! server.isHost(player.getGameProfile())) {
+                            EntrustExecution.executeNull(config.getConfig("register_player_uuid"), asNotNull -> {
+                                boolean check;
+                                if (registerPlayerUuid == PermissionLevel.OPS) {
+                                    check = player.hasPermissionLevel(2);
+                                } else {
+                                    check = true;
+                                }
+                                if (playerCached.has(player.getName().asString())) {
+                                    System.out.println(playerCached.getJSONObject(player.getName().asString()).get("uuid").toString());
+                                    System.out.println(player.getUuid().toString());
+                                    if (check && ! playerCached.getJSONObject(player.getName().asString()).get("uuid").toString().equals(player.getUuid().toString())) {
+                                        connection.send(new DisconnectS2CPacket(new LiteralText("you login with a obsolete UUID\ncheck your UUID or contact to server administrator to remove your registration")));
+                                        LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player login with obsolete UUID");
+                                        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.obsolete.uuid", player.getName().asString()), "join_server_follow");
+                                        connection.disconnect(new LiteralText("failed to login server"));
+                                        LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
+                                    }
+                                } else {
+                                    playerCached.put(player.getName().asString(), new JSONObject().put("uuid", player.getUuid()).put("name", player.getName().asString()));
+                                    updateModMdoVariables();
+                                }
+                            }, asNull -> {
+                                playerCached.put(player.getName().asString(), new JSONObject().put("uuid", player.getUuid()).put("name", player.getName().asString()));
+                                updateModMdoVariables();
+                            });
+                        }
+                    });
+                }
 
                 long waiting = TimeUtil.millions();
-                long nano = System.nanoTime();
-
-                LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
 
                 try {
                     new ServerPlayNetworkHandler(server, connection, player).sendPacket(new CustomPayloadS2CPacket(modMdoServerChannel, new PacketByteBuf(Unpooled.buffer()).writeVarInt(enableEncryptionToken ? 99 : 96)));

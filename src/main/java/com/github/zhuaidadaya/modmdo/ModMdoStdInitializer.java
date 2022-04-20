@@ -6,6 +6,7 @@ import com.github.zhuaidadaya.modmdo.extra.loader.ExtraArgs;
 import com.github.zhuaidadaya.modmdo.extra.loader.ModMdo;
 import com.github.zhuaidadaya.modmdo.extra.loader.ModMdoExtraLoader;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
+import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.zhuaidadaya.modmdo.identifier.RandomIdentifier;
 import com.github.zhuaidadaya.modmdo.lang.Language;
@@ -16,11 +17,11 @@ import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.ranking.command.RankingCommand;
 import com.github.zhuaidadaya.modmdo.reads.FileReads;
-import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
-import com.github.zhuaidadaya.modmdo.utils.config.DiskObjectConfigUtil;
-import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
 import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
+import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
+import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
+import com.github.zhuaidadaya.rikaishinikui.handler.entrust.EntrustExecution;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
 import org.json.JSONObject;
@@ -38,14 +39,25 @@ public class ModMdoStdInitializer implements ModInitializer {
     }
 
     public static void initModMdoVariables() {
-        if (config.getConfig("default_language") != null)
-            language = Language.getLanguageForName(config.getConfigString("default_language"));
-        if (config.getConfig("here_command") != null)
-            enableHereCommand = config.getConfigBoolean("here_command");
-        if (config.getConfig("dead_message") != null)
-            enableDeadMessage = config.getConfigBoolean("dead_message");
-        if (config.getConfig("cava") != null)
-            enableCava = config.getConfigBoolean("cava");
+        EntrustExecution.notNull(config.getConfigString("default_language"), lang -> {
+            language = Language.getLanguageForName(lang);
+        });
+        EntrustExecution.notNull(config.getConfigBoolean("here_command"), here -> {
+            enableHereCommand = here;
+        });
+        EntrustExecution.notNull(config.getConfigBoolean("dead_message"), dMessage-> {
+            enableDeadMessage = dMessage;
+        });
+        EntrustExecution.notNull(config.getConfigBoolean("cava"), cava -> {
+            enableCava = cava;
+        });
+//        EntrustExecution.notNull();
+//        EntrustExecution.notNull();
+//        EntrustExecution.notNull();
+//        EntrustExecution.notNull();
+//        EntrustExecution.notNull();
+//        EntrustExecution.notNull();
+//        EntrustExecution.notNull();
         if (config.getConfig("secure_enchant") != null)
             enableSecureEnchant = config.getConfigBoolean("secure_enchant");
         if (config.getConfig("encryption_token") != null)
@@ -62,6 +74,8 @@ public class ModMdoStdInitializer implements ModInitializer {
             clearEnchantIfLevelTooHigh = config.getConfigBoolean("enchantment_clear_if_level_too_high");
         if (config.getConfig("reject_no_fall_cheat") != null)
             rejectNoFallCheat = config.getConfigBoolean("reject_no_fall_chest");
+        if (config.getConfig("requires_register_player") != null)
+            registerPlayerUuid = PermissionLevel.valueOf(config.getConfigString("requires_register_player"));
 
         if (config.getConfig("token_by_encryption") != null) {
             initModMdoToken();
