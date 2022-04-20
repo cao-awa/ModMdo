@@ -19,7 +19,7 @@
         "ServerLoginNetworkHandlerMixin",
         "ServerPlayNetworkHandlerMixin",
         "ServerWorldMixin",
-        "StopServerRconMixin"
+        "StopServerRconMixin",
     ],
     "client": [
         "AddServerScreenMixin"

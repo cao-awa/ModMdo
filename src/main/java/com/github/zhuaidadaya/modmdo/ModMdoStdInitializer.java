@@ -20,7 +20,6 @@ import com.github.zhuaidadaya.modmdo.reads.FileReads;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
 import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.config.DiskObjectConfigUtil;
-import com.github.zhuaidadaya.modmdo.utils.config.ObjectConfigUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
