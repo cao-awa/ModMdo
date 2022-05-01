@@ -23,9 +23,9 @@ public enum Language {
         Language language = null;
         switch(name.toLowerCase()) {
             case "chinese" -> language = CHINESE;
-            case "english" -> language = ENGLISH;
             case "chinese_tw" -> language = CHINESE_TW;
             case "auto" -> language = AUTO;
+            default -> language = ENGLISH;
         }
         return language;
     }
