@@ -7,6 +7,7 @@ import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
@@ -15,7 +16,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import org.json.JSONObject;
 
@@ -64,8 +64,6 @@ public class ServerTickListener {
             while (server.isRunning()) {
                 try {
                     PlayerManager players = server.getPlayerManager();
-
-                    setOnlineTimeAndRanking(server, players);
 
                     updateRankingShow(server);
 
@@ -258,7 +256,7 @@ public class ServerTickListener {
             if (needSync) {
                 player.getInventory().updateItems();
             }
-            if (modMdoType == ModMdoType.SERVER & enableEncryptionToken) {
+            if (modMdoType == ModMdoType.SERVER & modmdoWhiteList) {
                 checkLoginStat(player, players);
                 try {
                     cancelLoginIfNoExistentOrChangedToken(player, players);
@@ -270,6 +268,20 @@ public class ServerTickListener {
             if (enableDeadMessage)
                 detectPlayerDead(player);
         }
+    }
+
+    public void checkLoginStat(ServerPlayerEntity player, PlayerManager manager) {
+        EntrustExecution.tryTemporary(() -> {
+            if (modmdoWhiteList) {
+                if (!whitelist.get(player.getName().asString()).identifier().equals(loginUsers.getUser(player).getIdentifier())) {
+                    throw new Exception();
+                }
+            }
+        }, () -> {
+            if (player.networkHandler.connection.isOpen()) {
+                player.networkHandler.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+            }
+        });
     }
 
     /**
@@ -301,29 +313,6 @@ public class ServerTickListener {
                 if (forceStopTokenCheck)
                     return;
 
-                if (manager.getPlayerList().contains(player)) {
-                    if (loginUsers.hasUser(player)) {
-                        User user = loginUsers.getUser(player);
-                        if (user.getClientToken().getToken().equals("")) {
-                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("empty token, please update")));
-                            player.networkHandler.disconnect(new LiteralText("empty token, please update"));
-                        } else {
-                            if (user.getLevel() == 1) {
-                                if (! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerDefaultToken())) {
-                                    loginUsers.removeUser(player);
-                                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
-                                    player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                                }
-                            } else if (user.getLevel() == 4) {
-                                if (! user.getClientToken().getToken().equals(modMdoToken.getServerToken().getServerOpsToken())) {
-                                    player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete token, please update")));
-                                    player.networkHandler.disconnect(new LiteralText("obsolete token, please update"));
-                                }
-                            }
-                        }
-                    }
-                }
-
                 tokenChanged = false;
             }
         } catch (Exception e) {
@@ -345,42 +334,12 @@ public class ServerTickListener {
         try {
             int level = loginUsers.getUserLevel(player);
 
-            if (manager.isOperator(player.getGameProfile())) {
-                if (level == 1)
-                    manager.removeFromOperators(player.getGameProfile());
-            } else if (level == 4) {
-                manager.addToOperators(player.getGameProfile());
-            }
-        } catch (Exception e) {
-
-        }
-    }
-
-    /**
-     * 检查玩家的登入状态, 如果超过指定时间没有登入则断开连接并提示检查token
-     *
-     * @param player
-     *         玩家
-     * @author zhuaidadaya
-     * @author 草awa
-     * @author 草二号机
-     */
-    public void checkLoginStat(ServerPlayerEntity player, PlayerManager manager) {
-        try {
-            if (! loginUsers.hasUser(player)) {
-                if (skipMap.get(player) == null)
-                    skipMap.put(player, System.currentTimeMillis());
-
-                if (System.currentTimeMillis() - skipMap.get(player) > 1000) {
-                    skipMap.put(player, System.currentTimeMillis());
-                    try {
-                        loginUsers.getUser(player.getUuid());
-                    } catch (Exception e) {
-                        if (player.networkHandler.connection.getAddress() != null) {
-                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("invalid token, check your login status")));
-                            player.networkHandler.disconnect(Text.of("invalid token, check your login status"));
-                        }
-                    }
+            if (level > 0) {
+                if (manager.isOperator(player.getGameProfile())) {
+                    if (level == 1)
+                        manager.removeFromOperators(player.getGameProfile());
+                } else if (level == 4) {
+                    manager.addToOperators(player.getGameProfile());
                 }
             }
         } catch (Exception e) {
@@ -422,32 +381,6 @@ public class ServerTickListener {
     public TranslatableText formatDeathMessage(ServerPlayerEntity player, XYZ xyz) {
         String dimension = DimensionUtil.getDimension(player);
         return new TranslatableText("dead.deadIn", DimensionUtil.getDimensionColor(dimension), DimensionUtil.getDimensionName(dimension), xyz.getIntegerXYZ());
-    }
-
-    public void setOnlineTimeAndRanking(MinecraftServer server, PlayerManager players) {
-        long current = System.currentTimeMillis();
-        for (ServerPlayerEntity player : players.getPlayerList()) {
-            if (player.networkHandler.connection.getAddress() == null) {
-                users.put(new User(users.getUser(player.getUuid()).setDummy(true).toJSONObject()));
-            }
-            User userCache = loginUsers.getUser(player);
-            User user = users.getUser(player);
-
-            user.setClientToken(userCache.getClientToken());
-
-            if (userCache.getOnlineTime() == 0) {
-                userCache.setOnlineTime(user.getOnlineTime());
-            }
-
-            userCache.addOnlineTime(Math.max(0, current - lastAddOnlineTime));
-
-            for (String s : user.getFollows())
-                userCache.addFollows(s);
-
-            loginUsers.put(userCache);
-            users.put(userCache);
-        }
-        lastAddOnlineTime = System.currentTimeMillis();
     }
 
     public void updateRankingShow(MinecraftServer server) {

@@ -6,26 +6,20 @@ import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
-import com.github.zhuaidadaya.modmdo.jump.server.ServerUtil;
 import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.login.server.ServerLogin;
-import com.github.zhuaidadaya.modmdo.login.token.ClientEncryptionToken;
-import com.github.zhuaidadaya.modmdo.login.token.EncryptionTokenUtil;
-import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
-import com.github.zhuaidadaya.modmdo.login.token.TokenContentType;
 import com.github.zhuaidadaya.modmdo.mixins.MinecraftServerSession;
 import com.github.zhuaidadaya.modmdo.ranking.Rank;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
+import com.github.zhuaidadaya.modmdo.whitelist.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.ObjectConfigUtil;
-import com.github.zhuaidadaya.rikaishinikui.handler.entrust.EntrustExecution;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -37,9 +31,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
+import org.json.*;
 
-import java.io.*;
 import java.net.SocketAddress;
 import java.text.NumberFormat;
 import java.util.*;
@@ -52,7 +45,6 @@ public class Variables {
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
     public static final LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
-    public static final LinkedHashSet<SocketAddress> disconnectedSet = new LinkedHashSet<>();
     public static final NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
     public static final NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();
     public static final NumberFormat fractionDigits0 = NumberFormat.getNumberInstance();
@@ -69,7 +61,7 @@ public class Variables {
     public static boolean enableCava = true;
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
-    public static boolean enableEncryptionToken = false;
+    public static boolean modmdoWhiteList = false;
     public static boolean cancelEntitiesTick = false;
     public static boolean enableCheckTokenPerTick = false;
     public static boolean forceStopTokenCheck = false;
@@ -79,8 +71,9 @@ public class Variables {
     public static PermissionLevel registerPlayerUuid = PermissionLevel.UNABLE;
     public static int tokenGenerateSize = 1024;
     public static int tokenCheckTimeLimit = 3000;
-    public static Identifier modMdoServerChannel = new Identifier("modmdo:server");
-    public static Identifier loginChannel = new Identifier("modmdo:token");
+    public static final Identifier CHECKING = new Identifier("modmdo:check");
+    public static final Identifier LOGIN = new Identifier("modmdo:login");
+    public static final Identifier SERVER = new Identifier("modmdo:server");
     public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
@@ -89,12 +82,7 @@ public class Variables {
     public static CavaUtil cavas;
     public static String motd = "";
     public static MinecraftServer server;
-    public static MinecraftClient client;
     public static ModMdoType modMdoType = ModMdoType.NONE;
-    public static EncryptionTokenUtil modMdoToken;
-    public static TextFieldWidget editToken;
-    public static TextFieldWidget editLoginType;
-    public static TextFieldWidget tokenTip;
     public static int itemDespawnAge = 6000;
     public static EnchantLevelController enchantLevelController;
     public static boolean needSync = false;
@@ -103,8 +91,9 @@ public class Variables {
     public static ObjectArrayList<Rank> rankingObjects = new ObjectArrayList<>();
     public static ObjectArrayList<Rank> rankingObjectsNoDump = new ObjectArrayList<>();
     public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
+    public static Object2ObjectArrayMap<String,WhiteList> whitelist = new Object2ObjectArrayMap<>();
+    public static Object2ObjectArrayMap<String ,TemporaryWhitelist> temporaryWhitelist = new Object2ObjectArrayMap<>();
     public static JSONObject playerCached = new JSONObject();
-    public static ServerUtil servers = new ServerUtil();
     public static boolean connectTo = false;
     public static String jump = "";
     public static String jumpToken = "";
@@ -140,7 +129,7 @@ public class Variables {
         enableCava = true;
         enableSecureEnchant = true;
         enableRejectReconnect = true;
-        enableEncryptionToken = false;
+        modmdoWhiteList = false;
         cancelEntitiesTick = false;
         enableCheckTokenPerTick = false;
         forceStopTokenCheck = false;
@@ -148,8 +137,6 @@ public class Variables {
         tokenChanged = false;
         tokenGenerateSize = 1024;
         tokenCheckTimeLimit = 3000;
-        modMdoServerChannel = new Identifier("modmdo:server");
-        loginChannel = new Identifier("modmdo:token");
         rejectUsers = new UserUtil();
         loginUsers = new UserUtil();
         users = new UserUtil();
@@ -161,7 +148,6 @@ public class Variables {
         rankingObjects = new ObjectArrayList<>();
         rankingObjectsNoDump = new ObjectArrayList<>();
 
-        servers = new ServerUtil();
         connectTo = false;
         jump = "";
         jumpToken = "";
@@ -169,6 +155,8 @@ public class Variables {
 
         enchantLevelController.setNoVanillaDefaultMaxLevel((short) 5);
         initEnchantmentMaxLevel();
+
+        temporaryWhitelist = new Object2ObjectArrayMap<>();
     }
 
     public static void initEnchantmentMaxLevel() {
@@ -178,6 +166,16 @@ public class Variables {
         } catch (Exception e) {
 
         }
+    }
+
+    public static void initWhiteList() {
+        EntrustExecution.tryTemporary(() -> {
+            JSONObject json = config.getConfigJSONObject("whitelist");
+
+            for (String s : json.keySet()) {
+                whitelist.put(s, WhiteList.build(json.getJSONObject(s)));
+            }
+        });
     }
 
     public static void resetPlayerCache() {
@@ -252,25 +250,6 @@ public class Variables {
         return ((MinecraftServerSession) server).getSession().getDirectoryName() + "/";
     }
 
-    public static void saveToken() {
-        try {
-            new File("token/").mkdirs();
-            BufferedWriter bw = new BufferedWriter(new FileWriter("token/token.txt"));
-            bw.write(modMdoToken.getServerToken().checkToken("default"));
-            bw.close();
-            bw = new BufferedWriter(new FileWriter("token/token_ops.txt"));
-            bw.write(modMdoToken.getServerToken().checkToken("ops"));
-            bw.close();
-            bw = new BufferedWriter(new FileWriter("token/token.json"));
-            JSONObject tokenJson = modMdoToken.toJSONObject();
-            tokenJson.remove("client");
-            bw.write(tokenJson.toString());
-            bw.close();
-        } catch (Exception e) {
-
-        }
-    }
-
     public static String getApply(CommandContext<ServerCommandSource> source) {
         return getApply(SimpleCommandOperation.getServer(source));
     }
@@ -302,53 +281,17 @@ public class Variables {
         }
     }
 
-    /**
-     * @param address
-     *         通过指定IP查询
-     * @param contentType
-     *         查询类型, 可选查询token和登入方式
-     * @return 返回查询结果(或默认值)
-     * @author 草awa
-     * @author 草二号机
-     */
-    public static String getModMdoTokenFormat(String address, TokenContentType contentType) {
-        String tokenString;
-        String loginType;
-        try {
-            switch (contentType) {
-                case TOKEN_BY_ENCRYPTION -> {
-                    tokenString = modMdoToken.getClientToken(address).getToken();
-                    return tokenString;
-                }
-                case LOGIN_TYPE -> {
-                    loginType = modMdoToken.getClientToken(address).getType();
-                    return loginType;
-                }
-            }
-        } catch (Exception e) {
-            switch (contentType) {
-                case TOKEN_BY_ENCRYPTION -> {
-                    return "";
-                }
-                case LOGIN_TYPE -> {
-                    return "default";
-                }
-            }
-        }
-
-        return "";
-    }
-
     public static boolean equalsModMdoVersion(ServerPlayerEntity player) {
         return getPlayerModMdoVersion(player) == MODMDO_VERSION;
     }
 
     public static int getPlayerModMdoVersion(ServerPlayerEntity player) {
         try {
-            return Integer.parseInt(loginUsers.getUser(player).getClientToken().getVersion());
+            System.out.println(loginUsers.getUser(player).getVersion());
         } catch (Exception e) {
-            return - 1;
+            e.printStackTrace();
         }
+        return EntrustParser.tryCreate(() -> loginUsers.getUser(player).getVersion(), -1);
     }
 
     public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
@@ -367,53 +310,29 @@ public class Variables {
         return versionRequire <= getPlayerModMdoVersion(player);
     }
 
-    public static void initModMdoToken() {
-        try {
-            JSONObject token = new JSONObject(config.getConfigString("token_by_encryption"));
-
-            modMdoToken = new EncryptionTokenUtil();
-
-            try {
-                JSONObject clientTokens = token.getJSONObject("client");
-
-                for (Object o : clientTokens.keySet()) {
-                    JSONObject clientToken = clientTokens.getJSONObject(o.toString());
-                    modMdoToken.addClientToken(new ClientEncryptionToken(clientToken.getString("token"), o.toString(), clientToken.getString("login_type"), VERSION_ID));
-                }
-            } catch (Exception e) {
-
-            }
-
-            JSONObject serverToken = token.getJSONObject("server");
-
-            modMdoToken.setServerToken(new ServerEncryptionToken(serverToken.getString("default"), serverToken.getString("ops")));
-        } catch (Exception e) {
-
-        }
-    }
-
     public static void updateModMdoVariables() {
         config.set("default_language", language.toString());
         config.set("here_command", enableHereCommand);
         config.set("dead_message", enableDeadMessage);
         config.set("cava", enableCava);
         config.set("secure_enchant", enableSecureEnchant);
-        config.set("encryption_token", enableEncryptionToken);
+        config.set("modmdo_whitelist", modmdoWhiteList);
         config.set("reject_reconnect", enableRejectReconnect);
         config.set("check_token_per_tick", enableCheckTokenPerTick);
-        EntrustExecution.notNull(modMdoToken, e -> {
-            config.set("token_by_encryption", e.toJSONObject());
-        });
         config.set("time_active", timeActive);
         config.set("checker_time_limit", tokenCheckTimeLimit);
         config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
         config.set("reject_no_fall_chest", rejectNoFallCheat);
         config.set("requires_register_player", registerPlayerUuid);
         config.set("register_player_uuid", playerCached);
-    }
 
-    public static void updateServersJump() {
-        config.set("servers_jump", servers.toJSONObject());
+        EntrustExecution.tryTemporary(() -> {
+            JSONObject json = new JSONObject();
+            for (String s : whitelist.keySet()) {
+                json.put(s, whitelist.get(s).toJSONObject());
+            }
+            config.set("whitelist", json);
+        });
     }
 
     public static void updateCavas() {

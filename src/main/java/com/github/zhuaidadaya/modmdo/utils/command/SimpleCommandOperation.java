@@ -24,7 +24,7 @@ public class SimpleCommandOperation {
 
     public static void sendFeedback(CommandContext<ServerCommandSource> source, TranslatableText message, int version) {
         try {
-            if (getPlayerModMdoVersion(getPlayer(source)) == version) {
+            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
                 sendFeedback(source, message);
             } else {
                 Variables.sendMessage(getPlayer(source), minecraftTextFormat.format(message.getKey(), message.getArgs()), false);
@@ -85,7 +85,7 @@ public class SimpleCommandOperation {
 
     public static void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, TranslatableText message, int version) {
         try {
-            if (getPlayerModMdoVersion(getPlayer(source)) == version) {
+            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
                 sendFeedbackAndInform(source.getSource(), message);
             } else {
                 Variables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
@@ -117,7 +117,7 @@ public class SimpleCommandOperation {
 
     public static void sendFeedback(ServerCommandSource source, TranslatableText message, int version) {
         try {
-            if (getPlayerModMdoVersion(getPlayer(source)) == version) {
+            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
                 sendFeedback(source, message);
             } else {
                 Variables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
@@ -141,7 +141,7 @@ public class SimpleCommandOperation {
 
     public static void sendMessage(CommandContext<ServerCommandSource> source, TranslatableText message, boolean actionbar, int version) {
         try {
-            if (getPlayerModMdoVersion(getPlayer(source)) == version) {
+            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
                 Variables.sendMessage(getPlayer(source), message, actionbar);
             } else {
                 Variables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), actionbar);
@@ -153,7 +153,7 @@ public class SimpleCommandOperation {
 
     public static void sendMessage(ServerPlayerEntity source, TranslatableText message, boolean actionbar, int version) {
         try {
-            if (getPlayerModMdoVersion(source) == version) {
+            if (getPlayerModMdoVersion(source) >= version) {
                 Variables.sendMessage(source, message, actionbar);
             } else {
                 Variables.sendMessage(source, new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), actionbar);
@@ -165,7 +165,7 @@ public class SimpleCommandOperation {
 
     public static void sendError(CommandContext<ServerCommandSource> source, TranslatableText message, int version) {
         try {
-            if (getPlayerModMdoVersion(getPlayer(source)) == version) {
+            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
                 sendError(source, message);
             } else {
                 Variables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
@@ -203,7 +203,7 @@ public class SimpleCommandOperation {
 
     public static void sendError(ServerCommandSource source, TranslatableText message, int version) {
         try {
-            if (getPlayerModMdoVersion(getPlayer(source)) == version) {
+            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
                 sendError(source, message);
             } else {
                 Variables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);

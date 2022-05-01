@@ -1,42 +1,37 @@
 package com.github.zhuaidadaya.modmdo.login.server;
 
-import com.github.zhuaidadaya.modmdo.login.token.ClientEncryptionToken;
-import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modmdo.utils.usr.User;
+import com.github.zhuaidadaya.modmdo.whitelist.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ServerLogin {
-    public void login(String data1, String data2, String data3, String data4, String data5, String data6) {
-        int level = 1;
-        if(data3.equals("ops"))
-            level = 4;
+    public void login(String name, String uuid, String identifier, String modmdoVersion) {
+        int version = EntrustParser.tryCreate(() -> Integer.valueOf(modmdoVersion), - 1);
 
-        if(! data1.equals("")) {
-            if(enableEncryptionToken) {
-                try {
-                    if(data4.equals(modMdoToken.getServerToken().checkToken(data3))) {
-                        LOGGER.info("login player: " + data1);
-
-                        loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)));
-                    } else {
-                        rejectUsers.put(new User(data2, data1, level));
+        if (! identifier.equals("")) {
+            if (modmdoWhiteList) {
+                EntrustExecution.notNull(temporaryWhitelist.get(name), e -> {
+                    if (e.isValid()) {
+                        if (EntrustParser.trying(() -> ! whitelist.get(name).identifier().equals(identifier), () -> true)) {
+                            whitelist.put(name, new WhiteList(name, identifier));
+                            updateModMdoVariables();
+                        }
                     }
-                } catch (NullPointerException e) {
-                    modMdoToken.setServerToken(ServerEncryptionToken.createServerEncryptionToken());
-
-                    rejectUsers.put(new User(data2, data1, level));
-
-                    saveToken();
-
-                    updateModMdoVariables();
+                    temporaryWhitelist.remove(name);
+                });
+                if (EntrustParser.trying(() -> ! whitelist.get(name).identifier().equals(identifier), () -> true)) {
+                    rejectUsers.put(new User(name, uuid, - 1, identifier, version));
+                } else {
+                    LOGGER.info("login player: " + name);
+                    loginUsers.put(new User(name, uuid, - 1, identifier, version));
                 }
             } else {
                 try {
-                    LOGGER.info("login player: " + data1);
-
-                    loginUsers.put(new User(data2, data1, level, new ClientEncryptionToken(data4, data5, data3, data6)));
+                    LOGGER.info("login player: " + name);
+                    loginUsers.put(new User(name, uuid, - 1, identifier, version));
                 } catch (Exception e) {
 
                 }
@@ -45,10 +40,6 @@ public class ServerLogin {
     }
 
     public void logout(ServerPlayerEntity player) {
-        if(loginUsers.getUser(player).getClientToken() != null) {
-            LOGGER.info("logout player: " + player.getUuid().toString());
-            LOGGER.info("canceling player token for: " + player.getUuid().toString());
-        }
         try {
             loginUsers.removeUser(player);
         } catch (Exception e) {

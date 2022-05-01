@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modmdo.utils.usr;
 
-import com.github.zhuaidadaya.modmdo.login.token.ClientEncryptionToken;
+import com.github.zhuaidadaya.modmdo.storage.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -8,13 +9,29 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.UUID;
 
+import static com.github.zhuaidadaya.modmdo.storage.Variables.modMdoVersionToIdMap;
+
 public class User {
     private String name;
     private UUID uuid;
     private int level = 1;
     private long onlineTime = 0;
-    private ClientEncryptionToken clientToken = null;
+    private String modmdoIdentifier = "";
+    private int modmdoVersion;
     private ObjectRBTreeSet<String> follows = new ObjectRBTreeSet<>();
+
+    public String getIdentifier() {
+        return modmdoIdentifier;
+    }
+
+    public void setIdentifier(String modmdoIdentifier) {
+        this.modmdoIdentifier = modmdoIdentifier;
+    }
+
+    public int getVersion() {
+        return modmdoVersion;
+    }
+
     private boolean dummyPlayer = true;
 
     public User() {
@@ -40,12 +57,19 @@ public class User {
         this.level = level;
     }
 
-    public User(String name, String uuid, int level, ClientEncryptionToken token) {
+    public User(String name, String uuid, int level, String modmdoIdentifier) {
         this.name = name;
         this.uuid = UUID.fromString(uuid);
         this.level = level;
-        this.clientToken = token;
-        this.dummyPlayer = false;
+        this.modmdoIdentifier = modmdoIdentifier;
+    }
+
+    public User(String name, String uuid, int level, String modmdoIdentifier, int modmdoVersion) {
+        this.name = name;
+        this.uuid = UUID.fromString(uuid);
+        this.level = level;
+        this.modmdoIdentifier = modmdoIdentifier;
+        this.modmdoVersion = modmdoVersion;
     }
 
     public User(JSONObject json) {
@@ -58,36 +82,22 @@ public class User {
         this.level = level;
 
         try {
-            JSONObject token = json.getJSONObject("token");
-            for(Object o : token.keySet()) {
-                JSONObject tokenContent = token.getJSONObject(o.toString());
-                this.clientToken = new ClientEncryptionToken(tokenContent.getString("token"), tokenContent.getString("address"), tokenContent.getString("login_type"), tokenContent.getString("modmdo_version"));
-            }
-            dummyPlayer = false;
-        } catch (Exception e) {
-
-        }
-
-        try {
             JSONArray subs = json.getJSONArray("subs");
-            for(Object o : subs)
+            for (Object o : subs)
                 this.follows.add(o.toString());
         } catch (Exception e) {
 
         }
 
-        try {
-            onlineTime = json.getLong("onlineTime");
-        } catch (Exception e) {
+        onlineTime = EntrustParser.tryCreate(() -> json.getLong("onlineTime"), - 1L);
 
+        if (dummyPlayer) {
+            dummyPlayer = EntrustParser.tryCreate(() -> json.getBoolean("dummy"), true);
         }
 
-        try {
-            if(dummyPlayer)
-                dummyPlayer = json.getBoolean("dummy");
-        } catch (Exception e) {
+        modmdoVersion = EntrustParser.tryCreate(() -> json.getInt("version"), -1);
 
-        }
+        modmdoIdentifier = EntrustParser.tryCreate(() -> json.getString("identifier"), "");
     }
 
     public User setDummy(boolean dummy) {
@@ -121,22 +131,14 @@ public class User {
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
-        try {
-            json.put("dummy", dummyPlayer);
-            json.put("onlineTime", onlineTime);
-            json.put("name", name);
-            json.put("uuid", uuid);
-            json.put("level", level);
-            json.put("token", clientToken.toJSONObject());
-            json.put("subs", new JSONArray(follows.toArray()));
-        } catch (Exception e) {
-            json.put("dummy", dummyPlayer);
-            json.put("onlineTime", onlineTime);
-            json.put("name", name);
-            json.put("uuid", uuid);
-            json.put("level", level);
-            json.put("subs", new JSONArray(follows.toArray()));
-        }
+        json.put("dummy", dummyPlayer);
+        json.put("onlineTime", onlineTime);
+        json.put("name", name);
+        json.put("uuid", getID());
+        json.put("level", level);
+        json.put("subs", new JSONArray(follows.toArray()));
+        json.put("version", modmdoVersion);
+        json.put("identifier", modmdoIdentifier);
 
         return json;
     }
@@ -154,18 +156,8 @@ public class User {
         return this;
     }
 
-    public ClientEncryptionToken getClientToken() {
-        return clientToken;
-    }
-
-    public User setClientToken(ClientEncryptionToken token) {
-        this.clientToken = token;
-        this.dummyPlayer = false;
-        return this;
-    }
-
     public User addFollows(String... follows) {
-        if(follows != null)
+        if (follows != null)
             this.follows.addAll(List.of(follows));
         return this;
     }
@@ -195,6 +187,14 @@ public class User {
 
         onlineSeconds -= (onlineSeconds > 59 ? onlineSeconds / 60 : 0) * 60;
         return onlineSeconds;
+    }
+
+    public long getOnlineTime() {
+        return onlineTime;
+    }
+
+    public void setOnlineTime(long onlineTime) {
+        this.onlineTime = onlineTime;
     }
 
     public long processRemainingMinutes() {
@@ -245,41 +245,33 @@ public class User {
         return onlineMonths > 11 ? onlineMonths / 12 : 0;
     }
 
-    public long getOnlineTime() {
-        return onlineTime;
-    }
-
-    public void setOnlineTime(long onlineTime) {
-        this.onlineTime = onlineTime;
-    }
-
     public long formatOnlineSecond() {
         return onlineTime / 1000;
     }
 
     public long formatOnlineMinute() {
-        if(getOnlineSecond() > 59)
+        if (getOnlineSecond() > 59)
             return getOnlineSecond() / 60;
         else
             return 0;
     }
 
     public long formatOnlineHour() {
-        if(getOnlineMinute() > 59)
+        if (getOnlineMinute() > 59)
             return getOnlineMinute() / 60;
         else
             return 0;
     }
 
     public long formatOnlineDay() {
-        if(getOnlineHour() > 23)
+        if (getOnlineHour() > 23)
             return getOnlineHour() / 24;
         else
             return 0;
     }
 
     public long formatOnlineMonth() {
-        if(getOnlineDay() > 29)
+        if (getOnlineDay() > 29)
             return getOnlineDay() / 30;
         else
             return 0;
@@ -290,28 +282,28 @@ public class User {
     }
 
     public long getOnlineMinute() {
-        if(getOnlineSecond() > 59)
+        if (getOnlineSecond() > 59)
             return formatOnlineMinute();
         else
             return 0;
     }
 
     public long getOnlineHour() {
-        if(getOnlineMinute() > 59)
+        if (getOnlineMinute() > 59)
             return formatOnlineHour();
         else
             return 0;
     }
 
     public long getOnlineDay() {
-        if(getOnlineHour() > 23)
+        if (getOnlineHour() > 23)
             return formatOnlineDay();
         else
             return 0;
     }
 
     public long getOnlineMonth() {
-        if(getOnlineSecond() > 29)
+        if (getOnlineSecond() > 29)
             return formatOnlineMonth();
         else
             return 0;

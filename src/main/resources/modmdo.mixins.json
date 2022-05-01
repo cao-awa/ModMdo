@@ -5,16 +5,12 @@
     "compatibilityLevel": "JAVA_16",
     "mixins": [
         "ArgumentTypesMixin",
-        "ClientConnectionMixin",
-        "ClientPlayNetworkHandlerMixin",
         "EnchantmentHelperMixin",
         "EntityListMixin",
         "EntityMixin",
         "ItemEntityMixin",
         "ItemStackMixin",
-        "MinecraftClientMixin",
         "MinecraftServerSession",
-        "MouseMixin",
         "PlayerManagerMixin",
         "ServerLoginNetworkHandlerMixin",
         "ServerPlayNetworkHandlerMixin",
@@ -22,11 +18,11 @@
         "StopServerRconMixin"
     ],
     "client": [
-        "AddServerScreenMixin"
+        "ClientPlayNetworkHandlerMixin"
     ],
     "server": [
     ],
     "injectors": {
         "defaultRequire": 1
-  }
+    }
 }
