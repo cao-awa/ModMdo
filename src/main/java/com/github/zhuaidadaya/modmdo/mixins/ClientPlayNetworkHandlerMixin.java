@@ -5,16 +5,21 @@ import com.mojang.authlib.*;
 import io.netty.buffer.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
+import net.minecraft.client.world.*;
 import net.minecraft.entity.player.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.*;
+import net.minecraft.util.registry.*;
+import net.minecraft.world.*;
 import org.json.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
+
+import java.util.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
