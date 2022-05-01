@@ -322,13 +322,15 @@ public class Variables {
         config.set("requires_register_player", registerPlayerUuid);
         config.set("register_player_uuid", playerCached);
 
-        EntrustExecution.tryTemporary(() -> {
-            JSONObject json = new JSONObject();
-            for (String s : whitelist.keySet()) {
-                json.put(s, whitelist.get(s).toJSONObject());
-            }
-            config.set("whitelist", json);
-        });
+        if (modMdoType == ModMdoType.SERVER) {
+            EntrustExecution.tryTemporary(() -> {
+                JSONObject json = new JSONObject();
+                for (String s : whitelist.keySet()) {
+                    json.put(s, whitelist.get(s).toJSONObject());
+                }
+                config.set("whitelist", json);
+            });
+        }
     }
 
     public static void updateCavas() {
@@ -474,20 +476,12 @@ public class Variables {
 
     public static void updateWhitelistNames(MinecraftServer server) {
         if (whitelist.hashCode() != whitelistHash) {
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("whitelist_names").writeString(getWhiteListNamesJSONObject().toString())));
-            }
-            whitelistHash = whitelist.hashCode();
+            return;
         }
-    }
-
-    public static void updateTemporaryWhitelistNames(MinecraftServer server) {
-        if (temporaryWhitelist.hashCode() != temporaryWhitelistHash) {
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("whitelist_names").writeString(getTemporaryWhitelistHashNamesJSONObject().toString())));
-            }
-            temporaryWhitelistHash = temporaryWhitelist.hashCode();
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("whitelist_names").writeString(getWhiteListNamesJSONObject().toString())));
         }
+        whitelistHash = whitelist.hashCode();
     }
 
     public static JSONObject getWhiteListNamesJSONObject() {
@@ -500,10 +494,20 @@ public class Variables {
         return json;
     }
 
+    public static void updateTemporaryWhitelistNames(MinecraftServer server) {
+        if (temporaryWhitelist.hashCode() == temporaryWhitelistHash) {
+            return;
+        }
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("temporary_whitelist_names").writeString(getTemporaryWhitelistHashNamesJSONObject().toString())));
+        }
+        temporaryWhitelistHash = temporaryWhitelist.hashCode();
+    }
+
     public static JSONObject getTemporaryWhitelistHashNamesJSONObject() {
         JSONObject json = new JSONObject();
         JSONArray array = new JSONArray();
-        for (String s : whitelist.keySet()) {
+        for (String s : temporaryWhitelist.keySet()) {
             array.put(s);
         }
         json.put("names", array);
@@ -513,7 +517,7 @@ public class Variables {
 
     public static void flushTemporaryWhitelist() {
         for (TemporaryWhitelist wl : temporaryWhitelist.values()) {
-            if (!wl.isValid()) {
+            if (! wl.isValid()) {
                 temporaryWhitelist.remove(wl.name());
             }
         }
