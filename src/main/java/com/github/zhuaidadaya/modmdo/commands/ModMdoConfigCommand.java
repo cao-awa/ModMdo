@@ -1,14 +1,12 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
 import com.github.zhuaidadaya.modmdo.lang.Language;
-import com.github.zhuaidadaya.modmdo.login.token.EncryptionTokenUtil;
-import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.storage.Variables;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.utils.translate.TranslateUtil;
-import com.github.zhuaidadaya.rikaishinikui.handler.entrust.EntrustExecution;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.ObjectConfigUtil;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.command.argument.EnchantmentArgumentType;
@@ -62,44 +60,26 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     sendFeedback(disableSecureEnchant, formatDisableSecureEnchant());
                 }
                 return 0;
-            }))).then(literal("encryptionToken").executes(encryptionToken -> {
-                if (commandApplyToPlayer(1, getPlayer(encryptionToken), this, encryptionToken)) {
+            }))).then(literal("useModMdoWhitelist").executes(whitelist -> {
+                if (commandApplyToPlayer(1, getPlayer(whitelist), this, whitelist)) {
+                    updateModMdoVariables();
 
-                    sendFeedback(encryptionToken, formatConfigReturnMessage("encryption_token"));
+                    sendFeedback(whitelist, formatConfigReturnMessage("modmdo_whitelist"));
                 }
                 return 2;
-            }).then(literal("enable").executes(enableEncryptionToken -> {
-                if (commandApplyToPlayer(1, getPlayer(enableEncryptionToken), this, enableEncryptionToken)) {
-                    Variables.enableEncryptionToken = true;
+            }).then(literal("enable").executes(enableWhitelist -> {
+                if (commandApplyToPlayer(1, getPlayer(enableWhitelist), this, enableWhitelist)) {
+                    modmdoWhiteList = true;
                     updateModMdoVariables();
-
-                    try {
-                        initModMdoToken();
-                        modMdoToken.getServerToken().getToken();
-                    } catch (NullPointerException npe) {
-                        try {
-                            modMdoToken = new EncryptionTokenUtil(ServerEncryptionToken.createServerEncryptionToken());
-                            LOGGER.info("spawned new encryption token, check the config file");
-                        } catch (Exception e) {
-                            Variables.enableEncryptionToken = false;
-                            LOGGER.info("failed to enable encryption token");
-                        }
-                    }
-
-                    saveToken();
-
-                    updateModMdoVariables();
-
-                    tokenChanged = true;
-
-                    sendFeedback(enableEncryptionToken, formatEnableEncryptionToken());
+                    
+                    sendFeedback(enableWhitelist, formatUseModMdoWhitelist());
                 }
                 return 1;
-            })).then(literal("disable").executes(disableEncryptionToken -> {
-                if (commandApplyToPlayer(1, getPlayer(disableEncryptionToken), this, disableEncryptionToken)) {
-                    enableEncryptionToken = false;
+            })).then(literal("disable").executes(disableWhitelist -> {
+                if (commandApplyToPlayer(1, getPlayer(disableWhitelist), this, disableWhitelist)) {
+                    modmdoWhiteList = false;
                     updateModMdoVariables();
-                    sendFeedback(disableEncryptionToken, formatDisableEncryptionToken());
+                    sendFeedback(disableWhitelist, formatDisableModMdoWhitelist());
                 }
                 return 0;
             }))).then(literal("rejectReconnect").executes(rejectReconnect -> {
@@ -421,57 +401,57 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     }
 
     public TranslatableText formatTickingEntitiesTick() {
-        return new TranslatableText(cancelEntitiesTick ? "ticking.entities.disable.rule.format" : "ticking.entities.enable.rule.format");
+        return new TranslatableText(cancelEntitiesTick ? "ticking.entities.false.rule.format" : "ticking.entities.true.rule.format");
     }
 
     public TranslatableText formatItemDespawnTicks() {
         if (itemDespawnAge > - 1) {
             return new TranslatableText("item.despawn.ticks.rule.format", itemDespawnAge);
         } else {
-            return new TranslatableText("item.despawn.ticks.disable.rule.format", itemDespawnAge);
+            return new TranslatableText("item.despawn.ticks.false.rule.format", itemDespawnAge);
         }
     }
 
     public TranslatableText formatEnableHere() {
-        return new TranslatableText("here_command.enable.rule.format");
+        return new TranslatableText("here_command.true.rule.format");
     }
 
     public TranslatableText formatDisableHere() {
-        return new TranslatableText("here_command.disable.rule.format");
+        return new TranslatableText("here_command.false.rule.format");
     }
 
     public TranslatableText formatEnableSecureEnchant() {
-        return new TranslatableText("secure_enchant.enable.rule.format");
+        return new TranslatableText("secure_enchant.true.rule.format");
     }
 
     public TranslatableText formatDisableSecureEnchant() {
-        return new TranslatableText("secure_enchant.disable.rule.format");
+        return new TranslatableText("secure_enchant.false.rule.format");
     }
 
-    public TranslatableText formatEnableEncryptionToken() {
-        return new TranslatableText("encryption_token.enable.rule.format");
+    public TranslatableText formatUseModMdoWhitelist() {
+        return new TranslatableText("modmdo_whitelist.true.rule.format");
     }
 
 
-    public TranslatableText formatDisableEncryptionToken() {
-        return new TranslatableText("encryption_token.disable.rule.format");
+    public TranslatableText formatDisableModMdoWhitelist() {
+        return new TranslatableText("modmdo_whitelist.false.rule.format");
     }
 
     public TranslatableText formatEnableRejectReconnect() {
-        return new TranslatableText("reject_reconnect.enable.rule.format");
+        return new TranslatableText("reject_reconnect.true.rule.format");
     }
 
 
     public TranslatableText formatDisableRejectReconnect() {
-        return new TranslatableText("reject_reconnect.reject.disable.rule.format");
+        return new TranslatableText("reject_reconnect.reject.false.rule.format");
     }
 
     public TranslatableText formatEnableDeadMessage() {
-        return new TranslatableText("dead_message.enable.rule.format");
+        return new TranslatableText("dead_message.true.rule.format");
     }
 
 
     public TranslatableText formatDisabledDeadMessage() {
-        return new TranslatableText("dead_message.disable.rule.format");
+        return new TranslatableText("dead_message.false.rule.format");
     }
 }

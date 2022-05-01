@@ -1,7 +1,6 @@
 package com.github.zhuaidadaya.modmdo;
 
 import com.github.zhuaidadaya.modmdo.commands.*;
-import com.github.zhuaidadaya.modmdo.commands.jump.JumpCommand;
 import com.github.zhuaidadaya.modmdo.extra.loader.ExtraArgs;
 import com.github.zhuaidadaya.modmdo.extra.loader.ModMdo;
 import com.github.zhuaidadaya.modmdo.extra.loader.ModMdoExtraLoader;
@@ -12,16 +11,15 @@ import com.github.zhuaidadaya.modmdo.identifier.RandomIdentifier;
 import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.listeners.ServerStartListener;
 import com.github.zhuaidadaya.modmdo.listeners.ServerTickListener;
-import com.github.zhuaidadaya.modmdo.login.token.EncryptionTokenUtil;
-import com.github.zhuaidadaya.modmdo.login.token.ServerEncryptionToken;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.ranking.command.RankingCommand;
 import com.github.zhuaidadaya.modmdo.reads.FileReads;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
 import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
+import com.github.zhuaidadaya.modmdo.whitelist.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
-import com.github.zhuaidadaya.rikaishinikui.handler.entrust.EntrustExecution;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
 import org.json.JSONObject;
@@ -51,52 +49,46 @@ public class ModMdoStdInitializer implements ModInitializer {
         EntrustExecution.notNull(config.getConfigBoolean("cava"), cava -> {
             enableCava = cava;
         });
-//        EntrustExecution.notNull();
-//        EntrustExecution.notNull();
-//        EntrustExecution.notNull();
-//        EntrustExecution.notNull();
-//        EntrustExecution.notNull();
-//        EntrustExecution.notNull();
-//        EntrustExecution.notNull();
-        if (config.getConfig("secure_enchant") != null)
-            enableSecureEnchant = config.getConfigBoolean("secure_enchant");
-        if (config.getConfig("encryption_token") != null)
-            enableEncryptionToken = config.getConfigBoolean("encryption_token");
-        if (config.getConfig("check_token_per_tick") != null)
-            enableCheckTokenPerTick = config.getConfigBoolean("check_token_per_tick");
-        if (config.getConfig("time_active") != null)
-            enableSecureEnchant = config.getConfigBoolean("time_active");
-        if (config.getConfig("checker_time_limit") != null)
-            tokenCheckTimeLimit = config.getConfigInt("checker_time_limit");
-        if (config.getConfig("identifier") == null)
-            config.set("identifier", RandomIdentifier.randomIdentifier());
-        if (config.getConfig("enchantment_clear_if_level_too_high") != null)
-            clearEnchantIfLevelTooHigh = config.getConfigBoolean("enchantment_clear_if_level_too_high");
-        if (config.getConfig("reject_no_fall_cheat") != null)
-            rejectNoFallCheat = config.getConfigBoolean("reject_no_fall_chest");
-        if (config.getConfig("requires_register_player") != null)
-            registerPlayerUuid = PermissionLevel.valueOf(config.getConfigString("requires_register_player"));
+        EntrustExecution.notNull(config.getConfigBoolean("secure_enchant"), enchant -> {
+            enableSecureEnchant = enchant;
+        });
+        EntrustExecution.notNull(config.getConfigBoolean("modmdo_whitelist"), whitelist -> {
+            modmdoWhiteList = whitelist;
+        });
+        EntrustExecution.notNull(config.getConfigBoolean("check_token_per_tick"), checkPerTick -> {
+            enableCheckTokenPerTick = checkPerTick;
+        });
+        EntrustExecution.notNull(config.getConfigBoolean("time_active"), tac -> {
+            timeActive = tac;
+        });
+        EntrustExecution.notNull(config.getConfigBoolean("secure_enchant"), secureEnchant -> {
+            enableSecureEnchant = secureEnchant;
+        });
+        EntrustExecution.notNull(config.getConfigInt("checker_time_limit"), limit -> {
+            tokenCheckTimeLimit = limit;
+        });
+        EntrustExecution.notNull(config.getConfigBoolean("enchantment_clear_if_level_too_high"), clear -> {
+            clearEnchantIfLevelTooHigh = clear;
+        });
+        EntrustExecution.notNull(config.getConfigBoolean("reject_no_fall_chest"), rejectnoFall -> {
+            rejectNoFallCheat = rejectnoFall;
+        });
+        EntrustExecution.notNull(PermissionLevel.valueOf(config.getConfigString("requires_register_player")), requiresRegistry -> {
+            registerPlayerUuid = requiresRegistry;
+        });
 
-        if (config.getConfig("token_by_encryption") != null) {
-            initModMdoToken();
-        } else {
-            if (enableEncryptionToken) {
-                try {
-                    modMdoToken = new EncryptionTokenUtil(ServerEncryptionToken.createServerEncryptionToken());
-                    LOGGER.info("spawned new encryption token, check the config file");
-                } catch (Exception e) {
-                    enableEncryptionToken = false;
-                    LOGGER.info("failed to enable encryption token");
-                }
-            } else {
-                modMdoToken = new EncryptionTokenUtil();
-            }
-        }
+        EntrustExecution.nullRequires(configCached.getConfig("identifier"), identifier -> {
+            configCached.set("identifier", RandomIdentifier.randomIdentifier());
+        });
 
-        if (config.getConfigString("run_command_follow") == null)
+        EntrustExecution.nullRequires(config.getConfigString("run_command_follow"), runCommandFollow -> {
             config.set("run_command_follow", PermissionLevel.OPS);
-        if (config.getConfigString("join_server_follow") == null)
+        });
+        EntrustExecution.nullRequires(config.getConfigString("join_server_follow"), joinServerFollow -> {
             config.set("join_server_follow", PermissionLevel.OPS);
+        });
+
+        initWhiteList();
     }
 
     @Override
@@ -121,11 +113,10 @@ public class ModMdoStdInitializer implements ModInitializer {
             new DimensionHereCommand().register();
             new CavaCommand().register();
             new ModMdoConfigCommand().register();
-            new TokenCommand().register();
             new AnalyzerCommand().register();
             new RankingCommand().register();
-            new JumpCommand().register();
             new TestCommand().register();
+            new TemporaryWhitelistCommand().register();
         } catch (Exception e) {
 
         }

@@ -1,6 +1,6 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.config;
 
-import com.github.zhuaidadaya.rikaishinikui.handler.entrust.EntrustParser;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;

@@ -1,6 +1,5 @@
 package com.github.zhuaidadaya.modmdo.utils.usr;
 
-import com.github.zhuaidadaya.modmdo.login.token.ClientEncryptionToken;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.json.JSONObject;
@@ -63,7 +62,7 @@ public class UserUtil {
 
     public User getUser(ServerPlayerEntity player) {
         if (users.get(player.getUuid().toString()) == null)
-            put(player.getUuid().toString(), new User(player.getName().asString(), player.getUuid().toString(), 0, new ClientEncryptionToken("", "unknown", "unknown", "unknown")).toJSONObject());
+            put(player.getUuid().toString(), new User(player.getName().asString(), player.getUuid().toString(), 0, "", -1).toJSONObject());
         return new User(users.get(player.getUuid().toString()));
     }
 
