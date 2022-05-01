@@ -155,8 +155,6 @@ public class Variables {
 
         enchantLevelController.setNoVanillaDefaultMaxLevel((short) 5);
         initEnchantmentMaxLevel();
-
-        temporaryWhitelist = new Object2ObjectArrayMap<>();
     }
 
     public static void initEnchantmentMaxLevel() {
@@ -169,6 +167,8 @@ public class Variables {
     }
 
     public static void initWhiteList() {
+        temporaryWhitelist = new Object2ObjectArrayMap<>();
+
         EntrustExecution.tryTemporary(() -> {
             JSONObject json = config.getConfigJSONObject("whitelist");
 
