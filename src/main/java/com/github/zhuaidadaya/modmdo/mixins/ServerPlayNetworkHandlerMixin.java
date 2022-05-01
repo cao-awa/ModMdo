@@ -1,11 +1,11 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.MessageType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -22,8 +22,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Set;
-
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 /**
@@ -36,7 +34,7 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
  * SKP(Skip)
  * VSD(Version Difference)
  * <p>
- * 手动替换检测: 1.18.x
+ * 手动替换检测: 1.17.x
  */
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
@@ -71,66 +69,18 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo ci) {
         try {
-            Identifier channel = new Identifier("");
+            Identifier channel = EntrustParser.tryCreate(packet::getChannel, new Identifier(""));
 
-            try {
-                channel = packet.getChannel();
-            } catch (Exception e) {
+            PacketByteBuf packetByteBuf = EntrustParser.trying(() -> new PacketByteBuf(packet.getData().copy()));
 
-            }
+            String data1 = EntrustParser.tryCreate(packetByteBuf::readString, "");
+            String data2 = EntrustParser.tryCreate(packetByteBuf::readString, "");
+            String data3 = EntrustParser.tryCreate(packetByteBuf::readString, "");
+            String data4 = EntrustParser.tryCreate(packetByteBuf::readString, "");
 
-            PacketByteBuf packetByteBuf = null;
-            try {
-                packetByteBuf = new PacketByteBuf(packet.getData().copy());
-            } catch (Exception e) {
-            }
-
-
-            String data1 = "";
-            try {
-                data1 = packetByteBuf.readString();
-            } catch (Exception e) {
-
-            }
-
-            String data2 = "";
-            try {
-                data2 = packetByteBuf.readString();
-            } catch (Exception e) {
-
-            }
-
-            String data3 = "";
-            try {
-                data3 = packetByteBuf.readString();
-            } catch (Exception e) {
-
-            }
-
-            String data4 = "";
-            try {
-                data4 = packetByteBuf.readString();
-            } catch (Exception e) {
-
-            }
-
-            String data5 = "";
-            try {
-                data5 = packetByteBuf.readString();
-            } catch (Exception e) {
-
-            }
-
-            String data6 = "";
-            try {
-                data6 = packetByteBuf.readString();
-            } catch (Exception e) {
-
-            }
-
-            if(channel.equals(loginChannel)) {
+            if(channel.equals(LOGIN)) {
                 if(modMdoType == ModMdoType.SERVER) {
-                    serverLogin.login(data1, data2, data3, data4, data5, data6);
+                    serverLogin.login(data1, data2, data3,data4);
                 }
             }
 
@@ -158,9 +108,9 @@ public abstract class ServerPlayNetworkHandlerMixin {
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
-            if((!rejectUsers.hasUser(player) || loginUsers.hasUser(player)) & server.getPlayerManager().getPlayer(player.getUuid()) != null) {
+            if((! rejectUsers.hasUser(player) || loginUsers.hasUser(player)) & server.getPlayerManager().getPlayer(player.getUuid()) != null) {
                 LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
-                this.server.getPlayerManager().broadcast((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
+                this.server.getPlayerManager().broadcastChatMessage((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
                 this.server.forcePlayerSampleUpdate();
                 this.server.getPlayerManager().remove(this.player);
                 this.player.onDisconnect();
@@ -185,13 +135,12 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "executeCommand", at = @At("HEAD"), cancellable = true)
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
-        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.try", player.getName().asString(), input), "runCommand");
-        if(! loginUsers.hasUser(player) & enableEncryptionToken) {
+        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.try", player.getName().asString(), input), "run_command_follow");
+        if(! loginUsers.hasUser(player) & modmdoWhiteList) {
             LOGGER.info("rejected command request: not login user");
-            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.rejected.without.login", player.getName().asString()), "runCommand");
+            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.rejected.without.login", player.getName().asString()), "run_command_follow");
             ci.cancel();
         }
-
-        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command", player.getName().asString(), input), "runCommand");
+        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command", player.getName().asString(), input), "run_command_follow");
     }
 }

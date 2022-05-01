@@ -1,8 +1,8 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
-import com.github.zhuaidadaya.modmdo.commands.init.ArgumentInit;
-import com.github.zhuaidadaya.modmdo.login.token.TokenContentType;
-import com.github.zhuaidadaya.modmdo.jump.server.ServerUtil;
+import com.github.zhuaidadaya.modmdo.identifier.*;
+import com.github.zhuaidadaya.modmdo.storage.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.MinecraftClient;
@@ -17,6 +17,7 @@ import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerAbilitiesS2CPacket;
+import net.minecraft.util.*;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
@@ -70,7 +71,6 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      *         packet
      * @param ci
      *         callback
-     *
      * @author 草二号机
      * @author 草
      * @author zhuaidadaya
@@ -80,115 +80,16 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
         PacketByteBuf data = packet.getData();
 
         try {
-            int id;
-            id = data.readVarInt();
+            Identifier channel = new Identifier(data.readString());
 
-            LOGGER.info("server sent a payload id: " + id);
+            LOGGER.info("server sent a payload: " + channel);
 
-            switch(id) {
-                case 99 -> {
-                    String address = formatAddress(connection.getAddress());
-                    String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
-                    String token;
-                    if(jumpToken.equals("") & jumpLoginType.equals("")) {
-                        token = getModMdoTokenFormat(address, TokenContentType.TOKEN_BY_ENCRYPTION);
-                    } else {
-                        token = jumpToken;
-                        loginType = jumpLoginType;
-                        jumpLoginType = "";
-                        jumpToken = "";
-                    }
-                    if (token.equals("") & configCached.getConfigString("specified_token") != null) {
-                        token = configCached.getConfigString("specified_token");
-                        loginType = "default";
-                        System.out.println(configCached.getConfigString("specified_token"));
-                    }
-                    System.out.println(token);
-                    UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-                    connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString(token).writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
-                }
-                case 96 -> {
-                    String address = formatAddress(connection.getAddress());
-                    String loginType = getModMdoTokenFormat(address, TokenContentType.LOGIN_TYPE);
-                    UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-                    connection.send(new CustomPayloadC2SPacket(loginChannel, (new PacketByteBuf(Unpooled.buffer())).writeString(uuid.toString()).writeString(profile.getName()).writeString(loginType).writeString("Nan").writeString(address).writeString(String.valueOf(MODMDO_VERSION))));
-                }
-                case 105 -> {
-                    String jumpName = "";
-                    try {
-                        jumpName = data.readString();
-                    } catch (Exception ex) {
-
-                    }
-
-                    String token = "";
-                    try {
-                        token = data.readString();
-                    } catch (Exception ex) {
-
-                    }
-
-                    String loginType = "";
-                    try {
-                        loginType = data.readString();
-                    } catch (Exception ex) {
-
-                    }
-
-                    jumpToken = token;
-                    jumpLoginType= loginType;
-                    jump = jumpName;
-                    connectTo = true;
-                }
-                case 106 -> {
-                    String jumpName = "";
-                    try {
-                        jumpName = data.readString();
-                    } catch (Exception ex) {
-
-                    }
-
-                    jumpToken = "";
-                    jump = jumpName;
-                    connectTo = true;
-                }
-                case 107 -> {
-                    String serversInfo = "";
-                    try {
-                        serversInfo = data.readString();
-                    } catch (Exception ex) {
-
-                    }
-
-                    servers = new ServerUtil(new JSONObject(serversInfo));
-
-                    ArgumentInit.initServerJump();
-                }
+            if (channel.equals(CHECKING) || channel.equals(LOGIN)) {
+                connection.send(new CustomPayloadC2SPacket(LOGIN, (new PacketByteBuf(Unpooled.buffer())).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(configCached.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION))));
             }
         } catch (Exception e) {
             LOGGER.error("error in connecting ModMdo server", e);
         }
         ci.cancel();
-    }
-
-    @Inject(method = "onHealthUpdate", at = @At("HEAD"), cancellable = true)
-    public void onHealthUpdate(HealthUpdateS2CPacket packet, CallbackInfo ci) {
-        if(client.player == null) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "onExperienceBarUpdate", at = @At("HEAD"), cancellable = true)
-    public void onExperienceBarUpdate(ExperienceBarUpdateS2CPacket packet, CallbackInfo ci) {
-        if(client.player == null) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "onPlayerAbilities", at = @At("HEAD"), cancellable = true)
-    public void onPlayerAbilities(PlayerAbilitiesS2CPacket packet, CallbackInfo ci) {
-        if(client.player == null) {
-            ci.cancel();
-        }
     }
 }
