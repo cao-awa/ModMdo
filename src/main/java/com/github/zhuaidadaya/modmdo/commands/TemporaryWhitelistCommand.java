@@ -33,14 +33,17 @@ public class TemporaryWhitelistCommand extends SimpleCommandOperation implements
                 }
                 temporary(name, 1000 * 60 * 5);
                 sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.default", name), 21);
+                updateTemporaryWhitelistNames(getServer(addDefault));
                 return 0;
             }))).then(literal("list").executes(showTemporary -> {
                 showTemporary(showTemporary);
+                updateTemporaryWhitelistNames(getServer(showTemporary));
                 return 0;
             })).then(literal("remove").then(argument("name",ModMdoTemporaryWhitelistArgumentType.whitelist()).executes(remove -> {
-                WhiteList wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove,"name");
+                TemporaryWhitelist wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove,"name");
                 temporaryWhitelist.remove(wl.name());
                 sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
+                updateTemporaryWhitelistNames(getServer(remove));
                 return 0;
             })))));
         });

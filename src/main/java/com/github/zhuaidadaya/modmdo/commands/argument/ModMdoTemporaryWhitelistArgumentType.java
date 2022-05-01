@@ -30,9 +30,9 @@ public class ModMdoTemporaryWhitelistArgumentType implements ArgumentType<String
         return string;
     }
 
-    public static WhiteList getWhiteList(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    public static TemporaryWhitelist getWhiteList(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
         String string = context.getArgument(name, String.class);
-        WhiteList whiteList = whitelist.get(string);
+        TemporaryWhitelist whiteList = temporaryWhitelist.get(string);
         if (whiteList == null) {
             throw WHITELIST_NOT_FOUND.create(string);
         } else {
