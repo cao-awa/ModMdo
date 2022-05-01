@@ -73,14 +73,17 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
             PacketByteBuf packetByteBuf = EntrustParser.trying(() -> new PacketByteBuf(packet.getData().copy()));
 
+            Identifier informationSign = new Identifier(EntrustParser.tryCreate(packetByteBuf::readString, ""));
             String data1 = EntrustParser.tryCreate(packetByteBuf::readString, "");
             String data2 = EntrustParser.tryCreate(packetByteBuf::readString, "");
             String data3 = EntrustParser.tryCreate(packetByteBuf::readString, "");
             String data4 = EntrustParser.tryCreate(packetByteBuf::readString, "");
 
-            if(channel.equals(LOGIN)) {
-                if(modMdoType == ModMdoType.SERVER) {
-                    serverLogin.login(data1, data2, data3,data4);
+            if(channel.equals(CLIENT)) {
+                if (informationSign.equals(LOGIN)) {
+                    if (modMdoType == ModMdoType.SERVER) {
+                        serverLogin.login(data1, data2, data3, data4);
+                    }
                 }
             }
 
@@ -103,8 +106,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
      */
     @Overwrite
     public void onDisconnected(Text reason) {
-        forceStopTokenCheck = true;
-
         new Thread(() -> {
             Thread.currentThread().setName("ModMdo accepting");
 
@@ -127,8 +128,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
                 LOGGER.info("Stopping singleplayer server as player logged out");
                 this.server.stop(false);
             }
-
-            forceStopTokenCheck = false;
         }).start();
     }
 

@@ -80,12 +80,26 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
         PacketByteBuf data = packet.getData();
 
         try {
-            Identifier channel = new Identifier(data.readString());
+            Identifier channel = packet.getChannel();
 
-            LOGGER.info("server sent a payload: " + channel);
+            Identifier informationSign = data.readIdentifier();
 
-            if (channel.equals(CHECKING) || channel.equals(LOGIN)) {
-                connection.send(new CustomPayloadC2SPacket(LOGIN, (new PacketByteBuf(Unpooled.buffer())).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(configCached.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION))));
+            LOGGER.info("server sent a payload in channel: " + channel);
+
+            if (informationSign.equals(CHECKING) || informationSign.equals(LOGIN)) {
+                connection.send(new CustomPayloadC2SPacket(CLIENT, (new PacketByteBuf(Unpooled.buffer())).writeIdentifier(LOGIN).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(configCached.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION))));
+            }
+
+            if (informationSign.equals(DATA)) {
+                String data1 = EntrustParser.tryCreate(data::readString, "");
+                String data2 = EntrustParser.tryCreate(data::readString, "");
+
+                if (data1.equals("whitelist_names")) {
+                    JSONObject json = new JSONObject(data2);
+                    for (Object o : json.getJSONArray("names")) {
+                        whitelist.put(o.toString(), null);
+                    }
+                }
             }
         } catch (Exception e) {
             LOGGER.error("error in connecting ModMdo server", e);
