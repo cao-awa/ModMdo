@@ -1,4 +1,13 @@
 {
+    "temporary.whitelist.removed": "removed %s from temporary whitelist",
+    "modmdo.whitelist.removed": "removed %s from modmdo whitelist",
+    "modmdo.whitelist.add.already.is.whitelist": "%s already in permanent whitelist, remove it and try again",
+    "temporary.whitelist.add.already.is.whitelist": "%s already in modmdo whitelist, remove it and try again",
+    "temporary.whitelist.left.times": "%sm, %ss",
+    "commands.modmdo.whitelist.none": "There are no whitelisted players",
+    "commands.modmdo.whitelist.list": "There are %s whitelisted players: \n%s",
+    "commands.temporary.whitelist.none": "There are no temporary whitelisted players",
+    "commands.temporary.whitelist.list": "There are %s temporary whitelisted players:\n%s",
     "temporary.whitelist.add.default": "add %s to temporary whitelist, please connect to server within five minutes",
     "player.login.rejected.obsolete.uuid": "§crejected %s §clogin request, because player try login with bad UUID",
     "player.no.fall.cheat.receive": "received all no fall damage cheating",

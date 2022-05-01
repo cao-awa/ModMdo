@@ -5,6 +5,7 @@ import net.minecraft.command.argument.serialize.*;
 
 public class ArgumentInit {
     public static void init() {
-        ArgumentTypes.register("modmdo:whitelist", ModMdoWhiteListArgumentType.class, new ConstantArgumentSerializer<>(ModMdoWhiteListArgumentType::whitelist));
+        ArgumentTypes.register("modmdo:whitelist", ModMdoWhitelistArgumentType.class, new ConstantArgumentSerializer<>(ModMdoWhitelistArgumentType::whitelist));
+        ArgumentTypes.register("modmdo:whitelist", ModMdoTemporaryWhitelistArgumentType.class, new ConstantArgumentSerializer<>(ModMdoTemporaryWhitelistArgumentType::whitelist));
     }
 }

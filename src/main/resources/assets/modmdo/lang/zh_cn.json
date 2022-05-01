@@ -1,4 +1,13 @@
 {
+    "temporary.whitelist.removed": "已将 %s 从临时白名单中删除",
+    "modmdo.whitelist.removed": "已将 %s 从ModMdo白名单中删除",
+    "modmdo.whitelist.add.already.is.whitelist": "%s 已经在ModMdo白名单中, 请将其删除后重试",
+    "temporary.whitelist.add.already.is.whitelist": "%s 已经在临时白名单中, 请将其删除后重试",
+    "temporary.whitelist.left.times": "%s 分钟 %s 秒",
+    "commands.modmdo.whitelist.none": "白名单中没有玩家",
+    "commands.modmdo.whitelist.list": "白名单中共有 %s 名玩家: \n%s",
+    "commands.temporary.whitelist.none": "临时白名单中没有玩家",
+    "commands.temporary.whitelist.list": "临时白名单中共有 %s 名玩家:\n%s",
     "temporary.whitelist.add.default": "已将 %s 添加到临时白名单, 请在五分钟内连接服务器",
     "player.login.rejected.obsolete.uuid": "§c已拒绝 %s §c登录服务器, 因为此玩家使用了错误的UUID登录",
     "player.no.fall.cheat.receive": "已允许所有无摔落伤害作弊",
