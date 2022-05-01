@@ -474,9 +474,11 @@ public class Variables {
         }
     }
 
-    public static void updateWhitelistNames(MinecraftServer server) {
-        if (whitelist.hashCode() != whitelistHash) {
-            return;
+    public static void updateWhitelistNames(MinecraftServer server, boolean force) {
+        if (!force) {
+            if (whitelist.hashCode() != whitelistHash) {
+                return;
+            }
         }
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("whitelist_names").writeString(getWhiteListNamesJSONObject().toString())));
@@ -494,9 +496,11 @@ public class Variables {
         return json;
     }
 
-    public static void updateTemporaryWhitelistNames(MinecraftServer server) {
-        if (temporaryWhitelist.hashCode() == temporaryWhitelistHash) {
-            return;
+    public static void updateTemporaryWhitelistNames(MinecraftServer server, boolean force) {
+        if (!force) {
+            if (temporaryWhitelist.hashCode() == temporaryWhitelistHash) {
+                return;
+            }
         }
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("temporary_whitelist_names").writeString(getTemporaryWhitelistHashNamesJSONObject().toString())));

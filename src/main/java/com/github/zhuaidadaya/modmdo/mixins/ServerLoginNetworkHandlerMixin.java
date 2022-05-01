@@ -143,8 +143,8 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             server.getPlayerManager().onPlayerConnect(connection, player);
                             LOGGER.info("accepted nano: " + nano + " (" + player.getName().asString() + ")");
 
-                            updateWhitelistNames(server);
-                            updateTemporaryWhitelistNames(server);
+                            updateWhitelistNames(server, true);
+                            updateTemporaryWhitelistNames(server, true);
                         } else {
                             LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
                         }

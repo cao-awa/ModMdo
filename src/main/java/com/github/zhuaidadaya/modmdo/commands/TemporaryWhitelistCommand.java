@@ -8,14 +8,12 @@ import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
 import net.fabricmc.fabric.api.command.v1.*;
-import net.minecraft.command.argument.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class TemporaryWhitelistCommand extends SimpleCommandOperation implements SimpleCommand {
     @Override
@@ -33,17 +31,17 @@ public class TemporaryWhitelistCommand extends SimpleCommandOperation implements
                 }
                 temporary(name, 1000 * 60 * 5);
                 sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.default", name), 21);
-                updateTemporaryWhitelistNames(getServer(addDefault));
+                updateTemporaryWhitelistNames(getServer(addDefault), true);
                 return 0;
             }))).then(literal("list").executes(showTemporary -> {
                 showTemporary(showTemporary);
-                updateTemporaryWhitelistNames(getServer(showTemporary));
+                updateTemporaryWhitelistNames(getServer(showTemporary), true);
                 return 0;
             })).then(literal("remove").then(argument("name",ModMdoTemporaryWhitelistArgumentType.whitelist()).executes(remove -> {
                 TemporaryWhitelist wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove,"name");
                 temporaryWhitelist.remove(wl.name());
                 sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
-                updateTemporaryWhitelistNames(getServer(remove));
+                updateTemporaryWhitelistNames(getServer(remove), true);
                 return 0;
             })))));
         });
