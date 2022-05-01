@@ -964,7 +964,7 @@ public class ObjectConfigUtil implements ConfigUtil {
 
     public String getConfigString(String config) {
         checkShutdown();
-        return EntrustParser.getNotNull(EntrustParser.build(() -> getConfig(config).toString()), "");
+        return EntrustParser.tryCreate(() -> getConfig(config).toString(), "");
     }
 
     public Boolean getConfigBoolean(String config) {

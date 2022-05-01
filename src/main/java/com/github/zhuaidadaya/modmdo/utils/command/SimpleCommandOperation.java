@@ -135,7 +135,7 @@ public class SimpleCommandOperation {
                 Variables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), actionbar);
             }
         } catch (Exception e) {
-            LOGGER.error("failed to send message " + consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error("failed to send message: " + consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 
@@ -147,7 +147,7 @@ public class SimpleCommandOperation {
                 Variables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), actionbar);
             }
         } catch (Exception e) {
-            LOGGER.error("failed to send message " + consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error("failed to send message: " + consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 
@@ -159,7 +159,7 @@ public class SimpleCommandOperation {
                 Variables.sendMessage(source, new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), actionbar);
             }
         } catch (Exception e) {
-            LOGGER.error("failed to send message " + consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error("failed to send message: " + consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 

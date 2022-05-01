@@ -42,7 +42,7 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.28";
+    public static final String VERSION_ID = "1.0.29";
     public static final int MODMDO_VERSION = 22;
     public static final UUID extraId = UUID.randomUUID();
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
@@ -155,8 +155,6 @@ public class Variables {
 
         enchantLevelController.setNoVanillaDefaultMaxLevel((short) 5);
         initEnchantmentMaxLevel();
-
-        temporaryWhitelist = new Object2ObjectArrayMap<>();
     }
 
     public static void initEnchantmentMaxLevel() {
@@ -169,6 +167,8 @@ public class Variables {
     }
 
     public static void initWhiteList() {
+        temporaryWhitelist = new Object2ObjectArrayMap<>();
+
         EntrustExecution.tryTemporary(() -> {
             JSONObject json = config.getConfigJSONObject("whitelist");
 
