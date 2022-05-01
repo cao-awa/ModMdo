@@ -16,7 +16,7 @@ public class RandomIdentifier {
     private static final SecureRandom random = new SecureRandom();
 
     public static String randomIdentifier() {
-        return randomIdentifier(64);
+        return randomIdentifier(128);
     }
 
     public static String randomIdentifier(int size) {
