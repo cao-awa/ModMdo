@@ -7,23 +7,21 @@ import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
 import com.mojang.brigadier.suggestion.*;
 import net.minecraft.command.*;
-import net.minecraft.command.argument.*;
-import net.minecraft.scoreboard.*;
 import net.minecraft.server.command.*;
 import net.minecraft.text.*;
 
 import java.util.*;
 import java.util.concurrent.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.whitelist;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
-public class ModMdoWhiteListArgumentType implements ArgumentType<String> {
+public class ModMdoTemporaryWhitelistArgumentType implements ArgumentType<String> {
     private static final DynamicCommandExceptionType WHITELIST_NOT_FOUND = new DynamicCommandExceptionType((name) -> {
         return new TranslatableText("arguments.whitelist.not.registered", name);
     });
 
-    public static ModMdoWhiteListArgumentType whitelist() {
-        return new ModMdoWhiteListArgumentType();
+    public static ModMdoTemporaryWhitelistArgumentType whitelist() {
+        return new ModMdoTemporaryWhitelistArgumentType();
     }
 
     @Override
@@ -45,7 +43,7 @@ public class ModMdoWhiteListArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(whitelist.keySet(), builder);
+        return CommandSource.suggestMatching(temporaryWhitelist.keySet(), builder);
     }
 
     @Override
