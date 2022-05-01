@@ -161,6 +161,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 }
 
                 updateWhitelistNames(server);
+                updateTemporaryWhitelistNames(server);
             }).start();
         } else {
             this.server.getPlayerManager().onPlayerConnect(this.connection, player);
