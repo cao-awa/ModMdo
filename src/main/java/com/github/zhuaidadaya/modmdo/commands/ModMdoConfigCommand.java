@@ -76,7 +76,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 if (commandApplyToPlayer(1, getPlayer(enableWhitelist), this, enableWhitelist)) {
                     modmdoWhiteList = true;
                     updateModMdoVariables();
-                    
+
                     sendFeedback(enableWhitelist, formatUseModMdoWhitelist());
                 }
                 return 1;
