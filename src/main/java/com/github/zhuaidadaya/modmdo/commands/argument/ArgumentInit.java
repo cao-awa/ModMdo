@@ -1,0 +1,10 @@
+package com.github.zhuaidadaya.modmdo.commands.argument;
+
+import net.minecraft.command.argument.*;
+import net.minecraft.command.argument.serialize.*;
+
+public class ArgumentInit {
+    public static void init() {
+        ArgumentTypes.register("modmdo:whitelist", ModMdoWhiteListArgumentType.class, new ConstantArgumentSerializer<>(ModMdoWhiteListArgumentType::whitelist));
+    }
+}

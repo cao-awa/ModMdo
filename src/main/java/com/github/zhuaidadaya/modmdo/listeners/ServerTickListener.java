@@ -258,15 +258,10 @@ public class ServerTickListener {
             }
             if (modMdoType == ModMdoType.SERVER & modmdoWhiteList) {
                 checkLoginStat(player, players);
-                try {
-                    cancelLoginIfNoExistentOrChangedToken(player, players);
-                } catch (Exception e) {
-
-                }
-                setPlayerLevel(player, players);
             }
-            if (enableDeadMessage)
+            if (enableDeadMessage) {
                 detectPlayerDead(player);
+            }
         }
     }
 
@@ -282,69 +277,6 @@ public class ServerTickListener {
                 player.networkHandler.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
             }
         });
-    }
-
-    /**
-     * 当玩家不存在时, 清除登入信息<br>
-     * (多个位置都有尝试清除, 保证一定能够移除登入状态)<br>
-     * <br>
-     * 或者服务器Token改变时, 也清除登入信息<br>
-     * (当token不符合时移除玩家, 换用新token即可)<br>
-     * 这种情况一般在手动生成新的token时使用, 否则一般不会
-     *
-     * @param player
-     *         玩家
-     * @param manager
-     *         玩家管理器
-     * @author 草awa
-     */
-    public void cancelLoginIfNoExistentOrChangedToken(ServerPlayerEntity player, PlayerManager manager) {
-        try {
-            if ((tokenChanged || enableCheckTokenPerTick) & ! forceStopTokenCheck) {
-                for (User user : loginUsers.getUsers()) {
-                    if (manager.getPlayer(user.getUuid()) == null) {
-                        if (forceStopTokenCheck)
-                            break;
-                        player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("obsolete player")));
-                        player.networkHandler.disconnect(new LiteralText("obsolete player"));
-                    }
-                }
-
-                if (forceStopTokenCheck)
-                    return;
-
-                tokenChanged = false;
-            }
-        } catch (Exception e) {
-
-        }
-    }
-
-    /**
-     * 设置玩家的权限等级, 处理使用不同的token登录时获得的不同权限等级
-     *
-     * @param player
-     *         玩家
-     * @param manager
-     *         玩家管理器
-     * @author 草二号机
-     * @author 草awa
-     */
-    public void setPlayerLevel(ServerPlayerEntity player, PlayerManager manager) {
-        try {
-            int level = loginUsers.getUserLevel(player);
-
-            if (level > 0) {
-                if (manager.isOperator(player.getGameProfile())) {
-                    if (level == 1)
-                        manager.removeFromOperators(player.getGameProfile());
-                } else if (level == 4) {
-                    manager.addToOperators(player.getGameProfile());
-                }
-            }
-        } catch (Exception e) {
-
-        }
     }
 
     /**

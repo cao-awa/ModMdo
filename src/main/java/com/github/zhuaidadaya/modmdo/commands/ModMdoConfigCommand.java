@@ -1,10 +1,12 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
+import com.github.zhuaidadaya.modmdo.commands.argument.*;
 import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.storage.Variables;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.utils.translate.TranslateUtil;
+import com.github.zhuaidadaya.modmdo.whitelist.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.ObjectConfigUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -266,7 +268,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 return 0;
             }).then(argument("ms", IntegerArgumentType.integer(500)).executes(setTimeLimit -> {
                 if (commandApplyToPlayer(16, getPlayer(setTimeLimit), this, setTimeLimit)) {
-                    tokenCheckTimeLimit = IntegerArgumentType.getInteger(setTimeLimit, "ms");
+                    loginCheckTimeLimit = IntegerArgumentType.getInteger(setTimeLimit, "ms");
 
                     updateModMdoVariables();
 
@@ -380,7 +382,11 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 return 0;
             }))).then(literal("registerPlayerNameRegex").executes(e -> {
                 return 0;
-            })));
+            })).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhiteListArgumentType.whitelist()).executes(remove -> {
+                WhiteList wl = ModMdoWhiteListArgumentType.getWhiteList(remove, "name");
+                whitelist.remove(wl.name());
+                return 0;
+            })))));
         });
     }
 
@@ -389,7 +395,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     }
 
     public TranslatableText formatCheckerTimeLimit() {
-        return new TranslatableText("checker_time_limit.rule.format", tokenCheckTimeLimit);
+        return new TranslatableText("checker_time_limit.rule.format", loginCheckTimeLimit);
     }
 
     public TranslatableText formatJoinGameFollow() {

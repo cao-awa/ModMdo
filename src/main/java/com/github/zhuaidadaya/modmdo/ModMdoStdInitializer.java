@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modmdo;
 
 import com.github.zhuaidadaya.modmdo.commands.*;
+import com.github.zhuaidadaya.modmdo.commands.argument.*;
 import com.github.zhuaidadaya.modmdo.extra.loader.ExtraArgs;
 import com.github.zhuaidadaya.modmdo.extra.loader.ModMdo;
 import com.github.zhuaidadaya.modmdo.extra.loader.ModMdoExtraLoader;
@@ -17,7 +18,6 @@ import com.github.zhuaidadaya.modmdo.reads.FileReads;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
 import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
-import com.github.zhuaidadaya.modmdo.whitelist.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.fabricmc.api.ModInitializer;
@@ -65,7 +65,7 @@ public class ModMdoStdInitializer implements ModInitializer {
             enableSecureEnchant = secureEnchant;
         });
         EntrustExecution.notNull(config.getConfigInt("checker_time_limit"), limit -> {
-            tokenCheckTimeLimit = limit;
+            loginCheckTimeLimit = limit;
         });
         EntrustExecution.notNull(config.getConfigBoolean("enchantment_clear_if_level_too_high"), clear -> {
             clearEnchantIfLevelTooHigh = clear;
@@ -117,6 +117,8 @@ public class ModMdoStdInitializer implements ModInitializer {
             new RankingCommand().register();
             new TestCommand().register();
             new TemporaryWhitelistCommand().register();
+
+            ArgumentInit.init();
         } catch (Exception e) {
 
         }

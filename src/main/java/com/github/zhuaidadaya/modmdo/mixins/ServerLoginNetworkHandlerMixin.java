@@ -114,7 +114,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
                             return;
                         } else {
-                            if (TimeUtil.processMillion(waiting) > tokenCheckTimeLimit) {
+                            if (TimeUtil.processMillion(waiting) > loginCheckTimeLimit) {
                                 connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with ModMdo")));
                                 LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
                                 sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "join_server_follow");
@@ -159,6 +159,8 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 } catch (Exception e) {
 
                 }
+
+                updateWhitelistNames(server);
             }).start();
         } else {
             this.server.getPlayerManager().onPlayerConnect(this.connection, player);

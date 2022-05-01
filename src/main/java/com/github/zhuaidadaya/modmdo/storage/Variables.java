@@ -19,7 +19,10 @@ import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.ObjectConfigUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.context.CommandContext;
+import io.netty.buffer.*;
 import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.network.*;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -48,6 +51,11 @@ public class Variables {
     public static final NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
     public static final NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();
     public static final NumberFormat fractionDigits0 = NumberFormat.getNumberInstance();
+    public static final Identifier CHECKING = new Identifier("modmdo:check");
+    public static final Identifier LOGIN = new Identifier("modmdo:login");
+    public static final Identifier SERVER = new Identifier("modmdo:server");
+    public static final Identifier CLIENT = new Identifier("modmdo:client");
+    public static final Identifier DATA = new Identifier("modmdo:data");
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static boolean rankingOnlineTimeScaleChanged = false;
@@ -64,16 +72,10 @@ public class Variables {
     public static boolean modmdoWhiteList = false;
     public static boolean cancelEntitiesTick = false;
     public static boolean enableCheckTokenPerTick = false;
-    public static boolean forceStopTokenCheck = false;
     public static boolean timeActive = true;
-    public static boolean tokenChanged = false;
     public static boolean rejectNoFallCheat = true;
     public static PermissionLevel registerPlayerUuid = PermissionLevel.UNABLE;
-    public static int tokenGenerateSize = 1024;
-    public static int tokenCheckTimeLimit = 3000;
-    public static final Identifier CHECKING = new Identifier("modmdo:check");
-    public static final Identifier LOGIN = new Identifier("modmdo:login");
-    public static final Identifier SERVER = new Identifier("modmdo:server");
+    public static int loginCheckTimeLimit = 3000;
     public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
@@ -91,8 +93,9 @@ public class Variables {
     public static ObjectArrayList<Rank> rankingObjects = new ObjectArrayList<>();
     public static ObjectArrayList<Rank> rankingObjectsNoDump = new ObjectArrayList<>();
     public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
-    public static Object2ObjectArrayMap<String,WhiteList> whitelist = new Object2ObjectArrayMap<>();
-    public static Object2ObjectArrayMap<String ,TemporaryWhitelist> temporaryWhitelist = new Object2ObjectArrayMap<>();
+    public static Object2ObjectArrayMap<String, WhiteList> whitelist = new Object2ObjectArrayMap<>();
+    public static int whitelistHash = whitelist.hashCode();
+    public static Object2ObjectArrayMap<String, TemporaryWhitelist> temporaryWhitelist = new Object2ObjectArrayMap<>();
     public static JSONObject playerCached = new JSONObject();
     public static boolean connectTo = false;
     public static String jump = "";
@@ -132,11 +135,8 @@ public class Variables {
         modmdoWhiteList = false;
         cancelEntitiesTick = false;
         enableCheckTokenPerTick = false;
-        forceStopTokenCheck = false;
         timeActive = true;
-        tokenChanged = false;
-        tokenGenerateSize = 1024;
-        tokenCheckTimeLimit = 3000;
+        loginCheckTimeLimit = 3000;
         rejectUsers = new UserUtil();
         loginUsers = new UserUtil();
         users = new UserUtil();
@@ -286,12 +286,7 @@ public class Variables {
     }
 
     public static int getPlayerModMdoVersion(ServerPlayerEntity player) {
-        try {
-            System.out.println(loginUsers.getUser(player).getVersion());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return EntrustParser.tryCreate(() -> loginUsers.getUser(player).getVersion(), -1);
+        return EntrustParser.tryCreate(() -> loginUsers.getUser(player).getVersion(), - 1);
     }
 
     public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
@@ -320,7 +315,7 @@ public class Variables {
         config.set("reject_reconnect", enableRejectReconnect);
         config.set("check_token_per_tick", enableCheckTokenPerTick);
         config.set("time_active", timeActive);
-        config.set("checker_time_limit", tokenCheckTimeLimit);
+        config.set("checker_time_limit", loginCheckTimeLimit);
         config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
         config.set("reject_no_fall_chest", rejectNoFallCheat);
         config.set("requires_register_player", registerPlayerUuid);
@@ -474,5 +469,24 @@ public class Variables {
         } catch (Exception e) {
             return enableDeadMessage ? "receive" : "rejected";
         }
+    }
+
+    public static void updateWhitelistNames(MinecraftServer server) {
+        if (whitelist.hashCode() != whitelistHash) {
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("whitelist_names").writeString(getWhiteListNamesJSONObject().toString())));
+            }
+            whitelistHash = whitelist.hashCode();
+        }
+    }
+
+    public static JSONObject getWhiteListNamesJSONObject() {
+        JSONObject json = new JSONObject();
+        JSONArray array = new JSONArray();
+        for (String s : whitelist.keySet()) {
+            array.put(s);
+        }
+        json.put("names", array);
+        return json;
     }
 }
