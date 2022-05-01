@@ -110,7 +110,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
             if((! rejectUsers.hasUser(player) || loginUsers.hasUser(player)) & server.getPlayerManager().getPlayer(player.getUuid()) != null) {
                 LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
-                this.server.getPlayerManager().broadcastChatMessage((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
+                this.server.getPlayerManager().broadcast((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
                 this.server.forcePlayerSampleUpdate();
                 this.server.getPlayerManager().remove(this.player);
                 this.player.onDisconnect();
