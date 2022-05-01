@@ -366,6 +366,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 WhiteList wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
                 whitelist.remove(wl.name());
                 sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
+                updateWhitelistNames(getServer(remove));
                 return 0;
             }))).then(literal("list").executes(showWhiteList -> {
                 showWhitelist(showWhiteList);

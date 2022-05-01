@@ -42,8 +42,8 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.29";
-    public static final int MODMDO_VERSION = 23;
+    public static final String VERSION_ID = "1.0.30";
+    public static final int MODMDO_VERSION = 24;
     public static final UUID extraId = UUID.randomUUID();
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
@@ -94,8 +94,9 @@ public class Variables {
     public static ObjectArrayList<Rank> rankingObjectsNoDump = new ObjectArrayList<>();
     public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
     public static Object2ObjectArrayMap<String, WhiteList> whitelist = new Object2ObjectArrayMap<>();
-    public static int whitelistHash = whitelist.hashCode();
     public static Object2ObjectArrayMap<String, TemporaryWhitelist> temporaryWhitelist = new Object2ObjectArrayMap<>();
+    public static int whitelistHash = whitelist.hashCode();
+    public static int temporaryWhitelistHash = temporaryWhitelist.hashCode();
     public static JSONObject playerCached = new JSONObject();
     public static boolean connectTo = false;
     public static String jump = "";
@@ -480,6 +481,15 @@ public class Variables {
         }
     }
 
+    public static void updateTemporaryWhitelistNames(MinecraftServer server) {
+        if (temporaryWhitelist.hashCode() != temporaryWhitelistHash) {
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("whitelist_names").writeString(getTemporaryWhitelistHashNamesJSONObject().toString())));
+            }
+            temporaryWhitelistHash = temporaryWhitelist.hashCode();
+        }
+    }
+
     public static JSONObject getWhiteListNamesJSONObject() {
         JSONObject json = new JSONObject();
         JSONArray array = new JSONArray();
@@ -489,6 +499,17 @@ public class Variables {
         json.put("names", array);
         return json;
     }
+
+    public static JSONObject getTemporaryWhitelistHashNamesJSONObject() {
+        JSONObject json = new JSONObject();
+        JSONArray array = new JSONArray();
+        for (String s : whitelist.keySet()) {
+            array.put(s);
+        }
+        json.put("names", array);
+        return json;
+    }
+
 
     public static void flushTemporaryWhitelist() {
         for (TemporaryWhitelist wl : temporaryWhitelist.values()) {
