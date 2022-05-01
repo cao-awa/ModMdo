@@ -76,7 +76,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 if (commandApplyToPlayer(1, getPlayer(enableWhitelist), this, enableWhitelist)) {
                     modmdoWhiteList = true;
                     updateModMdoVariables();
-                    
+
                     sendFeedback(enableWhitelist, formatUseModMdoWhitelist());
                 }
                 return 1;
@@ -366,7 +366,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 WhiteList wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
                 whitelist.remove(wl.name());
                 sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
-                updateWhitelistNames(getServer(remove));
+                updateWhitelistNames(getServer(remove), true);
                 return 0;
             }))).then(literal("list").executes(showWhiteList -> {
                 showWhitelist(showWhiteList);
