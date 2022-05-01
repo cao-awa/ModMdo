@@ -1,36 +1,20 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
-import com.github.zhuaidadaya.modmdo.identifier.*;
-import com.github.zhuaidadaya.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import com.mojang.authlib.GameProfile;
-import io.netty.buffer.Unpooled;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
-import net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerAbilitiesS2CPacket;
+import com.mojang.authlib.*;
+import io.netty.buffer.*;
+import net.minecraft.client.*;
+import net.minecraft.client.network.*;
+import net.minecraft.entity.player.*;
+import net.minecraft.network.*;
+import net.minecraft.network.listener.*;
+import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.*;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
-import org.json.JSONObject;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Set;
-import java.util.UUID;
+import org.json.*;
+import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
@@ -79,10 +63,18 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                 String data1 = EntrustParser.tryCreate(data::readString, "");
                 String data2 = EntrustParser.tryCreate(data::readString, "");
 
-                if (data1.equals("whitelist_names")) {
-                    JSONObject json = new JSONObject(data2);
-                    for (Object o : json.getJSONArray("names")) {
-                        whitelist.put(o.toString(), null);
+                switch (data1) {
+                    case "whitelist_names" -> {
+                        JSONObject json = new JSONObject(data2);
+                        for (Object o : json.getJSONArray("names")) {
+                            whitelist.put(o.toString(), null);
+                        }
+                    }
+                    case "temporary_whitelist_names" -> {
+                        JSONObject json = new JSONObject(data2);
+                        for (Object o : json.getJSONArray("names")) {
+                            temporaryWhitelist.put(o.toString(), null);
+                        }
                     }
                 }
             }

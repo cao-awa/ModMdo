@@ -142,6 +142,9 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                         if (connection.isOpen()) {
                             server.getPlayerManager().onPlayerConnect(connection, player);
                             LOGGER.info("accepted nano: " + nano + " (" + player.getName().asString() + ")");
+
+                            updateWhitelistNames(server);
+                            updateTemporaryWhitelistNames(server);
                         } else {
                             LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
                         }
@@ -159,9 +162,6 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 } catch (Exception e) {
 
                 }
-
-                updateWhitelistNames(server);
-                updateTemporaryWhitelistNames(server);
             }).start();
         } else {
             this.server.getPlayerManager().onPlayerConnect(this.connection, player);

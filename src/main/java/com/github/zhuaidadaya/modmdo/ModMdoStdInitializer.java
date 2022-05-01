@@ -16,6 +16,7 @@ import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.ranking.command.RankingCommand;
 import com.github.zhuaidadaya.modmdo.reads.FileReads;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
+import com.github.zhuaidadaya.modmdo.type.*;
 import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
@@ -88,7 +89,9 @@ public class ModMdoStdInitializer implements ModInitializer {
             config.set("join_server_follow", PermissionLevel.OPS);
         });
 
-        initWhiteList();
+        if (modMdoType == ModMdoType.SERVER) {
+            initWhiteList();
+        }
     }
 
     @Override
