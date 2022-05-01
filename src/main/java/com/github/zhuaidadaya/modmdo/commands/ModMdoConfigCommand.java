@@ -215,29 +215,6 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     sendFeedback(enableJoinServerFollowForOps, formatRunCommandFollow());
                 }
                 return 3;
-            }))).then(literal("checkTokenPerTick").executes(getCheckTokenPerTick -> {
-                if (commandApplyToPlayer(12, getPlayer(getCheckTokenPerTick), this, getCheckTokenPerTick)) {
-                    sendFeedback(getCheckTokenPerTick, formatConfigReturnMessage("check_token_per_tick"));
-                }
-                return 0;
-            }).then(literal("enable").executes(check -> {
-                if (commandApplyToPlayer(12, getPlayer(check), this, check)) {
-                    enableCheckTokenPerTick = true;
-
-                    updateModMdoVariables();
-
-                    sendFeedback(check, formatConfigReturnMessage("check_token_per_tick"));
-                }
-                return 0;
-            })).then(literal("disable").executes(noCheck -> {
-                if (commandApplyToPlayer(12, getPlayer(noCheck), this, noCheck)) {
-                    enableCheckTokenPerTick = false;
-
-                    updateModMdoVariables();
-
-                    sendFeedback(noCheck, formatConfigReturnMessage("check_token_per_tick"));
-                }
-                return 0;
             }))).then(literal("timeActive").executes(getTimeActive -> {
                 if (commandApplyToPlayer(15, getPlayer(getTimeActive), this, getTimeActive)) {
                     sendFeedback(getTimeActive, formatConfigReturnMessage("time_active"));
@@ -261,7 +238,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                     sendFeedback(disableTimeActive, formatConfigReturnMessage("time_active"));
                 }
                 return 0;
-            }))).then(literal("tokenCheckTimeLimit").executes(getTimeLimit -> {
+            }))).then(literal("loginCheckTimeLimit").executes(getTimeLimit -> {
                 if (commandApplyToPlayer(16, getPlayer(getTimeLimit), this, getTimeLimit)) {
                     sendFeedback(getTimeLimit, formatCheckerTimeLimit());
                 }
