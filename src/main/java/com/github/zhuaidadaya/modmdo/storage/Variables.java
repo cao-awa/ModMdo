@@ -42,7 +42,7 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.28";
+    public static final String VERSION_ID = "1.0.29";
     public static final int MODMDO_VERSION = 22;
     public static final UUID extraId = UUID.randomUUID();
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
