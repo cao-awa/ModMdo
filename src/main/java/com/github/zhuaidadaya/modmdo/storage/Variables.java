@@ -42,8 +42,8 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.27";
-    public static final int MODMDO_VERSION = 21;
+    public static final String VERSION_ID = "1.0.28";
+    public static final int MODMDO_VERSION = 22;
     public static final UUID extraId = UUID.randomUUID();
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
@@ -488,5 +488,13 @@ public class Variables {
         }
         json.put("names", array);
         return json;
+    }
+
+    public static void flushTemporaryWhitelist() {
+        for (TemporaryWhitelist wl : temporaryWhitelist.values()) {
+            if (!wl.isValid()) {
+                temporaryWhitelist.remove(wl.name());
+            }
+        }
     }
 }

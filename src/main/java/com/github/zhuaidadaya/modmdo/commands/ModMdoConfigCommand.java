@@ -10,9 +10,12 @@ import com.github.zhuaidadaya.modmdo.whitelist.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.ObjectConfigUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.*;
+import com.mojang.brigadier.exceptions.*;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.command.argument.EnchantmentArgumentType;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.server.command.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -359,12 +362,32 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 return 0;
             }))).then(literal("registerPlayerNameRegex").executes(e -> {
                 return 0;
-            })).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhiteListArgumentType.whitelist()).executes(remove -> {
-                WhiteList wl = ModMdoWhiteListArgumentType.getWhiteList(remove, "name");
+            })).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
+                WhiteList wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
                 whitelist.remove(wl.name());
+                sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
                 return 0;
-            })))));
+            }))).then(literal("list").executes(showWhiteList -> {
+                showWhitelist(showWhiteList);
+                return 0;
+            }))));
         });
+    }
+
+    public void showWhitelist(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
+        flushTemporaryWhitelist();
+        ServerPlayerEntity player = getPlayer(source);
+        if (whitelist.size() > 0) {
+            StringBuilder builder = new StringBuilder();
+            for (WhiteList wl : whitelist.values()) {
+                builder.append(wl.name()).append(", ");
+            }
+            builder.delete(builder.length() - 2, builder.length());
+            sendMessage(player, new TranslatableText("commands.modmdo.whitelist.list", whitelist.size(), builder.toString()), false, 22);
+        } else {
+            sendMessage(player, new TranslatableText("commands.modmdo.whitelist.none"), false, 22);
+
+        }
     }
 
     public TranslatableText formatConfigReturnMessage(String config) {
