@@ -53,8 +53,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     protected abstract boolean isHost();
 
     /**
-     * 解析玩家发送的数据包, 如果identifier为 <code>modmdo:token</code> 则检查token<br>
-     * token正确就加入loginUsers中, 加入就算放行了<br>
+     * 与客户端进行自定义通信
      * <br>
      *
      * @param packet
@@ -94,7 +93,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     }
 
     /**
-     * 在玩家退出游戏后去除放行状态, 下一次进入也需要重传token
+     * 退出时清除玩家的登录状态
      *
      * @param reason
      *         移除信息

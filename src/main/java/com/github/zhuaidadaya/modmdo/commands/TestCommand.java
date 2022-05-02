@@ -1,8 +1,9 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
+import com.github.cao.awa.hyacinth.logging.*;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.testing;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -15,7 +16,12 @@ public class TestCommand extends SimpleCommandOperation implements SimpleCommand
                 testing = !testing;
                 sendFeedback(e, new TranslatableText("testing: " + testing));
                 return 0;
-            }));
+            }).then(literal("debug").executes(debug -> {
+                PrintUtil.debugging = !PrintUtil.debugging;
+                sendFeedback(debug, new TranslatableText("debug: " + PrintUtil.debugging));
+                PrintUtil.messageToTracker(PrintUtil.tacker("ModMdo-Testing"));
+                return 0;
+            })));
         });
     }
 }
