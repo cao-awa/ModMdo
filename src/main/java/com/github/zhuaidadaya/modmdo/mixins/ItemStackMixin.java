@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -34,7 +35,7 @@ public abstract class ItemStackMixin {
     }
 
     public void filterLevel() {
-        try {
+        EntrustExecution.tryTemporary(() -> {
             if (enchantLevelController.isEnabledControl() && nbt != null) {
                 NbtList list = nbt.getList("Enchantments", 10);
                 NbtList addTo = new NbtList();
@@ -79,8 +80,6 @@ public abstract class ItemStackMixin {
                     nbt.put("Enchantments", addTo);
                 }
             }
-        } catch (Exception e) {
-
-        }
+        });
     }
 }

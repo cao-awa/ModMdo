@@ -1,7 +1,7 @@
 package com.github.zhuaidadaya.modmdo.storage;
 
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
-import com.github.zhuaidadaya.modmdo.extra.loader.ModMdoExtraLoader;
+import com.github.zhuaidadaya.modmdo.extra.loader.*;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
@@ -71,7 +71,6 @@ public class Variables {
     public static boolean enableRejectReconnect = true;
     public static boolean modmdoWhiteList = false;
     public static boolean cancelEntitiesTick = false;
-    public static boolean enableCheckTokenPerTick = false;
     public static boolean timeActive = true;
     public static boolean rejectNoFallCheat = true;
     public static PermissionLevel registerPlayerUuid = PermissionLevel.UNABLE;
@@ -99,11 +98,9 @@ public class Variables {
     public static int temporaryWhitelistHash = temporaryWhitelist.hashCode();
     public static JSONObject playerCached = new JSONObject();
     public static boolean connectTo = false;
-    public static String jump = "";
-    public static String jumpToken = "";
-    public static String jumpLoginType = "";
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
+    public static ArrayList<ModMdoExtra> extrasWaitingForRegister = new ArrayList<>();
     public static ModMdoExtraLoader extras;
     public static boolean loaded = false;
     public static boolean testing = false;
@@ -135,7 +132,6 @@ public class Variables {
         enableRejectReconnect = true;
         modmdoWhiteList = false;
         cancelEntitiesTick = false;
-        enableCheckTokenPerTick = false;
         timeActive = true;
         loginCheckTimeLimit = 3000;
         rejectUsers = new UserUtil();
@@ -150,9 +146,6 @@ public class Variables {
         rankingObjectsNoDump = new ObjectArrayList<>();
 
         connectTo = false;
-        jump = "";
-        jumpToken = "";
-        jumpLoginType = "";
 
         enchantLevelController.setNoVanillaDefaultMaxLevel((short) 5);
         initEnchantmentMaxLevel();
@@ -314,7 +307,6 @@ public class Variables {
         config.set("secure_enchant", enableSecureEnchant);
         config.set("modmdo_whitelist", modmdoWhiteList);
         config.set("reject_reconnect", enableRejectReconnect);
-        config.set("check_token_per_tick", enableCheckTokenPerTick);
         config.set("time_active", timeActive);
         config.set("checker_time_limit", loginCheckTimeLimit);
         config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
@@ -524,6 +516,14 @@ public class Variables {
             if (! wl.isValid()) {
                 temporaryWhitelist.remove(wl.name());
             }
+        }
+    }
+
+    public static void registerExtra(ModMdoExtra extra) {
+        if (extras == null) {
+            extrasWaitingForRegister.add(extra);
+        } else {
+            extras.register(extra.getId(), extra);
         }
     }
 }
