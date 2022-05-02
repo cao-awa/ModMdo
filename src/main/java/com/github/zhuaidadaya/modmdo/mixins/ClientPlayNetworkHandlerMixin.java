@@ -33,8 +33,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     private GameProfile profile;
 
     /**
-     * 如果收到了服务器的包,确定对方是一个ModMdo服务器并开启Token加密才发送数据包
-     * 如果服务器未安装ModMdo或未开启加密, 则不发送
+     * 与服务端进行自定义通信
      *
      * @param packet
      *         packet

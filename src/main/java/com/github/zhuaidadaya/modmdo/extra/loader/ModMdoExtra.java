@@ -1,10 +1,11 @@
 package com.github.zhuaidadaya.modmdo.extra.loader;
 
-import java.util.Map;
+import java.util.*;
 
 public abstract class ModMdoExtra {
     private ExtraArgs args = new ExtraArgs();
     private String name = "ModMdoExtra(Ab.)";
+    private UUID id = UUID.randomUUID();
 
     public abstract void init();
 
@@ -28,5 +29,14 @@ public abstract class ModMdoExtra {
 
     public boolean hasName() {
         return !name.equals("ModMdoExtra(Ab.)");
+    }
+
+    public ModMdoExtra setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    public UUID getId() {
+        return id;
     }
 }

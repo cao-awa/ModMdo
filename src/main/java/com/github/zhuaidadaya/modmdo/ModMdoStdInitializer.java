@@ -2,9 +2,7 @@ package com.github.zhuaidadaya.modmdo;
 
 import com.github.zhuaidadaya.modmdo.commands.*;
 import com.github.zhuaidadaya.modmdo.commands.argument.*;
-import com.github.zhuaidadaya.modmdo.extra.loader.ExtraArgs;
-import com.github.zhuaidadaya.modmdo.extra.loader.ModMdo;
-import com.github.zhuaidadaya.modmdo.extra.loader.ModMdoExtraLoader;
+import com.github.zhuaidadaya.modmdo.extra.loader.*;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
@@ -56,9 +54,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         EntrustExecution.notNull(config.getConfigBoolean("modmdo_whitelist"), whitelist -> {
             modmdoWhiteList = whitelist;
         });
-        EntrustExecution.notNull(config.getConfigBoolean("check_token_per_tick"), checkPerTick -> {
-            enableCheckTokenPerTick = checkPerTick;
-        });
         EntrustExecution.notNull(config.getConfigBoolean("time_active"), tac -> {
             timeActive = tac;
         });
@@ -102,6 +97,8 @@ public class ModMdoStdInitializer implements ModInitializer {
 
         configCached = new DiskObjectConfigUtil(entrust, "config/modmdo/");
 
+        registerExtra(new ModMdo().setName("ModMdo").setId(extraId));
+
         loginUsers = new UserUtil();
         rejectUsers = new UserUtil();
 
@@ -138,8 +135,9 @@ public class ModMdoStdInitializer implements ModInitializer {
         extras = new ModMdoExtraLoader();
 
         LOGGER.info("registering for ModMdo extra");
-
-        extras.register(extraId, new ModMdo().setName("ModMdo"));
+        for (ModMdoExtra extra : extrasWaitingForRegister) {
+            extras.register(extra.getId(), extra);
+        }
 
         loaded = true;
     }
