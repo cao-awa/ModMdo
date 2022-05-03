@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modmdo.utils.command;
 
 import com.github.zhuaidadaya.modmdo.storage.Variables;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.network.ClientConnection;

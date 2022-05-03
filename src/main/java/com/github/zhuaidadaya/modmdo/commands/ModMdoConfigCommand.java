@@ -7,7 +7,6 @@ import com.github.zhuaidadaya.modmdo.storage.Variables;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.utils.translate.TranslateUtil;
 import com.github.zhuaidadaya.modmdo.whitelist.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.config.ObjectConfigUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.*;
@@ -19,11 +18,11 @@ import net.minecraft.server.command.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
-import org.json.JSONObject;
 
 import java.util.Locale;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.getLanguage;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -74,15 +73,33 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 return 2;
             }).then(literal("enable").executes(enableWhitelist -> {
                 if (commandApplyToPlayer(1, getPlayer(enableWhitelist), this, enableWhitelist)) {
-                    modmdoWhiteList = true;
+                    config.set("modmdo_whitelist", true);
                     updateModMdoVariables();
 
                     sendFeedback(enableWhitelist, formatUseModMdoWhitelist());
+
+                    for (ServerPlayerEntity player : getServer(enableWhitelist).getPlayerManager().getPlayerList()) {
+                        EntrustExecution.tryTemporary(() -> {
+                            if (config.getConfigBoolean("whitelist_only_id")) {
+                                if (whitelist.getFromId(loginUsers.getUser(player).getIdentifier()) == null) {
+                                    throw new Exception();
+                                }
+                            } else {
+                                if (! whitelist.get(player.getName().asString()).getIdentifier().equals(loginUsers.getUser(player).getIdentifier())) {
+                                    throw new Exception();
+                                }
+                            }
+                        }, () -> {
+                            if (player.networkHandler.connection.isOpen()) {
+                                player.networkHandler.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+                            }
+                        });
+                    }
                 }
                 return 1;
             })).then(literal("disable").executes(disableWhitelist -> {
                 if (commandApplyToPlayer(1, getPlayer(disableWhitelist), this, disableWhitelist)) {
-                    modmdoWhiteList = false;
+                    config.set("modmdo_whitelist", false);
                     updateModMdoVariables();
                     sendFeedback(disableWhitelist, formatDisableModMdoWhitelist());
                 }
@@ -248,7 +265,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 return 0;
             }).then(argument("ms", IntegerArgumentType.integer(500)).executes(setTimeLimit -> {
                 if (commandApplyToPlayer(16, getPlayer(setTimeLimit), this, setTimeLimit)) {
-                    loginCheckTimeLimit = IntegerArgumentType.getInteger(setTimeLimit, "ms");
+                    config.set("checker_time_limit", IntegerArgumentType.getInteger(setTimeLimit, "ms"));
 
                     updateModMdoVariables();
 
@@ -256,17 +273,17 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 }
                 return 0;
             }))).then(literal("language").executes(getLanguage -> {
-                sendFeedback(getLanguage, new TranslatableText("language.default", language), 20);
+                sendFeedback(getLanguage, new TranslatableText("language.default", getLanguage()), 20);
                 return 0;
             }).then(literal("chinese").executes(chinese -> {
-                language = Language.CHINESE;
+                config.set("default_language", Language.CHINESE);
                 updateModMdoVariables();
-                sendFeedback(chinese, new TranslatableText("language.default", language), 20);
+                sendFeedback(chinese, new TranslatableText("language.default", getLanguage()), 20);
                 return 0;
             })).then(literal("english").executes(english -> {
-                language = Language.ENGLISH;
+                config.set("default_language", Language.ENGLISH);
                 updateModMdoVariables();
-                sendFeedback(english, new TranslatableText("language.default", language), 20);
+                sendFeedback(english, new TranslatableText("language.default", getLanguage()), 20);
                 return 0;
             }))).then(literal("maxEnchantmentLevel").executes(getEnchantControlEnable -> {
                 sendFeedback(getEnchantControlEnable, TranslateUtil.translatableText(enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"), 21);
@@ -336,38 +353,27 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 updateModMdoVariables();
                 sendFeedback(receive, new TranslatableText(rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
                 return 0;
-            }))).then(literal("registerPlayerUuid").then(literal("ops").executes(registerOps -> {
-                registerPlayerUuid = PermissionLevel.OPS;
-                updateModMdoVariables();
-                EntrustExecution.before(config, first -> {
-                    for (ServerPlayerEntity player : getServer(registerOps).getPlayerManager().getPlayerList()) {
-                        playerCached.put(player.getName().asString(), new JSONObject().put("uuid", player.getUuid().toString()).put("name", player.getName().asString()));
-                    }
-                    updateModMdoVariables();
-                }, ObjectConfigUtil::save);
+            }))).then(literal("onlyCheckIdentifier").executes(check -> {
+                sendFeedback(check, formatConfigReturnMessage("whitelist_only_id"));
                 return 0;
-            })).then(literal("all").executes(registerAll -> {
-                registerPlayerUuid = PermissionLevel.ALL;
-                updateModMdoVariables();
-                EntrustExecution.before(config, first -> {
-                    for (ServerPlayerEntity player : getServer(registerAll).getPlayerManager().getPlayerList()) {
-                        playerCached.put(player.getName().asString(), new JSONObject().put("uuid", player.getUuid().toString()).put("name", player.getName().asString()));
-                    }
-                    updateModMdoVariables();
-                }, ObjectConfigUtil::save);
+            }).then(literal("enable").executes(enable -> {
+                config.set("whitelist_only_id", true);
+                sendFeedback(enable, formatConfigReturnMessage("whitelist_only_id"));
                 return 0;
-            })).then(literal("disable").executes(disableRegister -> {
-                registerPlayerUuid = PermissionLevel.UNABLE;
-                updateModMdoVariables();
+            })).then(literal("disable").executes(disable -> {
+                config.set("whitelist_only_id", false);
+                sendFeedback(disable, formatConfigReturnMessage("whitelist_only_id"));
                 return 0;
-            }))).then(literal("registerPlayerNameRegex").executes(e -> {
-                return 0;
-            })).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
-                WhiteList wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
-                whitelist.remove(wl.name());
-                sendFeedback(remove, new TranslatableText("modmdo.whitelist.removed", wl.name()));
-                updateWhitelistNames(getServer(remove), true);
-                return 0;
+            }))).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
+                Whitelist wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
+                if (whitelist.containsName(wl.getName())) {
+                    whitelist.remove(wl.getName());
+                    sendFeedback(remove, new TranslatableText("modmdo.whitelist.removed", wl.getName()));
+                    updateWhitelistNames(getServer(remove), true);
+                    return 0;
+                }
+                sendError(remove, new TranslatableText("arguments.permanent.whitelist.not.registered"), 25);
+                return - 1;
             }))).then(literal("list").executes(showWhiteList -> {
                 showWhitelist(showWhiteList);
                 return 0;
@@ -380,8 +386,8 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
         ServerPlayerEntity player = getPlayer(source);
         if (whitelist.size() > 0) {
             StringBuilder builder = new StringBuilder();
-            for (WhiteList wl : whitelist.values()) {
-                builder.append(wl.name()).append(", ");
+            for (Whitelist wl : whitelist.values()) {
+                builder.append(wl.getName()).append(", ");
             }
             builder.delete(builder.length() - 2, builder.length());
             sendMessage(player, new TranslatableText("commands.modmdo.whitelist.list", whitelist.size(), builder.toString()), false, 22);
@@ -396,7 +402,7 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     }
 
     public TranslatableText formatCheckerTimeLimit() {
-        return new TranslatableText("checker_time_limit.rule.format", loginCheckTimeLimit);
+        return new TranslatableText("checker_time_limit.rule.format", config.getConfigInt("checker_time_limit"));
     }
 
     public TranslatableText formatJoinGameFollow() {

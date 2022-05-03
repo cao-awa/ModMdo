@@ -47,6 +47,7 @@ public class PlayerManagerMixin {
                     if (loginUsers.hasUser(player)) {
                         SimpleCommandOperation.sendMessage(player, new TranslatableText("login.dump.rejected"), false, 15);
                     }
+                    cir.setReturnValue(null);
                     cir.cancel();
                 }
             }
