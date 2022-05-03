@@ -15,8 +15,6 @@ public class ModMdo extends ModMdoExtra {
 
         new ModMdoUserCommand().init();
 
-        resetPlayerCache();
-
         try {
             initModMdoVariables();
         } catch (Exception e) {

@@ -20,7 +20,6 @@ public class ServerStartListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            motd = server.getServerMotd();
         });
     }
 }

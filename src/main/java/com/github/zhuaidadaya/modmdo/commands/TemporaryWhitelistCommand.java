@@ -21,11 +21,11 @@ public class TemporaryWhitelistCommand extends SimpleCommandOperation implements
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("temporary").then(literal("whitelist").then(literal("add").then(argument("name", StringArgumentType.string()).executes(addDefault -> {
                 String name = StringArgumentType.getString(addDefault, "name");
-                if (temporaryWhitelist.containsKey(name)) {
+                if (temporaryWhitelist.containsName(name)) {
                     sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.already.is.whitelist", name), 21);
                     return - 1;
                 }
-                if (whitelist.containsKey(name)) {
+                if (whitelist.containsName(name)) {
                     sendFeedback(addDefault, new TranslatableText("modmdo.whitelist.add.already.is.whitelist", name), 21);
                     return - 1;
                 }
@@ -38,11 +38,15 @@ public class TemporaryWhitelistCommand extends SimpleCommandOperation implements
                 updateTemporaryWhitelistNames(getServer(showTemporary), true);
                 return 0;
             })).then(literal("remove").then(argument("name",ModMdoTemporaryWhitelistArgumentType.whitelist()).executes(remove -> {
-                TemporaryWhitelist wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove,"name");
-                temporaryWhitelist.remove(wl.name());
-                sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
-                updateTemporaryWhitelistNames(getServer(remove), true);
-                return 0;
+                TemporaryWhitelist wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove, "name");
+                if (temporaryWhitelist.containsName(wl.getName())) {
+                    temporaryWhitelist.remove(wl.name());
+                    sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
+                    updateTemporaryWhitelistNames(getServer(remove), true);
+                    return 0;
+                }
+                sendError(remove, new TranslatableText("arguments.temporary.whitelist.not.registered", wl.getName()), 25);
+                return -1;
             })))));
         });
     }

@@ -88,7 +88,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
             ci.cancel();
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -130,15 +130,9 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }).start();
     }
 
-    @Inject(method = "executeCommand", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "executeCommand", at = @At("HEAD"))
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
-        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.try", player.getName().asString(), input), "run_command_follow");
-        if(! loginUsers.hasUser(player) & modmdoWhiteList) {
-            LOGGER.info("rejected command request: not login user");
-            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.rejected.without.login", player.getName().asString()), "run_command_follow");
-            ci.cancel();
-        }
         sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command", player.getName().asString(), input), "run_command_follow");
     }
 }

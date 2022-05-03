@@ -256,27 +256,10 @@ public class ServerTickListener {
             if (needSync) {
                 player.getInventory().updateItems();
             }
-            if (modMdoType == ModMdoType.SERVER & modmdoWhiteList) {
-                checkLoginStat(player, players);
-            }
             if (enableDeadMessage) {
                 detectPlayerDead(player);
             }
         }
-    }
-
-    public void checkLoginStat(ServerPlayerEntity player, PlayerManager manager) {
-        EntrustExecution.tryTemporary(() -> {
-            if (modmdoWhiteList) {
-                if (!whitelist.get(player.getName().asString()).identifier().equals(loginUsers.getUser(player).getIdentifier())) {
-                    throw new Exception();
-                }
-            }
-        }, () -> {
-            if (player.networkHandler.connection.isOpen()) {
-                player.networkHandler.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
-            }
-        });
     }
 
     /**
