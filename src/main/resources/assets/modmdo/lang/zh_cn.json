@@ -1,4 +1,8 @@
 {
+    "arguments.permanent.whitelist.not.registered": "没有将玩家 %s 注册于ModMdo白名单中",
+    "arguments.temporary.whitelist.not.registered": "没有将玩家 %s 注册于临时白名单中",
+    "whitelist_only_id.true.rule.format": "ModMdo白名单将不会确认玩家的名称",
+    "whitelist_only_id.false.rule.format": "ModMdo白名单将确认玩家名称以及id",
     "temporary.whitelist.removed": "已将 %s 从临时白名单中删除",
     "modmdo.whitelist.removed": "已将 %s 从ModMdo白名单中删除",
     "modmdo.whitelist.add.already.is.whitelist": "%s 已经在ModMdo白名单中, 请将其删除后重试",
@@ -58,8 +62,6 @@
     "server.tps": "服务器TPS: %sms -> %s / %s",
     "player.run.command": "§a玩家 %s §a运行了命令: \n%s",
     "player.run.command.rejected.bad.modmdo.version": "§c已拒绝 %s §c运行命令, 因为此玩家的ModMdo版本不符合命令要求",
-    "player.run.command.rejected.without.login": "§c已取消 %s §c运行命令, 因为此玩家未登录服务器",
-    "player.run.command.try": "§a玩家 %s §a正在尝试运行命令: \n%s",
     "player.login.rejected.not.white-listed": "§c已拒绝 %s §c登录服务器, 因为服务器没有登记此玩家的id",
     "player.login.rejected.without.modmdo": "§c已拒绝 %s §c登录服务器, 因为此玩家没有使用ModMdo连接",
     "player.login.try": "§a玩家 %s §a正在尝试登录服务器",

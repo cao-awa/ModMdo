@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
+import com.github.zhuaidadaya.modmdo.commands.argument.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
@@ -64,18 +65,21 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
 
                 switch (data1) {
                     case "whitelist_names" -> {
+                        whitelist.clear();
                         JSONObject json = new JSONObject(data2);
                         for (Object o : json.getJSONArray("names")) {
                             whitelist.put(o.toString(), null);
                         }
                     }
                     case "temporary_whitelist_names" -> {
+                        temporaryWhitelist.clear();
                         JSONObject json = new JSONObject(data2);
                         for (Object o : json.getJSONArray("names")) {
                             temporaryWhitelist.put(o.toString(), null);
                         }
                     }
                 }
+                ArgumentInit.init();
             }
         } catch (Exception e) {
             LOGGER.error("error in connecting ModMdo server", e);

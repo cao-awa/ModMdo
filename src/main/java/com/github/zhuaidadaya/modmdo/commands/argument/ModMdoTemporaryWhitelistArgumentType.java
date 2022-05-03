@@ -16,30 +16,20 @@ import java.util.concurrent.*;
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ModMdoTemporaryWhitelistArgumentType implements ArgumentType<String> {
-    private static final DynamicCommandExceptionType WHITELIST_NOT_FOUND = new DynamicCommandExceptionType((name) -> {
-        return new TranslatableText("arguments.whitelist.not.registered", name);
-    });
-
     public static ModMdoTemporaryWhitelistArgumentType whitelist() {
         return new ModMdoTemporaryWhitelistArgumentType();
     }
 
-    @Override
-    public String parse(StringReader reader) throws CommandSyntaxException {
-        String string = reader.readUnquotedString();
-        return string;
-    }
-
-    public static TemporaryWhitelist getWhiteList(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    public static TemporaryWhitelist getWhiteList(CommandContext<ServerCommandSource> context, String name) {
         String string = context.getArgument(name, String.class);
         TemporaryWhitelist whiteList = temporaryWhitelist.get(string);
-        if (whiteList == null) {
-            throw WHITELIST_NOT_FOUND.create(string);
-        } else {
-            return whiteList;
-        }
+        return whiteList == null ? new TemporaryWhitelist(string, -1, -1) : whiteList;
     }
 
+    @Override
+    public String parse(StringReader reader) {
+        return reader.readUnquotedString();
+    }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {

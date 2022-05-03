@@ -35,9 +35,6 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     @Final
     MinecraftServer server;
 
-    @Shadow
-    GameProfile profile;
-
     /**
      * 如果玩家为null, 则拒绝将玩家添加进服务器
      * (因为其他地方有cancel, 所以可能null)
@@ -59,51 +56,20 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 long nano = System.nanoTime();
                 LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
 
-                if (registerPlayerUuid != PermissionLevel.UNABLE) {
-                    EntrustExecution.before(config, first -> {
-                        try {
-                            config.readConfig();
-                        } catch (Exception e) {
-
-                        }
-                    }, before -> {
-                        EntrustExecution.executeNull(config.getConfig("register_player_uuid"), asNotNull -> {
-                            boolean check;
-                            if (registerPlayerUuid == PermissionLevel.OPS) {
-                                check = player.hasPermissionLevel(2);
-                            } else {
-                                check = true;
-                            }
-                            if (playerCached.has(player.getName().asString())) {
-                                if (check && ! playerCached.getJSONObject(player.getName().asString()).get("uuid").toString().equals(player.getUuid().toString())) {
-                                    connection.send(new DisconnectS2CPacket(new LiteralText("you login with a obsolete UUID\ncheck your UUID or contact to server administrator to remove your registration")));
-                                    LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player login with obsolete UUID");
-                                    sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.obsolete.uuid", player.getName().asString()), "join_server_follow");
-                                    connection.disconnect(new LiteralText("failed to login server"));
-                                    LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
-                                }
-                            } else {
-                                playerCached.put(player.getName().asString(), new JSONObject().put("uuid", player.getUuid()).put("name", player.getName().asString()));
-                                updateModMdoVariables();
-                            }
-                        }, asNull -> {
-                            playerCached.put(player.getName().asString(), new JSONObject().put("uuid", player.getUuid()).put("name", player.getName().asString()));
-                            updateModMdoVariables();
-                        });
-                    });
-                }
-
                 long waiting = TimeUtil.millions();
 
+                int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
+                boolean useModMdoWhitelist = config.getConfigBoolean("modmdo_whitelist");
+
                 try {
-                    new ServerPlayNetworkHandler(server, connection, player).sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhiteList ? CHECKING : LOGIN)));
+                    new ServerPlayNetworkHandler(server, connection, player).sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(useModMdoWhitelist ? CHECKING : LOGIN)));
 
                     sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.try", player.getName().asString()), "join_server_follow");
                 } catch (Exception e) {
 
                 }
 
-                if (modMdoType == ModMdoType.SERVER & modmdoWhiteList) {
+                if (modMdoType == ModMdoType.SERVER & useModMdoWhitelist) {
                     while (! loginUsers.hasUser(player)) {
                         if (rejectUsers.hasUser(player)) {
                             connection.send(new DisconnectS2CPacket(new TranslatableText("multiplayer.disconnect.not_whitelisted")));

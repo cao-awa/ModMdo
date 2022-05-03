@@ -2,7 +2,6 @@ package com.github.zhuaidadaya.modmdo.storage;
 
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modmdo.extra.loader.*;
-import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
@@ -42,12 +41,11 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.30";
-    public static final int MODMDO_VERSION = 24;
-    public static final UUID extraId = UUID.randomUUID();
+    public static final String VERSION_ID = "1.0.31";
+    public static final int MODMDO_VERSION = 25;
+    public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
-    public static final LinkedHashMap<ServerPlayerEntity, Long> skipMap = new LinkedHashMap<>();
     public static final NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
     public static final NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();
     public static final NumberFormat fractionDigits0 = NumberFormat.getNumberInstance();
@@ -61,7 +59,6 @@ public class Variables {
     public static boolean rankingOnlineTimeScaleChanged = false;
     public static String rankingOnlineTimeScale = "minute";
     public static String entrust = "ModMdo";
-    public static Language language = Language.ENGLISH;
     public static boolean rankingSwitchNoDump = true;
     public static boolean enableRanking = false;
     public static boolean enableHereCommand = true;
@@ -69,19 +66,15 @@ public class Variables {
     public static boolean enableCava = true;
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
-    public static boolean modmdoWhiteList = false;
     public static boolean cancelEntitiesTick = false;
     public static boolean timeActive = true;
     public static boolean rejectNoFallCheat = true;
-    public static PermissionLevel registerPlayerUuid = PermissionLevel.UNABLE;
-    public static int loginCheckTimeLimit = 3000;
     public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
     public static DiskObjectConfigUtil configCached;
     public static ObjectConfigUtil config;
     public static CavaUtil cavas;
-    public static String motd = "";
     public static MinecraftServer server;
     public static ModMdoType modMdoType = ModMdoType.NONE;
     public static int itemDespawnAge = 6000;
@@ -92,11 +85,10 @@ public class Variables {
     public static ObjectArrayList<Rank> rankingObjects = new ObjectArrayList<>();
     public static ObjectArrayList<Rank> rankingObjectsNoDump = new ObjectArrayList<>();
     public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
-    public static Object2ObjectArrayMap<String, WhiteList> whitelist = new Object2ObjectArrayMap<>();
-    public static Object2ObjectArrayMap<String, TemporaryWhitelist> temporaryWhitelist = new Object2ObjectArrayMap<>();
+    public static WhiteLists<PermanentWhitelist> whitelist = new WhiteLists<>();
+    public static WhiteLists<TemporaryWhitelist> temporaryWhitelist = new WhiteLists<>();
     public static int whitelistHash = whitelist.hashCode();
     public static int temporaryWhitelistHash = temporaryWhitelist.hashCode();
-    public static JSONObject playerCached = new JSONObject();
     public static boolean connectTo = false;
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
@@ -122,7 +114,6 @@ public class Variables {
         rankingRandomSwitchInterval = 20 * 60 * 8;
         rankingOnlineTimeScaleChanged = false;
         rankingOnlineTimeScale = "minute";
-        language = Language.ENGLISH;
         rankingSwitchNoDump = true;
         enableRanking = false;
         enableHereCommand = true;
@@ -130,17 +121,13 @@ public class Variables {
         enableCava = true;
         enableSecureEnchant = true;
         enableRejectReconnect = true;
-        modmdoWhiteList = false;
         cancelEntitiesTick = false;
         timeActive = true;
-        loginCheckTimeLimit = 3000;
         rejectUsers = new UserUtil();
         loginUsers = new UserUtil();
         users = new UserUtil();
         cavas = new CavaUtil();
-        motd = "";
         itemDespawnAge = 6000;
-        language = Language.ENGLISH;
 
         rankingObjects = new ObjectArrayList<>();
         rankingObjectsNoDump = new ObjectArrayList<>();
@@ -161,25 +148,15 @@ public class Variables {
     }
 
     public static void initWhiteList() {
-        temporaryWhitelist = new Object2ObjectArrayMap<>();
+        temporaryWhitelist = new WhiteLists<>();
 
         EntrustExecution.tryTemporary(() -> {
             JSONObject json = config.getConfigJSONObject("whitelist");
 
             for (String s : json.keySet()) {
-                whitelist.put(s, WhiteList.build(json.getJSONObject(s)));
+                whitelist.put(s, PermanentWhitelist.build(json.getJSONObject(s)));
             }
         });
-    }
-
-    public static void resetPlayerCache() {
-        playerCached = new JSONObject();
-
-        try {
-            playerCached = config.getConfigJSONObject("register_player_uuid");
-        } catch (Exception e) {
-
-        }
     }
 
     public static void saveEnchantmentMaxLevel() {
@@ -299,20 +276,31 @@ public class Variables {
         return versionRequire <= getPlayerModMdoVersion(player);
     }
 
+    public static void defaultConfig() {
+        config.set("default_language", Language.ENGLISH);
+        config.set("here_command", true);
+        config.set("dead_message", true);
+        config.set("cava", true);
+        config.set("secure_enchant", true);
+        config.set("modmdo_whitelist", false);
+        config.set("reject_reconnect", true);
+        config.set("time_active", true);
+        config.set("checker_time_limit", 3000);
+        config.set("enchantment_clear_if_level_too_high", false);
+        config.set("reject_no_fall_chest", true);
+        config.set("whitelist_only_id", false);
+    }
+
     public static void updateModMdoVariables() {
-        config.set("default_language", language.toString());
         config.set("here_command", enableHereCommand);
         config.set("dead_message", enableDeadMessage);
         config.set("cava", enableCava);
         config.set("secure_enchant", enableSecureEnchant);
-        config.set("modmdo_whitelist", modmdoWhiteList);
         config.set("reject_reconnect", enableRejectReconnect);
         config.set("time_active", timeActive);
-        config.set("checker_time_limit", loginCheckTimeLimit);
         config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
         config.set("reject_no_fall_chest", rejectNoFallCheat);
-        config.set("requires_register_player", registerPlayerUuid);
-        config.set("register_player_uuid", playerCached);
+        config.set("whitelist_only_id", false);
 
         if (modMdoType == ModMdoType.SERVER) {
             EntrustExecution.tryTemporary(() -> {
@@ -427,11 +415,7 @@ public class Variables {
     }
 
     public static Language getLanguage() {
-        return language;
-    }
-
-    public static Language getLanguage(Language lang) {
-        return lang == null ? language : lang;
+        return Language.valueOf(config.getConfigString("default_language"));
     }
 
     public static boolean isUserHereReceive(UUID userUUID) {

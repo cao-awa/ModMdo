@@ -31,14 +31,11 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ModMdoStdInitializer implements ModInitializer {
     public static void initForLevel(MinecraftServer server) {
-        extras.setArg(extraId, new ExtraArgs().set("server", server));
+        extras.setArg(EXTRA_ID, new ExtraArgs().set("server", server));
         extras.load();
     }
 
     public static void initModMdoVariables() {
-        EntrustExecution.notNull(config.getConfigString("default_language"), lang -> {
-            language = Language.getLanguageForName(lang);
-        });
         EntrustExecution.notNull(config.getConfigBoolean("here_command"), here -> {
             enableHereCommand = here;
         });
@@ -51,26 +48,17 @@ public class ModMdoStdInitializer implements ModInitializer {
         EntrustExecution.notNull(config.getConfigBoolean("secure_enchant"), enchant -> {
             enableSecureEnchant = enchant;
         });
-        EntrustExecution.notNull(config.getConfigBoolean("modmdo_whitelist"), whitelist -> {
-            modmdoWhiteList = whitelist;
-        });
         EntrustExecution.notNull(config.getConfigBoolean("time_active"), tac -> {
             timeActive = tac;
         });
         EntrustExecution.notNull(config.getConfigBoolean("secure_enchant"), secureEnchant -> {
             enableSecureEnchant = secureEnchant;
         });
-        EntrustExecution.notNull(config.getConfigInt("checker_time_limit"), limit -> {
-            loginCheckTimeLimit = limit;
-        });
         EntrustExecution.notNull(config.getConfigBoolean("enchantment_clear_if_level_too_high"), clear -> {
             clearEnchantIfLevelTooHigh = clear;
         });
         EntrustExecution.notNull(config.getConfigBoolean("reject_no_fall_chest"), rejectnoFall -> {
             rejectNoFallCheat = rejectnoFall;
-        });
-        EntrustExecution.notNull(PermissionLevel.valueOf(config.getConfigString("requires_register_player")), requiresRegistry -> {
-            registerPlayerUuid = requiresRegistry;
         });
 
         EntrustExecution.nullRequires(configCached.getConfig("identifier"), identifier -> {
@@ -95,9 +83,11 @@ public class ModMdoStdInitializer implements ModInitializer {
         LOGGER.info("ModMdo Std Initiator running");
         LOGGER.info("loading for ModMdo Std init");
 
+        System.setProperty("log4j.debug","true");
+
         configCached = new DiskObjectConfigUtil(entrust, "config/modmdo/");
 
-        registerExtra(new ModMdo().setName("ModMdo").setId(extraId));
+        registerExtra(new ModMdo().setName("ModMdo").setId(EXTRA_ID));
 
         loginUsers = new UserUtil();
         rejectUsers = new UserUtil();

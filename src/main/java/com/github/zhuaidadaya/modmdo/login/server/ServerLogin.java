@@ -12,30 +12,54 @@ public class ServerLogin {
         int version = EntrustParser.tryCreate(() -> Integer.valueOf(modmdoVersion), - 1);
 
         if (! identifier.equals("")) {
-            if (modmdoWhiteList) {
-                EntrustExecution.notNull(temporaryWhitelist.get(name), e -> {
-                    if (e.isValid()) {
-                        if (EntrustParser.trying(() -> ! whitelist.get(name).identifier().equals(identifier), () -> true)) {
-                            whitelist.put(name, new WhiteList(name, identifier));
-                            updateModMdoVariables();
-                        }
-                    }
-                    temporaryWhitelist.remove(name);
-                });
-                if (EntrustParser.trying(() -> ! whitelist.get(name).identifier().equals(identifier), () -> true)) {
-                    rejectUsers.put(new User(name, uuid, - 1, identifier, version));
+            if (config.getConfigBoolean("modmdo_whitelist")) {
+                if (config.getConfigBoolean("whitelist_only_id")) {
+                    loginUsingId(name, uuid, identifier, version);
                 } else {
-                    LOGGER.info("login player: " + name);
-                    loginUsers.put(new User(name, uuid, - 1, identifier, version));
+                    strictLogin(name, uuid, identifier, version);
                 }
             } else {
-                try {
+                EntrustExecution.tryTemporary(() -> {
                     LOGGER.info("login player: " + name);
                     loginUsers.put(new User(name, uuid, - 1, identifier, version));
-                } catch (Exception e) {
+                });
+            }
+        }
+    }
 
+    public void loginUsingId(String name, String uuid, String identifier, int version) {
+        EntrustExecution.notNull(temporaryWhitelist.get(name), e -> {
+            if (e.isValid()) {
+                if (whitelist.getFromId(identifier) == null) {
+                    whitelist.put(name, new PermanentWhitelist(name, identifier));
+                    updateModMdoVariables();
                 }
             }
+            temporaryWhitelist.remove(name);
+        });
+        if (whitelist.getFromId(identifier) == null) {
+            rejectUsers.put(new User(name, uuid, - 1, identifier, version));
+        } else {
+            LOGGER.info("login player: " + name);
+            loginUsers.put(new User(name, uuid, - 1, identifier, version));
+        }
+    }
+
+    public void strictLogin(String name, String uuid, String identifier, int version) {
+        EntrustExecution.notNull(temporaryWhitelist.get(name), e -> {
+            if (e.isValid()) {
+                if (EntrustParser.trying(() -> ! whitelist.get(name).getIdentifier().equals(identifier), () -> true)) {
+                    whitelist.put(name, new PermanentWhitelist(name, identifier));
+                    updateModMdoVariables();
+                }
+            }
+            temporaryWhitelist.remove(name);
+        });
+        if (EntrustParser.trying(() -> ! whitelist.get(name).getIdentifier().equals(identifier), () -> true)) {
+            rejectUsers.put(new User(name, uuid, - 1, identifier, version));
+        } else {
+            LOGGER.info("login player: " + name);
+            loginUsers.put(new User(name, uuid, - 1, identifier, version));
         }
     }
 

@@ -5,10 +5,9 @@ import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.language;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.getLanguage;
 
 public abstract class TextFormat<T> {
     protected final Map<Language, Map<String, String>> format = new Object2ObjectLinkedOpenHashMap<>();
@@ -36,7 +35,7 @@ public abstract class TextFormat<T> {
 
     public String formatted(String key, Object... args) {
         try {
-            String formatReturn = format.get(language).get(key);
+            String formatReturn = format.get(getLanguage()).get(key);
 
             for (Object o : args) {
                 try {
