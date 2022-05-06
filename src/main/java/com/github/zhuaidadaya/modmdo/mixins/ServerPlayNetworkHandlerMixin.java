@@ -113,11 +113,4 @@ public abstract class ServerPlayNetworkHandlerMixin {
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
     }
-
-    @Inject(method = "onClientSettings", at = @At("HEAD"))
-    private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
-        loginUsers.getUser(player).setLanguage(Language.getLanguageForName(packet.getLanguage()));
-        System.out.println(packet.getLanguage());
-        System.out.println(loginUsers.getUser(player).getLanguage());
-    }
 }
