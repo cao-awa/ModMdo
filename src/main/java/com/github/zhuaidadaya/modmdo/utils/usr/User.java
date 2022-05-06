@@ -1,8 +1,10 @@
 package com.github.zhuaidadaya.modmdo.utils.usr;
 
+import com.github.zhuaidadaya.modmdo.lang.*;
 import com.github.zhuaidadaya.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
+import net.minecraft.text.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -18,21 +20,8 @@ public class User {
     private long onlineTime = 0;
     private String modmdoIdentifier = "";
     private int modmdoVersion;
-    private ObjectRBTreeSet<String> follows = new ObjectRBTreeSet<>();
-
-    public String getIdentifier() {
-        return modmdoIdentifier;
-    }
-
-    public void setIdentifier(String modmdoIdentifier) {
-        this.modmdoIdentifier = modmdoIdentifier;
-    }
-
-    public int getVersion() {
-        return modmdoVersion;
-    }
-
-    private boolean dummyPlayer = true;
+    private Language language = Language.ENGLISH;
+    private Text rejectReason = null;
 
     public User() {
     }
@@ -81,28 +70,41 @@ public class User {
         this.uuid = UUID.fromString(uuid);
         this.level = level;
 
-        try {
-            JSONArray subs = json.getJSONArray("subs");
-            for (Object o : subs)
-                this.follows.add(o.toString());
-        } catch (Exception e) {
-
-        }
-
         onlineTime = EntrustParser.tryCreate(() -> json.getLong("onlineTime"), - 1L);
 
-        if (dummyPlayer) {
-            dummyPlayer = EntrustParser.tryCreate(() -> json.getBoolean("dummy"), true);
-        }
 
-        modmdoVersion = EntrustParser.tryCreate(() -> json.getInt("version"), -1);
+        modmdoVersion = EntrustParser.tryCreate(() -> json.getInt("version"), - 1);
 
         modmdoIdentifier = EntrustParser.tryCreate(() -> json.getString("identifier"), "");
     }
 
-    public User setDummy(boolean dummy) {
-        this.dummyPlayer = dummy;
+    public Text getRejectReason() {
+        return rejectReason;
+    }
+
+    public User setRejectReason(Text rejectReason) {
+        this.rejectReason = rejectReason;
         return this;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
+    }
+
+    public String getIdentifier() {
+        return modmdoIdentifier;
+    }
+
+    public void setIdentifier(String modmdoIdentifier) {
+        this.modmdoIdentifier = modmdoIdentifier;
+    }
+
+    public int getVersion() {
+        return modmdoVersion;
     }
 
     public String getName() {
@@ -125,26 +127,20 @@ public class User {
         this.uuid = uuid;
     }
 
-    public String getID() {
-        return uuid.toString();
-    }
-
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
-        json.put("dummy", dummyPlayer);
         json.put("onlineTime", onlineTime);
         json.put("name", name);
         json.put("uuid", getID());
         json.put("level", level);
-        json.put("subs", new JSONArray(follows.toArray()));
         json.put("version", modmdoVersion);
         json.put("identifier", modmdoIdentifier);
 
         return json;
     }
 
-    public boolean isDummyPlayer() {
-        return dummyPlayer;
+    public String getID() {
+        return uuid.toString();
     }
 
     public int getLevel() {
@@ -154,28 +150,6 @@ public class User {
     public User setLevel(int level) {
         this.level = level;
         return this;
-    }
-
-    public User addFollows(String... follows) {
-        if (follows != null)
-            this.follows.addAll(List.of(follows));
-        return this;
-    }
-
-    public ObjectRBTreeSet<String> getFollows() {
-        return follows;
-    }
-
-    public void removeFollow(String follow) {
-        this.follows.remove(follow);
-    }
-
-    public void clearFollows() {
-        this.follows = new ObjectRBTreeSet<>();
-    }
-
-    public boolean isFollow(String... follows) {
-        return this.follows.containsAll(List.of(follows));
     }
 
     public void addOnlineTime(long timeMillion) {

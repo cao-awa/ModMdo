@@ -15,12 +15,7 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class SimpleCommandOperation {
     public static LiteralText formatModMdoVersionRequire(int versionRequire, ServerPlayerEntity player) {
-        sendToSub(player);
         return new LiteralText(consoleTextFormat.format("command.require.version", modMdoIdToVersionMap.get(versionRequire)));
-    }
-
-    public static void sendToSub(ServerPlayerEntity player) {
-        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command.rejected.bad.modmdo.version", player.getName().asString()), "run_command_follow");
     }
 
     public static void sendFeedback(CommandContext<ServerCommandSource> source, TranslatableText message, int version) {
@@ -28,7 +23,7 @@ public class SimpleCommandOperation {
             if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
                 sendFeedback(source, message);
             } else {
-                Variables.sendMessage(getPlayer(source), minecraftTextFormat.format(message.getKey(), message.getArgs()), false);
+                Variables.sendMessage(getPlayer(source), minecraftTextFormat.format(users.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
             }
         } catch (Exception e) {
             LOGGER.error("failed to feedback command result: " + consoleTextFormat.format(message.getKey(), message.getArgs()));
@@ -169,7 +164,7 @@ public class SimpleCommandOperation {
             if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
                 sendError(source, message);
             } else {
-                Variables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
+                Variables.sendMessage(getPlayer(source), minecraftTextFormat.format(users.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
             }
         } catch (Exception e) {
             LOGGER.info(consoleTextFormat.format(message.getKey(), message.getArgs()));
@@ -207,7 +202,7 @@ public class SimpleCommandOperation {
             if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
                 sendError(source, message);
             } else {
-                Variables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
+                Variables.sendMessage(getPlayer(source), minecraftTextFormat.format(users.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
             }
         } catch (Exception e) {
             LOGGER.info(consoleTextFormat.format(message.getKey(), message.getArgs()));
