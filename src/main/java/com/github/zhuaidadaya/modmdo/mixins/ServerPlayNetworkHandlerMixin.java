@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
+import com.github.zhuaidadaya.modmdo.lang.*;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.ClientConnection;
@@ -9,8 +10,7 @@ import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -21,6 +21,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.function.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
@@ -49,9 +51,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Final
     private MinecraftServer server;
 
-    @Shadow
-    protected abstract boolean isHost();
-
     /**
      * 与客户端进行自定义通信
      * <br>
@@ -60,7 +59,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
      *         客户端发送的数据包
      * @param ci
      *         callback
-     *
      * @author 草awa
      * @author 草二号机
      * @author zhuaidadaya
@@ -72,13 +70,24 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
             PacketByteBuf packetByteBuf = EntrustParser.trying(() -> new PacketByteBuf(packet.getData().copy()));
 
-            Identifier informationSign = new Identifier(EntrustParser.tryCreate(packetByteBuf::readString, ""));
+            String oldLogin = "";
+            Identifier informationSign = new Identifier("");
+            if (TOKEN.equals(channel)) {
+                oldLogin = EntrustParser.tryCreate(packetByteBuf::readString, "");
+            } else {
+                informationSign = new Identifier(EntrustParser.tryCreate(packetByteBuf::readString, ""));
+            }
             String data1 = EntrustParser.tryCreate(packetByteBuf::readString, "");
             String data2 = EntrustParser.tryCreate(packetByteBuf::readString, "");
             String data3 = EntrustParser.tryCreate(packetByteBuf::readString, "");
             String data4 = EntrustParser.tryCreate(packetByteBuf::readString, "");
 
-            if(channel.equals(CLIENT)) {
+            if (TOKEN.equals(channel)) {
+                serverLogin.reject(data1, oldLogin, "", new LiteralText("obsolete login type"));
+                return;
+            }
+
+            if (channel.equals(CLIENT)) {
                 if (informationSign.equals(LOGIN)) {
                     if (modMdoType == ModMdoType.SERVER) {
                         serverLogin.login(data1, data2, data3, data4);
@@ -92,47 +101,23 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    /**
-     * 退出时清除玩家的登录状态
-     *
-     * @param reason
-     *         移除信息
-     *
-     * @author 草awa
-     * @author 草二号机
-     * @author zhuaidadaya
-     * @reason
-     */
-    @Overwrite
-    public void onDisconnected(Text reason) {
-        new Thread(() -> {
-            Thread.currentThread().setName("ModMdo accepting");
-
-            if((! rejectUsers.hasUser(player) || loginUsers.hasUser(player)) & server.getPlayerManager().getPlayer(player.getUuid()) != null) {
-                LOGGER.info("{} lost connection: {}", this.player.getName().getString(), reason.getString());
-                this.server.getPlayerManager().broadcastChatMessage((new TranslatableText("multiplayer.player.left", this.player.getDisplayName())).formatted(Formatting.YELLOW), MessageType.SYSTEM, Util.NIL_UUID);
-                this.server.forcePlayerSampleUpdate();
-                this.server.getPlayerManager().remove(this.player);
-                this.player.onDisconnect();
-                this.player.getTextStream().onDisconnect();
-            }
-
-            if(rejectUsers.hasUser(player)) {
-                rejectUsers.removeUser(player);
-            }
-
-            serverLogin.logout(player);
-
-            if(this.isHost()) {
-                LOGGER.info("Stopping singleplayer server as player logged out");
-                this.server.stop(false);
-            }
-        }).start();
+    @Inject(method = "onDisconnected", at = @At("RETURN"))
+    public void onDisconnected(Text reason, CallbackInfo ci) {
+        serverLogin.logout(player);
     }
+
+    @Shadow
+    protected abstract boolean isHost();
 
     @Inject(method = "executeCommand", at = @At("HEAD"))
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
-        sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.run.command", player.getName().asString(), input), "run_command_follow");
+    }
+
+    @Inject(method = "onClientSettings", at = @At("HEAD"))
+    private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
+        loginUsers.getUser(player).setLanguage(Language.getLanguageForName(packet.getLanguage()));
+        System.out.println(packet.getLanguage());
+        System.out.println(loginUsers.getUser(player).getLanguage());
     }
 }

@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modmdo.format;
 
 import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
+import com.github.zhuaidadaya.modmdo.utils.usr.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import org.json.JSONObject;
 
@@ -36,6 +37,23 @@ public abstract class TextFormat<T> {
     public String formatted(String key, Object... args) {
         try {
             String formatReturn = format.get(getLanguage()).get(key);
+
+            for (Object o : args) {
+                try {
+                    formatReturn = formatReturn.replaceFirst("%s", o.toString());
+                } catch (Exception ex) {
+                    return formatReturn;
+                }
+            }
+            return formatReturn;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public String formatted(User user, String key, Object... args) {
+        try {
+            String formatReturn = format.get(user.getLanguage()).get(key);
 
             for (Object o : args) {
                 try {

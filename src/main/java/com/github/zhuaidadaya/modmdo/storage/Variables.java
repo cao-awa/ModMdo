@@ -41,8 +41,8 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.31";
-    public static final int MODMDO_VERSION = 25;
+    public static final String VERSION_ID = "1.0.32";
+    public static final int MODMDO_VERSION = 26;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
@@ -54,6 +54,7 @@ public class Variables {
     public static final Identifier SERVER = new Identifier("modmdo:server");
     public static final Identifier CLIENT = new Identifier("modmdo:client");
     public static final Identifier DATA = new Identifier("modmdo:data");
+    public static final Identifier TOKEN = new Identifier("modmdo:token");
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static boolean rankingOnlineTimeScaleChanged = false;
@@ -79,7 +80,6 @@ public class Variables {
     public static ModMdoType modMdoType = ModMdoType.NONE;
     public static int itemDespawnAge = 6000;
     public static EnchantLevelController enchantLevelController;
-    public static boolean needSync = false;
     public static boolean clearEnchantIfLevelTooHigh = false;
     public static ServerLogin serverLogin = new ServerLogin();
     public static ObjectArrayList<Rank> rankingObjects = new ObjectArrayList<>();
@@ -332,86 +332,6 @@ public class Variables {
 
     public static void updateUserProfiles() {
         config.set("user_profiles", users.toJSONObject());
-    }
-
-    public static void addUserFollow(User user, String... follows) {
-        JSONObject userInfo;
-        try {
-            userInfo = users.getJSONObject(user.getID());
-        } catch (Exception e) {
-            userInfo = new JSONObject().put("uuid", user.getID()).put("name", user.getName());
-        }
-        user = new User(userInfo);
-        user.addFollows(follows);
-        users.put(user);
-
-        updateUserProfiles();
-    }
-
-    public static void removeUserFollow(User user, String... follows) {
-        JSONObject userInfo;
-        try {
-            userInfo = users.getJSONObject(user.getID());
-        } catch (Exception e) {
-            userInfo = new JSONObject().put("uuid", user.getID()).put("name", user.getName());
-        }
-        user = new User(userInfo);
-
-        for (String s : follows) {
-            user.removeFollow(s);
-        }
-
-        users.put(user);
-
-        updateUserProfiles();
-    }
-
-    public static void clearUserFollow(User user) {
-        JSONObject userInfo;
-        try {
-            userInfo = users.getJSONObject(user.getID());
-        } catch (Exception e) {
-            userInfo = new JSONObject().put("uuid", user.getID()).put("name", user.getName());
-        }
-        user = new User(userInfo);
-        user.clearFollows();
-        users.put(user);
-
-        updateUserProfiles();
-    }
-
-    public static void sendFollowingMessage(PlayerManager players, Text message, String... follows) {
-        try {
-            for (ServerPlayerEntity player : players.getPlayerList()) {
-                User staticUser = users.getUser(player.getUuid());
-                HashSet<String> permissions = new HashSet<>();
-
-                boolean unableToSend = false;
-
-                for (String s : follows) {
-                    permissions.add(config.getConfigString(s).toLowerCase(Locale.ROOT));
-                }
-
-                if (permissions.contains("unable"))
-                    unableToSend = true;
-
-                if (! unableToSend) {
-                    boolean needOps = permissions.contains("ops");
-
-                    if (staticUser.isFollow(follows)) {
-                        if (needOps) {
-                            if (player.hasPermissionLevel(4)) {
-                                sendMessage(player, message, false);
-                            }
-                        } else {
-                            sendMessage(player, message, false);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-
-        }
     }
 
     public static Language getLanguage() {
