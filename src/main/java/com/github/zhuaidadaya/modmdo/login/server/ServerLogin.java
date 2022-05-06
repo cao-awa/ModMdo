@@ -4,6 +4,7 @@ import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import com.github.zhuaidadaya.modmdo.whitelist.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
@@ -56,11 +57,15 @@ public class ServerLogin {
             temporaryWhitelist.remove(name);
         });
         if (EntrustParser.trying(() -> ! whitelist.get(name).getIdentifier().equals(identifier), () -> true)) {
-            rejectUsers.put(new User(name, uuid, - 1, identifier, version));
+            reject(name,uuid, identifier, null);
         } else {
             LOGGER.info("login player: " + name);
             loginUsers.put(new User(name, uuid, - 1, identifier, version));
         }
+    }
+
+    public void reject(String name,String uuid,String identifier, Text reson) {
+        rejectUsers.put(new User(name, uuid, - 1, identifier, -1).setRejectReason(reson));
     }
 
     public void logout(ServerPlayerEntity player) {

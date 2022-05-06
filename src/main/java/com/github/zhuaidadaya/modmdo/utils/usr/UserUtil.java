@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.UUID;
 
 public class UserUtil {
-    private final Object2ObjectRBTreeMap<String, JSONObject> users = new Object2ObjectRBTreeMap<>();
+    private final Object2ObjectRBTreeMap<String, User> users = new Object2ObjectRBTreeMap<>();
     private final Object2ObjectRBTreeMap<String, String> userNameIdMap = new Object2ObjectRBTreeMap<>();
 
     public UserUtil() {
@@ -16,11 +16,11 @@ public class UserUtil {
 
     public UserUtil(JSONObject json) {
         for (String o : json.keySet())
-            users.put(o, json.getJSONObject(o));
+            users.put(o, new User(json.getJSONObject(o)));
     }
 
     public void put(String target, JSONObject value) {
-        users.put(target, value);
+        users.put(target, new User(value));
         try {
             userNameIdMap.put(target, value.getString("uuid"));
         } catch (Exception e) {
@@ -29,18 +29,18 @@ public class UserUtil {
     }
 
     public void put(User user) {
-        users.put(user.getID(), user.toJSONObject());
+        users.put(user.getID(), user);
         userNameIdMap.put(user.getName(), user.getID());
     }
 
     public JSONObject getJSONObject(Object target) {
         if (users.get(target.toString()) == null) throw new IllegalStateException();
-        return users.get(target.toString());
+        return users.get(target.toString()).toJSONObject();
     }
 
     public Object getUserConfig(String targetUuid, Object getConfig) {
         if (users.get(targetUuid) == null) throw new IllegalStateException();
-        return users.get(targetUuid).get(getConfig.toString()).toString();
+        return users.get(targetUuid).toJSONObject().get(getConfig.toString()).toString();
     }
 
     public JSONObject toJSONObject() {
@@ -54,7 +54,7 @@ public class UserUtil {
         User[] userList = new User[users.size()];
         int i = 0;
         for (Object o : users.keySet()) {
-            JSONObject userJSON = users.get(o.toString());
+            JSONObject userJSON = users.get(o.toString()).toJSONObject();
             userList[i++] = new User(userJSON);
         }
         return userList;
@@ -63,7 +63,7 @@ public class UserUtil {
     public User getUser(ServerPlayerEntity player) {
         if (users.get(player.getUuid().toString()) == null)
             put(player.getUuid().toString(), new User(player.getName().asString(), player.getUuid().toString(), 0, "", -1).toJSONObject());
-        return new User(users.get(player.getUuid().toString()));
+        return users.get(player.getUuid().toString());
     }
 
     public User getUserFromName(String name) {
@@ -71,11 +71,11 @@ public class UserUtil {
     }
 
     public User getUser(UUID uuid) {
-        return new User(users.get(uuid.toString()));
+        return users.get(uuid.toString());
     }
 
     public User getUser(String uuid) {
-        return new User(users.get(uuid));
+        return users.get(uuid);
     }
 
     public boolean hasUser(ServerPlayerEntity player) {
@@ -108,7 +108,7 @@ public class UserUtil {
     }
 
     public void setUserLevel(String uuid, int level) {
-        users.put(uuid, new User(getUser(uuid).toJSONObject()).setLevel(level).toJSONObject());
+        users.put(uuid, getUser(uuid).setLevel(level));
     }
 
     public void setUserLevel(UUID uuid, int level) {

@@ -50,23 +50,19 @@ public abstract class ItemStackMixin {
                             real = Short.parseShort(lvl.replaceAll("\\D+", ""));
                         } catch (Exception e) {
                             LOGGER.warn("level " + lvl + " is too large, removed this element");
-                            needSync = true;
                             continue;
                         }
                         if (max == 0) {
-                            needSync = true;
                             continue;
                         }
                         if (real > max) {
                             if (clearEnchantIfLevelTooHigh) {
                                 addTo = null;
-                                needSync = true;
                                 LOGGER.warn("a item got invalid enchant nbt, cleared enchant nbt");
                                 break;
                             }
                             LOGGER.warn("level of " + name + " out of limit " + max + ": " + real);
                             enchantment.putShort("lvl", enchantLevelController.getDefaultEnchantmentLevel(name).getMax());
-                            needSync = true;
                         }
                         addTo.add(enchantment);
                     } catch (Exception e) {

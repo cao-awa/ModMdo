@@ -97,42 +97,27 @@ public class ServerTickListener {
     }
 
     public void updateOtherRankings(MinecraftServer server, PlayerManager manager) {
-        for (ServerPlayerEntity player : manager.getPlayerList()) {
-            User user = users.getUser(player);
-            if (! user.isDummyPlayer()) {
-                try {
-                    BufferedReader reader = new BufferedReader(new FileReader(getServerLevelPath(server) + "stats/" + player.getUuid().toString() + ".json"));
+        EntrustExecution.tryFor(manager.getPlayerList(), player -> {
+            BufferedReader reader = new BufferedReader(new FileReader(getServerLevelPath(server) + "stats/" + player.getUuid().toString() + ".json"));
 
-                    player.getStatHandler().save();
+            player.getStatHandler().save();
 
-                    String cache;
-                    StringBuilder builder = new StringBuilder();
-                    while ((cache = reader.readLine()) != null) {
-                        builder.append(cache);
-                    }
-
-                    JSONObject source = new JSONObject(builder.toString());
-                    JSONObject stat = source.getJSONObject("stats");
-
-                    switch (rankingObject) {
-                        case "destroyBlocks" -> {
-                            updateDestroyBlocks(server, player, stat);
-                        }
-                        case "tradesWithVillager" -> {
-                            updateCustomRanking("minecraft:traded_with_villager", server, player, stat);
-                        }
-                        case "deaths" -> {
-                            updateCustomRanking("minecraft:deaths", server, player, stat);
-                        }
-                        case "gameOnlineTimes" -> {
-                            updateGameOnlineTime(stat, server, player);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            String cache;
+            StringBuilder builder = new StringBuilder();
+            while ((cache = reader.readLine()) != null) {
+                builder.append(cache);
             }
-        }
+
+            JSONObject source = new JSONObject(builder.toString());
+            JSONObject stat = source.getJSONObject("stats");
+
+            switch (rankingObject) {
+                case "destroyBlocks" -> updateDestroyBlocks(server, player, stat);
+                case "tradesWithVillager" -> updateCustomRanking("minecraft:traded_with_villager", server, player, stat);
+                case "deaths" -> updateCustomRanking("minecraft:deaths", server, player, stat);
+                case "gameOnlineTimes" -> updateGameOnlineTime(stat, server, player);
+            }
+        });
     }
 
     public void updateCustomRanking(String object, MinecraftServer server, ServerPlayerEntity player, JSONObject stat) {
@@ -154,7 +139,7 @@ public class ServerTickListener {
             }
             int count = 0;
             try {
-                custom.getInt(countObject);
+                count = custom.getInt(countObject);
             } catch (Exception e) {
 
             }
@@ -195,22 +180,10 @@ public class ServerTickListener {
 
     public void updateGameOnlineTime(JSONObject stat, MinecraftServer server, ServerPlayerEntity player) {
         User user = users.getUser(player);
-        ServerScoreboard scoreboard = server.getScoreboard();
-        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getName().asString(), scoreboard.getObjective("modmdo.ots"));
 
-        for (ScoreboardPlayerScore score : scoreboardPlayerScore.getScoreboard().getAllPlayerScores(scoreboardPlayerScore.getObjective())) {
-            User each = users.getUserFromName(score.getPlayerName());
-            if (! each.isDummyPlayer()) {
-                if (rankingOnlineTimeScaleChanged) {
-                    updateGameOnlineTime(server, user.getName(), stat);
-                    rankingOnlineTimeScaleChanged = false;
-                }
-            } else {
-                scoreboard.resetPlayerScore(score.getPlayerName(), score.getObjective());
-            }
-        }
-        if (! user.isDummyPlayer()) {
+        if (rankingOnlineTimeScaleChanged) {
             updateGameOnlineTime(server, user.getName(), stat);
+            rankingOnlineTimeScaleChanged = false;
         }
     }
 
@@ -221,23 +194,13 @@ public class ServerTickListener {
             ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(name, scoreboard.getObjective("modmdo.ots"));
             long gameTime = stat.getJSONObject("minecraft:custom").getLong("minecraft:play_time") * 50;
             long showOnlineTime;
-            switch (rankingOnlineTimeScale) {
-                case "second" -> {
-                    showOnlineTime = TimeUtil.formatSecond(gameTime);
-                }
-                case "hour" -> {
-                    showOnlineTime = TimeUtil.formatHour(gameTime);
-                }
-                case "day" -> {
-                    showOnlineTime = TimeUtil.formatDay(gameTime);
-                }
-                case "month" -> {
-                    showOnlineTime = TimeUtil.formatMonth(gameTime);
-                }
-                default -> {
-                    showOnlineTime = TimeUtil.formatMinute(gameTime);
-                }
-            }
+            showOnlineTime = switch (rankingOnlineTimeScale) {
+                case "second" -> TimeUtil.formatSecond(gameTime);
+                case "hour" ->  TimeUtil.formatHour(gameTime);
+                case "day" ->  TimeUtil.formatDay(gameTime);
+                case "month" -> TimeUtil.formatMonth(gameTime);
+                default -> TimeUtil.formatMinute(gameTime);
+            };
             scoreboardPlayerScore.setScore((int) showOnlineTime);
             scoreboard.updateScore(scoreboardPlayerScore);
         }
@@ -253,9 +216,6 @@ public class ServerTickListener {
      */
     public void eachPlayer(PlayerManager players) {
         for (ServerPlayerEntity player : players.getPlayerList()) {
-            if (needSync) {
-                player.getInventory().updateItems();
-            }
             if (enableDeadMessage) {
                 detectPlayerDead(player);
             }
@@ -271,16 +231,14 @@ public class ServerTickListener {
      * @author 草二号机
      */
     public void detectPlayerDead(ServerPlayerEntity player) {
-        try {
+        EntrustExecution.tryTemporary(() -> {
             if (isUserDeadMessageReceive(player.getUuid()) & enableDeadMessage) {
                 if (player.deathTime == 1) {
                     XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
                     player.sendMessage(formatDeathMessage(player, xyz), false);
                 }
             }
-        } catch (Exception e) {
-
-        }
+        });
     }
 
     /**
@@ -291,6 +249,7 @@ public class ServerTickListener {
      * @param xyz
      *         等同于vec3d
      * @return 格式化过后的信息
+     *
      * @author 草二号机
      */
     public TranslatableText formatDeathMessage(ServerPlayerEntity player, XYZ xyz) {

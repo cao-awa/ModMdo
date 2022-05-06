@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modmdo.identifier;
 
 import com.github.zhuaidadaya.modmdo.utils.times.*;
 
+import java.io.*;
 import java.math.*;
 import java.security.*;
 
@@ -19,7 +20,7 @@ public class RandomIdentifier {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public static String randomIdentifier() {
-        return randomIdentifier(256);
+        return randomIdentifier(128);
     }
 
     public static String randomIdentifier(int size) {

@@ -128,6 +128,14 @@ public class EntrustExecution {
         }
     }
 
+    public static <T> void tryTemporary(ExceptingTemporary action, Consumer<Exception> whenException) {
+        try {
+            action.apply();
+        } catch (Exception e) {
+            whenException.accept(e);
+        }
+    }
+
     public static <T> void tryTemporary(ExceptingTemporary action) {
         try {
             action.apply();

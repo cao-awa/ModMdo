@@ -4,6 +4,7 @@ import com.github.zhuaidadaya.modmdo.commands.*;
 import com.github.zhuaidadaya.modmdo.commands.argument.*;
 import com.github.zhuaidadaya.modmdo.extra.loader.*;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
+import com.github.zhuaidadaya.modmdo.mixins.*;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.zhuaidadaya.modmdo.identifier.RandomIdentifier;
@@ -19,7 +20,9 @@ import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.network.*;
 import net.minecraft.server.MinecraftServer;
 import org.json.JSONObject;
 
@@ -82,8 +85,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         LOGGER.info("loading ModMdo " + VERSION_ID + " (step 1/2)");
         LOGGER.info("ModMdo Std Initiator running");
         LOGGER.info("loading for ModMdo Std init");
-
-        System.setProperty("log4j.debug","true");
 
         configCached = new DiskObjectConfigUtil(entrust, "config/modmdo/");
 

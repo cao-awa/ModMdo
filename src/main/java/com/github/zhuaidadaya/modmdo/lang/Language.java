@@ -1,7 +1,9 @@
 package com.github.zhuaidadaya.modmdo.lang;
 
+import org.apache.commons.codec.language.bm.*;
+
 public enum Language {
-    CHINESE(0, "Chinese"), ENGLISH(1, "English"), CHINESE_TW(2, "Chinese_tw"), AUTO(3, "Auto");
+    CHINESE(0, "Chinese"), ENGLISH(1, "English"), CHINESE_TW(2, "Chinese_tw");
 
     private final int value;
     private final String name;
@@ -22,9 +24,8 @@ public enum Language {
     public static Language getLanguageForName(String name) {
         Language language = null;
         switch(name.toLowerCase()) {
-            case "chinese" -> language = CHINESE;
+            case "chinese", "zh_en" -> language = CHINESE;
             case "chinese_tw" -> language = CHINESE_TW;
-            case "auto" -> language = AUTO;
             default -> language = ENGLISH;
         }
         return language;
@@ -36,7 +37,6 @@ public enum Language {
             case CHINESE -> name = "Chinese";
             case ENGLISH -> name = "English";
             case CHINESE_TW -> name = "Chinese_tw";
-            case AUTO -> name = "Auto";
         }
         return name;
     }

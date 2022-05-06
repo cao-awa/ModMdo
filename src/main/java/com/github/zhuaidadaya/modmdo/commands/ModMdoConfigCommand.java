@@ -38,239 +38,139 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 sendFeedback(enableHere, formatEnableHere(), 1);
                 return 1;
             })).then(literal("disable").executes(disableHere -> {
-                if (commandApplyToPlayer(1, getPlayer(disableHere), this, disableHere)) {
-                    enableHereCommand = false;
-                    updateModMdoVariables();
-                    sendFeedback(disableHere, formatDisableHere());
-                }
+                enableHereCommand = false;
+                updateModMdoVariables();
+                sendFeedback(disableHere, formatDisableHere(), 1);
                 return 0;
             }))).then(literal("secureEnchant").executes(secureEnchant -> {
-                if (commandApplyToPlayer(1, getPlayer(secureEnchant), this, secureEnchant)) {
-
-                    sendFeedback(secureEnchant, formatConfigReturnMessage("secure_enchant"));
-                }
+                sendFeedback(secureEnchant, formatConfigReturnMessage("secure_enchant"), 1);
                 return 2;
             }).then(literal("enable").executes(enableSecureEnchant -> {
-                if (commandApplyToPlayer(1, getPlayer(enableSecureEnchant), this, enableSecureEnchant)) {
-                    Variables.enableSecureEnchant = true;
-                    updateModMdoVariables();
-                    sendFeedback(enableSecureEnchant, formatEnableSecureEnchant());
-                }
+                Variables.enableSecureEnchant = true;
+                updateModMdoVariables();
+                sendFeedback(enableSecureEnchant, formatEnableSecureEnchant(), 1);
                 return 1;
             })).then(literal("disable").executes(disableSecureEnchant -> {
-                if (commandApplyToPlayer(1, getPlayer(disableSecureEnchant), this, disableSecureEnchant)) {
-                    enableSecureEnchant = false;
-                    updateModMdoVariables();
-                    sendFeedback(disableSecureEnchant, formatDisableSecureEnchant());
-                }
+                enableSecureEnchant = false;
+                updateModMdoVariables();
+                sendFeedback(disableSecureEnchant, formatDisableSecureEnchant(), 1);
                 return 0;
             }))).then(literal("useModMdoWhitelist").executes(whitelist -> {
-                if (commandApplyToPlayer(1, getPlayer(whitelist), this, whitelist)) {
-                    updateModMdoVariables();
+                updateModMdoVariables();
 
-                    sendFeedback(whitelist, formatConfigReturnMessage("modmdo_whitelist"));
-                }
+                sendFeedback(whitelist, formatConfigReturnMessage("modmdo_whitelist"), 1);
                 return 2;
             }).then(literal("enable").executes(enableWhitelist -> {
-                if (commandApplyToPlayer(1, getPlayer(enableWhitelist), this, enableWhitelist)) {
-                    config.set("modmdo_whitelist", true);
-                    updateModMdoVariables();
+                config.set("modmdo_whitelist", true);
+                updateModMdoVariables();
 
-                    sendFeedback(enableWhitelist, formatUseModMdoWhitelist());
+                sendFeedback(enableWhitelist, formatUseModMdoWhitelist(), 1);
 
-                    for (ServerPlayerEntity player : getServer(enableWhitelist).getPlayerManager().getPlayerList()) {
-                        EntrustExecution.tryTemporary(() -> {
-                            if (config.getConfigBoolean("whitelist_only_id")) {
-                                if (whitelist.getFromId(loginUsers.getUser(player).getIdentifier()) == null) {
-                                    throw new Exception();
-                                }
-                            } else {
-                                if (! whitelist.get(player.getName().asString()).getIdentifier().equals(loginUsers.getUser(player).getIdentifier())) {
-                                    throw new Exception();
-                                }
+                for (ServerPlayerEntity player : getServer(enableWhitelist).getPlayerManager().getPlayerList()) {
+                    EntrustExecution.tryTemporary(() -> {
+                        if (config.getConfigBoolean("whitelist_only_id")) {
+                            if (whitelist.getFromId(loginUsers.getUser(player).getIdentifier()) == null) {
+                                throw new Exception();
                             }
-                        }, () -> {
-                            if (player.networkHandler.connection.isOpen()) {
-                                player.networkHandler.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+                        } else {
+                            if (! whitelist.get(player.getName().asString()).getIdentifier().equals(loginUsers.getUser(player).getIdentifier())) {
+                                throw new Exception();
                             }
-                        });
-                    }
+                        }
+                    }, () -> {
+                        if (player.networkHandler.connection.isOpen()) {
+                            player.networkHandler.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+                        }
+                    });
                 }
                 return 1;
             })).then(literal("disable").executes(disableWhitelist -> {
-                if (commandApplyToPlayer(1, getPlayer(disableWhitelist), this, disableWhitelist)) {
-                    config.set("modmdo_whitelist", false);
-                    updateModMdoVariables();
-                    sendFeedback(disableWhitelist, formatDisableModMdoWhitelist());
-                }
+                config.set("modmdo_whitelist", false);
+                updateModMdoVariables();
+                sendFeedback(disableWhitelist, formatDisableModMdoWhitelist(), 1);
                 return 0;
             }))).then(literal("rejectReconnect").executes(rejectReconnect -> {
-                if (commandApplyToPlayer(1, getPlayer(rejectReconnect), this, rejectReconnect)) {
-                    sendFeedback(rejectReconnect, formatConfigReturnMessage("reject_reconnect"));
-                }
+                sendFeedback(rejectReconnect, formatConfigReturnMessage("reject_reconnect"), 1);
                 return 2;
             }).then(literal("enable").executes(reject -> {
                 if (commandApplyToPlayer(1, getPlayer(reject), this, reject)) {
                     enableRejectReconnect = true;
                     updateModMdoVariables();
 
-                    sendFeedback(reject, formatEnableRejectReconnect());
+                    sendFeedback(reject, formatEnableRejectReconnect(), 1);
                 }
                 return 1;
             })).then(literal("disable").executes(receive -> {
-                if (commandApplyToPlayer(1, getPlayer(receive), this, receive)) {
-                    enableRejectReconnect = false;
-                    updateModMdoVariables();
-                    sendFeedback(receive, formatDisableRejectReconnect());
-                }
+                enableRejectReconnect = false;
+                updateModMdoVariables();
+                sendFeedback(receive, formatDisableRejectReconnect(), 1);
                 return 0;
             }))).then(literal("deadMessage").executes(deadMessage -> {
-                if (commandApplyToPlayer(1, getPlayer(deadMessage), this, deadMessage)) {
-                    sendFeedback(deadMessage, formatConfigReturnMessage("dead_message"));
-                }
+                sendFeedback(deadMessage, formatConfigReturnMessage("dead_message"), 1);
                 return 2;
             }).then(literal("enable").executes(enabled -> {
-                if (commandApplyToPlayer(1, getPlayer(enabled), this, enabled)) {
-                    enableDeadMessage = true;
-                    updateModMdoVariables();
+                enableDeadMessage = true;
+                updateModMdoVariables();
 
-                    sendFeedback(enabled, formatEnableDeadMessage());
-                }
+                sendFeedback(enabled, formatEnableDeadMessage(), 1);
                 return 1;
             })).then(literal("disable").executes(disable -> {
-                if (commandApplyToPlayer(1, getPlayer(disable), this, disable)) {
-
-                    enableDeadMessage = false;
-                    updateModMdoVariables();
-                    sendFeedback(disable, formatDisabledDeadMessage());
-                }
+                enableDeadMessage = false;
+                updateModMdoVariables();
+                sendFeedback(disable, formatDisabledDeadMessage(), 1);
                 return 0;
             }))).then(literal("itemDespawnTicks").executes(getDespawnTicks -> {
-                if (commandApplyToPlayer(1, getPlayer(getDespawnTicks), this, getDespawnTicks)) {
-                    sendFeedback(getDespawnTicks, formatItemDespawnTicks());
-                }
+                sendFeedback(getDespawnTicks, formatItemDespawnTicks(), 1);
                 return 2;
             }).then(literal("become").then(argument("ticks", IntegerArgumentType.integer(- 1)).executes(setTicks -> {
-                if (commandApplyToPlayer(1, getPlayer(setTicks), this, setTicks)) {
-                    itemDespawnAge = Integer.parseInt(setTicks.getInput().split(" ")[3]);
+                itemDespawnAge = IntegerArgumentType.getInteger(setTicks, "ticks");
 
-                    sendFeedbackAndInform(setTicks, formatItemDespawnTicks());
-                }
+                sendFeedbackAndInform(setTicks, formatItemDespawnTicks(), 1);
                 return 1;
             }))).then(literal("original").executes(setTicksToDefault -> {
-                if (commandApplyToPlayer(1, getPlayer(setTicksToDefault), this, setTicksToDefault)) {
-                    itemDespawnAge = 6000;
+                itemDespawnAge = 6000;
 
-                    sendFeedbackAndInform(setTicksToDefault, formatItemDespawnTicks());
-                }
+                sendFeedbackAndInform(setTicksToDefault, formatItemDespawnTicks(), 1);
                 return 2;
             }))).then(literal("tickingEntities").executes(getTickingEntities -> {
-                if (commandApplyToPlayer(1, getPlayer(getTickingEntities), this, getTickingEntities)) {
-                    sendFeedbackAndInform(getTickingEntities, formatTickingEntitiesTick());
-                }
+                sendFeedbackAndInform(getTickingEntities, formatTickingEntitiesTick(), 1);
                 return 0;
             }).then(literal("enable").executes(enableTickingEntities -> {
-                if (commandApplyToPlayer(1, getPlayer(enableTickingEntities), this, enableTickingEntities)) {
-                    cancelEntitiesTick = false;
+                cancelEntitiesTick = false;
 
-                    sendFeedbackAndInform(enableTickingEntities, formatTickingEntitiesTick());
-                }
+                sendFeedbackAndInform(enableTickingEntities, formatTickingEntitiesTick(), 1);
                 return 1;
             })).then(literal("disable").executes(disableTickingEntities -> {
-                if (commandApplyToPlayer(1, getPlayer(disableTickingEntities), this, disableTickingEntities)) {
-                    cancelEntitiesTick = true;
+                cancelEntitiesTick = true;
 
-                    sendFeedbackAndInform(disableTickingEntities, formatTickingEntitiesTick());
-                }
+                sendFeedbackAndInform(disableTickingEntities, formatTickingEntitiesTick(), 1);
                 return 2;
-            }))).then(literal("joinServerFollow").executes(getJoinServerFollowLimit -> {
-                if (commandApplyToPlayer(10, getPlayer(getJoinServerFollowLimit), this, getJoinServerFollowLimit)) {
-                    sendFeedback(getJoinServerFollowLimit, formatJoinGameFollow());
-                }
-                return 0;
-            }).then(literal("disable").executes(disableJoinServerFollow -> {
-                if (commandApplyToPlayer(10, getPlayer(disableJoinServerFollow), this, disableJoinServerFollow)) {
-                    config.set("join_server_follow", PermissionLevel.UNABLE);
-
-                    sendFeedback(disableJoinServerFollow, formatJoinGameFollow());
-                }
-                return 1;
-            })).then(literal("all").executes(enableJoinServerFollowForAll -> {
-                if (commandApplyToPlayer(10, getPlayer(enableJoinServerFollowForAll), this, enableJoinServerFollowForAll)) {
-                    config.set("join_server_follow", PermissionLevel.ALL);
-
-                    sendFeedback(enableJoinServerFollowForAll, formatJoinGameFollow());
-                }
-                return 2;
-            })).then(literal("ops").executes(enableJoinServerFollowForOps -> {
-                if (commandApplyToPlayer(10, getPlayer(enableJoinServerFollowForOps), this, enableJoinServerFollowForOps)) {
-                    config.set("join_server_follow", PermissionLevel.OPS);
-
-                    sendFeedback(enableJoinServerFollowForOps, formatJoinGameFollow());
-                }
-                return 3;
-            }))).then(literal("runCommandFollow").executes(getJoinServerFollowLimit -> {
-                if (commandApplyToPlayer(10, getPlayer(getJoinServerFollowLimit), this, getJoinServerFollowLimit)) {
-                    sendFeedback(getJoinServerFollowLimit, formatRunCommandFollow());
-                }
-                return 0;
-            }).then(literal("disable").executes(disableJoinServerFollow -> {
-                if (commandApplyToPlayer(10, getPlayer(disableJoinServerFollow), this, disableJoinServerFollow)) {
-                    config.set("run_command_follow", PermissionLevel.UNABLE);
-
-                    sendFeedback(disableJoinServerFollow, formatRunCommandFollow());
-                }
-                return 1;
-            })).then(literal("all").executes(enableJoinServerFollowForAll -> {
-                if (commandApplyToPlayer(10, getPlayer(enableJoinServerFollowForAll), this, enableJoinServerFollowForAll)) {
-                    config.set("run_command_follow", PermissionLevel.ALL);
-
-                    sendFeedback(enableJoinServerFollowForAll, formatRunCommandFollow());
-                }
-                return 2;
-            })).then(literal("ops").executes(enableJoinServerFollowForOps -> {
-                if (commandApplyToPlayer(10, getPlayer(enableJoinServerFollowForOps), this, enableJoinServerFollowForOps)) {
-                    config.set("run_command_follow", PermissionLevel.OPS);
-
-                    sendFeedback(enableJoinServerFollowForOps, formatRunCommandFollow());
-                }
-                return 3;
             }))).then(literal("timeActive").executes(getTimeActive -> {
-                if (commandApplyToPlayer(15, getPlayer(getTimeActive), this, getTimeActive)) {
-                    sendFeedback(getTimeActive, formatConfigReturnMessage("time_active"));
-                }
+                sendFeedback(getTimeActive, formatConfigReturnMessage("time_active"), 15);
                 return 0;
             }).then(literal("enable").executes(enableTimeActive -> {
-                if (commandApplyToPlayer(15, getPlayer(enableTimeActive), this, enableTimeActive)) {
-                    timeActive = true;
+                timeActive = true;
 
-                    updateModMdoVariables();
+                updateModMdoVariables();
 
-                    sendFeedback(enableTimeActive, formatConfigReturnMessage("time_active"));
-                }
+                sendFeedback(enableTimeActive, formatConfigReturnMessage("time_active"), 15);
                 return 0;
             })).then(literal("disable").executes(disableTimeActive -> {
-                if (commandApplyToPlayer(15, getPlayer(disableTimeActive), this, disableTimeActive)) {
-                    timeActive = false;
+                timeActive = false;
 
-                    updateModMdoVariables();
+                updateModMdoVariables();
 
-                    sendFeedback(disableTimeActive, formatConfigReturnMessage("time_active"));
-                }
+                sendFeedback(disableTimeActive, formatConfigReturnMessage("time_active"), 15);
                 return 0;
             }))).then(literal("loginCheckTimeLimit").executes(getTimeLimit -> {
-                if (commandApplyToPlayer(16, getPlayer(getTimeLimit), this, getTimeLimit)) {
-                    sendFeedback(getTimeLimit, formatCheckerTimeLimit());
-                }
+                sendFeedback(getTimeLimit, formatCheckerTimeLimit(), 16);
                 return 0;
             }).then(argument("ms", IntegerArgumentType.integer(500)).executes(setTimeLimit -> {
-                if (commandApplyToPlayer(16, getPlayer(setTimeLimit), this, setTimeLimit)) {
-                    config.set("checker_time_limit", IntegerArgumentType.getInteger(setTimeLimit, "ms"));
+                config.set("checker_time_limit", IntegerArgumentType.getInteger(setTimeLimit, "ms"));
 
-                    updateModMdoVariables();
+                updateModMdoVariables();
 
-                    sendFeedback(setTimeLimit, formatCheckerTimeLimit());
-                }
+                sendFeedback(setTimeLimit, formatCheckerTimeLimit(), 16);
                 return 0;
             }))).then(literal("language").executes(getLanguage -> {
                 sendFeedback(getLanguage, new TranslatableText("language.default", getLanguage()), 20);
@@ -405,14 +305,6 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
         return new TranslatableText("checker_time_limit.rule.format", config.getConfigInt("checker_time_limit"));
     }
 
-    public TranslatableText formatJoinGameFollow() {
-        return TranslateUtil.formatRule("follow.join.server", config.getConfigString("join_server_follow").toLowerCase(Locale.ROOT));
-    }
-
-    public TranslatableText formatRunCommandFollow() {
-        return TranslateUtil.formatRule("follow.run.command", config.getConfigString("run_command_follow").toLowerCase(Locale.ROOT));
-    }
-
     public TranslatableText formatTickingEntitiesTick() {
         return new TranslatableText(cancelEntitiesTick ? "ticking.entities.false.rule.format" : "ticking.entities.true.rule.format");
     }
@@ -445,7 +337,6 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
         return new TranslatableText("modmdo_whitelist.true.rule.format");
     }
 
-
     public TranslatableText formatDisableModMdoWhitelist() {
         return new TranslatableText("modmdo_whitelist.false.rule.format");
     }
@@ -453,7 +344,6 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
     public TranslatableText formatEnableRejectReconnect() {
         return new TranslatableText("reject_reconnect.true.rule.format");
     }
-
 
     public TranslatableText formatDisableRejectReconnect() {
         return new TranslatableText("reject_reconnect.reject.false.rule.format");
@@ -463,8 +353,15 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
         return new TranslatableText("dead_message.true.rule.format");
     }
 
-
     public TranslatableText formatDisabledDeadMessage() {
         return new TranslatableText("dead_message.false.rule.format");
+    }
+
+    public TranslatableText formatJoinGameFollow() {
+        return TranslateUtil.formatRule("follow.join.server", config.getConfigString("join_server_follow").toLowerCase(Locale.ROOT));
+    }
+
+    public TranslatableText formatRunCommandFollow() {
+        return TranslateUtil.formatRule("follow.run.command", config.getConfigString("run_command_follow").toLowerCase(Locale.ROOT));
     }
 }

@@ -3,6 +3,7 @@ package com.github.zhuaidadaya.modmdo.mixins;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
+import com.github.zhuaidadaya.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
@@ -58,13 +59,13 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
                 long waiting = TimeUtil.millions();
 
-                int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
-                boolean useModMdoWhitelist = config.getConfigBoolean("modmdo_whitelist");
+                int loginCheckTimeLimit = EntrustParser.tryCreate(() -> config.getConfigInt("checker_time_limit"), 3000);
+                boolean useModMdoWhitelist = EntrustParser.tryCreate(() -> config.getConfigBoolean("modmdo_whitelist"), false);
 
                 try {
-                    new ServerPlayNetworkHandler(server, connection, player).sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(useModMdoWhitelist ? CHECKING : LOGIN)));
-
-                    sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.try", player.getName().asString()), "join_server_follow");
+                    ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
+                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeVarInt(useModMdoWhitelist ? 99 : 96)));
+                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(useModMdoWhitelist ? CHECKING : LOGIN)));
                 } catch (Exception e) {
 
                 }
@@ -72,10 +73,16 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 if (modMdoType == ModMdoType.SERVER & useModMdoWhitelist) {
                     while (! loginUsers.hasUser(player)) {
                         if (rejectUsers.hasUser(player)) {
-                            connection.send(new DisconnectS2CPacket(new TranslatableText("multiplayer.disconnect.not_whitelisted")));
-                            LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player are not white-listed");
-                            sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.not.white-listed", player.getName().asString()), "join_server_follow");
+                            User rejected = rejectUsers.getUser(player.getUuid());
+                            connection.send(new DisconnectS2CPacket(rejected.getRejectReason() == null ? new TranslatableText("multiplayer.disconnect.not_whitelisted") : rejected.getRejectReason()));
+                            if (rejected.getRejectReason() == null) {
+                                LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player are not white-listed");
+                            } else {
+                                LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\"");
+                            }
                             connection.disconnect(new LiteralText("failed to login server"));
+
+                            rejectUsers.removeUser(player);
 
                             LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
                             return;
@@ -83,7 +90,6 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             if (TimeUtil.processMillion(waiting) > loginCheckTimeLimit) {
                                 connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with ModMdo")));
                                 LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
-                                sendFollowingMessage(server.getPlayerManager(), new TranslatableText("player.login.rejected.without.modmdo", player.getName().asString()), "join_server_follow");
                                 connection.disconnect(new LiteralText("failed to login server"));
 
                                 LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
@@ -106,6 +112,8 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 try {
                     try {
                         if (connection.isOpen()) {
+                            serverLogin.login(player.getName().asString(), player.getUuid().toString(), "", "0");
+
                             server.getPlayerManager().onPlayerConnect(connection, player);
                             LOGGER.info("accepted nano: " + nano + " (" + player.getName().asString() + ")");
 
@@ -130,6 +138,8 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 }
             }).start();
         } else {
+            serverLogin.login(player.getName().asString(), player.getUuid().toString(), "", "0");
+
             this.server.getPlayerManager().onPlayerConnect(this.connection, player);
         }
     }
