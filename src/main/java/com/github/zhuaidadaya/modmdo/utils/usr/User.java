@@ -72,7 +72,6 @@ public class User {
 
         onlineTime = EntrustParser.tryCreate(() -> json.getLong("onlineTime"), - 1L);
 
-
         modmdoVersion = EntrustParser.tryCreate(() -> json.getInt("version"), - 1);
 
         modmdoIdentifier = EntrustParser.tryCreate(() -> json.getString("identifier"), "");
@@ -91,8 +90,9 @@ public class User {
         return language;
     }
 
-    public void setLanguage(Language language) {
+    public User setLanguage(Language language) {
         this.language = language;
+        return this;
     }
 
     public String getIdentifier() {
