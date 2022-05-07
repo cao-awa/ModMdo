@@ -6,6 +6,8 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
 
+import java.util.*;
+
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ServerLogin {
@@ -32,7 +34,7 @@ public class ServerLogin {
         EntrustExecution.notNull(temporaryWhitelist.get(name), e -> {
             if (e.isValid()) {
                 if (whitelist.getFromId(identifier) == null) {
-                    whitelist.put(name, new PermanentWhitelist(name, identifier));
+                    whitelist.put(name, new PermanentWhitelist(name, identifier, UUID.fromString(uuid)));
                     updateModMdoVariables();
                 }
             }
@@ -50,22 +52,45 @@ public class ServerLogin {
         EntrustExecution.notNull(temporaryWhitelist.get(name), e -> {
             if (e.isValid()) {
                 if (EntrustParser.trying(() -> ! whitelist.get(name).getIdentifier().equals(identifier), () -> true)) {
-                    whitelist.put(name, new PermanentWhitelist(name, identifier));
+                    whitelist.put(name, new PermanentWhitelist(name, identifier, UUID.fromString(uuid)));
                     updateModMdoVariables();
                 }
             }
             temporaryWhitelist.remove(name);
         });
         if (EntrustParser.trying(() -> ! whitelist.get(name).getIdentifier().equals(identifier), () -> true)) {
-            reject(name,uuid, identifier, null);
+            reject(name, uuid, identifier, null);
         } else {
             LOGGER.info("login player: " + name);
             loginUsers.put(new User(name, uuid, - 1, identifier, version));
         }
     }
 
-    public void reject(String name,String uuid,String identifier, Text reson) {
-        rejectUsers.put(new User(name, uuid, - 1, identifier, -1).setRejectReason(reson));
+    public void reject(String name, String uuid, String identifier, Text reson) {
+        rejectUsers.put(new User(name, uuid, - 1, identifier, - 1).setRejectReason(reson));
+    }
+
+    public void loginUsingYgg(String name, String uuid) {
+        EntrustExecution.notNull(temporaryWhitelist.get(name), e -> {
+            if (e.isValid()) {
+                try {
+                    if (uuid.equals(whitelist.get(name).getRecorde().uuid().toString())) {
+                        return;
+                    }
+                } catch (Exception ex) {
+
+                }
+                whitelist.put(name, new PermanentWhitelist(name, "", UUID.fromString(uuid)));
+                updateModMdoVariables();
+            }
+            temporaryWhitelist.remove(name);
+        });
+        if (! uuid.equals(whitelist.get(name).getRecorde().uuid().toString())) {
+            rejectUsers.put(new User(name, uuid, - 1, "", 0));
+        } else {
+            LOGGER.info("login player: " + name);
+            loginUsers.put(new User(name, uuid, - 1, "", 0));
+        }
     }
 
     public void logout(ServerPlayerEntity player) {

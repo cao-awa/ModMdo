@@ -41,8 +41,8 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.32";
-    public static final int MODMDO_VERSION = 26;
+    public static final String VERSION_ID = "1.0.33";
+    public static final int MODMDO_VERSION = 27;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
@@ -70,6 +70,7 @@ public class Variables {
     public static boolean cancelEntitiesTick = false;
     public static boolean timeActive = true;
     public static boolean rejectNoFallCheat = true;
+    public static boolean modmdoWhitelist = false;
     public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
@@ -277,18 +278,19 @@ public class Variables {
     }
 
     public static void defaultConfig() {
-        config.set("default_language", Language.ENGLISH);
-        config.set("here_command", true);
-        config.set("dead_message", true);
-        config.set("cava", true);
-        config.set("secure_enchant", true);
-        config.set("modmdo_whitelist", false);
-        config.set("reject_reconnect", true);
-        config.set("time_active", true);
-        config.set("checker_time_limit", 3000);
-        config.set("enchantment_clear_if_level_too_high", false);
-        config.set("reject_no_fall_chest", true);
-        config.set("whitelist_only_id", false);
+        config.setIfNoExist("default_language", Language.ENGLISH);
+        config.setIfNoExist("here_command", true);
+        config.setIfNoExist("dead_message", true);
+        config.setIfNoExist("cava", true);
+        config.setIfNoExist("secure_enchant", true);
+        config.setIfNoExist("modmdo_whitelist", false);
+        config.setIfNoExist("reject_reconnect", true);
+        config.setIfNoExist("time_active", true);
+        config.setIfNoExist("checker_time_limit", 3000);
+        config.setIfNoExist("enchantment_clear_if_level_too_high", false);
+        config.setIfNoExist("reject_no_fall_chest", true);
+        config.setIfNoExist("whitelist_only_id", false);
+        config.setIfNoExist("compatible_online_mode", true);
     }
 
     public static void updateModMdoVariables() {
@@ -301,6 +303,7 @@ public class Variables {
         config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
         config.set("reject_no_fall_chest", rejectNoFallCheat);
         config.set("whitelist_only_id", false);
+        config.setIfNoExist("modmdo_whitelist", modmdoWhitelist);
 
         if (modMdoType == ModMdoType.SERVER) {
             EntrustExecution.tryTemporary(() -> {
