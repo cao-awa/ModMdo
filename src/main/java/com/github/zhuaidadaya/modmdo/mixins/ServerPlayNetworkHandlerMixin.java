@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
+import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.type.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
@@ -89,6 +90,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
     @Inject(method = "onClientSettings", at = @At("HEAD"))
     private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
-        loginUsers.getUser(player).setLanguage(Language.getLanguageForName(packet.getLanguage()));
+        loginUsers.getUser(player).setLanguage(Language.getLanguageForName(packet.language()));
     }
 }
