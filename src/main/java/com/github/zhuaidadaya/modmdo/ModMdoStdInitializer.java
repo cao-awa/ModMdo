@@ -63,6 +63,9 @@ public class ModMdoStdInitializer implements ModInitializer {
         EntrustExecution.notNull(config.getConfigBoolean("reject_no_fall_chest"), rejectnoFall -> {
             rejectNoFallCheat = rejectnoFall;
         });
+        EntrustExecution.notNull(config.getConfigBoolean("modmdo_whitelist"), whitelist -> {
+            modmdoWhitelist = whitelist;
+        });
 
         EntrustExecution.nullRequires(configCached.getConfig("identifier"), identifier -> {
             configCached.set("identifier", RandomIdentifier.randomIdentifier());

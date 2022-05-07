@@ -1,23 +1,30 @@
 package com.github.zhuaidadaya.modmdo.whitelist;
 
+import com.github.zhuaidadaya.modmdo.login.*;
 import org.json.*;
 
+import java.util.*;
+
 public abstract class Whitelist {
-    private final String name;
-    private final String identifier;
+    public final String name;
+    public final LoginRecorde recorde;
+
+    public Whitelist(String name, LoginRecorde recorde) {
+        this.name = name;
+        this.recorde = recorde;
+    }
 
     public String getName() {
         return name;
     }
 
     public String getIdentifier() {
-        return identifier;
-    }
-
-    public Whitelist(String name, String identifier) {
-        this.name = name;
-        this.identifier = identifier;
+        return recorde.modmdoUniqueId();
     }
 
     public abstract JSONObject toJSONObject();
+
+    public LoginRecorde getRecorde() {
+        return recorde;
+    }
 }

@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modmdo.whitelist;
 
+import com.github.zhuaidadaya.modmdo.login.*;
 import com.github.zhuaidadaya.modmdo.utils.times.*;
 import org.json.*;
 
@@ -11,7 +12,7 @@ public final class TemporaryWhitelist extends Whitelist {
     private final long millions;
 
     public TemporaryWhitelist(String name, long recording, long millions) {
-        super(name, name);
+        super(name, new LoginRecorde(name, null, LoginRecordeType.TEMPORARY));
         this.name = name;
         this.recording = recording;
         this.millions = millions;

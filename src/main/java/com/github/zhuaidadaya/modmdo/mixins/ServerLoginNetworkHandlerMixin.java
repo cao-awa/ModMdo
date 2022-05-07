@@ -6,23 +6,31 @@ import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import com.github.zhuaidadaya.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.exceptions.*;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.encryption.*;
 import net.minecraft.network.listener.ServerLoginPacketListener;
+import net.minecraft.network.packet.c2s.login.*;
+import net.minecraft.network.packet.s2c.login.*;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
+import net.minecraft.util.logging.*;
+import org.apache.commons.lang3.*;
+import org.jetbrains.annotations.*;
 import org.json.JSONObject;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
@@ -31,10 +39,18 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     @Shadow
     @Final
     public ClientConnection connection;
+    boolean authing = false;
+    boolean preReject = false;
 
     @Shadow
     @Final
     MinecraftServer server;
+
+    @Shadow
+    @Nullable GameProfile profile;
+
+    @Shadow
+    public abstract String getConnectionInfo();
 
     /**
      * 如果玩家为null, 则拒绝将玩家添加进服务器
@@ -51,6 +67,18 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
         if (player == null)
             return;
 
+        if (profile == null || profile.getId() == null && preReject) {
+            return;
+        }
+
+        if (config.getConfigBoolean("compatible_online_mode")) {
+            EntrustExecution.tryTemporary(() -> {
+                serverLogin.loginUsingYgg(player.getName().asString(), profile.getId().toString());
+            }, () -> {
+                serverLogin.reject(player.getName().asString(), profile.getId().toString(), "", new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+            });
+        }
+
         if (! server.isHost(player.getGameProfile())) {
             new Thread(() -> {
                 Thread.currentThread().setName("ModMdo accepting");
@@ -59,28 +87,26 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
                 long waiting = TimeUtil.millions();
 
-                int loginCheckTimeLimit = EntrustParser.tryCreate(() -> config.getConfigInt("checker_time_limit"), 3000);
-                boolean useModMdoWhitelist = EntrustParser.tryCreate(() -> config.getConfigBoolean("modmdo_whitelist"), false);
+                int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
 
                 try {
                     ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
-                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeVarInt(useModMdoWhitelist ? 99 : 96)));
-                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(useModMdoWhitelist ? CHECKING : LOGIN)));
+                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
+                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING : LOGIN)));
                 } catch (Exception e) {
 
                 }
 
-                if (modMdoType == ModMdoType.SERVER & useModMdoWhitelist) {
+                if (modMdoType == ModMdoType.SERVER & modmdoWhitelist) {
                     while (! loginUsers.hasUser(player)) {
                         if (rejectUsers.hasUser(player)) {
                             User rejected = rejectUsers.getUser(player.getUuid());
-                            connection.send(new DisconnectS2CPacket(rejected.getRejectReason() == null ? new TranslatableText("multiplayer.disconnect.not_whitelisted") : rejected.getRejectReason()));
                             if (rejected.getRejectReason() == null) {
                                 LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player are not white-listed");
                             } else {
                                 LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\"");
                             }
-                            connection.disconnect(new LiteralText("failed to login server"));
+                            disc(rejected.getRejectReason() == null ? new TranslatableText("multiplayer.disconnect.not_whitelisted") : rejected.getRejectReason());
 
                             rejectUsers.removeUser(player);
 
@@ -88,9 +114,8 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             return;
                         } else {
                             if (TimeUtil.processMillion(waiting) > loginCheckTimeLimit) {
-                                connection.send(new DisconnectS2CPacket(new LiteralText("server enabled ModMdo secure module, please login with ModMdo")));
+                                disc(new LiteralText("server enabled ModMdo secure module, please login with ModMdo"));
                                 LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
-                                connection.disconnect(new LiteralText("failed to login server"));
 
                                 LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
                                 return;
@@ -126,9 +151,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                         if (! server.isHost(player.getGameProfile())) {
                             LOGGER.info("player " + player.getName().asString() + " lost status synchronize");
 
-                            player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("lost status synchronize, please connect again")));
-
-                            player.networkHandler.disconnect(new LiteralText("lost status synchronize"));
+                            disc(new LiteralText("lost status synchronize, please connect again"));
                         } else {
                             LOGGER.info("player " + player.getName().asString() + " lost status synchronize, but will not be process");
                         }
@@ -141,6 +164,24 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
             serverLogin.login(player.getName().asString(), player.getUuid().toString(), "", "0");
 
             this.server.getPlayerManager().onPlayerConnect(this.connection, player);
+        }
+    }
+
+    public void disc(Text reason) {
+        this.connection.send(new DisconnectS2CPacket(reason));
+        this.connection.disconnect(reason);
+    }
+
+    @Inject(method = "onKey", at = @At("HEAD"))
+    public void onKey(LoginKeyC2SPacket packet, CallbackInfo ci) {
+        authing = true;
+    }
+
+    @Inject(method = "disconnect", at = @At("HEAD"), cancellable = true)
+    public void disconnect(Text reason, CallbackInfo ci) {
+        if (authing && config.getConfigBoolean("compatible_online_mode")) {
+            preReject = true;
+            ci.cancel();
         }
     }
 }

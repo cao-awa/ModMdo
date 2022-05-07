@@ -1,4 +1,6 @@
 {
+    "compatible_online_mode.true.rule.format": "ModMdo will compatible to vanilla verification",
+    "compatible_online_mode.false.rule.format": "ModMdo will not compatible to vanilla verification",
     "arguments.permanent.whitelist.not.registered": "player %s are not registered in ModMdo whitelist",
     "arguments.temporary.whitelist.not.registered": "player %s are not registered in temporary whitelist",
     "whitelist_only_id.true.rule.format": "ModMdo whitelist will not check player name",
