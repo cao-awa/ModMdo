@@ -219,7 +219,33 @@ public class ServerTickListener {
             if (enableDeadMessage) {
                 detectPlayerDead(player);
             }
+            if (modmdoWhitelist) {
+                if (!hasWhitelist(player)) {
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(new TranslatableText("multiplayer.disconnect.not_whitelisted")));
+                    player.networkHandler.connection.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+                }
+            }
         }
+    }
+
+    public boolean hasWhitelist(ServerPlayerEntity player) {
+        try {
+            switch (whitelist.get(player.getName().asString()).getRecorde().type()) {
+                case IDENTIFIER -> {
+                    if (whitelist.get(player.getName().asString()).getRecorde().modmdoUniqueId().equals("")) {
+                        return false;
+                    }
+                }
+                case UUID -> {
+                    if (! player.getUuid().equals(whitelist.get(player.getName().asString()).getRecorde().uuid())) {
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -1,4 +1,6 @@
 {
+    "compatible_online_mode.true.rule.format": "ModMdo 白名单将会兼容正版验证",
+    "compatible_online_mode.false.rule.format": "ModMdo 白名单将不会兼容正版验证",
     "arguments.permanent.whitelist.not.registered": "没有将玩家 %s 注册于ModMdo白名单中",
     "arguments.temporary.whitelist.not.registered": "没有将玩家 %s 注册于临时白名单中",
     "whitelist_only_id.true.rule.format": "ModMdo白名单将不会确认玩家的名称",

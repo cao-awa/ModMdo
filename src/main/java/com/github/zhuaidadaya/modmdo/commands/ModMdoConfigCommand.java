@@ -277,6 +277,17 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
             }))).then(literal("list").executes(showWhiteList -> {
                 showWhitelist(showWhiteList);
                 return 0;
+            }))).then(literal("compatibleOnlineMode").executes(getCompatible -> {
+                sendFeedback(getCompatible, formatConfigReturnMessage("compatible_online_mode"));
+                return 0;
+            }).then(literal("enable").executes(enable -> {
+                config.set("compatible_online_mode", true);
+                sendFeedback(enable, formatConfigReturnMessage("compatible_online_mode"));
+                return 0;
+            })).then(literal("disable").executes(disable -> {
+                config.set("compatible_online_mode", false);
+                sendFeedback(disable, formatConfigReturnMessage("compatible_online_mode"));
+                return 0;
             }))));
         });
     }

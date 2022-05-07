@@ -12,6 +12,7 @@ public class ModMdo extends ModMdoExtra {
         config = new ObjectConfigUtil(entrust, getServerLevelPath((MinecraftServer) getArgs().get("server")), "modmdo.mhf");
 
         allDefault();
+        defaultConfig();
 
         new ModMdoUserCommand().init();
 
