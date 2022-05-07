@@ -25,7 +25,7 @@
     "enchantment.max.level.limit.all.default": "已恢复全部魔咒的默认最高等级",
     "enchantment.max.level.limit.all": "已将全部魔咒的最高等级设为: %s",
     "enchantment.max.level.limit": "当前的 %s 最大等级为 %s",
-    "command.require.version": "此命令需要最低%s版本的ModMdo运行",
+    "command.require.version": "此命令需要最低 %s 版本的ModMdo运行",
     "language.chinese": "中文",
     "language.english": "英文",
     "language.default": "当前默认语言为: %s",

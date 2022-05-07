@@ -14,18 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
-/**
- * TAG:DRT|SKP|VSD
- * 这个tag用于注明这是有版本差异的
- * 存在这个tag时不会直接从其他正在开发的部分复制
- * 而是手动替换
- * TAG:
- * DRT(Don't Replace It)
- * SKP(Skip)
- * VSD(Version Difference)
- * <p>
- * 手动替换检测: 1.17.x
- */
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
     @Shadow
@@ -94,11 +82,13 @@ public abstract class ServerPlayNetworkHandlerMixin {
         serverLogin.logout(player);
     }
 
-    @Shadow
-    protected abstract boolean isHost();
-
     @Inject(method = "executeCommand", at = @At("HEAD"))
     private void executeCommand(String input, CallbackInfo ci) {
         LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
+    }
+
+    @Inject(method = "onClientSettings", at = @At("HEAD"))
+    private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
+        loginUsers.getUser(player).setLanguage(Language.getLanguageForName(packet.getLanguage()));
     }
 }

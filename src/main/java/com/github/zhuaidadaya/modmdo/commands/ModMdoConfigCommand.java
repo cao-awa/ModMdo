@@ -65,24 +65,6 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 updateModMdoVariables();
 
                 sendFeedback(enableWhitelist, formatUseModMdoWhitelist(), 1);
-
-                for (ServerPlayerEntity player : getServer(enableWhitelist).getPlayerManager().getPlayerList()) {
-                    EntrustExecution.tryTemporary(() -> {
-                        if (config.getConfigBoolean("whitelist_only_id")) {
-                            if (whitelist.getFromId(loginUsers.getUser(player).getIdentifier()) == null) {
-                                throw new Exception();
-                            }
-                        } else {
-                            if (! whitelist.get(player.getName().asString()).getIdentifier().equals(loginUsers.getUser(player).getIdentifier())) {
-                                throw new Exception();
-                            }
-                        }
-                    }, () -> {
-                        if (player.networkHandler.connection.isOpen()) {
-                            player.networkHandler.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
-                        }
-                    });
-                }
                 return 1;
             })).then(literal("disable").executes(disableWhitelist -> {
                 config.set("modmdo_whitelist", false);
