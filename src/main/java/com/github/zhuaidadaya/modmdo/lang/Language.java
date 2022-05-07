@@ -22,13 +22,11 @@ public enum Language {
     }
 
     public static Language getLanguageForName(String name) {
-        Language language = null;
-        switch(name.toLowerCase()) {
-            case "chinese", "zh_en" -> language = CHINESE;
-            case "chinese_tw" -> language = CHINESE_TW;
-            default -> language = ENGLISH;
-        }
-        return language;
+        return switch(name.toLowerCase()) {
+            case "chinese", "zh_cn" -> CHINESE;
+            case "chinese_tw" -> CHINESE_TW;
+            default -> ENGLISH;
+        };
     }
 
     public static String getNameForLanguage(Language language) {
