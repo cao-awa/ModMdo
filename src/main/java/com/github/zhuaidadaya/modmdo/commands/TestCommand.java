@@ -1,11 +1,15 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
-import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import com.github.zhuaidadaya.modmdo.utils.command.*;
+import com.mojang.brigadier.arguments.*;
+import it.unimi.dsi.fastutil.objects.*;
+import net.fabricmc.fabric.api.command.v1.*;
 import net.minecraft.text.*;
+import net.minecraft.util.math.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.testing;
-import static net.minecraft.server.command.CommandManager.literal;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.world.World.*;
 
 public class TestCommand extends SimpleCommandOperation implements SimpleCommand {
     @Override
