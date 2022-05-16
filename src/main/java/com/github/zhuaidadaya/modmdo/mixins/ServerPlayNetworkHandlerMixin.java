@@ -1,28 +1,23 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
 import com.github.zhuaidadaya.modmdo.lang.*;
+import com.github.zhuaidadaya.modmdo.network.process.*;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.MessageType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.function.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
@@ -58,30 +53,32 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
             PacketByteBuf packetByteBuf = EntrustParser.trying(() -> new PacketByteBuf(packet.getData().copy()));
 
-            String oldLogin = "";
-            Identifier informationSign = new Identifier("");
-            if (TOKEN.equals(channel)) {
-                oldLogin = EntrustParser.tryCreate(packetByteBuf::readString, "");
-            } else {
-                informationSign = new Identifier(EntrustParser.tryCreate(packetByteBuf::readString, ""));
-            }
-            String data1 = EntrustParser.tryCreate(packetByteBuf::readString, "");
-            String data2 = EntrustParser.tryCreate(packetByteBuf::readString, "");
-            String data3 = EntrustParser.tryCreate(packetByteBuf::readString, "");
-            String data4 = EntrustParser.tryCreate(packetByteBuf::readString, "");
+            EntrustExecution.notNull(packetByteBuf, buf -> {
+                String oldLogin = "";
+                Identifier informationSign = new Identifier("");
+                if (TOKEN.equals(channel)) {
+                    oldLogin = EntrustParser.tryCreate(buf::readString, "");
+                } else {
+                    informationSign = new Identifier(EntrustParser.tryCreate(buf::readString, ""));
+                }
+                String data1 = EntrustParser.tryCreate(buf::readString, "");
+                String data2 = EntrustParser.tryCreate(buf::readString, "");
+                String data3 = EntrustParser.tryCreate(buf::readString, "");
+                String data4 = EntrustParser.tryCreate(buf::readString, "");
 
-            if (TOKEN.equals(channel)) {
-                serverLogin.reject(data1, oldLogin, "", new LiteralText("obsolete login type"));
-                return;
-            }
+                if (TOKEN.equals(channel)) {
+                    serverLogin.reject(data1, oldLogin, "", new LiteralText("obsolete login type"));
+                    return;
+                }
 
-            if (channel.equals(CLIENT)) {
-                if (informationSign.equals(LOGIN)) {
-                    if (modMdoType == ModMdoType.SERVER) {
-                        serverLogin.login(data1, data2, data3, data4);
+                if (channel.equals(CLIENT)) {
+                    if (informationSign.equals(LOGIN)) {
+                        if (modMdoType == ModMdoType.SERVER) {
+                            serverLogin.login(data1, data2, data3, data4);
+                        }
                     }
                 }
-            }
+            });
 
             ci.cancel();
         } catch (Exception e) {
@@ -92,6 +89,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onDisconnected", at = @At("RETURN"))
     public void onDisconnected(Text reason, CallbackInfo ci) {
         serverLogin.logout(player);
+        EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(player.getName().asString()));
     }
 
     @Inject(method = "executeCommand", at = @At("HEAD"))
@@ -102,5 +100,12 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onClientSettings", at = @At("HEAD"))
     private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
         loginUsers.getUser(player).setLanguage(Language.getLanguageForName(packet.getLanguage()));
+    }
+
+    @Inject(method = "onGameMessage", at = @At("HEAD"))
+    public void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
+        if (!packet.getChatMessage().startsWith("/")) {
+            EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), player.getName().asString()));
+        }
     }
 }

@@ -20,9 +20,13 @@ public class EntrustExecution {
         }
     }
 
+    public static <T> void runThread(T target, Consumer<T> action) {
+        new Thread(() -> action.accept(target)).start();
+    }
+
     public static <T> void executeNull(T target, Consumer<T> asNotNull, Consumer<T> asNull) {
         if (target == null) {
-            asNull.accept((T) o);
+            asNull.accept(null);
         } else {
             asNotNull.accept(target);
         }
@@ -100,6 +104,22 @@ public class EntrustExecution {
                 } catch (Exception e) {
 
                 }
+            }
+        }
+    }
+
+    public static <T> void tryFor(ExceptingSupplier<Collection<T>> targets, ExceptingConsumer<T> action) {
+        if (targets != null) {
+            try {
+                for (T target : targets.get()) {
+                    try {
+                        action.accept(target);
+                    } catch (Exception e) {
+
+                    }
+                }
+            } catch (Exception e) {
+
             }
         }
     }

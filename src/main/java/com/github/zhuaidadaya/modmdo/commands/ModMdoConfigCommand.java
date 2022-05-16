@@ -1,14 +1,16 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
-import com.github.zhuaidadaya.modmdo.commands.argument.*;
+import com.github.zhuaidadaya.modmdo.commands.argument.connection.*;
+import com.github.zhuaidadaya.modmdo.commands.argument.whitelist.*;
 import com.github.zhuaidadaya.modmdo.lang.Language;
-import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
+import com.github.zhuaidadaya.modmdo.network.connection.*;
+import com.github.zhuaidadaya.modmdo.network.process.*;
 import com.github.zhuaidadaya.modmdo.storage.Variables;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.utils.translate.TranslateUtil;
 import com.github.zhuaidadaya.modmdo.whitelist.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -17,8 +19,10 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.*;
+import org.json.*;
 
+import java.net.*;
 import java.util.Locale;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
@@ -29,7 +33,10 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class ModMdoConfigCommand extends SimpleCommandOperation implements SimpleCommand {
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("modmdo").requires(level -> level.hasPermissionLevel(4)).then(literal("here").executes(here -> {
+            dispatcher.register(literal("modmdo").executes(modmdo -> {
+                sendFeedback(modmdo, formatModMdoDescription(getPlayer(modmdo)), Integer.MAX_VALUE);
+                return 0;
+            }).requires(level -> level.hasPermissionLevel(4)).then(literal("here").executes(here -> {
                 sendFeedback(here, formatConfigReturnMessage("here_command"), 1);
                 return 2;
             }).then(literal("enable").executes(enableHere -> {
@@ -61,13 +68,13 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 sendFeedback(whitelist, formatConfigReturnMessage("modmdo_whitelist"), 1);
                 return 2;
             }).then(literal("enable").executes(enableWhitelist -> {
-                config.set("modmdo_whitelist", true);
+                config.set("modmdo_whitelist", modmdoWhitelist = true);
                 updateModMdoVariables();
 
                 sendFeedback(enableWhitelist, formatUseModMdoWhitelist(), 1);
                 return 1;
             })).then(literal("disable").executes(disableWhitelist -> {
-                config.set("modmdo_whitelist", false);
+                config.set("modmdo_whitelist", modmdoWhitelist = false);
                 updateModMdoVariables();
                 sendFeedback(disableWhitelist, formatDisableModMdoWhitelist(), 1);
                 return 0;
@@ -236,15 +243,15 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 sendFeedback(receive, new TranslatableText(rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
                 return 0;
             }))).then(literal("onlyCheckIdentifier").executes(check -> {
-                sendFeedback(check, formatConfigReturnMessage("whitelist_only_id"));
+                sendFeedback(check, formatConfigReturnMessage("whitelist_only_id"), 28);
                 return 0;
             }).then(literal("enable").executes(enable -> {
                 config.set("whitelist_only_id", true);
-                sendFeedback(enable, formatConfigReturnMessage("whitelist_only_id"));
+                sendFeedback(enable, formatConfigReturnMessage("whitelist_only_id"), 28);
                 return 0;
             })).then(literal("disable").executes(disable -> {
                 config.set("whitelist_only_id", false);
-                sendFeedback(disable, formatConfigReturnMessage("whitelist_only_id"));
+                sendFeedback(disable, formatConfigReturnMessage("whitelist_only_id"), 28);
                 return 0;
             }))).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
                 Whitelist wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
@@ -260,17 +267,133 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 showWhitelist(showWhiteList);
                 return 0;
             }))).then(literal("compatibleOnlineMode").executes(getCompatible -> {
-                sendFeedback(getCompatible, formatConfigReturnMessage("compatible_online_mode"));
+                sendFeedback(getCompatible, formatConfigReturnMessage("compatible_online_mode"), 28);
                 return 0;
             }).then(literal("enable").executes(enable -> {
                 config.set("compatible_online_mode", true);
-                sendFeedback(enable, formatConfigReturnMessage("compatible_online_mode"));
+                sendFeedback(enable, formatConfigReturnMessage("compatible_online_mode"), 28);
                 return 0;
             })).then(literal("disable").executes(disable -> {
                 config.set("compatible_online_mode", false);
-                sendFeedback(disable, formatConfigReturnMessage("compatible_online_mode"));
+                sendFeedback(disable, formatConfigReturnMessage("compatible_online_mode"), 28);
                 return 0;
-            }))));
+            }))).then(literal("modmdoConnecting").executes(modmdoConnecting -> {
+                sendFeedback(modmdoConnecting, formatConfigReturnMessage("modmdo_connecting"), 28);
+                return 0;
+            }).then(literal("enable").executes(enable -> {
+                config.set("modmdo_connecting", true);
+                sendFeedback(enable, formatConfigReturnMessage("modmdo_connecting"), 28);
+                return 0;
+            })).then(literal("disable").executes(disable -> {
+                config.set("modmdo_connecting", false);
+                sendFeedback(disable, formatConfigReturnMessage("modmdo_connecting"), 28);
+                return 0;
+            }))).then(literal("connection").then(literal("connections").then(argument("name", ModMdoConnectionArgumentType.connection()).executes(getConnectInfo -> {
+                // TODO: 2022/5/10
+                return 0;
+            }).then(literal("disconnect").executes(disconnect -> {
+                Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(disconnect, "name");
+                EntrustExecution.tryTemporary(pair.getRight()::disconnect, nullProcessor -> sendError(disconnect, new TranslatableText("modmdo.connection.not.found", pair.getLeft()), 28));
+                return 0;
+            })).then(literal("test").executes(test -> {
+                Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(test, "name");
+                EntrustExecution.tryTemporary(pair.getRight()::connectionTesting, nullProcessor -> sendError(test, new TranslatableText("modmdo.connection.not.found", pair.getLeft()), 28));
+                return 0;
+            })))).then(literal("connect").then(argument("ip", StringArgumentType.string()).then(argument("port", IntegerArgumentType.integer(0, 65565)).executes(connectTo -> {
+                if (configCached.getConfigString("server_name") != null) {
+                    JSONObject loginData = new JSONObject();
+                    loginData.put("name", configCached.getConfigString("server_name"));
+                    loginData.put("identifier", configCached.getConfigString("identifier"));
+                    loginData.put("version", MODMDO_VERSION);
+                    EntrustExecution.tryTemporary(() -> new ModMdoClientConnection(server, new InetSocketAddress(StringArgumentType.getString(connectTo, "ip"), IntegerArgumentType.getInteger(connectTo, "port")), loginData));
+                }
+                return 0;
+            })))).then(literal("self").then(literal("name").then(argument("name", StringArgumentType.string()).executes(setName -> {
+                configCached.set("server_name", StringArgumentType.getString(setName, "name"));
+                return 0;
+            }))).then(literal("config").then(literal("chatting").then(literal("format").then(argument("format", StringArgumentType.string()).executes(format -> {
+                String formatting = StringArgumentType.getString(format, "format");
+                configCached.set("modmdo_connection_chatting_format", formatting);
+                sendFeedback(format, new TranslatableText("modmdo.connection.chatting.format", formatting.replace("%server", "TestServer").replace("%name", "PlayerName233").replace("%msg", "Hi!")), Integer.MAX_VALUE);
+                return 0;
+            }))).then(literal("accept").executes(getAccept -> {
+                sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"), 28);
+                return 0;
+            }).then(literal("enable").executes(enable -> {
+                configCached.set("modmdo_connection_chatting_accept", true);
+                sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            })).then(literal("disable").executes(disable -> {
+                configCached.set("modmdo_connection_chatting_accept", false);
+                sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            }))).then(literal("forward").executes(getForward -> {
+                sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"), 28);
+                return 0;
+            }).then(literal("enable").executes(enable -> {
+                configCached.set("modmdo_connection_chatting_forward", true);
+                sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            })).then(literal("disable").executes(disable -> {
+                configCached.set("modmdo_connection_chatting_forward", false);
+                sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"), 28);
+                return 0;
+            })))).then(literal("gameMessage").then(literal("playerJoin").then(literal("forward").executes(getForward -> {
+                sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"), 28);
+                return 0;
+            }).then(literal("enable").executes(enable -> {
+                configCached.set("modmdo_connection_player_join_forward", false);
+                sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            })).then(literal("disable").executes(disable -> {
+                configCached.set("modmdo_connection_player_join_forward", false);
+                sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            }))).then(literal("accept").executes(getAccept -> {
+                sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"), 28);
+                return 0;
+            })).then(literal("enable").executes(enable -> {
+                configCached.set("modmdo_connection_player_join_accept", false);
+                sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            })).then(literal("disable").executes(disable -> {
+                configCached.set("modmdo_connection_player_join_accept", false);
+                sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            }))).then(literal("playerQuit").then(literal("forward").executes(getForward -> {
+                sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"), 28);
+                return 0;
+            }).then(literal("enable").executes(enable -> {
+                configCached.set("modmdo_connection_player_quit_forward", true);
+                sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            })).then(literal("disable").executes(disable -> {
+                configCached.set("modmdo_connection_player_quit_forward", false);
+                sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            }))).then(literal("accept").executes(getAccept -> {
+                sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"), 28);
+                return 0;
+            }).then(literal("enable").executes(enable -> {
+                configCached.set("modmdo_connection_player_quit_accept", true);
+                sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            })).then(literal("disable").executes(disable -> {
+                configCached.set("modmdo_connection_player_quit_accept", false);
+                sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"), 28);
+                EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::updateSetting);
+                return 0;
+            })))))))));
         });
     }
 
@@ -288,6 +411,10 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
             sendMessage(player, new TranslatableText("commands.modmdo.whitelist.none"), false, 22);
 
         }
+    }
+
+    public TranslatableText formatConfigCachedReturnMessage(String config) {
+        return new TranslatableText(config + "." + configCached.getConfigString(config) + ".rule.format");
     }
 
     public TranslatableText formatConfigReturnMessage(String config) {
@@ -348,6 +475,16 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
 
     public TranslatableText formatDisabledDeadMessage() {
         return new TranslatableText("dead_message.false.rule.format");
+    }
+
+    public TranslatableText formatModMdoDescription(ServerPlayerEntity player) {
+        TranslatableText modmdoVersion;
+        if (getPlayerModMdoVersion(player) > 0) {
+            modmdoVersion = new TranslatableText("modmdo.description.your.modmdo", modMdoIdToVersionMap.get(getPlayerModMdoVersion(player)));
+        } else {
+            modmdoVersion = new TranslatableText("modmdo.description.you.do.not.have.modmdo");
+        }
+        return new TranslatableText("modmdo.description", MODMDO_VERSION_NAME, RELEASE_TIME, modmdoVersion);
     }
 
     public TranslatableText formatJoinGameFollow() {

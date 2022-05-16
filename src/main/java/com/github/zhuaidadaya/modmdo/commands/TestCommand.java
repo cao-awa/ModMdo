@@ -12,7 +12,7 @@ public class TestCommand extends SimpleCommandOperation implements SimpleCommand
     public void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("testmodmdo").executes(e -> {
-                testing = !testing;
+                testing = ! testing;
                 sendFeedback(e, new TranslatableText("testing: " + testing));
                 return 0;
             }));

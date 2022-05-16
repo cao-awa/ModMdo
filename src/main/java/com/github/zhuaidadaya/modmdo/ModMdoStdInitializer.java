@@ -85,11 +85,12 @@ public class ModMdoStdInitializer implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        LOGGER.info("loading ModMdo " + VERSION_ID + " (step 1/2)");
+        LOGGER.info("Loading ModMdo " + VERSION_ID + " (step 1/2)");
         LOGGER.info("ModMdo Std Initiator running");
-        LOGGER.info("loading for ModMdo Std init");
+        LOGGER.info("Loading for ModMdo Std init");
 
         configCached = new DiskObjectConfigUtil(entrust, "config/modmdo/");
+        configCached.setIfNoExist("identifier", RandomIdentifier.randomIdentifier());
 
         registerExtra(new ModMdo().setName("ModMdo").setId(EXTRA_ID));
 
@@ -128,7 +129,7 @@ public class ModMdoStdInitializer implements ModInitializer {
 
         extras = new ModMdoExtraLoader();
 
-        LOGGER.info("registering for ModMdo extra");
+        LOGGER.info("Registering for ModMdo extra");
         for (ModMdoExtra extra : extrasWaitingForRegister) {
             extras.register(extra.getId(), extra);
         }

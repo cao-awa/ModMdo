@@ -10,7 +10,5 @@ public class ModMdoClientInitializer implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         modMdoType = ModMdoType.CLIENT;
-
-        configCached.setIfNoExist("identifier", RandomIdentifier.randomIdentifier());
     }
 }

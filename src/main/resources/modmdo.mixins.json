@@ -5,6 +5,7 @@
     "compatibilityLevel": "JAVA_16",
     "mixins": [
         "ArgumentTypesMixin",
+        "ClientConnectionMixin",
         "EnchantmentHelperMixin",
         "EntityListMixin",
         "EntityMixin",
@@ -12,7 +13,9 @@
         "ItemStackMixin",
         "MinecraftServerSession",
         "PlayerManagerMixin",
+        "ServerHandshakeNetworkHandlerMixin",
         "ServerLoginNetworkHandlerMixin",
+        "ServerNetworkIoMixin",
         "ServerPlayNetworkHandlerMixin",
         "ServerWorldMixin",
         "StopServerRconMixin"
