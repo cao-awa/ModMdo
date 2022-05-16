@@ -2,6 +2,7 @@ package com.github.zhuaidadaya.modmdo.storage;
 
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modmdo.extra.loader.*;
+import com.github.zhuaidadaya.modmdo.network.process.*;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
@@ -26,7 +27,6 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -41,8 +41,10 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.33";
-    public static final int MODMDO_VERSION = 27;
+    public static final String VERSION_ID = "1.0.34";
+    public static final String MODMDO_VERSION_NAME = VERSION_ID + "-ES";
+    public static final String RELEASE_TIME = "2022.5.7";
+    public static final int MODMDO_VERSION = 28;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
@@ -86,11 +88,14 @@ public class Variables {
     public static ObjectArrayList<Rank> rankingObjects = new ObjectArrayList<>();
     public static ObjectArrayList<Rank> rankingObjectsNoDump = new ObjectArrayList<>();
     public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
+    public static ObjectArrayList<String> modmdoConnectionNames = new ObjectArrayList<>();
+    public static ObjectArrayList<ModMdoDataProcessor> modmdoConnections = new ObjectArrayList<>();
+    public static TemporaryWhitelist modmdoConnectionAccepting = new TemporaryWhitelist("", - 1, - 1);
+    public static WhiteLists<PermanentWhitelist> modmdoConnectionWhitelist = new WhiteLists<>();
     public static WhiteLists<PermanentWhitelist> whitelist = new WhiteLists<>();
     public static WhiteLists<TemporaryWhitelist> temporaryWhitelist = new WhiteLists<>();
     public static int whitelistHash = whitelist.hashCode();
     public static int temporaryWhitelistHash = temporaryWhitelist.hashCode();
-    public static boolean connectTo = false;
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
     public static ArrayList<ModMdoExtra> extrasWaitingForRegister = new ArrayList<>();
@@ -133,9 +138,8 @@ public class Variables {
         rankingObjects = new ObjectArrayList<>();
         rankingObjectsNoDump = new ObjectArrayList<>();
 
-        connectTo = false;
-
         enchantLevelController.setNoVanillaDefaultMaxLevel((short) 5);
+
         initEnchantmentMaxLevel();
     }
 
@@ -156,6 +160,14 @@ public class Variables {
 
             for (String s : json.keySet()) {
                 whitelist.put(s, PermanentWhitelist.build(json.getJSONObject(s)));
+            }
+        });
+
+        EntrustExecution.tryTemporary(() -> {
+            JSONObject json = config.getConfigJSONObject("connection-whitelist");
+
+            for (String s : json.keySet()) {
+                modmdoConnectionWhitelist.put(s, PermanentWhitelist.build(json.getJSONObject(s)));
             }
         });
     }
@@ -235,6 +247,10 @@ public class Variables {
     }
 
     public static void sendMessageToAllPlayer(Text message, boolean actionBar) {
+        sendMessageToAllPlayer(server, message, actionBar);
+    }
+
+    public static void sendMessageToAllPlayer(MinecraftServer server, Text message, boolean actionBar) {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
             sendMessage(player, message, actionBar);
     }
@@ -291,6 +307,15 @@ public class Variables {
         config.setIfNoExist("reject_no_fall_chest", true);
         config.setIfNoExist("whitelist_only_id", false);
         config.setIfNoExist("compatible_online_mode", true);
+        config.setIfNoExist("modmdo_connecting", true);
+        config.setIfNoExist("modmdo_connecting_whitelist", new JSONObject());
+        configCached.setIfNoExist("modmdo_connection_chatting_format", ModMdoDataProcessor.CONSOLE_CHAT_FORMAT);
+        configCached.setIfNoExist("modmdo_connection_chatting_forward", true);
+        configCached.setIfNoExist("modmdo_connection_chatting_accept", true);
+        configCached.setIfNoExist("modmdo_connection_player_join_forward", true);
+        configCached.setIfNoExist("modmdo_connection_player_quit_forward", true);
+        configCached.setIfNoExist("modmdo_connection_player_join_accept", true);
+        configCached.setIfNoExist("modmdo_connection_player_quit_accept", true);
     }
 
     public static void updateModMdoVariables() {
@@ -303,7 +328,7 @@ public class Variables {
         config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
         config.set("reject_no_fall_chest", rejectNoFallCheat);
         config.set("whitelist_only_id", false);
-        config.setIfNoExist("modmdo_whitelist", modmdoWhitelist);
+        config.set("modmdo_whitelist", modmdoWhitelist);
 
         if (modMdoType == ModMdoType.SERVER) {
             EntrustExecution.tryTemporary(() -> {
@@ -313,6 +338,14 @@ public class Variables {
                 }
                 config.set("whitelist", json);
             });
+
+            EntrustExecution.tryTemporary(() -> {
+                JSONObject json = new JSONObject();
+                for (String s : modmdoConnectionWhitelist.keySet()) {
+                    json.put(s, modmdoConnectionWhitelist.get(s).toJSONObject());
+                }
+                config.set("connection-whitelist", json);
+            }, Throwable::printStackTrace);
         }
     }
 
@@ -374,7 +407,7 @@ public class Variables {
     }
 
     public static void updateWhitelistNames(MinecraftServer server, boolean force) {
-        if (!force) {
+        if (! force) {
             if (whitelist.hashCode() != whitelistHash) {
                 return;
             }
@@ -396,7 +429,7 @@ public class Variables {
     }
 
     public static void updateTemporaryWhitelistNames(MinecraftServer server, boolean force) {
-        if (!force) {
+        if (! force) {
             if (temporaryWhitelist.hashCode() == temporaryWhitelistHash) {
                 return;
             }
@@ -405,6 +438,22 @@ public class Variables {
             player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("temporary_whitelist_names").writeString(getTemporaryWhitelistHashNamesJSONObject().toString())));
         }
         temporaryWhitelistHash = temporaryWhitelist.hashCode();
+    }
+
+    public static void updateModMdoConnectionsNames(MinecraftServer server) {
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("connections").writeString(getModMdoConnectionsNamesJSONObject().toString())));
+        }
+    }
+
+    public static JSONObject getModMdoConnectionsNamesJSONObject() {
+        JSONObject json = new JSONObject();
+        JSONArray array = new JSONArray();
+        for (ModMdoDataProcessor processor : modmdoConnections) {
+            array.put(processor.getModMdoConnection().getName());
+        }
+        json.put("names", array);
+        return json;
     }
 
     public static JSONObject getTemporaryWhitelistHashNamesJSONObject() {

@@ -1,9 +1,11 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
@@ -52,5 +54,10 @@ public class PlayerManagerMixin {
                 }
             }
         }
+    }
+
+    @Inject(method = "onPlayerConnect", at = @At("RETURN"))
+    public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
+        EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerJoin(player.getName().asString()));
     }
 }

@@ -99,12 +99,18 @@ public class User {
         return modmdoIdentifier;
     }
 
-    public void setIdentifier(String modmdoIdentifier) {
+    public User setIdentifier(String modmdoIdentifier) {
         this.modmdoIdentifier = modmdoIdentifier;
+        return this;
     }
 
     public int getVersion() {
         return modmdoVersion;
+    }
+
+    public User setVersion(int version) {
+        this.modmdoVersion = version;
+        return this;
     }
 
     public String getName() {

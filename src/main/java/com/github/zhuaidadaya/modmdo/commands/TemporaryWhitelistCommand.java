@@ -1,6 +1,6 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
-import com.github.zhuaidadaya.modmdo.commands.argument.*;
+import com.github.zhuaidadaya.modmdo.commands.argument.whitelist.*;
 import com.github.zhuaidadaya.modmdo.utils.command.*;
 import com.github.zhuaidadaya.modmdo.utils.times.*;
 import com.github.zhuaidadaya.modmdo.whitelist.*;
@@ -37,7 +37,7 @@ public class TemporaryWhitelistCommand extends SimpleCommandOperation implements
                 showTemporary(showTemporary);
                 updateTemporaryWhitelistNames(getServer(showTemporary), true);
                 return 0;
-            })).then(literal("remove").then(argument("name",ModMdoTemporaryWhitelistArgumentType.whitelist()).executes(remove -> {
+            })).then(literal("remove").then(argument("name", ModMdoTemporaryWhitelistArgumentType.whitelist()).executes(remove -> {
                 TemporaryWhitelist wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove, "name");
                 if (temporaryWhitelist.containsName(wl.getName())) {
                     temporaryWhitelist.remove(wl.name());
@@ -46,7 +46,35 @@ public class TemporaryWhitelistCommand extends SimpleCommandOperation implements
                     return 0;
                 }
                 sendError(remove, new TranslatableText("arguments.temporary.whitelist.not.registered", wl.getName()), 25);
-                return -1;
+                return - 1;
+            })))).then(literal("connection").then(literal("whitelist").executes(whitelist -> {
+                if (modmdoConnectionAccepting.isValid()) {
+                    long million = modmdoConnectionAccepting.millions() - TimeUtil.processMillion(modmdoConnectionAccepting.recording());
+                    long minute = TimeUtil.processRemainingMinutes(million);
+                    long second = TimeUtil.processRemainingSeconds(million);
+                    sendFeedback(whitelist, new TranslatableText("connection.whitelist.accepting", minute, second), 28);
+                } else {
+                    sendFeedback(whitelist, new TranslatableText("connection.whitelist.no.accepting"), 28);
+                }
+                return 0;
+            }).then(literal("accept").then(literal("one").executes(acceptOne -> {
+                if (modmdoConnectionAccepting.isValid()) {
+                    long million = modmdoConnectionAccepting.millions() - TimeUtil.processMillion(modmdoConnectionAccepting.recording());
+                    long minute = TimeUtil.processRemainingMinutes(million);
+                    long second = TimeUtil.processRemainingSeconds(million);
+                    sendError(acceptOne, new TranslatableText("connection.whitelist.accepting", minute, second), 28);
+                } else {
+                    sendFeedback(acceptOne, new TranslatableText("connection.whitelist.accepting.one"), 28);
+                    modmdoConnectionAccepting = new TemporaryWhitelist("", TimeUtil.millions(), 1000 * 60 * 5);
+                }
+                return 0;
+            }))).then(literal("cancel").executes(cancel -> {
+                if (modmdoConnectionAccepting.isValid()) {
+                    modmdoConnectionAccepting = new TemporaryWhitelist("", - 1, - 1);
+                } else {
+                    sendError(cancel, new TranslatableText("connection.whitelist.no.accepting"), 28);
+                }
+                return 0;
             })))));
         });
     }

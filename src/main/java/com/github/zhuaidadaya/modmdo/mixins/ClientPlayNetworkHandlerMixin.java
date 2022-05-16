@@ -1,6 +1,7 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
 import com.github.zhuaidadaya.modmdo.commands.argument.*;
+import com.github.zhuaidadaya.modmdo.network.process.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
@@ -73,6 +74,13 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             temporaryWhitelist.put(o.toString(), null);
                         }
                     }
+                    case "connections" -> EntrustExecution.tryTemporary(() -> {
+                        modmdoConnectionNames.clear();
+                        JSONObject json = new JSONObject(data2);
+                        for (Object o : json.getJSONArray("names")) {
+                            modmdoConnectionNames.add(o.toString());
+                        }
+                    });
                 }
                 ArgumentInit.init();
             }

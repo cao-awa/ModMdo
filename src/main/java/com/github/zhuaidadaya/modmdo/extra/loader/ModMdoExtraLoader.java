@@ -17,13 +17,13 @@ public class ModMdoExtraLoader {
 
     public void register(UUID id, ModMdoExtra extra) {
         extras.put(id, extra);
-        LOGGER.info("registered extra: " + id + (extra.hasName() ? "(" + extra.getName() + ")" : ""));
+        LOGGER.info("Registered extra: " + id + (extra.hasName() ? "(" + extra.getName() + ")" : ""));
     }
 
     public void unregister(UUID id) {
         ModMdoExtra extra = extras.get(id);
         extras.remove(id);
-        LOGGER.info("unregistered extra: " + id + (extra.hasName() ? "(" + extra.getName() + ")" : ""));
+        LOGGER.info("Unregistered extra: " + id + (extra.hasName() ? "(" + extra.getName() + ")" : ""));
     }
 
     public void setArg(UUID id, ExtraArgs args) {
@@ -38,7 +38,7 @@ public class ModMdoExtraLoader {
                 long time = TimeUtil.processMillion(start.get());
                 if ((time - 320) % 1000 == 0) {
                     if (loadingExtra != null) {
-                        LOGGER.warn("extra: " + loadingId + (loadingExtra.hasName() ? "(" + loadingExtra.getName() + ")" : "") + " loading time has " + time / 1000 + " seconds longer than expected");
+                        LOGGER.warn("Extra: " + loadingId + (loadingExtra.hasName() ? "(" + loadingExtra.getName() + ")" : "") + " loading time has " + time / 1000 + " seconds longer than expected");
                     }
                 }
 
@@ -54,9 +54,9 @@ public class ModMdoExtraLoader {
             long startLoad = TimeUtil.millions();
             loadingId = id;
             loadingExtra = extras.get(id);
-            LOGGER.info("loading extra: " + id + (loadingExtra.hasName() ? "(" + loadingExtra.getName() + ")" : ""));
+            LOGGER.info("Loading extra: " + id + (loadingExtra.hasName() ? "(" + loadingExtra.getName() + ")" : ""));
             loadingExtra.init();
-            LOGGER.info("loaded extra: " + id + (loadingExtra.hasName() ? "(" + loadingExtra.getName() + ")" : "") + " in " + TimeUtil.processMillion(startLoad) + "ms");
+            LOGGER.info("Loaded extra: " + id + (loadingExtra.hasName() ? "(" + loadingExtra.getName() + ")" : "") + " in " + TimeUtil.processMillion(startLoad) + "ms");
             start.set(TimeUtil.millions());
         }
         loadingExtra = null;
