@@ -4,14 +4,12 @@ import com.github.zhuaidadaya.modmdo.network.process.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.text.*;
 
 import java.net.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.modmdoConnections;
-import static com.github.zhuaidadaya.modmdo.storage.Variables.updateModMdoConnectionsNames;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ModMdoServerDataHandler implements ServerPlayPacketListener {
     private final MinecraftServer server;
@@ -30,7 +28,7 @@ public class ModMdoServerDataHandler implements ServerPlayPacketListener {
     }
 
     @Override
-    public void onGameMessage(ChatMessageC2SPacket packet) {
+    public void onChatMessage(ChatMessageC2SPacket packet) {
 
     }
 
@@ -90,7 +88,7 @@ public class ModMdoServerDataHandler implements ServerPlayPacketListener {
     }
 
     @Override
-    public void onPlayerAbilities(UpdatePlayerAbilitiesC2SPacket packet) {
+    public void onUpdatePlayerAbilities(UpdatePlayerAbilitiesC2SPacket packet) {
 
     }
 
@@ -120,7 +118,7 @@ public class ModMdoServerDataHandler implements ServerPlayPacketListener {
     }
 
     @Override
-    public void onSignUpdate(UpdateSignC2SPacket packet) {
+    public void onUpdateSign(UpdateSignC2SPacket packet) {
 
     }
 
@@ -205,12 +203,12 @@ public class ModMdoServerDataHandler implements ServerPlayPacketListener {
     }
 
     @Override
-    public void onStructureBlockUpdate(UpdateStructureBlockC2SPacket packet) {
+    public void onUpdateStructureBlock(UpdateStructureBlockC2SPacket packet) {
 
     }
 
     @Override
-    public void onMerchantTradeSelect(SelectMerchantTradeC2SPacket packet) {
+    public void onSelectMerchantTrade(SelectMerchantTradeC2SPacket packet) {
 
     }
 
@@ -230,7 +228,7 @@ public class ModMdoServerDataHandler implements ServerPlayPacketListener {
     }
 
     @Override
-    public void onJigsawUpdate(UpdateJigsawC2SPacket packet) {
+    public void onUpdateJigsaw(UpdateJigsawC2SPacket packet) {
 
     }
 

@@ -86,7 +86,7 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
     }
 
     @Override
-    public void onBlockDestroyProgress(BlockBreakingProgressS2CPacket packet) {
+    public void onBlockBreakingProgress(BlockBreakingProgressS2CPacket packet) {
 
     }
 
@@ -211,7 +211,7 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
     }
 
     @Override
-    public void onEntityUpdate(EntityS2CPacket packet) {
+    public void onEntity(EntityS2CPacket packet) {
 
     }
 
@@ -246,7 +246,7 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
     }
 
     @Override
-    public void onRemoveEntityEffect(RemoveEntityStatusEffectS2CPacket packet) {
+    public void onRemoveEntityStatusEffect(RemoveEntityStatusEffectS2CPacket packet) {
 
     }
 
@@ -261,7 +261,7 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
     }
 
     @Override
-    public void onHeldItemChange(UpdateSelectedSlotS2CPacket packet) {
+    public void onUpdateSelectedSlot(UpdateSelectedSlotS2CPacket packet) {
 
     }
 
@@ -276,12 +276,12 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
     }
 
     @Override
-    public void onVelocityUpdate(EntityVelocityUpdateS2CPacket packet) {
+    public void onEntityVelocityUpdate(EntityVelocityUpdateS2CPacket packet) {
 
     }
 
     @Override
-    public void onEquipmentUpdate(EntityEquipmentUpdateS2CPacket packet) {
+    public void onEntityEquipmentUpdate(EntityEquipmentUpdateS2CPacket packet) {
 
     }
 
@@ -476,7 +476,7 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
     }
 
     @Override
-    public void onTagQuery(NbtQueryResponseS2CPacket packet) {
+    public void onNbtQueryResponse(NbtQueryResponseS2CPacket packet) {
 
     }
 
@@ -502,6 +502,11 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
 
     @Override
     public void onChunkLoadDistance(ChunkLoadDistanceS2CPacket packet) {
+
+    }
+
+    @Override
+    public void onSimulationDistance(SimulationDistanceS2CPacket packet) {
 
     }
 
