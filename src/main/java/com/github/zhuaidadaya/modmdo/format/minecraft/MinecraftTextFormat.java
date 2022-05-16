@@ -18,4 +18,8 @@ public class MinecraftTextFormat extends TextFormat<LiteralText> {
     public LiteralText format(User user, String key, Object... args) {
         return new LiteralText(formatted(user, key, args));
     }
+
+    public LiteralText format(Language language, String key, Object... args) {
+        return new LiteralText(formatted(language, key, args));
+    }
 }

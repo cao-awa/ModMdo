@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.modmdo.listeners;
 
+import com.github.zhuaidadaya.modmdo.network.process.*;
 import com.github.zhuaidadaya.modmdo.ranking.Rank;
 import com.github.zhuaidadaya.modmdo.simple.vec.XYZ;
 import com.github.zhuaidadaya.modmdo.storage.Variables;
@@ -9,6 +10,7 @@ import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.block.*;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -17,12 +19,16 @@ import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.*;
+import net.minecraft.util.math.*;
+import net.minecraft.util.registry.*;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static net.minecraft.world.World.OVERWORLD;
 
 public class ServerTickListener {
     private MinecraftServer server;
@@ -44,12 +50,14 @@ public class ServerTickListener {
 
             randomRankingSwitchTick++;
 
-            Variables.server = server;
-
             try {
                 eachPlayer(players);
             } catch (Exception e) {
 
+            }
+
+            for (ModMdoDataProcessor processor : modmdoConnections) {
+                processor.tick(server);
             }
         });
 

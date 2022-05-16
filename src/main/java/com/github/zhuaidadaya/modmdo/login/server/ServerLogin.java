@@ -40,11 +40,15 @@ public class ServerLogin {
             }
             temporaryWhitelist.remove(name);
         });
-        if (whitelist.getFromId(identifier) == null) {
-            rejectUsers.put(new User(name, uuid, - 1, identifier, version));
-        } else {
-            LOGGER.info("login player: " + name);
-            loginUsers.put(new User(name, uuid, - 1, identifier, version));
+        try {
+            loginUsers.getUser(uuid).setIdentifier(identifier).setVersion(version);
+        }catch (Exception e) {
+            if (whitelist.getFromId(identifier) == null) {
+                rejectUsers.put(new User(name, uuid, - 1, identifier, version));
+            } else {
+                LOGGER.info("login player using id login: " + name);
+                loginUsers.put(new User(name, uuid, - 1, identifier, version));
+            }
         }
     }
 
@@ -58,11 +62,15 @@ public class ServerLogin {
             }
             temporaryWhitelist.remove(name);
         });
-        if (EntrustParser.trying(() -> ! whitelist.get(name).getIdentifier().equals(identifier), () -> true)) {
-            reject(name, uuid, identifier, null);
-        } else {
-            LOGGER.info("login player: " + name);
-            loginUsers.put(new User(name, uuid, - 1, identifier, version));
+        try {
+            loginUsers.getUser(uuid).setIdentifier(identifier).setVersion(version);
+        }catch (Exception e) {
+            if (EntrustParser.trying(() -> ! whitelist.get(name).getIdentifier().equals(identifier), () -> true)) {
+                reject(name, uuid, identifier, null);
+            } else {
+                LOGGER.info("login player using strict login: " + name);
+                loginUsers.put(new User(name, uuid, - 1, identifier, version));
+            }
         }
     }
 
@@ -88,7 +96,7 @@ public class ServerLogin {
         if (! uuid.equals(whitelist.get(name).getRecorde().uuid().toString())) {
             rejectUsers.put(new User(name, uuid, - 1, "", 0));
         } else {
-            LOGGER.info("login player: " + name);
+            LOGGER.info("login player using ygg login: " + name);
             loginUsers.put(new User(name, uuid, - 1, "", 0));
         }
     }

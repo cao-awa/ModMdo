@@ -4,6 +4,7 @@ import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
 import com.github.zhuaidadaya.modmdo.utils.usr.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import net.minecraft.text.*;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -35,27 +36,25 @@ public abstract class TextFormat<T> {
     public abstract T format(String key, Object... args);
 
     public String formatted(String key, Object... args) {
-        try {
-            String formatReturn = format.get(getLanguage()).get(key);
-
-            for (Object o : args) {
-                try {
-                    formatReturn = formatReturn.replaceFirst("%s", o.toString());
-                } catch (Exception ex) {
-                    return formatReturn;
-                }
-            }
-            return formatReturn;
-        } catch (Exception e) {
-            return "";
-        }
+        return formatted(getLanguage(), key, args);
     }
 
     public String formatted(User user, String key, Object... args) {
+        return formatted(user.getLanguage(), key, args);
+    }
+
+    public String formatted(Language language, String key, Object... args) {
         try {
-            String formatReturn = format.get(user.getLanguage()).get(key);
+            String formatReturn = format.get(language).get(key);
+
+            if (formatReturn == null) {
+                return key;
+            }
 
             for (Object o : args) {
+                if (o instanceof TranslatableText translatable) {
+                    o = formatted(language, translatable.getKey(), translatable.getArgs());
+                }
                 try {
                     formatReturn = formatReturn.replaceFirst("%s", o.toString());
                 } catch (Exception ex) {
@@ -64,7 +63,7 @@ public abstract class TextFormat<T> {
             }
             return formatReturn;
         } catch (Exception e) {
-            return "";
+            return key;
         }
     }
 }

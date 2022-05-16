@@ -49,9 +49,6 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     @Shadow
     @Nullable GameProfile profile;
 
-    @Shadow
-    public abstract String getConnectionInfo();
-
     /**
      * 如果玩家为null, 则拒绝将玩家添加进服务器
      * (因为其他地方有cancel, 所以可能null)
@@ -91,6 +88,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
                 try {
                     ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
+                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("modmdo-connection")));
                     handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
                     handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING : LOGIN)));
                 } catch (Exception e) {
@@ -137,13 +135,12 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 try {
                     try {
                         if (connection.isOpen()) {
-                            serverLogin.login(player.getName().asString(), player.getUuid().toString(), "", "0");
-
                             server.getPlayerManager().onPlayerConnect(connection, player);
                             LOGGER.info("accepted nano: " + nano + " (" + player.getName().asString() + ")");
 
                             updateWhitelistNames(server, true);
                             updateTemporaryWhitelistNames(server, true);
+                            updateModMdoConnectionsNames(server);
                         } else {
                             LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
                         }

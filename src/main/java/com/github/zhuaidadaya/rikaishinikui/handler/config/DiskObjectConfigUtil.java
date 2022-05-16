@@ -246,7 +246,12 @@ public class DiskObjectConfigUtil implements ConfigUtil {
                 return null;
             }
             int encryptionType = cache.chars().toArray()[0];
-            String encryptionEnable = cache.substring(2);
+            String encryptionEnable;
+            try {
+                encryptionEnable = cache.substring(2);
+            }catch (Exception e) {
+                encryptionEnable = "";
+            }
             boolean encrypted = encryptionEnable.startsWith("encryption") | encryptionEnable.startsWith("MCH DB");
             if (encrypted) {
                 switch (encryptionType) {
@@ -876,7 +881,11 @@ public class DiskObjectConfigUtil implements ConfigUtil {
 
     public String getConfigString(String config) {
         checkShutdown();
-        return EntrustParser.getNotNull(EntrustParser.trying(() -> getConfig(config).toString()), "");
+        try {
+            return EntrustParser.getNotNull(getConfig(config).toString(), "");
+        }catch (Exception e) {
+            return "";
+        }
     }
 
     public Boolean getConfigBoolean(String config) {
