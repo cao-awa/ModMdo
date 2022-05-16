@@ -38,6 +38,7 @@ public class ModMdoDataProcessor {
     private long logged;
     private long lastKeepAlive = 0;
     private long lastDataPacket = TimeUtil.millions();
+    private boolean trafficking = false;
 
     public ModMdoDataProcessor(MinecraftServer server, InetSocketAddress address, ClientConnection connection, NetworkSide side) {
         this.server = server;
@@ -268,12 +269,9 @@ public class ModMdoDataProcessor {
         EntrustExecution.executeNull(getConnection(), connection -> {
             if (connection.isOpen()) {
                 connection.tick();
-                if (builder.getSide() == NetworkSide.CLIENTBOUND && TimeUtil.millions() - lastKeepAlive > (getSetting().isTesting() ? 10000 : 15000)) {
+                if (builder.getSide() == NetworkSide.CLIENTBOUND && TimeUtil.millions() - lastKeepAlive > 15000) {
                     sendKeepAlive(lastKeepAlive);
                     lastKeepAlive = TimeUtil.millions();
-                    if (testing) {
-                        connectionTesting();
-                    }
                 }
                 if (! modMdoConnection.isLogged() && modMdoConnection.getMaxLoginMillion() < (TimeUtil.millions() - connected)) {
                     disconnect("modmdo.connection.login.time.too.long");
@@ -299,10 +297,6 @@ public class ModMdoDataProcessor {
         send(builder.getBuilder().buildKeepAlive(lastKeepAlive));
     }
 
-    public void send(Packet<?> packet) {
-        modMdoConnection.send(packet);
-    }
-
     public ClientConnection getConnection() {
         return modMdoConnection.getConnection();
     }
@@ -317,6 +311,10 @@ public class ModMdoDataProcessor {
         modMdoConnection.disconnect(new TranslatableText("modmdo.connection.target.disconnect.initiative"));
     }
 
+    public void send(Packet<?> packet) {
+        modMdoConnection.send(packet);
+    }
+
     private void onDisconnect(String message) {
         EntrustExecution.tryFor(() -> server.getPlayerManager().getPlayerList(), player -> player.sendMessage(new LiteralText("[ModMdo Connection] " + minecraftTextFormat.format(loginUsers.getUser(player), message, getAddress()).asString()), false));
         disconnected = true;
@@ -327,30 +325,6 @@ public class ModMdoDataProcessor {
         if (testing) {
             traffic();
         }
-    }
-
-    public void onTraffic(JSONObject json) {
-        trafficOutRecord.set(json.getLong("traffic-in"));
-        JSONObject packets = json.getJSONObject("packets-processed");
-        for (String s : packets.keySet()) {
-            packetsOutRecord.put(s, new OperationalLong(packets.getLong(s)));
-        }
-        send(builder.getBuilder().buildTrafficResult(trafficInRecord, packetsRecord));
-    }
-
-    public void onTrafficResult(JSONObject json) {
-        trafficOutRecord.set(json.getLong("traffic-in"));
-        JSONObject packets = json.getJSONObject("packets-processed");
-        for (String s : packets.keySet()) {
-            packetsOutRecord.put(s, new OperationalLong(packets.getLong(s)));
-        }
-        if (testing) {
-            traffic();
-        }
-    }
-
-    public void connectionTesting() {
-        send(builder.getBuilder().buildTraffic(trafficInRecord, packetsRecord));
     }
 
     public void traffic() {
@@ -376,6 +350,32 @@ public class ModMdoDataProcessor {
 
     public InetSocketAddress getAddress() {
         return address;
+    }
+
+    public void onTraffic(JSONObject json) {
+        trafficOutRecord.set(json.getLong("traffic-in"));
+        JSONObject packets = json.getJSONObject("packets-processed");
+        for (String s : packets.keySet()) {
+            packetsOutRecord.put(s, new OperationalLong(packets.getLong(s)));
+        }
+        send(builder.getBuilder().buildTrafficResult(trafficInRecord, packetsRecord));
+    }
+
+    public void onTrafficResult(JSONObject json) {
+        trafficOutRecord.set(json.getLong("traffic-in"));
+        JSONObject packets = json.getJSONObject("packets-processed");
+        for (String s : packets.keySet()) {
+            packetsOutRecord.put(s, new OperationalLong(packets.getLong(s)));
+        }
+        if (trafficking) {
+            traffic();
+            trafficking = false;
+        }
+    }
+
+    public void sendTraffic() {
+        trafficking = true;
+        send(builder.getBuilder().buildTraffic(trafficInRecord, packetsRecord));
     }
 
     public void disconnect(String reason) {

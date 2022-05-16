@@ -295,9 +295,9 @@ public class ModMdoConfigCommand extends SimpleCommandOperation implements Simpl
                 Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(disconnect, "name");
                 EntrustExecution.tryTemporary(pair.getRight()::disconnect, nullProcessor -> sendError(disconnect, new TranslatableText("modmdo.connection.not.found", pair.getLeft()), 28));
                 return 0;
-            })).then(literal("test").executes(test -> {
+            })).then(literal("traffic").executes(test -> {
                 Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(test, "name");
-                EntrustExecution.tryTemporary(pair.getRight()::connectionTesting, nullProcessor -> sendError(test, new TranslatableText("modmdo.connection.not.found", pair.getLeft()), 28));
+                EntrustExecution.tryTemporary(pair.getRight()::sendTraffic, nullProcessor -> sendError(test, new TranslatableText("modmdo.connection.not.found", pair.getLeft()), 28));
                 return 0;
             })))).then(literal("connect").then(argument("ip", StringArgumentType.string()).then(argument("port", IntegerArgumentType.integer(0, 65565)).executes(connectTo -> {
                 if (configCached.getConfigString("server_name") != null) {
