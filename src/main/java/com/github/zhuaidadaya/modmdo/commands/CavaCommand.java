@@ -1,79 +1,87 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
-import com.github.zhuaidadaya.modmdo.cavas.Cava;
-import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
-import com.github.zhuaidadaya.modmdo.utils.usr.User;
-import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.TranslatableText;
-import org.json.JSONObject;
+import com.github.zhuaidadaya.modmdo.cavas.*;
+import com.github.zhuaidadaya.modmdo.utils.usr.*;
+import com.mojang.brigadier.arguments.*;
+import net.minecraft.server.command.*;
+import net.minecraft.server.network.*;
+import net.minecraft.text.*;
+import org.json.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.server.command.CommandManager.*;
 
-public class CavaCommand extends SimpleCommandOperation implements ConfigurableCommand {
-    public void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("cava").executes(cava -> {
-                ServerCommandSource source = cava.getSource();
+public class CavaCommand extends ConfigurableCommand<CavaCommand> {
+    public CavaCommand init() {
+        Object projectConf = config.getConfig("cavas");
+        if (projectConf != null) {
+            cavas = new CavaUtil(new JSONObject(projectConf.toString()));
+        } else {
+            cavas = new CavaUtil();
+            config.set("cavas", new JSONObject());
+        }
 
-                if (enableCava) {
-                    try {
-                        sendFeedback(source, formatCavaTip(getPlayer(cava)), 1);
-                    } catch (Exception e) {
-                        sendError(source, formatNoCava(), 1);
-                    }
-                } else {
-                    sendError(source, formatCavaDisabled(), 1);
+        updateCavas();
+        return this;
+    }
+
+    public CavaCommand register() {
+        commandRegister.register(literal("cava").executes(cava -> {
+            ServerCommandSource source = cava.getSource();
+
+            if (enableCava) {
+                try {
+                    sendFeedback(source, formatCavaTip(getPlayer(cava)), 1);
+                } catch (Exception e) {
+                    sendError(source, formatNoCava(), 1);
                 }
-                return 0;
-            }).then(literal("create").then(argument("cava_message", StringArgumentType.greedyString()).executes(createCava -> {
-                ServerCommandSource source = createCava.getSource();
-                ServerPlayerEntity player = getPlayer(createCava);
-                if (enableCava) {
-                    String cavaMessage = createCava.getInput();
+            } else {
+                sendError(source, formatCavaDisabled(), 1);
+            }
+            return 0;
+        }).then(literal("create").then(argument("cava_message", StringArgumentType.greedyString()).executes(createCava -> {
+            ServerCommandSource source = createCava.getSource();
+            ServerPlayerEntity player = getPlayer(createCava);
+            if (enableCava) {
+                String cavaMessage = createCava.getInput();
 
-                    try {
-                        Cava cava = cavas.createCava(users.getUser(player), cavaMessage.substring(13));
+                try {
+                    Cava cava = cavas.createCava(users.getUser(player), cavaMessage.substring(13));
 
-                        LOGGER.info(String.format("player %s(%s) created a Cava, Cava id: %s", player.getName().asString(), player.getUuid(), cava.getID()));
+                    LOGGER.info(String.format("player %s(%s) created a Cava, Cava id: %s", player.getName().asString(), player.getUuid(), cava.getID()));
 
-                        sendFeedback(source, formatCavaCreated(cava.getID()), 1);
-                    } catch (IllegalArgumentException e) {
-                        sendError(source, formatCavaExists(), 1);
-                    } catch (Exception e) {
-                        sendError(source, formatCavaCreateFail(), 1);
-                    }
-                } else {
-                    sendError(source, formatCavaDisabled(), 1);
+                    sendFeedback(source, formatCavaCreated(cava.getID()), 1);
+                } catch (IllegalArgumentException e) {
+                    sendError(source, formatCavaExists(), 1);
+                } catch (Exception e) {
+                    sendError(source, formatCavaCreateFail(), 1);
                 }
-                return 1;
-            }))).then(literal("deleteLast").requires(level -> level.hasPermissionLevel(4)).executes(deleteCava -> {
-                ServerCommandSource source = deleteCava.getSource();
-                ServerPlayerEntity player = source.getPlayer();
+            } else {
+                sendError(source, formatCavaDisabled(), 1);
+            }
+            return 1;
+        }))).then(literal("deleteLast").requires(level -> level.hasPermissionLevel(4)).executes(deleteCava -> {
+            ServerCommandSource source = deleteCava.getSource();
+            ServerPlayerEntity player = source.getPlayer();
 
-                if (enableCava) {
-                    try {
-                        String cavaID = users.getUserConfig(player.getUuid().toString(), "lastCava").toString();
+            if (enableCava) {
+                try {
+                    String cavaID = users.getUserConfig(player.getUuid().toString(), "lastCava").toString();
 
-                        cavas.deleteCava(cavaID);
+                    cavas.deleteCava(cavaID);
 
-                        LOGGER.info(String.format("player %s(%s) deleted a Cava, Cava id: %s", player.getName().asString(), player.getUuid(), cavaID));
+                    LOGGER.info(String.format("player %s(%s) deleted a Cava, Cava id: %s", player.getName().asString(), player.getUuid(), cavaID));
 
-                        sendFeedback(source, formatCavaDeleted(cavaID), 1);
-                    } catch (Exception e) {
-                        sendError(source, formatCavaDeleteFail(), 1);
-                    }
-                } else {
-                    sendError(source, formatCavaDisabled(), 1);
+                    sendFeedback(source, formatCavaDeleted(cavaID), 1);
+                } catch (Exception e) {
+                    sendError(source, formatCavaDeleteFail(), 1);
                 }
-                return 2;
-            })));
-        });
+            } else {
+                sendError(source, formatCavaDisabled(), 1);
+            }
+            return 2;
+        })));
+        return this;
     }
 
     public TranslatableText formatCavaDeleteFail() {
@@ -114,17 +122,5 @@ public class CavaCommand extends SimpleCommandOperation implements ConfigurableC
 
     public TranslatableText formatCavaDisabled() {
         return new TranslatableText("cava.disable");
-    }
-
-    public void init() {
-        Object projectConf = config.getConfig("cavas");
-        if (projectConf != null) {
-            cavas = new CavaUtil(new JSONObject(projectConf.toString()));
-        } else {
-            cavas = new CavaUtil();
-            config.set("cavas", new JSONObject());
-        }
-
-        updateCavas();
     }
 }

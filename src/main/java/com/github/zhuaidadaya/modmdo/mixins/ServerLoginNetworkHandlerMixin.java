@@ -8,14 +8,15 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.*;
 import io.netty.buffer.Unpooled;
+import net.minecraft.entity.player.*;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.encryption.*;
 import net.minecraft.network.listener.ServerLoginPacketListener;
 import net.minecraft.network.packet.c2s.login.*;
+import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.login.*;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
-import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -61,107 +62,111 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
      */
     @Overwrite
     private void addToServer(ServerPlayerEntity player) {
-        if (player == null)
-            return;
+        if (extras != null && extras.isActive(EXTRA_ID)) {
+            if (player == null)
+                return;
 
-        if (profile == null || profile.getId() == null && preReject) {
-            return;
-        }
+            if (profile == null || profile.getId() == null && preReject) {
+                return;
+            }
 
-        if (config.getConfigBoolean("compatible_online_mode")) {
-            EntrustExecution.tryTemporary(() -> {
-                serverLogin.loginUsingYgg(player.getName().asString(), profile.getId().toString());
-            }, () -> {
-                serverLogin.reject(player.getName().asString(), profile.getId().toString(), "", new TranslatableText("multiplayer.disconnect.not_whitelisted"));
-            });
-        }
+            if (config.getConfigBoolean("compatible_online_mode")) {
+                EntrustExecution.tryTemporary(() -> {
+                    serverLogin.loginUsingYgg(player.getName().asString(), profile.getId().toString());
+                }, () -> {
+                    serverLogin.reject(player.getName().asString(), profile.getId().toString(), "", new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+                });
+            }
 
-        if (! server.isHost(player.getGameProfile())) {
-            new Thread(() -> {
-                Thread.currentThread().setName("ModMdo accepting");
-                long nano = System.nanoTime();
-                LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
+            if (! server.isHost(player.getGameProfile()) || modMdoType == ModMdoType.SERVER) {
+                new Thread(() -> {
+                    Thread.currentThread().setName("ModMdo accepting");
+                    long nano = System.nanoTime();
+                    LOGGER.info("nano " + nano + " (" + player.getName().asString() + ") trying join server");
 
-                long waiting = TimeUtil.millions();
+                    long waiting = TimeUtil.millions();
 
-                int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
+                    int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
 
-                try {
-                    ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
-                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("modmdo-connection")));
-                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
-                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING : LOGIN)));
-                } catch (Exception e) {
+                    try {
+                        ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
+                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("modmdo-connection")));
+                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
+                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING : LOGIN)));
+                    } catch (Exception e) {
 
-                }
+                    }
 
-                if (modMdoType == ModMdoType.SERVER & modmdoWhitelist) {
-                    while (! loginUsers.hasUser(player)) {
-                        if (rejectUsers.hasUser(player)) {
-                            User rejected = rejectUsers.getUser(player.getUuid());
-                            if (rejected.getRejectReason() == null) {
-                                LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player are not white-listed");
-                            } else {
-                                LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\"");
-                            }
-                            disc(rejected.getRejectReason() == null ? new TranslatableText("multiplayer.disconnect.not_whitelisted") : rejected.getRejectReason());
+                    if (modMdoType == ModMdoType.SERVER & modmdoWhitelist) {
+                        while (! loginUsers.hasUser(player)) {
+                            if (rejectUsers.hasUser(player)) {
+                                User rejected = rejectUsers.getUser(player.getUuid());
+                                if (rejected.getRejectReason() == null) {
+                                    LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player are not white-listed");
+                                } else {
+                                    LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\"");
+                                }
+                                disc(rejected.getRejectReason() == null ? new TranslatableText("multiplayer.disconnect.not_whitelisted") : rejected.getRejectReason());
 
-                            rejectUsers.removeUser(player);
-
-                            LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
-                            return;
-                        } else {
-                            if (TimeUtil.processMillion(waiting) > loginCheckTimeLimit) {
-                                disc(new LiteralText("server enabled ModMdo secure module, please login with ModMdo"));
-                                LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
+                                rejectUsers.removeUser(player);
 
                                 LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
                                 return;
+                            } else {
+                                if (TimeUtil.processMillion(waiting) > loginCheckTimeLimit) {
+                                    disc(new LiteralText("server enabled ModMdo secure module, please login with ModMdo"));
+                                    LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\", because player not login with ModMdo");
+
+                                    LOGGER.info("rejected nano: " + nano + " (" + player.getName().asString() + ")");
+                                    return;
+                                }
+                            }
+
+                            if (! connection.isOpen()) {
+                                break;
+                            }
+
+                            EntrustExecution.tryTemporary(() -> TimeUtil.barricade(15));
+                        }
+                    }
+
+                    try {
+                        try {
+                            if (connection.isOpen()) {
+                                callOnConnect(player);
+                                LOGGER.info("accepted nano: " + nano + " (" + player.getName().asString() + ")");
+
+                                updateWhitelistNames(server, true);
+                                updateTemporaryWhitelistNames(server, true);
+                                updateModMdoConnectionsNames(server);
+                            } else {
+                                LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
+                            }
+                        } catch (Exception e) {
+                            if (! server.isHost(player.getGameProfile())) {
+                                LOGGER.info("player " + player.getName().asString() + " lost status synchronize");
+
+                                disc(new LiteralText("lost status synchronize, please connect again"));
+                            } else {
+                                LOGGER.info("player " + player.getName().asString() + " lost status synchronize, but will not be process");
                             }
                         }
-
-                        if (! connection.isOpen()) {
-                            break;
-                        }
-
-                        try {
-                            Thread.sleep(15);
-                        } catch (InterruptedException e) {
-
-                        }
-                    }
-                }
-
-                try {
-                    try {
-                        if (connection.isOpen()) {
-                            server.getPlayerManager().onPlayerConnect(connection, player);
-                            LOGGER.info("accepted nano: " + nano + " (" + player.getName().asString() + ")");
-
-                            updateWhitelistNames(server, true);
-                            updateTemporaryWhitelistNames(server, true);
-                            updateModMdoConnectionsNames(server);
-                        } else {
-                            LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
-                        }
                     } catch (Exception e) {
-                        if (! server.isHost(player.getGameProfile())) {
-                            LOGGER.info("player " + player.getName().asString() + " lost status synchronize");
 
-                            disc(new LiteralText("lost status synchronize, please connect again"));
-                        } else {
-                            LOGGER.info("player " + player.getName().asString() + " lost status synchronize, but will not be process");
-                        }
                     }
-                } catch (Exception e) {
+                }).start();
+            } else {
+                serverLogin.login(player.getName().getString(), player.getUuid().toString(), configCached.getConfigString("identifier"), MODMDO_VERSION);
 
-                }
-            }).start();
+                callOnConnect(player);
+            }
         } else {
-            serverLogin.login(player.getName().asString(), player.getUuid().toString(), "", "0");
-
-            this.server.getPlayerManager().onPlayerConnect(this.connection, player);
+            callOnConnect(player);
         }
+    }
+
+    public void callOnConnect(ServerPlayerEntity player) {
+        this.server.getPlayerManager().onPlayerConnect(this.connection, player);
     }
 
     public void disc(Text reason) {

@@ -15,10 +15,13 @@
         "PlayerManagerMixin",
         "ServerHandshakeNetworkHandlerMixin",
         "ServerLoginNetworkHandlerMixin",
-        "ServerNetworkIoMixin",
         "ServerPlayNetworkHandlerMixin",
-        "ServerWorldMixin",
-        "StopServerRconMixin"
+        "block.BlockMixin",
+        "entity.LivingEntityMixin",
+        "entity.player.ServerPlayerEntityMixin",
+        "explosion.ExplosionMixin",
+        "network.ServerNetworkIoMixin",
+        "tracker.DamageTrackerMixin"
     ],
     "client": [
         "ClientPlayNetworkHandlerMixin"

@@ -1,10 +1,8 @@
 package com.github.zhuaidadaya.modmdo;
 
-import com.github.zhuaidadaya.modmdo.commands.*;
-import com.github.zhuaidadaya.modmdo.commands.argument.*;
+import com.github.zhuaidadaya.modmdo.event.*;
 import com.github.zhuaidadaya.modmdo.extra.loader.*;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
-import com.github.zhuaidadaya.modmdo.mixins.*;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resource;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.zhuaidadaya.modmdo.identifier.RandomIdentifier;
@@ -12,7 +10,6 @@ import com.github.zhuaidadaya.modmdo.lang.Language;
 import com.github.zhuaidadaya.modmdo.listeners.ServerStartListener;
 import com.github.zhuaidadaya.modmdo.listeners.ServerTickListener;
 import com.github.zhuaidadaya.modmdo.permission.PermissionLevel;
-import com.github.zhuaidadaya.modmdo.ranking.command.RankingCommand;
 import com.github.zhuaidadaya.modmdo.reads.FileReads;
 import com.github.zhuaidadaya.modmdo.resourceLoader.Resources;
 import com.github.zhuaidadaya.modmdo.type.*;
@@ -20,9 +17,7 @@ import com.github.zhuaidadaya.modmdo.utils.usr.UserUtil;
 import com.github.zhuaidadaya.modmdo.utils.enchant.EnchantLevelController;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import it.unimi.dsi.fastutil.objects.*;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.network.*;
 import net.minecraft.server.MinecraftServer;
 import org.json.JSONObject;
 
@@ -34,7 +29,9 @@ import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 public class ModMdoStdInitializer implements ModInitializer {
     public static void initForLevel(MinecraftServer server) {
-        extras.setArg(EXTRA_ID, new ExtraArgs().set("server", server));
+        event = new ModMdoEventTracer();
+
+        extras.getExtra(ModMdo.class, EXTRA_ID).setServer(server);
         extras.load();
     }
 
@@ -92,8 +89,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         configCached = new DiskObjectConfigUtil(entrust, "config/modmdo/");
         configCached.setIfNoExist("identifier", RandomIdentifier.randomIdentifier());
 
-        registerExtra(new ModMdo().setName("ModMdo").setId(EXTRA_ID));
-
         loginUsers = new UserUtil();
         rejectUsers = new UserUtil();
 
@@ -101,22 +96,6 @@ public class ModMdoStdInitializer implements ModInitializer {
 
         new ServerStartListener().listener();
         new ServerTickListener().listener();
-
-        try {
-            new ModMdoUserCommand().register();
-            new HereCommand().register();
-            new DimensionHereCommand().register();
-            new CavaCommand().register();
-            new ModMdoConfigCommand().register();
-            new AnalyzerCommand().register();
-            new RankingCommand().register();
-            new TestCommand().register();
-            new TemporaryWhitelistCommand().register();
-
-            ArgumentInit.init();
-        } catch (Exception e) {
-
-        }
 
         Resource<Language> resource = new Resource<>();
         resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
@@ -127,10 +106,11 @@ public class ModMdoStdInitializer implements ModInitializer {
         enchant.set("enchantment_level", "/assets/modmdo/format/enchantment_level.json");
         enchantLevelController = new EnchantLevelController(enchant);
 
-        extras = new ModMdoExtraLoader();
+        LOGGER.info("Registering for ModMdo major");
+        extras = new ModMdoExtraLoader(new ModMdo().setName("ModMdo").setId(EXTRA_ID), RandomIdentifier.randomIdentifier());
 
         LOGGER.info("Registering for ModMdo extra");
-        for (ModMdoExtra extra : extrasWaitingForRegister) {
+        for (ModMdoExtra<?> extra : extrasWaitingForRegister) {
             extras.register(extra.getId(), extra);
         }
 

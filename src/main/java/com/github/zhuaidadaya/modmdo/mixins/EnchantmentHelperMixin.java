@@ -1,22 +1,17 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
-import com.google.common.collect.Lists;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Util;
-import net.minecraft.util.collection.Weighting;
-import net.minecraft.util.math.MathHelper;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
+import com.google.common.collect.*;
+import net.minecraft.enchantment.*;
+import net.minecraft.item.*;
+import net.minecraft.util.*;
+import net.minecraft.util.collection.*;
+import net.minecraft.util.math.*;
+import org.spongepowered.asm.mixin.*;
 
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.security.*;
+import java.util.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.enableSecureEnchant;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 @Mixin(EnchantmentHelper.class)
 public class EnchantmentHelperMixin {
@@ -31,33 +26,33 @@ public class EnchantmentHelperMixin {
         ArrayList<EnchantmentLevelEntry> list = Lists.newArrayList();
         Item item = stack.getItem();
         int i = item.getEnchantability();
-        if(i <= 0) {
+        if (i <= 0) {
             return list;
         }
         level += 1 + random.nextInt(i / 4 + 1) + random.nextInt(i / 4 + 1);
         float f = (random.nextFloat() + random.nextFloat() - 1.0f) * 0.15f;
         List<EnchantmentLevelEntry> list2 = EnchantmentHelper.getPossibleEntries(level = MathHelper.clamp(Math.round((float) level + (float) level * f), 1, Integer.MAX_VALUE), stack, treasureAllowed);
-        if(! list2.isEmpty()) {
-            Weighting.getRandom(random, list2).ifPresent(list :: add);
-            if(enableSecureEnchant) {
-                while(secureRandom.nextInt(50) <= level) {
+        if (! list2.isEmpty()) {
+            Weighting.getRandom(random, list2).ifPresent(list::add);
+            if ((extras != null && extras.isActive(EXTRA_ID)) && enableSecureEnchant) {
+                while (secureRandom.nextInt(50) <= level) {
                     secureRandom = new SecureRandom();
-                    if(! list.isEmpty()) {
+                    if (! list.isEmpty()) {
                         EnchantmentHelper.removeConflicts(list2, Util.getLast(list));
                     }
-                    if(list2.isEmpty())
+                    if (list2.isEmpty())
                         break;
-                    Weighting.getRandom(random, list2).ifPresent(list :: add);
+                    Weighting.getRandom(random, list2).ifPresent(list::add);
                     level /= 2;
                 }
             } else {
-                while(random.nextInt(50) <= level) {
-                    if(! list.isEmpty()) {
+                while (random.nextInt(50) <= level) {
+                    if (! list.isEmpty()) {
                         EnchantmentHelper.removeConflicts(list2, Util.getLast(list));
                     }
-                    if(list2.isEmpty())
+                    if (list2.isEmpty())
                         break;
-                    Weighting.getRandom(random, list2).ifPresent(list :: add);
+                    Weighting.getRandom(random, list2).ifPresent(list::add);
                     level /= 2;
                 }
             }

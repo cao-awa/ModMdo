@@ -1,6 +1,6 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
-import com.github.zhuaidadaya.modmdo.network.handler.*;
+import com.github.zhuaidadaya.modmdo.network.forwarder.handler.*;
 import net.minecraft.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.c2s.handshake.*;
@@ -11,6 +11,9 @@ import net.minecraft.text.*;
 import org.spongepowered.asm.mixin.*;
 
 import java.net.*;
+
+import static com.github.zhuaidadaya.modmdo.storage.Variables.EXTRA_ID;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.extras;
 
 @Mixin(ServerHandshakeNetworkHandler.class)
 public class ServerHandshakeNetworkHandlerMixin {
@@ -51,8 +54,10 @@ public class ServerHandshakeNetworkHandlerMixin {
                 }
                 break;
             case PLAY:
-                this.connection.setState(NetworkState.PLAY);
-                new ModMdoServerDataHandler(this.server, (InetSocketAddress) connection.getAddress(), this.connection);
+                if (extras != null && extras.isActive(EXTRA_ID)) {
+                    this.connection.setState(NetworkState.PLAY);
+                    new ModMdoServerDataHandler(this.server, (InetSocketAddress) connection.getAddress(), this.connection);
+                }
                 break;
             default:
                 throw new UnsupportedOperationException("Invalid intention " + packet.getIntendedState());

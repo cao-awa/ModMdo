@@ -1,7 +1,5 @@
 package com.github.zhuaidadaya.modmdo.lang;
 
-import org.apache.commons.codec.language.bm.*;
-
 public enum Language {
     CHINESE(0, "Chinese"), ENGLISH(1, "English"), CHINESE_TW(2, "Chinese_tw");
 
