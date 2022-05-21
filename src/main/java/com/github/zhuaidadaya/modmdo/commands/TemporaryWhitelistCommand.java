@@ -7,7 +7,7 @@ import com.github.zhuaidadaya.modmdo.whitelist.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
-import net.fabricmc.fabric.api.command.v1.*;
+import net.minecraft.server.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
@@ -15,68 +15,67 @@ import net.minecraft.text.*;
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.*;
 
-public class TemporaryWhitelistCommand extends SimpleCommandOperation implements SimpleCommand {
+public class TemporaryWhitelistCommand extends SimpleCommand {
     @Override
-    public void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("temporary").then(literal("whitelist").then(literal("add").then(argument("name", StringArgumentType.string()).executes(addDefault -> {
-                String name = StringArgumentType.getString(addDefault, "name");
-                if (temporaryWhitelist.containsName(name)) {
-                    sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.already.is.whitelist", name), 21);
-                    return - 1;
-                }
-                if (whitelist.containsName(name)) {
-                    sendFeedback(addDefault, new TranslatableText("modmdo.whitelist.add.already.is.whitelist", name), 21);
-                    return - 1;
-                }
-                temporary(name, 1000 * 60 * 5);
-                sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.default", name), 21);
-                updateTemporaryWhitelistNames(getServer(addDefault), true);
-                return 0;
-            }))).then(literal("list").executes(showTemporary -> {
-                showTemporary(showTemporary);
-                updateTemporaryWhitelistNames(getServer(showTemporary), true);
-                return 0;
-            })).then(literal("remove").then(argument("name", ModMdoTemporaryWhitelistArgumentType.whitelist()).executes(remove -> {
-                TemporaryWhitelist wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove, "name");
-                if (temporaryWhitelist.containsName(wl.getName())) {
-                    temporaryWhitelist.remove(wl.name());
-                    sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
-                    updateTemporaryWhitelistNames(getServer(remove), true);
-                    return 0;
-                }
-                sendError(remove, new TranslatableText("arguments.temporary.whitelist.not.registered", wl.getName()), 25);
+    public TemporaryWhitelistCommand register() {
+        commandRegister.register(literal("temporary").then(literal("whitelist").then(literal("add").then(argument("name", StringArgumentType.string()).executes(addDefault -> {
+            String name = StringArgumentType.getString(addDefault, "name");
+            if (temporaryWhitelist.containsName(name)) {
+                sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.already.is.whitelist", name), 21);
                 return - 1;
-            })))).then(literal("connection").then(literal("whitelist").executes(whitelist -> {
-                if (modmdoConnectionAccepting.isValid()) {
-                    long million = modmdoConnectionAccepting.millions() - TimeUtil.processMillion(modmdoConnectionAccepting.recording());
-                    long minute = TimeUtil.processRemainingMinutes(million);
-                    long second = TimeUtil.processRemainingSeconds(million);
-                    sendFeedback(whitelist, new TranslatableText("connection.whitelist.accepting", minute, second), 28);
-                } else {
-                    sendFeedback(whitelist, new TranslatableText("connection.whitelist.no.accepting"), 28);
-                }
+            }
+            if (whitelist.containsName(name)) {
+                sendFeedback(addDefault, new TranslatableText("modmdo.whitelist.add.already.is.whitelist", name), 21);
+                return - 1;
+            }
+            temporary(name, 1000 * 60 * 5);
+            sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.default", name), 21);
+            updateTemporaryWhitelistNames(getServer(addDefault), true);
+            return 0;
+        }))).then(literal("list").executes(showTemporary -> {
+            showTemporary(showTemporary);
+            updateTemporaryWhitelistNames(getServer(showTemporary), true);
+            return 0;
+        })).then(literal("remove").then(argument("name", ModMdoTemporaryWhitelistArgumentType.whitelist()).executes(remove -> {
+            TemporaryWhitelist wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove, "name");
+            if (temporaryWhitelist.containsName(wl.getName())) {
+                temporaryWhitelist.remove(wl.name());
+                sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
+                updateTemporaryWhitelistNames(getServer(remove), true);
                 return 0;
-            }).then(literal("accept").then(literal("one").executes(acceptOne -> {
-                if (modmdoConnectionAccepting.isValid()) {
-                    long million = modmdoConnectionAccepting.millions() - TimeUtil.processMillion(modmdoConnectionAccepting.recording());
-                    long minute = TimeUtil.processRemainingMinutes(million);
-                    long second = TimeUtil.processRemainingSeconds(million);
-                    sendError(acceptOne, new TranslatableText("connection.whitelist.accepting", minute, second), 28);
-                } else {
-                    sendFeedback(acceptOne, new TranslatableText("connection.whitelist.accepting.one"), 28);
-                    modmdoConnectionAccepting = new TemporaryWhitelist("", TimeUtil.millions(), 1000 * 60 * 5);
-                }
-                return 0;
-            }))).then(literal("cancel").executes(cancel -> {
-                if (modmdoConnectionAccepting.isValid()) {
-                    modmdoConnectionAccepting = new TemporaryWhitelist("", - 1, - 1);
-                } else {
-                    sendError(cancel, new TranslatableText("connection.whitelist.no.accepting"), 28);
-                }
-                return 0;
-            })))));
-        });
+            }
+            sendError(remove, new TranslatableText("arguments.temporary.whitelist.not.registered", wl.getName()), 25);
+            return - 1;
+        })))).then(literal("connection").then(literal("whitelist").executes(whitelist -> {
+            if (modmdoConnectionAccepting.isValid()) {
+                long million = modmdoConnectionAccepting.millions() - TimeUtil.processMillion(modmdoConnectionAccepting.recording());
+                long minute = TimeUtil.processRemainingMinutes(million);
+                long second = TimeUtil.processRemainingSeconds(million);
+                sendFeedback(whitelist, new TranslatableText("connection.whitelist.accepting", minute, second), 28);
+            } else {
+                sendFeedback(whitelist, new TranslatableText("connection.whitelist.no.accepting"), 28);
+            }
+            return 0;
+        }).then(literal("accept").then(literal("one").executes(acceptOne -> {
+            if (modmdoConnectionAccepting.isValid()) {
+                long million = modmdoConnectionAccepting.millions() - TimeUtil.processMillion(modmdoConnectionAccepting.recording());
+                long minute = TimeUtil.processRemainingMinutes(million);
+                long second = TimeUtil.processRemainingSeconds(million);
+                sendError(acceptOne, new TranslatableText("connection.whitelist.accepting", minute, second), 28);
+            } else {
+                sendFeedback(acceptOne, new TranslatableText("connection.whitelist.accepting.one"), 28);
+                modmdoConnectionAccepting = new TemporaryWhitelist("", TimeUtil.millions(), 1000 * 60 * 5);
+            }
+            return 0;
+        }))).then(literal("cancel").executes(cancel -> {
+            if (modmdoConnectionAccepting.isValid()) {
+                modmdoConnectionAccepting = new TemporaryWhitelist("", - 1, - 1);
+            } else {
+                sendError(cancel, new TranslatableText("connection.whitelist.no.accepting"), 28);
+            }
+            return 0;
+        })))));
+        return this;
     }
 
     public void showTemporary(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {

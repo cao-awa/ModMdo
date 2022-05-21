@@ -1,6 +1,6 @@
 package com.github.zhuaidadaya.modmdo.whitelist;
 
-import com.github.zhuaidadaya.modmdo.login.*;
+import com.github.zhuaidadaya.modmdo.server.login.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
 

@@ -1,6 +1,6 @@
 package com.github.zhuaidadaya.modmdo.commands.argument.connection;
 
-import com.github.zhuaidadaya.modmdo.network.process.*;
+import com.github.zhuaidadaya.modmdo.network.forwarder.process.*;
 import com.mojang.brigadier.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;

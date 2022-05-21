@@ -1,13 +1,16 @@
 package com.github.zhuaidadaya.modmdo.storage;
 
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
+import com.github.zhuaidadaya.modmdo.commands.*;
+import com.github.zhuaidadaya.modmdo.event.*;
 import com.github.zhuaidadaya.modmdo.extra.loader.*;
-import com.github.zhuaidadaya.modmdo.network.process.*;
+import com.github.zhuaidadaya.modmdo.network.forwarder.process.*;
+import com.github.zhuaidadaya.modmdo.subscribable.*;
 import com.github.zhuaidadaya.modmdo.utils.command.SimpleCommandOperation;
 import com.github.zhuaidadaya.modmdo.format.console.ConsoleTextFormat;
 import com.github.zhuaidadaya.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.zhuaidadaya.modmdo.lang.Language;
-import com.github.zhuaidadaya.modmdo.login.server.ServerLogin;
+import com.github.zhuaidadaya.modmdo.server.login.ServerLogin;
 import com.github.zhuaidadaya.modmdo.mixins.MinecraftServerSession;
 import com.github.zhuaidadaya.modmdo.ranking.Rank;
 import com.github.zhuaidadaya.modmdo.type.ModMdoType;
@@ -41,10 +44,10 @@ import java.util.*;
 
 public class Variables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.34";
+    public static final String VERSION_ID = "1.0.35";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + "-ES";
     public static final String RELEASE_TIME = "2022.5.16";
-    public static final int MODMDO_VERSION = 28;
+    public static final int MODMDO_VERSION = 29;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
     public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
@@ -98,10 +101,15 @@ public class Variables {
     public static int temporaryWhitelistHash = temporaryWhitelist.hashCode();
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
-    public static ArrayList<ModMdoExtra> extrasWaitingForRegister = new ArrayList<>();
+    public static ArrayList<ModMdoExtra<?>> extrasWaitingForRegister = new ArrayList<>();
     public static ModMdoExtraLoader extras;
     public static boolean loaded = false;
     public static boolean testing = false;
+
+    public static ModMdoCommandRegister commandRegister;
+    public static ModMdoEventTracer event;
+
+    public static TickPerSecondAnalyzer tps = new TickPerSecondAnalyzer();
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
@@ -277,7 +285,7 @@ public class Variables {
         return EntrustParser.tryCreate(() -> loginUsers.getUser(player).getVersion(), - 1);
     }
 
-    public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, SimpleCommandOperation command, CommandContext<ServerCommandSource> source) {
+    public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, CommandContext<ServerCommandSource> source) {
         return commandApplyToPlayer(versionRequire, player, source.getSource());
     }
 
@@ -475,7 +483,7 @@ public class Variables {
         }
     }
 
-    public static void registerExtra(ModMdoExtra extra) {
+    public static void registerExtra(ModMdoExtra<?> extra) {
         if (extras == null) {
             extrasWaitingForRegister.add(extra);
         } else {

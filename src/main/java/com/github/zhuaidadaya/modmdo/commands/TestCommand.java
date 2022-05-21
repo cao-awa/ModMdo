@@ -1,25 +1,33 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
-import com.github.zhuaidadaya.modmdo.utils.command.*;
-import com.mojang.brigadier.arguments.*;
-import it.unimi.dsi.fastutil.objects.*;
-import net.fabricmc.fabric.api.command.v1.*;
+import com.github.cao.awa.hyacinth.logging.*;
+import com.github.zhuaidadaya.modmdo.math.*;
+import net.minecraft.block.*;
+import net.minecraft.command.argument.*;
+import net.minecraft.server.network.*;
+import net.minecraft.server.world.*;
 import net.minecraft.text.*;
+import net.minecraft.util.*;
 import net.minecraft.util.math.*;
+import net.minecraft.util.registry.*;
+import net.minecraft.world.explosion.*;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 import static net.minecraft.server.command.CommandManager.*;
 import static net.minecraft.world.World.*;
 
-public class TestCommand extends SimpleCommandOperation implements SimpleCommand {
+public class TestCommand extends SimpleCommand {
     @Override
-    public void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("testmodmdo").executes(e -> {
-                testing = ! testing;
-                sendFeedback(e, new TranslatableText("testing: " + testing));
-                return 0;
-            }));
-        });
+    public TestCommand register() {
+        commandRegister.register(literal("testmodmdo").executes(e -> {
+            testing = ! testing;
+            sendFeedback(e, new TranslatableText("testing: " + testing));
+            return 0;
+        }).then(literal("trace").executes(e -> {
+            PrintUtil.debugging = !PrintUtil.debugging;
+            sendFeedback(e, new TranslatableText("trace: " + PrintUtil.debugging));
+            return 0;
+        })));
+        return this;
     }
 }
