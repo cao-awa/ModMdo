@@ -2131,10 +2131,8 @@ public class JSONObject {
     private static boolean numberIsFinite(Number n) {
         if (n instanceof Double && (((Double) n).isInfinite() || ((Double) n).isNaN())) {
             return false;
-        } else if (n instanceof Float && (((Float) n).isInfinite() || ((Float) n).isNaN())) {
-            return false;
-        }
-        return true;
+        } else
+            return ! (n instanceof Float) || (! ((Float) n).isInfinite() && ! ((Float) n).isNaN());
     }
 
     /**

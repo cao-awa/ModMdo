@@ -96,6 +96,10 @@ public class EntrustExecution {
         }
     }
 
+    public static <T> void ensureTrying(T target, ExceptingConsumer<T> action, ExceptingConsumer<T> actionWhenException) {
+        trying(target, action, t -> trying(t, actionWhenException));
+    }
+
     public static <T> void tryFor(Collection<T> targets, ExceptingConsumer<T> action) {
         if (targets != null) {
             for (T target : targets) {
@@ -132,6 +136,14 @@ public class EntrustExecution {
                 } catch (Exception e) {
                     whenException.accept(target);
                 }
+            }
+        }
+    }
+
+    public static <T> void ensureTryFor(Collection<T> targets, ExceptingConsumer<T> action, ExceptingConsumer<T> whenException) {
+        if (targets != null) {
+            for (T target : targets) {
+                ensureTrying(target, action, whenException);
             }
         }
     }

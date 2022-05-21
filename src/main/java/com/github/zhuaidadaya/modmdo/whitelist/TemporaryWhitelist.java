@@ -1,10 +1,8 @@
 package com.github.zhuaidadaya.modmdo.whitelist;
 
-import com.github.zhuaidadaya.modmdo.login.*;
+import com.github.zhuaidadaya.modmdo.server.login.*;
 import com.github.zhuaidadaya.modmdo.utils.times.*;
 import org.json.*;
-
-import java.util.*;
 
 public final class TemporaryWhitelist extends Whitelist {
     private final String name;

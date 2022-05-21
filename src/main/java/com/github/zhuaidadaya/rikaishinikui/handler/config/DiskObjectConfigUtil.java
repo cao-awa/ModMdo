@@ -13,7 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.nio.charset.Charset;
+import java.nio.charset.*;
 import java.util.Random;
 
 public class DiskObjectConfigUtil implements ConfigUtil {
@@ -23,7 +23,7 @@ public class DiskObjectConfigUtil implements ConfigUtil {
     private boolean empty = false;
     private int splitRange = 20;
     private int libraryOffset = 5;
-    private boolean canShutdown = true;
+    private final boolean canShutdown = true;
     private boolean shuttingDown = false;
     private boolean shutdown = false;
     private boolean encryptionHead = false;

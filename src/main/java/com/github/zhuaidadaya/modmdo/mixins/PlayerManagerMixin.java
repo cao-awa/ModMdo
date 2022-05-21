@@ -40,17 +40,19 @@ public class PlayerManagerMixin {
      */
     @Inject(method = "createPlayer", at = @At("HEAD"))
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
-        if (enableRejectReconnect) {
-            UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-            for (ServerPlayerEntity player : this.players) {
-                if (player.networkHandler.connection.getAddress() == null)
-                    break;
-                if (player.getUuid().equals(uuid)) {
-                    if (loginUsers.hasUser(player)) {
-                        SimpleCommandOperation.sendMessage(player, new TranslatableText("login.dump.rejected"), false, 15);
+        if (extras != null && extras.isActive(EXTRA_ID)) {
+            if (enableRejectReconnect) {
+                UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+                for (ServerPlayerEntity player : this.players) {
+                    if (player.networkHandler.connection.getAddress() == null)
+                        break;
+                    if (player.getUuid().equals(uuid)) {
+                        if (loginUsers.hasUser(player)) {
+                            SimpleCommandOperation.sendMessage(player, new TranslatableText("login.dump.rejected"), false, 15);
+                        }
+                        cir.setReturnValue(null);
+                        cir.cancel();
                     }
-                    cir.setReturnValue(null);
-                    cir.cancel();
                 }
             }
         }
@@ -58,6 +60,8 @@ public class PlayerManagerMixin {
 
     @Inject(method = "onPlayerConnect", at = @At("RETURN"))
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerJoin(player.getName().asString()));
+        if (extras != null && extras.isActive(EXTRA_ID)) {
+            EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerJoin(player.getName().asString()));
+        }
     }
 }

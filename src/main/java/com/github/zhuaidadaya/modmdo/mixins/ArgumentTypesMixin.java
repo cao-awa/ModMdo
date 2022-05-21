@@ -13,6 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
 
+import static com.github.zhuaidadaya.modmdo.storage.Variables.EXTRA_ID;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.extras;
+
 @Mixin(ArgumentTypes.class)
 public class ArgumentTypesMixin {
     @Shadow @Final private static Map CLASS_MAP;
@@ -24,8 +27,10 @@ public class ArgumentTypesMixin {
      */
     @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;Lnet/minecraft/command/argument/serialize/ArgumentSerializer;)V", at = @At("HEAD"))
     private static <T extends ArgumentType<?>> void register(String id, Class<T> class_, ArgumentSerializer<T> argumentSerializer, CallbackInfo ci) {
-        Identifier identifier = new Identifier(id);
-        CLASS_MAP.remove(class_);
-        ID_MAP.remove(identifier);
+        if (extras != null && extras.isActive(EXTRA_ID)) {
+            Identifier identifier = new Identifier(id);
+            CLASS_MAP.remove(class_);
+            ID_MAP.remove(identifier);
+        }
     }
 }

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.rejectNoFallCheat;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -22,9 +22,11 @@ public abstract class EntityMixin {
 
     @Inject(method = "fall", at = @At("HEAD"), cancellable = true)
     private void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition, CallbackInfo ci) {
-        if (rejectNoFallCheat & world.getBlockState(getBlockPos().down(1)).toString().equals("Block{minecraft:air}")) {
-            this.fallDistance = (float)((double)this.fallDistance - heightDifference);
-            ci.cancel();
+        if (extras != null && extras.isActive(EXTRA_ID)) {
+            if (rejectNoFallCheat & world.getBlockState(getBlockPos().down(1)).toString().equals("Block{minecraft:air}")) {
+                this.fallDistance = (float) ((double) this.fallDistance - heightDifference);
+                ci.cancel();
+            }
         }
     }
 }

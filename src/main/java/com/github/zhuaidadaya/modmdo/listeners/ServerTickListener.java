@@ -1,38 +1,27 @@
 package com.github.zhuaidadaya.modmdo.listeners;
 
-import com.github.zhuaidadaya.modmdo.network.process.*;
+import com.github.zhuaidadaya.modmdo.network.forwarder.process.*;
 import com.github.zhuaidadaya.modmdo.ranking.Rank;
-import com.github.zhuaidadaya.modmdo.simple.vec.XYZ;
-import com.github.zhuaidadaya.modmdo.storage.Variables;
-import com.github.zhuaidadaya.modmdo.type.ModMdoType;
 import com.github.zhuaidadaya.modmdo.utils.usr.User;
-import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.block.*;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.*;
-import net.minecraft.util.math.*;
-import net.minecraft.util.registry.*;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 
 import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
-import static net.minecraft.world.World.OVERWORLD;
 
 public class ServerTickListener {
     private MinecraftServer server;
-    private long lastAddOnlineTime = - 1;
     private long lastIntervalActive = System.currentTimeMillis();
     private int randomRankingSwitchTick = 0;
 
@@ -42,8 +31,6 @@ public class ServerTickListener {
      * @author 草二号机
      */
     public void listener() {
-        lastAddOnlineTime = System.currentTimeMillis();
-
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             this.server = server;
             PlayerManager players = server.getPlayerManager();
@@ -224,9 +211,6 @@ public class ServerTickListener {
      */
     public void eachPlayer(PlayerManager players) {
         for (ServerPlayerEntity player : players.getPlayerList()) {
-            if (enableDeadMessage) {
-                detectPlayerDead(player);
-            }
             if (modmdoWhitelist) {
                 if (!hasWhitelist(player)) {
                     player.networkHandler.connection.send(new DisconnectS2CPacket(new TranslatableText("multiplayer.disconnect.not_whitelisted")));
@@ -254,41 +238,6 @@ public class ServerTickListener {
             return false;
         }
         return true;
-    }
-
-    /**
-     * 检测玩家的死亡状态, 如果死亡时间为1则发送当时的坐标和维度信息
-     * (如果该玩家愿意接收才发送)
-     *
-     * @param player
-     *         玩家
-     * @author 草二号机
-     */
-    public void detectPlayerDead(ServerPlayerEntity player) {
-        EntrustExecution.tryTemporary(() -> {
-            if (isUserDeadMessageReceive(player.getUuid()) & enableDeadMessage) {
-                if (player.deathTime == 1) {
-                    XYZ xyz = new XYZ(player.getX(), player.getY(), player.getZ());
-                    player.sendMessage(formatDeathMessage(player, xyz), false);
-                }
-            }
-        });
-    }
-
-    /**
-     * 对死亡时的位置、维度进行格式化
-     *
-     * @param player
-     *         玩家
-     * @param xyz
-     *         等同于vec3d
-     * @return 格式化过后的信息
-     *
-     * @author 草二号机
-     */
-    public TranslatableText formatDeathMessage(ServerPlayerEntity player, XYZ xyz) {
-        String dimension = DimensionUtil.getDimension(player);
-        return new TranslatableText("dead.deadIn", DimensionUtil.getDimensionColor(dimension), DimensionUtil.getDimensionName(dimension), xyz.getIntegerXYZ());
     }
 
     public void updateRankingShow(MinecraftServer server) {

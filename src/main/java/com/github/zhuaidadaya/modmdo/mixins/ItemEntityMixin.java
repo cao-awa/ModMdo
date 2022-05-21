@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.itemDespawnAge;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin extends Entity {
@@ -31,16 +31,18 @@ public abstract class ItemEntityMixin extends Entity {
      */
     @Inject(method = "tick",at = @At("RETURN"))
     public void tick(CallbackInfo ci) {
-        if (age == -1) {
-            age = itemAge;
-        }
-        age++;
-        if (itemAge % 5999 == 0) {
-            itemAge = 0;
-        }
-        if (age > itemDespawnAge) {
-            discard();
-            age = -1;
+        if (extras != null && extras.isActive(EXTRA_ID)) {
+            if (age == - 1) {
+                age = itemAge;
+            }
+            age++;
+            if (itemAge % 5999 == 0) {
+                itemAge = 0;
+            }
+            if (age > itemDespawnAge) {
+                discard();
+                age = - 1;
+            }
         }
     }
 }

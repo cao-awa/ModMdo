@@ -1,5 +1,10 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
-public interface SimpleCommand {
-    void register();
+import com.github.zhuaidadaya.modmdo.utils.command.*;
+import com.mojang.brigadier.builder.*;
+import net.minecraft.server.*;
+import net.minecraft.server.command.*;
+
+public abstract class SimpleCommand extends SimpleCommandOperation {
+    protected abstract SimpleCommand register();
 }

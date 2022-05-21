@@ -1,21 +1,15 @@
 package com.github.zhuaidadaya.modmdo.mixins;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import net.fabricmc.api.Environment;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.EntityList;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import it.unimi.dsi.fastutil.ints.*;
+import net.minecraft.entity.*;
+import net.minecraft.util.*;
+import net.minecraft.world.*;
+import org.jetbrains.annotations.*;
+import org.spongepowered.asm.mixin.*;
 
-import java.util.function.Consumer;
+import java.util.function.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.cancelEntitiesTick;
+import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
 
 @Mixin(EntityList.class)
 public class EntityListMixin {
@@ -24,7 +18,8 @@ public class EntityListMixin {
     @Shadow
     private @Nullable Int2ObjectMap<Entity> iterating;
 
-    @Shadow private Int2ObjectMap<Entity> temp;
+    @Shadow
+    private Int2ObjectMap<Entity> temp;
 
     /**
      * @author 草awa
@@ -32,28 +27,30 @@ public class EntityListMixin {
      */
     @Overwrite
     public void forEach(Consumer<Entity> action) {
-        if (this.iterating != null) {
-            throw new UnsupportedOperationException("Only one concurrent iteration supported");
-        } else {
-            this.iterating = this.entities;
+        if (extras != null && extras.isActive(EXTRA_ID)) {
+            if (this.iterating != null) {
+                throw new UnsupportedOperationException("Only one concurrent iteration supported");
+            } else {
+                this.iterating = this.entities;
 
-            try {
-                for (Entity entity : this.entities.values()) {
-                    if (entity == null) {
-                        continue;
-                    }
-                    if (cancelEntitiesTick) {
-                        Identifier id = EntityType.getId(entity.getType());
-                        if (id != null && id.toString().equals("minecraft:player")) {
-                            action.accept(entity);
-                            return;
+                try {
+                    for (Entity entity : this.entities.values()) {
+                        if (entity == null) {
+                            continue;
                         }
-                        continue;
+                        if (cancelEntitiesTick) {
+                            Identifier id = EntityType.getId(entity.getType());
+                            if (id != null && id.toString().equals("minecraft:player")) {
+                                action.accept(entity);
+                                return;
+                            }
+                            continue;
+                        }
+                        action.accept(entity);
                     }
-                    action.accept(entity);
+                } finally {
+                    this.iterating = null;
                 }
-            } finally {
-                this.iterating = null;
             }
         }
     }

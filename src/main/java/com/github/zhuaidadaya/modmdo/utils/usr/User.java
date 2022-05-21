@@ -1,17 +1,12 @@
 package com.github.zhuaidadaya.modmdo.utils.usr;
 
 import com.github.zhuaidadaya.modmdo.lang.*;
-import com.github.zhuaidadaya.modmdo.storage.*;
+import com.github.zhuaidadaya.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.text.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.*;
 
-import java.util.List;
-import java.util.UUID;
-
-import static com.github.zhuaidadaya.modmdo.storage.Variables.modMdoVersionToIdMap;
+import java.util.*;
 
 public class User {
     private String name;
@@ -22,6 +17,7 @@ public class User {
     private int modmdoVersion;
     private Language language = Language.ENGLISH;
     private Text rejectReason = null;
+    private final long loginTime = TimeUtil.millions();
 
     public User() {
     }
@@ -75,6 +71,10 @@ public class User {
         modmdoVersion = EntrustParser.tryCreate(() -> json.getInt("version"), - 1);
 
         modmdoIdentifier = EntrustParser.tryCreate(() -> json.getString("identifier"), "");
+    }
+
+    public long getLoginTime() {
+        return loginTime;
     }
 
     public Text getRejectReason() {

@@ -1,14 +1,13 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust;
 
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
+import com.google.common.collect.*;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
 import java.util.function.*;
 
 public class EntrustParser {
-    static final Map<String, String> name = new HashMap<>();
-
     public static <T> T getNotNull(T target, @NotNull T defaultValue) {
         if (target == null) {
             return defaultValue;
@@ -83,5 +82,17 @@ public class EntrustParser {
 
     public static <T> T select(T[] array, Random random) {
         return array[random.nextInt(array.length)];
+    }
+
+    public static <T> Thread thread(Temporary action) {
+        return new Thread(action::apply);
+    }
+
+    public static <T> Collection<Thread> threads(Temporary... actions) {
+        Collection<Thread> threads = Sets.newHashSet();
+        for (Temporary temporary : actions) {
+            threads.add(new Thread(temporary::apply));
+        }
+        return threads;
     }
 }

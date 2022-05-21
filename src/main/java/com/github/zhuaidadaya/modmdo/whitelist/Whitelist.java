@@ -1,9 +1,7 @@
 package com.github.zhuaidadaya.modmdo.whitelist;
 
-import com.github.zhuaidadaya.modmdo.login.*;
+import com.github.zhuaidadaya.modmdo.server.login.*;
 import org.json.*;
-
-import java.util.*;
 
 public abstract class Whitelist {
     public final String name;
