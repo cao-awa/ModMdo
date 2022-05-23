@@ -6,8 +6,8 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.getServerLevelPath;
-import static com.github.zhuaidadaya.modmdo.storage.Variables.server;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.getServerLevelPath;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.server;
 
 public class PlayerUtil {
     public static long getPlayTime(ServerPlayerEntity player) {

@@ -5,7 +5,7 @@ import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import org.json.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class ModMdoUserCommand extends ConfigurableCommand<ModMdoUserCommand> {

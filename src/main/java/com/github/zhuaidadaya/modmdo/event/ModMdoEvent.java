@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.objects.*;
 
 import java.util.function.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.testing;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     private final ObjectLinkedOpenHashSet<TaskOrder<T>> actions = new ObjectLinkedOpenHashSet<>();
@@ -26,12 +26,18 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
         return submitted;
     }
 
+    @SingleThread
+    public synchronized void immediately(T target) {
+        submit(target);
+        action();
+    }
+
     public synchronized void action() {
-        for (TaskOrder<T> event : actions) {
-            for (T target : delay) {
+        for (T target : delay) {
+            for (TaskOrder<T> event : actions) {
                 EntrustExecution.trying(target, event::call);
-                delay.remove(target);
             }
+            delay.remove(target);
         }
         submitted = false;
     }
@@ -45,15 +51,13 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
         delay.add(target);
         submitted = true;
         if (testing) {
-            PrintUtil.messageToTracker(PrintUtil.tacker(Thread.currentThread().getStackTrace(), -1, target.synopsis()));
+            PrintUtil.messageToTracker(PrintUtil.tacker(Thread.currentThread().getStackTrace(), - 1, target.synopsis()));
         }
     }
 
-    @SingleThread
-    public synchronized void immediately(T target) {
-        submit(target);
-        action();
-    }
+    public abstract T fuse(Previously<T> previously, T delay);
+
+    public abstract String synopsis();
 
     @SingleThread
     public synchronized void immediately(T target, Temporary action) {
@@ -62,12 +66,10 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
         action();
     }
 
-    public abstract T fuse(Previously<T> previously, T delay);
-
-    public abstract String synopsis();
-
     @SingleThread
     public synchronized void previously(T target, Temporary action) {
         previously.add(new Previously<>(target, action));
     }
+
+    public abstract String abbreviate();
 }

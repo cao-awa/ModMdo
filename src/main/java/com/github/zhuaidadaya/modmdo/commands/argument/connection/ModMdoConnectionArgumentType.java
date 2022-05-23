@@ -14,7 +14,7 @@ import net.minecraft.util.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public class ModMdoConnectionArgumentType implements ArgumentType<String> {
     public static ModMdoConnectionArgumentType connection() {

@@ -8,7 +8,7 @@ import net.minecraft.text.*;
 
 import java.util.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public class ServerLogin {
     public void login(String name, String uuid, String identifier, int modmdoVersion) {

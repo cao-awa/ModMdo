@@ -1,13 +1,14 @@
-package com.github.zhuaidadaya.modmdo.event.entity.player.death;
+package com.github.zhuaidadaya.modmdo.event.entity.death;
 
 import com.github.zhuaidadaya.modmdo.event.*;
 import com.github.zhuaidadaya.modmdo.event.delay.*;
+import com.github.zhuaidadaya.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.entity.*;
 import net.minecraft.server.*;
 import net.minecraft.util.math.*;
 
-public class EntityDeathEvent extends ModMdoEvent<EntityDeathEvent> {
+public class EntityDeathEvent extends EntityTargetedEvent<EntityDeathEvent> {
     private final LivingEntity entity;
     private final Vec3d pos;
     private final MinecraftServer server;
@@ -31,7 +32,7 @@ public class EntityDeathEvent extends ModMdoEvent<EntityDeathEvent> {
         return new EntityDeathEvent();
     }
 
-    public LivingEntity getEntity() {
+    public LivingEntity getTargeted() {
         return entity;
     }
 
@@ -48,20 +49,25 @@ public class EntityDeathEvent extends ModMdoEvent<EntityDeathEvent> {
     }
 
     public String synopsis() {
-        String name = EntrustParser.tryCreate(() -> {
-            String str = entity.getDisplayName().asString();
-            if (str.equals("")) {
-                throw new IllegalArgumentException("empty name");
-            }
-            return str;
-        }, entity.toString());
-        String perpetratorName = EntrustParser.tryCreate(() -> {
+        String name = EntrustParser.trying(() -> EntrustParser.tryCreate(() -> {
+             String str = entity.getDisplayName().asString();
+             if (str.equals("")) {
+                 throw new IllegalArgumentException("empty name");
+             }
+             return str;
+         }, entity.toString()), () -> "null");
+        String perpetratorName = EntrustParser.trying(() -> EntrustParser.tryCreate(() -> {
             String str = perpetrator.getDisplayName().asString();
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }
             return str;
-        }, perpetrator.toString());
-        return EntrustParser.tryCreate(() -> String.format("EntityDeathEvent{player=%s, perpetrator=%s, pos=%s, dimension=%s}", name, perpetratorName, entity.getPos(), entity.getEntityWorld().getDimension().getEffects()), toString());
+        }, perpetrator.toString()), () -> "null");
+        return EntrustParser.tryCreate(() -> String.format("EntityDeathEvent{player=%s, perpetrator=%s, pos=%s, dimension=%s}", name, perpetratorName, pos, entity.getEntityWorld().getDimension().getEffects()), toString());
+    }
+
+    @Override
+    public String abbreviate() {
+        return "EntityDeathEvent";
     }
 }

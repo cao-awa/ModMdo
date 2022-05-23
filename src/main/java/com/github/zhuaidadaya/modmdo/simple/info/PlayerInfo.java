@@ -1,24 +1,17 @@
 package com.github.zhuaidadaya.modmdo.simple.info;
 
 import com.github.zhuaidadaya.modmdo.simple.vec.RXY;
-import com.github.zhuaidadaya.modmdo.simple.vec.Speed;
 import com.github.zhuaidadaya.modmdo.simple.vec.XYZ;
 import com.github.zhuaidadaya.modmdo.utils.dimension.DimensionUtil;
-import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.fractionDigits2;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.fractionDigits2;
 
 public class PlayerInfo {
     private final XYZ xyz;

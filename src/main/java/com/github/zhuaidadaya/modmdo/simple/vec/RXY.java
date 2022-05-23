@@ -3,7 +3,7 @@ package com.github.zhuaidadaya.modmdo.simple.vec;
 import net.minecraft.util.math.Vec2f;
 import org.json.JSONObject;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.fractionDigits2;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.fractionDigits2;
 
 public class RXY {
     public double x;

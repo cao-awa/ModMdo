@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.*;
 import java.security.*;
 import java.util.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 @Mixin(EnchantmentHelper.class)
 public class EnchantmentHelperMixin {

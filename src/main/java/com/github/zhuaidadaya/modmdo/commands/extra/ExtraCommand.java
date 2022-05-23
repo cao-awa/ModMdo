@@ -3,7 +3,7 @@ package com.github.zhuaidadaya.modmdo.commands.extra;
 import com.github.zhuaidadaya.modmdo.commands.*;
 import net.minecraft.text.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class ExtraCommand extends SimpleCommand {

@@ -3,13 +3,18 @@ package com.github.zhuaidadaya.modmdo.event;
 import com.github.zhuaidadaya.modmdo.event.block.destroy.*;
 import com.github.zhuaidadaya.modmdo.event.block.place.*;
 import com.github.zhuaidadaya.modmdo.event.entity.damage.*;
-import com.github.zhuaidadaya.modmdo.event.entity.player.death.*;
+import com.github.zhuaidadaya.modmdo.event.entity.death.*;
+import com.github.zhuaidadaya.modmdo.event.entity.player.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.*;
 import net.minecraft.entity.player.*;
 import net.minecraft.item.*;
+import net.minecraft.network.*;
 import net.minecraft.server.*;
+import net.minecraft.server.network.*;
 import net.minecraft.util.math.*;
 import net.minecraft.world.*;
 import net.minecraft.world.explosion.*;
@@ -20,6 +25,14 @@ public class ModMdoEventTracer {
     public final BlockPlaceEvent blockPlace = BlockPlaceEvent.snap();
     public final BlockExplosionDestroyEvent blockExplosion = BlockExplosionDestroyEvent.snap();
     public final EntityDamageEvent entityDamage = EntityDamageEvent.snap();
+    public final JoinServerEvent joinServer = JoinServerEvent.snap();
+    public final Object2ObjectOpenHashMap<String, ModMdoEvent<?>> events = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), list -> {
+        list.put(entityDeath.abbreviate(), entityDeath);
+        list.put(blockDestroy.abbreviate(), blockDestroy);
+        list.put(blockPlace.abbreviate(), blockPlace);
+        list.put(blockExplosion.abbreviate(), blockExplosion);
+        list.put(entityDamage.abbreviate(), entityDamage);
+    });
 
     public void submitBlockDestroy(PlayerEntity player, BlockState state, BlockPos pos, World world, MinecraftServer server) {
         if (blockDestroy.isSubmitted()) {
@@ -45,7 +58,11 @@ public class ModMdoEventTracer {
         entityDeath.immediately(new EntityDeathEvent(entity, perpetrator, pos, server));
     }
 
-    public void submitEntityDamage(LivingEntity entity, DamageSource damageSource, float originalHealth, float damage, World world, MinecraftServer server){
+    public void submitEntityDamage(LivingEntity entity, DamageSource damageSource, float originalHealth, float damage, World world, MinecraftServer server) {
         entityDamage.immediately(new EntityDamageEvent(entity, damageSource, originalHealth, damage, world, server));
+    }
+
+    public void submitJoinServer(ServerPlayerEntity player, ClientConnection connection, Vec3d pos, MinecraftServer server) {
+        joinServer.immediately(new JoinServerEvent(player, connection, pos, server));
     }
 }

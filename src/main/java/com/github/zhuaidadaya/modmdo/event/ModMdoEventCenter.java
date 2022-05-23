@@ -2,15 +2,21 @@ package com.github.zhuaidadaya.modmdo.event;
 
 import com.github.zhuaidadaya.modmdo.event.block.destroy.*;
 import com.github.zhuaidadaya.modmdo.event.block.place.*;
-import com.github.zhuaidadaya.modmdo.event.entity.player.death.*;
+import com.github.zhuaidadaya.modmdo.event.entity.damage.*;
+import com.github.zhuaidadaya.modmdo.event.entity.death.*;
+import com.github.zhuaidadaya.modmdo.event.entity.player.*;
 
 import java.util.function.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.event;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.event;
 
 public class ModMdoEventCenter {
-    public static void registerPlayerDeath(Consumer<EntityDeathEvent> action) {
+    public static void registerEntityDeath(Consumer<EntityDeathEvent> action) {
         event.entityDeath.register(action);
+    }
+
+    public static void registerEntityDamage(Consumer<EntityDamageEvent> action) {
+        event.entityDamage.register(action);
     }
 
     public static void registerBlockDestroy(Consumer<BlockDestroyEvent> action) {
@@ -23,5 +29,9 @@ public class ModMdoEventCenter {
 
     public static void registerBlockPlace(Consumer<BlockPlaceEvent> action) {
         event.blockPlace.register(action);
+    }
+
+    public static void registerJoinServer(Consumer<JoinServerEvent> action) {
+        event.joinServer.register(action);
     }
 }

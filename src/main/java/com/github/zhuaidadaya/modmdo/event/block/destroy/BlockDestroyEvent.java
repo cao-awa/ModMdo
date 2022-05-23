@@ -71,4 +71,9 @@ public class BlockDestroyEvent extends ModMdoEvent<BlockDestroyEvent> {
         }, destroyBy.toString());
         return EntrustParser.tryCreate(() -> String.format("BlockDestroyEvent{block=%s, pos=%s, dimension=%s, perpetrator=%s]", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().getEffects(), name), toString());
     }
+
+    @Override
+    public String abbreviate() {
+        return "BlockDestroyEvent";
+    }
 }

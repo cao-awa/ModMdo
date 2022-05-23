@@ -21,11 +21,10 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public class ModMdoStdInitializer implements ModInitializer {
     public static void initForLevel(MinecraftServer server) {
@@ -100,6 +99,14 @@ public class ModMdoStdInitializer implements ModInitializer {
         Resource<Language> resource = new Resource<>();
         resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
         resource.set(Language.ENGLISH, "/assets/modmdo/lang/en_us.json");
+
+        EntrustExecution.tryTemporary(() -> {
+            new File("config/modmdo/resources/lang/").mkdirs();
+
+            for (File f : EntrustParser.getNotNull(new File("config/modmdo/resources/lang/").listFiles(), new File[0])) {
+                resource.set(Language.ofs(f.getName()), f.getAbsolutePath());
+            }
+        });
         consoleTextFormat = new ConsoleTextFormat(resource);
         minecraftTextFormat = new MinecraftTextFormat(resource);
         Resource<String> enchant = new Resource<>();

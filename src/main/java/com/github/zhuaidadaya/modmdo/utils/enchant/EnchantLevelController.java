@@ -23,7 +23,9 @@ public class EnchantLevelController {
 
     public void set(Resource<String> resource) {
         for (String res : resource.getNames()) {
-            set(new JSONObject(resource.read(res)));
+            for (String s : resource.read(res)) {
+                set(new JSONObject(s));
+            }
         }
     }
 
