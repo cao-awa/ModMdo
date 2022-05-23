@@ -11,7 +11,7 @@ import net.minecraft.server.command.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.whitelist;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.whitelist;
 
 public class ModMdoWhitelistArgumentType implements ArgumentType<String> {
     public static ModMdoWhitelistArgumentType whitelist() {

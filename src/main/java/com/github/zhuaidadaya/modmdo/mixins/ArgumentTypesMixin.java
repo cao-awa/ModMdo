@@ -13,8 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.EXTRA_ID;
-import static com.github.zhuaidadaya.modmdo.storage.Variables.extras;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.EXTRA_ID;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.extras;
 
 @Mixin(ArgumentTypes.class)
 public class ArgumentTypesMixin {

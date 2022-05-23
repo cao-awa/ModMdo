@@ -5,7 +5,6 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
@@ -20,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 import java.util.UUID;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 @Mixin(PlayerManager.class)
 public class PlayerManagerMixin {
@@ -62,6 +61,7 @@ public class PlayerManagerMixin {
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         if (extras != null && extras.isActive(EXTRA_ID)) {
             EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerJoin(player.getName().asString()));
+            event.submitJoinServer(player, connection, player.getPos(), server);
         }
     }
 }

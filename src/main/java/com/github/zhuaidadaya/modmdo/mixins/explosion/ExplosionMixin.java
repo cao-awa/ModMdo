@@ -8,7 +8,7 @@ import net.minecraft.world.explosion.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 @Mixin(Explosion.class)
 public class ExplosionMixin {

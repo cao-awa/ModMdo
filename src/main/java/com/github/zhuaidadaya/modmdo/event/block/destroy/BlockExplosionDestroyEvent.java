@@ -73,4 +73,9 @@ public class BlockExplosionDestroyEvent extends ModMdoEvent<BlockExplosionDestro
         }, explosion.getCausingEntity().toString());
         return EntrustParser.tryCreate(() -> String.format("BlockExplosionDestroyEvent{block=%s, pos=%s, dimension=%s, perpetrator=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().getEffects(), name), toString());
     }
+
+    @Override
+    public String abbreviate() {
+        return "BlockExplosionDestroyEvent";
+    }
 }

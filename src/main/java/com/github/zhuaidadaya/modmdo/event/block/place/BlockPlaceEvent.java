@@ -79,4 +79,9 @@ public class BlockPlaceEvent extends ModMdoEvent<BlockPlaceEvent> {
         }, placer.toString());
         return EntrustParser.tryCreate(() -> String.format("BlockPlaceEvent{block=%s, pos=%s, dimension=%s, placer=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().getEffects(), name), toString());
     }
+
+    @Override
+    public String abbreviate() {
+        return "BlockPlaceEvent";
+    }
 }

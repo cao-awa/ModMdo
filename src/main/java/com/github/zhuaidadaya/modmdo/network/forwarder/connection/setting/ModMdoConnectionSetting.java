@@ -3,7 +3,7 @@ package com.github.zhuaidadaya.modmdo.network.forwarder.connection.setting;
 import com.github.zhuaidadaya.modmdo.storage.*;
 import org.json.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.configCached;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.configCached;
 
 public class ModMdoConnectionSetting {
     private boolean chat = true;
@@ -83,7 +83,7 @@ public class ModMdoConnectionSetting {
         setting.setChat(configCached.getConfigBoolean("modmdo_connection_chatting_accept"));
         setting.setPlayerJoin(configCached.getConfigBoolean("modmdo_connection_player_join_accept"));
         setting.setPlayerQuit(configCached.getConfigBoolean("modmdo_connection_player_quit_accept"));
-        setting.setTesting(Variables.testing);
+        setting.setTesting(SharedVariables.testing);
         return setting;
     }
 }

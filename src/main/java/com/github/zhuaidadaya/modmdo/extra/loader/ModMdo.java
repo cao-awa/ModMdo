@@ -3,6 +3,11 @@ package com.github.zhuaidadaya.modmdo.extra.loader;
 import com.github.zhuaidadaya.modmdo.commands.*;
 import com.github.zhuaidadaya.modmdo.commands.argument.*;
 import com.github.zhuaidadaya.modmdo.event.*;
+import com.github.zhuaidadaya.modmdo.event.trigger.*;
+import com.github.zhuaidadaya.modmdo.event.variable.*;
+import com.github.zhuaidadaya.modmdo.lang.*;
+import com.github.zhuaidadaya.modmdo.reads.*;
+import com.github.zhuaidadaya.modmdo.resourceLoader.*;
 import com.github.zhuaidadaya.modmdo.simple.vec.*;
 import com.github.zhuaidadaya.modmdo.utils.dimension.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.ObjectConfigUtil;
@@ -11,9 +16,13 @@ import net.minecraft.entity.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
+import org.json.*;
+
+import java.io.*;
+import java.nio.charset.*;
 
 import static com.github.zhuaidadaya.modmdo.ModMdoStdInitializer.initModMdoVariables;
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public class ModMdo extends ModMdoExtra<ModMdo> {
     private MinecraftServer server;
@@ -62,9 +71,9 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
     }
 
     public void initEvent() {
-        ModMdoEventCenter.registerPlayerDeath(event -> {
+        ModMdoEventCenter.registerEntityDeath(event -> {
             EntrustExecution.tryTemporary(() -> {
-                LivingEntity entity = event.getEntity();
+                LivingEntity entity = event.getTargeted();
                 if (entity instanceof ServerPlayerEntity player) {
                     if (isUserDeadMessageReceive(player.getUuid()) & enableDeadMessage) {
                         String dimension = DimensionUtil.getDimension(player);
@@ -75,6 +84,26 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                     }
                 }
             });
+        });
+
+        triggerBuilder = new ModMdoTriggerBuilder();
+        EntrustExecution.tryTemporary(() -> {
+            new File("config/modmdo/resources/events/").mkdirs();
+
+            for (File f : EntrustParser.getNotNull(new File("config/modmdo/resources/events/").listFiles(), new File[0])) {
+                triggerBuilder.register(new JSONObject(FileReads.read(new BufferedReader(new FileReader(f)))));
+            }
+        });
+
+        variables.clear();
+        variableBuilder = new ModMdoVariableBuilder();
+        EntrustExecution.tryTemporary(() -> {
+            new File("config/modmdo/resources/persistent/").mkdirs();
+
+            for (File f : EntrustParser.getNotNull(new File("config/modmdo/resources/persistent/").listFiles(), new File[0])) {
+                ModMdoPersistent<?> persistent = variableBuilder.build(f, new JSONObject(FileReads.read(new BufferedReader(new FileReader(f)))));
+                variables.put(persistent.getName(), persistent);
+            }
         });
     }
 

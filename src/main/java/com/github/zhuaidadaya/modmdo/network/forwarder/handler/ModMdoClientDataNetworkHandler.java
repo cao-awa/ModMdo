@@ -10,7 +10,7 @@ import org.jetbrains.annotations.*;
 
 import java.net.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.modmdoConnections;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.modmdoConnections;
 
 public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener {
     private final MinecraftServer server;

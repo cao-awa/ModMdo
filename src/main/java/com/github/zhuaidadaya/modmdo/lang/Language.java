@@ -19,12 +19,22 @@ public enum Language {
         this.name = name;
     }
 
-    public static Language getLanguageForName(String name) {
+    public static Language of(String name) {
         return switch(name.toLowerCase()) {
             case "chinese", "zh_cn" -> CHINESE;
             case "chinese_tw" -> CHINESE_TW;
             default -> ENGLISH;
         };
+    }
+
+    public static Language ofs(String name) {
+        if (name.startsWith("zh_cn")) {
+            return CHINESE;
+        }
+        if (name.startsWith("zh_tw")) {
+            return CHINESE_TW;
+        }
+        return ENGLISH;
     }
 
     public static String getNameForLanguage(Language language) {

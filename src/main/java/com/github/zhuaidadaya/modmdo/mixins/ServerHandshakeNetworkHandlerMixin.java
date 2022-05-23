@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.*;
 
 import java.net.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.EXTRA_ID;
-import static com.github.zhuaidadaya.modmdo.storage.Variables.extras;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.EXTRA_ID;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.extras;
 
 @Mixin(ServerHandshakeNetworkHandler.class)
 public class ServerHandshakeNetworkHandlerMixin {

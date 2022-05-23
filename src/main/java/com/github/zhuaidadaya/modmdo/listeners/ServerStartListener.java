@@ -3,16 +3,15 @@ package com.github.zhuaidadaya.modmdo.listeners;
 import com.github.zhuaidadaya.modmdo.ModMdoStdInitializer;
 import com.github.zhuaidadaya.modmdo.commands.*;
 import com.github.zhuaidadaya.modmdo.network.forwarder.process.*;
-import com.github.zhuaidadaya.modmdo.storage.Variables;
-import com.github.zhuaidadaya.modmdo.subscribable.*;
+import com.github.zhuaidadaya.modmdo.storage.SharedVariables;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public class ServerStartListener {
     public void listener() {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            Variables.server = server;
+            SharedVariables.server = server;
 
             try {
                 commandRegister = new ModMdoCommandRegister(server);

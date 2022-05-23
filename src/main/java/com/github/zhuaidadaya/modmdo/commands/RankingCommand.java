@@ -6,7 +6,7 @@ import net.minecraft.command.argument.*;
 import net.minecraft.server.*;
 import net.minecraft.text.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class RankingCommand extends ConfigurableCommand<RankingCommand> {

@@ -11,7 +11,7 @@ import net.minecraft.text.*;
 
 import java.util.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public class TickPerSecondAnalyzer extends SimpleCommandOperation {
     private final Collection<TargetCountLong<ServerPlayerEntity>> subs = new ObjectArrayList<>();
@@ -105,7 +105,7 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
                         for (TargetCountLong<ServerPlayerEntity> counter : subs) {
                             ServerPlayerEntity player = counter.getTarget();
                             if (player.networkHandler.connection.isOpen()) {
-                                Variables.sendMessage(player, new LiteralText("§etick-" + countTicks + ": §b(mspt: §a[r: " + realMspt + "ms, sub: " + subTps + "ms]§b, tps: §a[r: " + tpsCurrent + "§a, target: " + tpsTarget + "]§b)"), true);
+                                SharedVariables.sendMessage(player, new LiteralText("§etick-" + countTicks + ": §b(mspt: §a[r: " + realMspt + "ms, sub: " + subTps + "ms]§b, tps: §a[r: " + tpsCurrent + "§a, target: " + tpsTarget + "]§b)"), true);
                             } else {
                                 cancelSub(player);
                             }

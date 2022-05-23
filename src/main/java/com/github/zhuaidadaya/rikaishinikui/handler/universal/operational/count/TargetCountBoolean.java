@@ -22,10 +22,10 @@ public class TargetCountBoolean<T> extends TargetCount {
         }
     }
 
-    public TargetCountBoolean(T target, boolean targetCount, boolean count) {
+    public TargetCountBoolean(T target, boolean targetCount, boolean base) {
         this.target = target;
         this.targetCount = targetCount;
-        this.count = new OperationalBoolean(count).callback(this::action);
+        this.count = new OperationalBoolean(base).callback(this::action);
     }
 
     public T getTarget() {

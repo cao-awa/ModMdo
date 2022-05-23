@@ -9,7 +9,7 @@ import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.s2c.play.*;
 import org.json.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.DATA;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.DATA;
 
 public class ModMdoServerPacketBuilder extends PacketBuilder<Packet<ClientPlayPacketListener>> {
     public CustomPayloadS2CPacket buildDisconnect(String reason) {

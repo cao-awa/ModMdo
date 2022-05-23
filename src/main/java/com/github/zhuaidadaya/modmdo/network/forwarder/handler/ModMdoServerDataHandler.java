@@ -9,7 +9,7 @@ import net.minecraft.text.*;
 
 import java.net.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.modmdoConnections;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.modmdoConnections;
 
 public class ModMdoServerDataHandler implements ServerPlayPacketListener {
     private final MinecraftServer server;

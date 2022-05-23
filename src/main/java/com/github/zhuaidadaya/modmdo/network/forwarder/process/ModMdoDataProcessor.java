@@ -18,7 +18,7 @@ import org.json.*;
 
 import java.net.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public class ModMdoDataProcessor {
     public static final int MINIMUM_COMPATIBILITY = MODMDO_VERSION;

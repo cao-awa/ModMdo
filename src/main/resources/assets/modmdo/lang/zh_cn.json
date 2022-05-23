@@ -135,7 +135,7 @@
     "profile.feedback": "用户设定 \"%s\" 为: %s",
     "dead.receive": "死亡时将收到当时的维度及坐标信息",
     "dead.rejection": "不再接收死亡时的坐标记录信息",
-    "dead.deadIn": "你在 %s%s §r死亡: \n §e%s",
+    "dead.dead.in": "你在 %s%s §r死亡: \n §e%s",
     "languages.Chinese": "中文",
     "languages.English": "英文",
     "language.change": "将ModMdo语言切换为 %s",

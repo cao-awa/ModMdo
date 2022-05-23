@@ -1,7 +1,6 @@
 package com.github.zhuaidadaya.modmdo.commands.argument.extra;
 
 import com.github.zhuaidadaya.modmdo.extra.loader.*;
-import com.github.zhuaidadaya.modmdo.network.forwarder.process.*;
 import com.mojang.brigadier.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
@@ -10,12 +9,11 @@ import com.mojang.brigadier.suggestion.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.command.*;
 import net.minecraft.server.command.*;
-import net.minecraft.util.*;
 
 import java.util.*;
 import java.util.concurrent.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public class ModMdoExtraArgumentType implements ArgumentType<UUID> {
     public static ModMdoExtraArgumentType extra() {

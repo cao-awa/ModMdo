@@ -3,6 +3,8 @@ package com.github.zhuaidadaya.modmdo.storage;
 import com.github.zhuaidadaya.modmdo.cavas.CavaUtil;
 import com.github.zhuaidadaya.modmdo.commands.*;
 import com.github.zhuaidadaya.modmdo.event.*;
+import com.github.zhuaidadaya.modmdo.event.trigger.*;
+import com.github.zhuaidadaya.modmdo.event.variable.*;
 import com.github.zhuaidadaya.modmdo.extra.loader.*;
 import com.github.zhuaidadaya.modmdo.network.forwarder.process.*;
 import com.github.zhuaidadaya.modmdo.subscribable.*;
@@ -42,7 +44,7 @@ import java.net.SocketAddress;
 import java.text.NumberFormat;
 import java.util.*;
 
-public class Variables {
+public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static final String VERSION_ID = "1.0.35";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + "-ES";
@@ -60,6 +62,7 @@ public class Variables {
     public static final Identifier CLIENT = new Identifier("modmdo:client");
     public static final Identifier DATA = new Identifier("modmdo:data");
     public static final Identifier TOKEN = new Identifier("modmdo:token");
+    public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> variables = new Object2ObjectOpenHashMap<>();
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static boolean rankingOnlineTimeScaleChanged = false;
@@ -105,10 +108,10 @@ public class Variables {
     public static ModMdoExtraLoader extras;
     public static boolean loaded = false;
     public static boolean testing = false;
-
     public static ModMdoCommandRegister commandRegister;
     public static ModMdoEventTracer event;
-
+    public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
+    public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
     public static TickPerSecondAnalyzer tps = new TickPerSecondAnalyzer();
 
     public static void allDefault() {
@@ -448,6 +451,16 @@ public class Variables {
         temporaryWhitelistHash = temporaryWhitelist.hashCode();
     }
 
+    public static JSONObject getTemporaryWhitelistHashNamesJSONObject() {
+        JSONObject json = new JSONObject();
+        JSONArray array = new JSONArray();
+        for (String s : temporaryWhitelist.keySet()) {
+            array.put(s);
+        }
+        json.put("names", array);
+        return json;
+    }
+
     public static void updateModMdoConnectionsNames(MinecraftServer server) {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("connections").writeString(getModMdoConnectionsNamesJSONObject().toString())));
@@ -463,17 +476,6 @@ public class Variables {
         json.put("names", array);
         return json;
     }
-
-    public static JSONObject getTemporaryWhitelistHashNamesJSONObject() {
-        JSONObject json = new JSONObject();
-        JSONArray array = new JSONArray();
-        for (String s : temporaryWhitelist.keySet()) {
-            array.put(s);
-        }
-        json.put("names", array);
-        return json;
-    }
-
 
     public static void flushTemporaryWhitelist() {
         for (TemporaryWhitelist wl : temporaryWhitelist.values()) {

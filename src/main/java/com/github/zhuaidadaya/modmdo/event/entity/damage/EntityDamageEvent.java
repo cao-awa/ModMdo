@@ -2,13 +2,15 @@ package com.github.zhuaidadaya.modmdo.event.entity.damage;
 
 import com.github.zhuaidadaya.modmdo.event.*;
 import com.github.zhuaidadaya.modmdo.event.delay.*;
+import com.github.zhuaidadaya.modmdo.event.entity.*;
+import com.github.zhuaidadaya.modmdo.event.entity.death.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.*;
 import net.minecraft.server.*;
 import net.minecraft.world.*;
 
-public class EntityDamageEvent extends ModMdoEvent<EntityDamageEvent> {
+public class EntityDamageEvent extends EntityTargetedEvent<EntityDamageEvent> {
     private final LivingEntity entity;
     private final DamageSource damageSource;
     private final float originalHealth;
@@ -38,7 +40,7 @@ public class EntityDamageEvent extends ModMdoEvent<EntityDamageEvent> {
         return new EntityDamageEvent();
     }
 
-    public LivingEntity getEntity() {
+    public LivingEntity getTargeted() {
         return entity;
     }
 
@@ -76,5 +78,10 @@ public class EntityDamageEvent extends ModMdoEvent<EntityDamageEvent> {
             return str;
         }, entity.toString());
         return EntrustParser.tryCreate(() -> String.format("EntityDamageEvent{entity=%s, pos=%s, dimension=%s, origin-health=%s, damage=%s}", name, entity.getPos(), world.getDimension().getEffects(), originalHealth, damage), toString());
+    }
+
+    @Override
+    public String abbreviate() {
+        return "EntityDamageEvent";
     }
 }

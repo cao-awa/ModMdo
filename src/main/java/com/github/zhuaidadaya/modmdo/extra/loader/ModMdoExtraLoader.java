@@ -8,7 +8,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 public class ModMdoExtraLoader {
     private final Object2ObjectRBTreeMap<UUID, ActivityObject<ModMdoExtra<?>>> extras = new Object2ObjectRBTreeMap<>();

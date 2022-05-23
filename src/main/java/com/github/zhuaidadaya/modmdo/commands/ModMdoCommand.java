@@ -23,7 +23,7 @@ import org.json.*;
 import java.net.*;
 import java.util.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class ModMdoCommand extends SimpleCommand {
@@ -48,7 +48,7 @@ public class ModMdoCommand extends SimpleCommand {
             sendFeedback(secureEnchant, formatConfigReturnMessage("secure_enchant"), 1);
             return 2;
         }).then(literal("enable").executes(enableSecureEnchant -> {
-            Variables.enableSecureEnchant = true;
+            SharedVariables.enableSecureEnchant = true;
             updateModMdoVariables();
             sendFeedback(enableSecureEnchant, formatEnableSecureEnchant(), 1);
             return 1;
@@ -159,12 +159,12 @@ public class ModMdoCommand extends SimpleCommand {
         }))).then(literal("language").executes(getLanguage -> {
             sendFeedback(getLanguage, new TranslatableText("language.default", getLanguage()), 20);
             return 0;
-        }).then(literal("chinese").executes(chinese -> {
+        }).then(literal("zh_cn").executes(chinese -> {
             config.set("default_language", Language.CHINESE);
             updateModMdoVariables();
             sendFeedback(chinese, new TranslatableText("language.default", getLanguage()), 20);
             return 0;
-        })).then(literal("english").executes(english -> {
+        })).then(literal("en_us").executes(english -> {
             config.set("default_language", Language.ENGLISH);
             updateModMdoVariables();
             sendFeedback(english, new TranslatableText("language.default", getLanguage()), 20);
@@ -413,7 +413,7 @@ public class ModMdoCommand extends SimpleCommand {
     }
 
     public TranslatableText formatConfigReturnMessage(String config) {
-        return new TranslatableText(config + "." + Variables.config.getConfigString(config) + ".rule.format");
+        return new TranslatableText(config + "." + SharedVariables.config.getConfigString(config) + ".rule.format");
     }
 
     public TranslatableText formatCheckerTimeLimit() {
