@@ -5,7 +5,7 @@ import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.Vec3i;
 import org.json.JSONObject;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.fractionDigits2;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.fractionDigits2;
 
 public class XYZ {
     public double x;

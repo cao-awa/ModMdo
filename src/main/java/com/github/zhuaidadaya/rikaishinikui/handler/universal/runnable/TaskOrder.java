@@ -9,20 +9,24 @@ import org.jetbrains.annotations.*;
 import java.util.function.*;
 
 public class TaskOrder<T> {
-    private final @SingleThread @NotNull TargetCountBoolean<Consumer<T>> action;
+    private final @SingleThread
+    @NotNull TargetCountBoolean<Consumer<T>> action;
     private final ObjectArrayList<T> delay = new ObjectArrayList<>();
-    private @NotNull Thread thread = new Thread(() -> {});
+    private @NotNull Thread thread = new Thread(() -> {
+    });
 
     public TaskOrder(Consumer<T> action) {
-        this.action = new TargetCountBoolean<>(action, true);
+        this.action = new TargetCountBoolean<>(action, true, true);
     }
 
     public void call(T target) {
-        if (action.satisfy() && !thread.isAlive()) {
+        if (action.satisfy() && ! thread.isAlive()) {
             action.reverse();
             call(EntrustParser.thread(() -> {
-                action.getTarget().accept(target);
-                resolve();
+                EntrustExecution.tryTemporary(() -> {
+                    action.getTarget().accept(target);
+                    resolve();
+                });
                 action.reverse();
             }));
         } else {
@@ -35,7 +39,7 @@ public class TaskOrder<T> {
         return thread;
     }
 
-    public void call(Thread thread) {
+    private void call(Thread thread) {
         this.thread = thread;
         thread.start();
     }

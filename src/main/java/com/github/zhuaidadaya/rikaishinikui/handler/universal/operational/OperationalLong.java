@@ -33,13 +33,17 @@ public class OperationalLong extends Operational<Long> {
         return this;
     }
 
+    private void callback(Long LongValue) {
+        callback.accept(LongValue);
+    }
+
     public Long add() {
         callback(longValue++);
         return longValue;
     }
 
-    private void callback(Long LongValue) {
-        callback.accept(LongValue);
+    public Long add(Long value, Long amplifier) {
+        return add(value * amplifier);
     }
 
     public Long add(Long value) {
@@ -48,14 +52,38 @@ public class OperationalLong extends Operational<Long> {
         return longValue;
     }
 
-    public Long reduce() {
-        callback(longValue--);
-        return longValue;
+    public Long reduce(Long value, Long amplifier) {
+        return reduce(value * amplifier);
     }
 
     public Long reduce(Long value) {
         longValue -= value;
         callback(longValue);
+        return longValue;
+    }
+
+    public Long add(Integer value, Long amplifier) {
+        return add(value * amplifier);
+    }
+
+    public Long add(Integer value) {
+        longValue += value;
+        callback(longValue);
+        return longValue;
+    }
+
+    public Long reduce(Integer value, Long amplifier) {
+        return reduce(value * amplifier);
+    }
+
+    public Long reduce(Integer value) {
+        longValue -= value;
+        callback(longValue);
+        return longValue;
+    }
+
+    public Long reduce() {
+        callback(longValue--);
         return longValue;
     }
 }

@@ -135,7 +135,7 @@
     "profile.feedback": "User profile \"%s\" is: %s",
     "dead.receive": "Receive dimension and position info when dead",
     "dead.rejection": "Rejected death record message when dead",
-    "dead.deadIn": "You dead in %s%s§r: \n §e%s",
+    "dead.dead.in": "You dead in %s%s§r: \n §e%s",
     "languages.Chinese": "Chinese",
     "languages.English": "English",
     "language.change": "Change the ModMdo language to %s",

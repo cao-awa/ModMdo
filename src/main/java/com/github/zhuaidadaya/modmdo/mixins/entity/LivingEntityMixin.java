@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.event;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.event;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {

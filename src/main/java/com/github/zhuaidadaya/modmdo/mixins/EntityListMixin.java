@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.*;
 
 import java.util.function.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 
 @Mixin(EntityList.class)
 public class EntityListMixin {

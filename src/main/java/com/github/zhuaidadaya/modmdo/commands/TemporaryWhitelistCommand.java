@@ -1,18 +1,16 @@
 package com.github.zhuaidadaya.modmdo.commands;
 
 import com.github.zhuaidadaya.modmdo.commands.argument.whitelist.*;
-import com.github.zhuaidadaya.modmdo.utils.command.*;
 import com.github.zhuaidadaya.modmdo.utils.times.*;
 import com.github.zhuaidadaya.modmdo.whitelist.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
-import net.minecraft.server.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class TemporaryWhitelistCommand extends SimpleCommand {

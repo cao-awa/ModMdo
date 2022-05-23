@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 import java.security.SecureRandom;
 
-import static com.github.zhuaidadaya.modmdo.storage.Variables.updateCavas;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.updateCavas;
 
 public class CavaUtil {
     private final Object2ObjectRBTreeMap<Object, Cava> cavas = new Object2ObjectRBTreeMap<>();
