@@ -5,6 +5,7 @@ import com.github.zhuaidadaya.modmdo.event.delay.*;
 import com.github.zhuaidadaya.modmdo.event.entity.*;
 import com.github.zhuaidadaya.modmdo.event.entity.death.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.*;
 import net.minecraft.server.*;
@@ -40,8 +41,8 @@ public class EntityDamageEvent extends EntityTargetedEvent<EntityDamageEvent> {
         return new EntityDamageEvent();
     }
 
-    public LivingEntity getTargeted() {
-        return entity;
+    public ObjectArrayList<LivingEntity> getTargeted() {
+        return ObjectArrayList.of(entity);
     }
 
     public DamageSource getDamageSource() {
@@ -83,5 +84,9 @@ public class EntityDamageEvent extends EntityTargetedEvent<EntityDamageEvent> {
     @Override
     public String abbreviate() {
         return "EntityDamageEvent";
+    }
+
+    public String clazz() {
+        return getClass().getName();
     }
 }

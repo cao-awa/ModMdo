@@ -140,6 +140,30 @@ public class EntrustExecution {
         }
     }
 
+    public static <T> void tryFor(T[] targets, ExceptingConsumer<T> action) {
+        if (targets != null) {
+            for (T target : targets) {
+                try {
+                    action.accept(target);
+                } catch (Exception e) {
+
+                }
+            }
+        }
+    }
+
+    public static <T> void tryFor(T[] targets, ExceptingConsumer<T> action, Consumer<T> whenException) {
+        if (targets != null) {
+            for (T target : targets) {
+                try {
+                    action.accept(target);
+                } catch (Exception e) {
+                    whenException.accept(target);
+                }
+            }
+        }
+    }
+
     public static <T> void ensureTryFor(Collection<T> targets, ExceptingConsumer<T> action, ExceptingConsumer<T> whenException) {
         if (targets != null) {
             for (T target : targets) {

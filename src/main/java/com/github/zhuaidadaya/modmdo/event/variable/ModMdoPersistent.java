@@ -36,4 +36,6 @@ public abstract class ModMdoPersistent<T> {
     public abstract T get();
 
     public abstract void build(File file, JSONObject json);
+
+    public abstract void handle(JSONObject json);
 }

@@ -4,6 +4,7 @@ import com.github.zhuaidadaya.modmdo.event.*;
 import com.github.zhuaidadaya.modmdo.event.delay.*;
 import com.github.zhuaidadaya.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
 import net.minecraft.server.*;
 import net.minecraft.util.math.*;
@@ -32,8 +33,8 @@ public class EntityDeathEvent extends EntityTargetedEvent<EntityDeathEvent> {
         return new EntityDeathEvent();
     }
 
-    public LivingEntity getTargeted() {
-        return entity;
+    public ObjectArrayList<LivingEntity> getTargeted() {
+        return ObjectArrayList.of(entity);
     }
 
     public Vec3d getPos() {
@@ -69,5 +70,9 @@ public class EntityDeathEvent extends EntityTargetedEvent<EntityDeathEvent> {
     @Override
     public String abbreviate() {
         return "EntityDeathEvent";
+    }
+
+    public String clazz() {
+        return getClass().getName();
     }
 }

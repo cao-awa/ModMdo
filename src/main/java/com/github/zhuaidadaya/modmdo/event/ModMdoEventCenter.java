@@ -5,6 +5,8 @@ import com.github.zhuaidadaya.modmdo.event.block.place.*;
 import com.github.zhuaidadaya.modmdo.event.entity.damage.*;
 import com.github.zhuaidadaya.modmdo.event.entity.death.*;
 import com.github.zhuaidadaya.modmdo.event.entity.player.*;
+import com.github.zhuaidadaya.modmdo.event.server.*;
+import com.github.zhuaidadaya.modmdo.event.server.tick.*;
 
 import java.util.function.*;
 
@@ -33,5 +35,13 @@ public class ModMdoEventCenter {
 
     public static void registerJoinServer(Consumer<JoinServerEvent> action) {
         event.joinServer.register(action);
+    }
+
+    public static void registerGameTickStart(Consumer<GameTickStartEvent> action) {
+        event.gameTickStart.register(action);
+    }
+
+    public static void registerServerStarted(Consumer<ServerStartedEvent> action) {
+        event.serverStarted.register(action);
     }
 }

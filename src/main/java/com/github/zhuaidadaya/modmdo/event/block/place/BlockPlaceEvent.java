@@ -84,4 +84,8 @@ public class BlockPlaceEvent extends ModMdoEvent<BlockPlaceEvent> {
     public String abbreviate() {
         return "BlockPlaceEvent";
     }
+
+    public String clazz() {
+        return getClass().getName();
+    }
 }

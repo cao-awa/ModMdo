@@ -78,4 +78,8 @@ public class BlockExplosionDestroyEvent extends ModMdoEvent<BlockExplosionDestro
     public String abbreviate() {
         return "BlockExplosionDestroyEvent";
     }
+
+    public String clazz() {
+        return getClass().getName();
+    }
 }

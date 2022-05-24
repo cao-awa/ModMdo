@@ -76,6 +76,14 @@ public class EntrustParser {
         }
     }
 
+    public static <T> T trying(ExceptingSupplier<T> action, Action<Exception, T> actionWhenException) {
+        try {
+            return action.get();
+        } catch (Exception e) {
+            return actionWhenException.action(e);
+        }
+    }
+
     public static <T> T select(T[] array, int index) {
         return array.length > index ? array[index] : array[array.length - 1];
     }

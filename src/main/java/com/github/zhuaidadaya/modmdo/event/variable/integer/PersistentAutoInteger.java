@@ -1,5 +1,7 @@
-package com.github.zhuaidadaya.modmdo.event.variable;
+package com.github.zhuaidadaya.modmdo.event.variable.integer;
 
+import com.github.zhuaidadaya.modmdo.event.variable.*;
+import com.github.zhuaidadaya.modmdo.event.variable.integer.operation.*;
 import com.github.zhuaidadaya.modmdo.reads.*;
 import com.github.zhuaidadaya.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.annotaions.*;
@@ -32,16 +34,30 @@ public class PersistentAutoInteger extends ModMdoPersistent<Integer> {
 
     public void build(File file, JSONObject json) {
         setFile(file);
-        this.value = new OperationalInteger(json.getInt("value"));
-        this.interval = json.getLong("interval");
-        this.shouldChange = new Pair<>(json.getLong("should-change-time"), json.getInt("amplifier"));
+        this.value = new OperationalInteger(Integer.parseInt(json.get("value").toString()));
+        this.interval = Long.parseLong(json.get("interval").toString());
+        this.shouldChange = new Pair<>(Long.parseLong(json.get("should-change-time").toString()), Integer.parseInt(json.get("amplifier").toString()));
         this.name = json.getString("name");
     }
 
     private void solve() {
         long change = (TimeUtil.processMillion(shouldChange.getLeft())) / Math.max(1, interval);
         value.add(change, shouldChange.getRight());
-        shouldChange.setLeft(TimeUtil.millions() + interval);
+        shouldChange.setLeft(TimeUtil.millions());
+        save();
+    }
+
+    public void handle(JSONObject json) {
+        solve();
+        IntegerOperation operation = IntegerOperation.of(json.getString("operation"));
+        Integer integer = json.getInt("value");
+        switch (operation) {
+            case ADD -> value.add(integer);
+            case REDUCE -> value.reduce(integer);
+            case MULTIPLY -> value.multiply(integer);
+            case DIVIDE -> value.divide(integer);
+            case SET -> value.set(integer);
+        }
         save();
     }
 }

@@ -7,6 +7,7 @@ import com.github.zhuaidadaya.modmdo.storage.SharedVariables;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.*;
+import static com.github.zhuaidadaya.modmdo.storage.SharedVariables.server;
 
 public class ServerStartListener {
     public void listener() {
@@ -18,12 +19,13 @@ public class ServerStartListener {
 
                 ModMdoStdInitializer.initForLevel(server);
             } catch (Exception e) {
-                e.printStackTrace();
+
             }
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             tps.init(server, -1);
+            event.submitServerStarted(server);
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {

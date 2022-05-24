@@ -73,7 +73,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
     public void initEvent() {
         ModMdoEventCenter.registerEntityDeath(event -> {
             EntrustExecution.tryTemporary(() -> {
-                LivingEntity entity = event.getTargeted();
+                LivingEntity entity = event.getTargeted().get(0);
                 if (entity instanceof ServerPlayerEntity player) {
                     if (isUserDeadMessageReceive(player.getUuid()) & enableDeadMessage) {
                         String dimension = DimensionUtil.getDimension(player);
@@ -90,9 +90,14 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         EntrustExecution.tryTemporary(() -> {
             new File("config/modmdo/resources/events/").mkdirs();
 
-            for (File f : EntrustParser.getNotNull(new File("config/modmdo/resources/events/").listFiles(), new File[0])) {
-                triggerBuilder.register(new JSONObject(FileReads.read(new BufferedReader(new FileReader(f)))));
-            }
+            EntrustExecution.tryFor(EntrustParser.getNotNull(new File("config/modmdo/resources/events/").listFiles(), new File[0]), file -> {
+                EntrustExecution.tryTemporary(() -> {
+                    triggerBuilder.register(new JSONObject(FileReads.read(new BufferedReader(new FileReader(file)))), file);
+                    LOGGER.info("Registered event: " + file.getPath());
+                }, ex -> {
+                    LOGGER.warn("Failed register event: " + file.getPath(), ex);
+                });
+            });
         });
 
         variables.clear();
@@ -100,10 +105,11 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         EntrustExecution.tryTemporary(() -> {
             new File("config/modmdo/resources/persistent/").mkdirs();
 
-            for (File f : EntrustParser.getNotNull(new File("config/modmdo/resources/persistent/").listFiles(), new File[0])) {
-                ModMdoPersistent<?> persistent = variableBuilder.build(f, new JSONObject(FileReads.read(new BufferedReader(new FileReader(f)))));
-                variables.put(persistent.getName(), persistent);
-            }
+            EntrustExecution.tryFor(EntrustParser.getNotNull(new File("config/modmdo/resources/persistent/").listFiles(), new File[0]), file -> {
+                EntrustExecution.notNull(variableBuilder.build(file, new JSONObject(FileReads.read(new BufferedReader(new FileReader(file))))), v -> {
+                    variables.put(v.getName(), v);
+                });
+            });
         });
     }
 

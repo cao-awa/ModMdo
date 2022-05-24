@@ -5,7 +5,7 @@ import com.github.zhuaidadaya.modmdo.ranking.Rank;
 import com.github.zhuaidadaya.modmdo.utils.usr.User;
 import com.github.zhuaidadaya.modmdo.utils.times.TimeUtil;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.*;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -46,6 +46,10 @@ public class ServerTickListener {
             for (ModMdoDataProcessor processor : modmdoConnections) {
                 processor.tick(server);
             }
+        });
+
+        ServerTickEvents.START_SERVER_TICK.register(server -> {
+            event.submitGameTickStart(server);
         });
 
         Thread subListener = new Thread(() -> {

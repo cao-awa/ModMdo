@@ -5,6 +5,8 @@ import com.github.zhuaidadaya.modmdo.event.block.place.*;
 import com.github.zhuaidadaya.modmdo.event.entity.damage.*;
 import com.github.zhuaidadaya.modmdo.event.entity.death.*;
 import com.github.zhuaidadaya.modmdo.event.entity.player.*;
+import com.github.zhuaidadaya.modmdo.event.server.*;
+import com.github.zhuaidadaya.modmdo.event.server.tick.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.block.*;
@@ -26,12 +28,16 @@ public class ModMdoEventTracer {
     public final BlockExplosionDestroyEvent blockExplosion = BlockExplosionDestroyEvent.snap();
     public final EntityDamageEvent entityDamage = EntityDamageEvent.snap();
     public final JoinServerEvent joinServer = JoinServerEvent.snap();
-    public final Object2ObjectOpenHashMap<String, ModMdoEvent<?>> events = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), list -> {
-        list.put(entityDeath.abbreviate(), entityDeath);
-        list.put(blockDestroy.abbreviate(), blockDestroy);
-        list.put(blockPlace.abbreviate(), blockPlace);
-        list.put(blockExplosion.abbreviate(), blockExplosion);
-        list.put(entityDamage.abbreviate(), entityDamage);
+    public final GameTickStartEvent gameTickStart = GameTickStartEvent.snap();
+    public final ServerStartedEvent serverStarted = ServerStartedEvent.snap();
+    public final Object2ObjectOpenHashMap<String, ModMdoEvent<?>> events = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
+        map.put(entityDeath.   clazz(), entityDeath);
+        map.put(blockDestroy.  clazz(), blockDestroy);
+        map.put(blockPlace.    clazz(), blockPlace);
+        map.put(blockExplosion.clazz(), blockExplosion);
+        map.put(entityDamage.  clazz(), entityDamage);
+        map.put(gameTickStart. clazz(), gameTickStart);
+        map.put(serverStarted.  clazz(), serverStarted);
     });
 
     public void submitBlockDestroy(PlayerEntity player, BlockState state, BlockPos pos, World world, MinecraftServer server) {
@@ -64,5 +70,13 @@ public class ModMdoEventTracer {
 
     public void submitJoinServer(ServerPlayerEntity player, ClientConnection connection, Vec3d pos, MinecraftServer server) {
         joinServer.immediately(new JoinServerEvent(player, connection, pos, server));
+    }
+
+    public void submitGameTickStart(MinecraftServer server) {
+        gameTickStart.skipDelay(new GameTickStartEvent(server));
+    }
+
+    public void submitServerStarted(MinecraftServer server) {
+        serverStarted.immediately(new ServerStartedEvent(server));
     }
 }

@@ -3,6 +3,7 @@ package com.github.zhuaidadaya.modmdo.event.entity.player;
 import com.github.zhuaidadaya.modmdo.event.delay.*;
 import com.github.zhuaidadaya.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
 import net.minecraft.network.*;
 import net.minecraft.server.*;
@@ -40,8 +41,8 @@ public class JoinServerEvent extends EntityTargetedEvent<JoinServerEvent> {
         return connection;
     }
 
-    public LivingEntity getTargeted() {
-        return player;
+    public ObjectArrayList<LivingEntity> getTargeted() {
+        return ObjectArrayList.of(player);
     }
 
     public Vec3d getPos() {
@@ -70,5 +71,9 @@ public class JoinServerEvent extends EntityTargetedEvent<JoinServerEvent> {
     @Override
     public String abbreviate() {
         return "JoinServerEvent";
+    }
+
+    public String clazz() {
+        return getClass().getName();
     }
 }
