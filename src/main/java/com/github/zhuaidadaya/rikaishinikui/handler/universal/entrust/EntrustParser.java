@@ -76,12 +76,30 @@ public class EntrustParser {
         }
     }
 
+    public static <T> T trying(ExceptingSupplier<T> action, Action<Exception, T> actionWhenException) {
+        try {
+            return action.get();
+        } catch (Exception e) {
+            return actionWhenException.action(e);
+        }
+    }
+
     public static <T> T select(T[] array, int index) {
         return array.length > index ? array[index] : array[array.length - 1];
     }
 
     public static <T> T select(T[] array, Random random) {
         return array[random.nextInt(array.length)];
+    }
+
+    public static <T> T select(List<T> array, Random random) {
+        return array.get(random.nextInt(array.size()));
+    }
+
+    public static <T> T desert(List<T> array, Random random) {
+        T result = array.get(random.nextInt(array.size()));
+        array.remove(result);
+        return result;
     }
 
     public static <T> Thread thread(Temporary action) {

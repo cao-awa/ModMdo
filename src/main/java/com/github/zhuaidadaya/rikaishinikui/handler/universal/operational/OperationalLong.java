@@ -86,4 +86,14 @@ public class OperationalLong extends Operational<Long> {
         callback(longValue--);
         return longValue;
     }
+
+    public Long multiply(Long value) {
+        callback(longValue *= value);
+        return longValue;
+    }
+
+    public Long divide(Long value) {
+        callback(longValue /= value);
+        return longValue;
+    }
 }

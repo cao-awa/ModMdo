@@ -17,6 +17,7 @@ public class ActivityObject<T> {
         this.obj = obj;
         active = true;
         this.needEnsure = true;
+        this.ensureKey = ensureKey;
     }
 
     public T get() {
