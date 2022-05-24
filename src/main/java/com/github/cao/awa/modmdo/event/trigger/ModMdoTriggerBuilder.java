@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.event.trigger;
 
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.entity.*;
+import com.github.cao.awa.modmdo.event.trigger.selector.*;
 import com.github.cao.awa.modmdo.event.trigger.selector.random.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -35,18 +36,13 @@ public class ModMdoTriggerBuilder {
 
     public void prepareTargeted(JSONObject event, EntityTargetedEvent<?> targeted, File trace) {
         if (targeted.getTargeted().size() > 1 || EntrustParser.trying(() -> event.getString("target-instanceof").equals(targeted.getTargeted().get(0).getClass().getName()), () -> true)) {
-            JSONObject source = event.getJSONObject("triggers");
-            TriggerSelector random = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
-            System.out.println(random);
+            TriggerSelector selector = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
             OperationalInteger i = new OperationalInteger();
-            random.select(source, (name, json) -> {
+            selector.select(event.getJSONObject("triggers"), (name, json) -> {
                 EntrustExecution.notNull(EntrustParser.trying(() -> {
                     ModMdoEventTrigger<EntityTargetedEvent<?>> trigger = (ModMdoEventTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                     return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
-                }, ex -> {
-                    ex.printStackTrace();
-                    return null;
-                }), ModMdoEventTrigger::action);
+                }, ex -> null), ModMdoEventTrigger::action);
                 i.add();
             });
         }
@@ -61,17 +57,13 @@ public class ModMdoTriggerBuilder {
     }
 
     public void prepare(JSONObject event, ModMdoEvent<?> targeted, File trace) {
-        JSONObject source = event.getJSONObject("triggers");
-        TriggerSelector random = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
+        TriggerSelector selector = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
         OperationalInteger i = new OperationalInteger();
-        random.select(source, (name, json) -> {
+        selector.select(event.getJSONObject("triggers"), (name, json) -> {
             EntrustExecution.notNull(EntrustParser.trying(() -> {
                 ModMdoEventTrigger<ModMdoEvent<?>> trigger = (ModMdoEventTrigger<ModMdoEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                 return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
-            }, ex -> {
-                ex.printStackTrace();
-                return null;
-            }), ModMdoEventTrigger::action);
+            }, ex -> null), ModMdoEventTrigger::action);
             i.add();
         });
     }

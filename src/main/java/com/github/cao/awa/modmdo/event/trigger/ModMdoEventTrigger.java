@@ -14,7 +14,7 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
     public abstract void action();
 
     public String buildAt() {
-        return " <at: " + trace.file().getPath() + ", trigger position: " + trace.position() + "(" + trace.name() + ")>";
+        return trace.buildAt();
     }
 
     public TriggerTrace getTrace() {

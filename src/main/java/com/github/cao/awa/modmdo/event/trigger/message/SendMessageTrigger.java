@@ -21,7 +21,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
     private final ObjectArrayList<Receptacle<String>> args = new ObjectArrayList<>();
     private boolean active = true;
     private String key = "";
-    private EntitySelector selector = EntitySelector.SELF;
+    private EntitySelectorType selector = EntitySelectorType.SELF;
     private MinecraftServer server;
 
     @Override
@@ -35,7 +35,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
             }
         });
         setTarget(event.getTargeted());
-        selector = EntitySelector.of(metadata.getString("selector"));
+        selector = EntitySelectorType.of(metadata.getString("selector"));
         server = getTarget().get(0).getServer();
         setTrace(trace);
         return this;
