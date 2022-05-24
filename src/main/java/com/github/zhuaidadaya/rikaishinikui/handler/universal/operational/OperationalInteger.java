@@ -86,4 +86,14 @@ public class OperationalInteger extends Operational<Integer> {
         callback(intValue--);
         return intValue;
     }
+
+    public Integer multiply(Integer value) {
+        callback(intValue *= value);
+        return intValue;
+    }
+
+    public Integer divide(Integer value) {
+        callback(intValue /= value);
+        return intValue;
+    }
 }

@@ -8,9 +8,9 @@ import org.jetbrains.annotations.*;
 
 import java.util.function.*;
 
+@AsyncDelay
 public class TaskOrder<T> {
-    private final @SingleThread
-    @NotNull TargetCountBoolean<Consumer<T>> action;
+    private final @SingleThread @NotNull TargetCountBoolean<Consumer<T>> action;
     private final ObjectArrayList<T> delay = new ObjectArrayList<>();
     private @NotNull Thread thread = new Thread(() -> {
     });
@@ -19,6 +19,7 @@ public class TaskOrder<T> {
         this.action = new TargetCountBoolean<>(action, true, true);
     }
 
+    @AsyncDelay
     public void call(T target) {
         if (action.satisfy() && ! thread.isAlive()) {
             action.reverse();

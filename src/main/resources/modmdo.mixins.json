@@ -1,7 +1,7 @@
 {
     "required": true,
     "minVersion": "0.8",
-    "package": "com.github.zhuaidadaya.modmdo.mixins",
+    "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
         "ArgumentTypesMixin",
@@ -21,7 +21,8 @@
         "entity.player.ServerPlayerEntityMixin",
         "explosion.ExplosionMixin",
         "network.ServerNetworkIoMixin",
-        "tracker.DamageTrackerMixin"
+        "tracker.DamageTrackerMixin",
+        "world.WorldMixin"
     ],
     "client": [
         "ClientPlayNetworkHandlerMixin"
