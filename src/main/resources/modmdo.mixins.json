@@ -21,7 +21,8 @@
         "entity.player.ServerPlayerEntityMixin",
         "explosion.ExplosionMixin",
         "network.ServerNetworkIoMixin",
-        "tracker.DamageTrackerMixin"
+        "tracker.DamageTrackerMixin",
+        "world.WorldMixin"
     ],
     "client": [
         "ClientPlayNetworkHandlerMixin"

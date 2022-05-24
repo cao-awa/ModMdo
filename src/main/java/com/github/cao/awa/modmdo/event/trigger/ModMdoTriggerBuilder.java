@@ -15,16 +15,16 @@ public class ModMdoTriggerBuilder {
         JSONObject e = json.getJSONObject("event");
         String name = e.getString("instanceof");
         switch (name) {
-            case "com.github.zhuaidadaya.modmdo.event.entity.death.EntityDeathEvent" -> {
+            case "com.github.cao.awa.modmdo.event.entity.death.EntityDeathEvent" -> {
                 ModMdoEventCenter.registerEntityDeath(event -> prepareTargeted(e, event, trace));
             }
-            case "com.github.zhuaidadaya.modmdo.event.entity.player.JoinServerEvent" -> {
+            case "com.github.cao.awa.modmdo.event.entity.player.JoinServerEvent" -> {
                 ModMdoEventCenter.registerJoinServer(event -> prepareTargeted(e, event, trace));
             }
-            case "com.github.zhuaidadaya.modmdo.event.server.tick.GameTickStartEvent" -> {
+            case "com.github.cao.awa.modmdo.event.server.tick.GameTickStartEvent" -> {
                 ModMdoEventCenter.registerGameTickStart(event -> prepareTargeted(e, event, trace));
             }
-            case "com.github.zhuaidadaya.modmdo.event.server.ServerStartedEvent" -> {
+            case "com.github.cao.awa.modmdo.event.server.ServerStartedEvent" -> {
                 ModMdoEventCenter.registerServerStarted(event -> prepare(e, event, trace));
             }
             default -> {
@@ -37,12 +37,16 @@ public class ModMdoTriggerBuilder {
         if (targeted.getTargeted().size() > 1 || EntrustParser.trying(() -> event.getString("target-instanceof").equals(targeted.getTargeted().get(0).getClass().getName()), () -> true)) {
             JSONObject source = event.getJSONObject("triggers");
             TriggerSelector random = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
+            System.out.println(random);
             OperationalInteger i = new OperationalInteger();
             random.select(source, (name, json) -> {
                 EntrustExecution.notNull(EntrustParser.trying(() -> {
                     ModMdoEventTrigger<EntityTargetedEvent<?>> trigger = (ModMdoEventTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                     return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
-                }, e -> null), ModMdoEventTrigger::action);
+                }, ex -> {
+                    ex.printStackTrace();
+                    return null;
+                }), ModMdoEventTrigger::action);
                 i.add();
             });
         }
@@ -65,6 +69,7 @@ public class ModMdoTriggerBuilder {
                 ModMdoEventTrigger<ModMdoEvent<?>> trigger = (ModMdoEventTrigger<ModMdoEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                 return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
             }, ex -> {
+                ex.printStackTrace();
                 return null;
             }), ModMdoEventTrigger::action);
             i.add();

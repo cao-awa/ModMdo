@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.event;
 
 import com.github.cao.awa.modmdo.event.block.destroy.*;
 import com.github.cao.awa.modmdo.event.block.place.*;
+import com.github.cao.awa.modmdo.event.block.state.*;
 import com.github.cao.awa.modmdo.event.entity.damage.*;
 import com.github.cao.awa.modmdo.event.entity.death.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
@@ -25,6 +26,7 @@ public class ModMdoEventTracer {
     public final EntityDeathEvent entityDeath = EntityDeathEvent.snap();
     public final BlockDestroyEvent blockDestroy = BlockDestroyEvent.snap();
     public final BlockPlaceEvent blockPlace = BlockPlaceEvent.snap();
+    public final BlockStateSetEvent blockStateSet = BlockStateSetEvent.snap();
     public final BlockExplosionDestroyEvent blockExplosion = BlockExplosionDestroyEvent.snap();
     public final EntityDamageEvent entityDamage = EntityDamageEvent.snap();
     public final JoinServerEvent joinServer = JoinServerEvent.snap();
@@ -32,14 +34,15 @@ public class ModMdoEventTracer {
     public final GameTickStartEvent gameTickStart = GameTickStartEvent.snap();
     public final ServerStartedEvent serverStarted = ServerStartedEvent.snap();
     public final Object2ObjectOpenHashMap<String, ModMdoEvent<?>> events = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
-        map.put(entityDeath.   clazz(), entityDeath);
-        map.put(blockDestroy.  clazz(), blockDestroy);
-        map.put(blockPlace.    clazz(), blockPlace);
+        map.put(entityDeath.clazz(), entityDeath);
+        map.put(blockDestroy.clazz(), blockDestroy);
+        map.put(blockPlace.clazz(), blockPlace);
         map.put(blockExplosion.clazz(), blockExplosion);
-        map.put(entityDamage.  clazz(), entityDamage);
-        map.put(gameTickStart. clazz(), gameTickStart);
-        map.put(serverStarted. clazz(), serverStarted);
-        map.put(quitServer.    clazz(), quitServer);
+        map.put(entityDamage.clazz(), entityDamage);
+        map.put(gameTickStart.clazz(), gameTickStart);
+        map.put(serverStarted.clazz(), serverStarted);
+        map.put(quitServer.clazz(), quitServer);
+        map.put(blockStateSet.clazz(), blockStateSet);
     });
 
     public void submitBlockDestroy(PlayerEntity player, BlockState state, BlockPos pos, World world, MinecraftServer server) {
@@ -60,6 +63,10 @@ public class ModMdoEventTracer {
 
     public void submitBlockExplosion(Explosion explosion, BlockState state, BlockPos pos, World world, MinecraftServer server) {
         blockExplosion.immediately(new BlockExplosionDestroyEvent(explosion, state, pos, world, server));
+    }
+
+    public void submitBlockStateSet(BlockState state, BlockPos pos, int flags, int maxUpdateDepth, World world, MinecraftServer server) {
+        blockStateSet.immediately(new BlockStateSetEvent(state, pos, flags, maxUpdateDepth, world, server));
     }
 
     public void submitEntityDeath(LivingEntity entity, LivingEntity perpetrator, Vec3d pos, MinecraftServer server) {

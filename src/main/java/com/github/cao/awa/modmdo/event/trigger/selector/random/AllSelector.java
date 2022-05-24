@@ -8,7 +8,14 @@ public class AllSelector extends TriggerSelector {
     @Override
     public void select(JSONObject json, BiConsumer<String, JSONObject> operation) {
         for (String name : json.keySet()) {
-            operation.accept(name, json.getJSONObject(name));
+            targets.put(name, json.getJSONObject(name));
+        }
+        select(operation);
+    }
+
+    public void select(BiConsumer<String, JSONObject> operation) {
+        for (String name : targets.keySet()) {
+            operation.accept(name, targets.get(name));
         }
     }
 

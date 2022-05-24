@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.event;
 
 import com.github.cao.awa.modmdo.event.block.destroy.*;
 import com.github.cao.awa.modmdo.event.block.place.*;
+import com.github.cao.awa.modmdo.event.block.state.*;
 import com.github.cao.awa.modmdo.event.entity.damage.*;
 import com.github.cao.awa.modmdo.event.entity.death.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
@@ -22,6 +23,10 @@ public class ModMdoEventCenter {
 
     public static void registerBlockDestroy(Consumer<BlockDestroyEvent> action) {
         SharedVariables.event.blockDestroy.register(action);
+    }
+
+    public static void registerBlockStateSet(Consumer<BlockStateSetEvent> action) {
+        SharedVariables.event.blockStateSet.register(action);
     }
 
     public static void registerBlockExplosion(Consumer<BlockExplosionDestroyEvent> action) {

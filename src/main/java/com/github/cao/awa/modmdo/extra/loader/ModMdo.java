@@ -2,18 +2,12 @@ package com.github.cao.awa.modmdo.extra.loader;
 
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.commands.argument.*;
-import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.reads.*;
-import com.github.cao.awa.modmdo.simple.vec.*;
-import com.github.cao.awa.modmdo.utils.dimension.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import net.minecraft.entity.*;
 import net.minecraft.server.*;
-import net.minecraft.server.network.*;
-import net.minecraft.text.*;
 import org.json.*;
 
 import java.io.*;
@@ -68,21 +62,6 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
     }
 
     public void initEvent() {
-        ModMdoEventCenter.registerEntityDeath(event -> {
-            EntrustExecution.tryTemporary(() -> {
-                LivingEntity entity = event.getTargeted().get(0);
-                if (entity instanceof ServerPlayerEntity player) {
-                    if (isUserDeadMessageReceive(player.getUuid()) & enableDeadMessage) {
-                        String dimension = DimensionUtil.getDimension(player);
-                        TranslatableText text = new TranslatableText("dead.deadIn", DimensionUtil.getDimensionColor(dimension), DimensionUtil.getDimensionName(dimension), new XYZ(event.getPos()).getIntegerXYZ());
-                        if (player.deathTime == 1) {
-                            player.sendMessage(text, false);
-                        }
-                    }
-                }
-            });
-        });
-
         triggerBuilder = new ModMdoTriggerBuilder();
         EntrustExecution.tryTemporary(() -> {
             new File("config/modmdo/resources/events/").mkdirs();
