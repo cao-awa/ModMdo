@@ -1,11 +1,13 @@
 package com.github.cao.awa.modmdo.event.trigger;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.annotaions.*;
 import org.json.*;
 
-@SingleThread
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
+
+@Auto
 public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
     private TriggerTrace trace;
 
@@ -13,8 +15,12 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
 
     public abstract void action();
 
-    public String buildAt() {
-        return " <at: " + trace.file().getPath() + ", trigger position: " + trace.position() + "(" + trace.name() + ")>";
+    public String at() {
+        return trace.at();
+    }
+
+    public void err(String message, Exception exception) {
+        LOGGER.warn(message + at(), exception);
     }
 
     public TriggerTrace getTrace() {

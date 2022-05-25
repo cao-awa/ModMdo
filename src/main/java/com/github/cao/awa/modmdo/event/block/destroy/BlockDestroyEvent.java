@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.block.destroy;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -10,6 +11,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.util.registry.*;
 import net.minecraft.world.*;
 
+@Auto
 public class BlockDestroyEvent extends ModMdoEvent<BlockDestroyEvent> {
     private final PlayerEntity destroyBy;
     private final BlockState state;

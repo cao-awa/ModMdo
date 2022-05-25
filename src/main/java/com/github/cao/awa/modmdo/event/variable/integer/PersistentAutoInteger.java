@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.variable.integer;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.event.variable.integer.operation.*;
 import com.github.cao.awa.modmdo.utils.times.*;
@@ -9,6 +10,7 @@ import org.json.*;
 
 import java.io.*;
 
+@Auto
 public class PersistentAutoInteger extends ModMdoPersistent<Integer> {
     private OperationalInteger value;
     private Pair<Long, Integer> shouldChange;

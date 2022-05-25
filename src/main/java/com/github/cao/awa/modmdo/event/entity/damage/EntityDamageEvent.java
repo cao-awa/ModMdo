@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.entity.damage;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -9,6 +10,7 @@ import net.minecraft.entity.damage.*;
 import net.minecraft.server.*;
 import net.minecraft.world.*;
 
+@Auto
 public class EntityDamageEvent extends EntityTargetedEvent<EntityDamageEvent> {
     private final LivingEntity entity;
     private final DamageSource damageSource;

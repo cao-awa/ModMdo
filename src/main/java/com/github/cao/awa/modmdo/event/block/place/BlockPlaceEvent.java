@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.block.place;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -11,6 +12,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.util.registry.*;
 import net.minecraft.world.*;
 
+@Auto
 public class BlockPlaceEvent extends ModMdoEvent<BlockPlaceEvent> {
     private final LivingEntity placer;
     private final BlockState state;

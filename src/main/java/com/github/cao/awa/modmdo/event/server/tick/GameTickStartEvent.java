@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.server.tick;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -7,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
 import net.minecraft.server.*;
 
+@Auto
 public class GameTickStartEvent extends EntityTargetedEvent<GameTickStartEvent> {
     private final MinecraftServer server;
 

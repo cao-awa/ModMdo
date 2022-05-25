@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.entity.death;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -8,6 +9,7 @@ import net.minecraft.entity.*;
 import net.minecraft.server.*;
 import net.minecraft.util.math.*;
 
+@Auto
 public class EntityDeathEvent extends EntityTargetedEvent<EntityDeathEvent> {
     private final LivingEntity entity;
     private final Vec3d pos;

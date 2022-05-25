@@ -1,10 +1,10 @@
 package com.github.cao.awa.modmdo.event.trigger.persistent;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.annotaions.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -12,7 +12,7 @@ import org.json.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
-@SingleThread
+@Auto
 public class PersistentModifyTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<T> {
     private final ObjectArrayList<Receptacle<JSONObject>> vars = new ObjectArrayList<>();
 
@@ -52,9 +52,5 @@ public class PersistentModifyTrigger<T extends ModMdoEvent<?>> extends ModMdoEve
                 });
             }
         });
-    }
-
-    public void err(String message, Exception exception) {
-        LOGGER.warn(message + buildAt(), exception);
     }
 }

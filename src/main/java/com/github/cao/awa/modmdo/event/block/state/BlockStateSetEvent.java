@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.block.state;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -9,6 +10,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.util.registry.*;
 import net.minecraft.world.*;
 
+@Auto
 public class BlockStateSetEvent extends ModMdoEvent<BlockStateSetEvent> {
     private final BlockState state;
     private final BlockPos pos;

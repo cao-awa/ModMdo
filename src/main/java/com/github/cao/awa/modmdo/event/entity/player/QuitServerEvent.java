@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.entity.player;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -10,6 +11,7 @@ import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.util.math.*;
 
+@Auto
 public class QuitServerEvent extends EntityTargetedEvent<QuitServerEvent> {
     private final LivingEntity player;
     private final ClientConnection connection;
