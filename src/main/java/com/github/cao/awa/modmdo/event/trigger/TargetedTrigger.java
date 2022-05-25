@@ -1,9 +1,11 @@
 package com.github.cao.awa.modmdo.event.trigger;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.simple.vec.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.set.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -11,6 +13,7 @@ import net.minecraft.entity.*;
 
 import java.util.function.*;
 
+@Auto
 public abstract class TargetedTrigger<T extends EntityTargetedEvent<?>> extends ModMdoEventTrigger<T> {
     public static final Object2ObjectArrayMap<String, BiConsumer<TargetedTrigger<?>, Receptacle<String>>> formatter = EntrustParser.operation(new Object2ObjectArrayMap<>(), map -> {
         map.put("%{dim_name}", (trigger, str) -> {
@@ -44,4 +47,6 @@ public abstract class TargetedTrigger<T extends EntityTargetedEvent<?>> extends 
     public void setTarget(ObjectArrayList<? extends Entity> target) {
         this.target = target;
     }
+
+    public abstract UnmodifiableListReceptacle<String> supported();
 }
