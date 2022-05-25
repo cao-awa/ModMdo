@@ -35,12 +35,13 @@ public class ModMdoTriggerBuilder {
     }
 
     public void prepareTargeted(JSONObject event, EntityTargetedEvent<?> targeted, File trace) {
-        if (targeted.getTargeted().size() > 1 || EntrustParser.trying(() -> event.getString("target-instanceof").equals(targeted.getTargeted().get(0).getClass().getName()), () -> true)) {
-            TriggerSelector selector = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
+        String instance = EntrustParser.trying(() -> event.getString("target-instanceof"));
+        if (targeted.getTargeted().size() > 1 || EntrustParser.trying(() -> instance.equals(targeted.getTargeted().get(0).getClass().getName()), () -> true)) {
+            TriggerSelector random = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
             OperationalInteger i = new OperationalInteger();
-            selector.select(event.getJSONObject("triggers"), (name, json) -> {
+            random.select(event.getJSONObject("triggers"), (name, json) -> {
                 EntrustExecution.notNull(EntrustParser.trying(() -> {
-                    ModMdoEventTrigger<EntityTargetedEvent<?>> trigger = (ModMdoEventTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
+                    TargetedTrigger<EntityTargetedEvent<?>> trigger = (TargetedTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                     return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
                 }, ex -> null), ModMdoEventTrigger::action);
                 i.add();

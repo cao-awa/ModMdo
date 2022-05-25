@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.event.trigger.message;
+package com.github.cao.awa.modmdo.event.trigger.connection;
 
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.entity.*;
@@ -19,7 +19,7 @@ import org.json.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Auto
-public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends TargetedTrigger<T> {
+public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends TargetedTrigger<T> {
     private static final UnmodifiableListReceptacle<String> supported = new UnmodifiableListReceptacle<>(EntrustParser.operation(new ObjectArrayList<>(), list -> {
         list.add(ServerPlayerEntity.class.getName());
     }));
@@ -31,7 +31,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
 
     @Override
     public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
-        JSONObject message = metadata.getJSONObject("message");
+        JSONObject message = metadata.getJSONObject("reason");
         key = message.getString("key");
         JSONArray array = message.getJSONArray("args");
         EntrustParser.operation(args, list -> {
@@ -48,10 +48,10 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> send(format()));
+        EntrustExecution.tryTemporary(() -> disconnect(format()));
     }
 
-    public void send(Text message) {
+    public void disconnect(Text reason) {
         if (active) {
             switch (selector) {
                 case SELF -> {
@@ -60,9 +60,15 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                         return;
                     }
                     Entity target = getTarget().get(0);
-                    target.sendSystemMessage(message, target.getUuid());
+                    if (target instanceof ServerPlayerEntity player) {
+                        player.networkHandler.disconnect(reason);
+                    }
                 }
-                case ALL -> sendMessageToAllPlayer(server, message, false);
+                case ALL -> {
+                    EntrustExecution.tryFor(server.getPlayerManager().getPlayerList(), player -> {
+                        player.networkHandler.disconnect(reason);
+                    });
+                }
             }
         }
     }

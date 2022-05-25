@@ -68,8 +68,10 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
             EntrustExecution.tryFor(EntrustParser.getNotNull(new File("config/modmdo/resources/events/").listFiles(), new File[0]), file -> {
                 EntrustExecution.tryTemporary(() -> {
-                    triggerBuilder.register(new JSONObject(FileReads.read(new BufferedReader(new FileReader(file)))), file);
-                    LOGGER.info("Registered event: " + file.getPath());
+                    if (file.isFile()) {
+                        triggerBuilder.register(new JSONObject(FileReads.read(new BufferedReader(new FileReader(file)))), file);
+                        LOGGER.info("Registered event: " + file.getPath());
+                    }
                 }, ex -> {
                     LOGGER.warn("Failed register event: " + file.getPath(), ex);
                 });
