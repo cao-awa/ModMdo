@@ -1,7 +1,6 @@
 package com.github.cao.awa.modmdo.event.variable.integer;
 
 import com.github.cao.awa.modmdo.annotations.*;
-import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.event.variable.integer.operation.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
@@ -11,7 +10,7 @@ import org.json.*;
 import java.io.*;
 
 @Auto
-public class PersistentAutoInteger extends ModMdoPersistent<Integer> {
+public class PersistentAutoInteger extends PersistentInteger<Integer> {
     private OperationalInteger value;
     private Pair<Long, Integer> shouldChange;
     private long interval;
@@ -32,12 +31,19 @@ public class PersistentAutoInteger extends ModMdoPersistent<Integer> {
         return value.get();
     }
 
-    public void build(File file, JSONObject json) {
+    public PersistentAutoInteger clone() {
+        solve();
+        return new PersistentAutoInteger().build(null, toJSONObject());
+    }
+
+    public PersistentAutoInteger build(File file, JSONObject json) {
         setFile(file);
+        setMeta(json);
         this.value = new OperationalInteger(Integer.parseInt(json.get("value").toString()));
         this.interval = Long.parseLong(json.get("interval").toString());
         this.shouldChange = new Pair<>(Long.parseLong(json.get("should-change-time").toString()), Integer.parseInt(json.get("amplifier").toString()));
         this.name = json.getString("name");
+        return this;
     }
 
     private void solve() {

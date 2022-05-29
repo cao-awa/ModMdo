@@ -1,4 +1,5 @@
 {
+    "modmdo.event.reload.success": "%s 个事件已被成功重新加载, 先前为 %s 个",
     "modmdo.connection.not.found": "无法找到名为 %s 的 ModMdo 连接",
     "modmdo.connection.login.success": "成功登录到: %s",
     "modmdo.connection.multiplayer.player.left": "§7[%s] §e%s 退出了游戏",

@@ -1,9 +1,10 @@
-package com.github.cao.awa.modmdo.event.trigger.selector.random.select;
+package com.github.cao.awa.modmdo.event.trigger.selector.algorithm;
 
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 
+import java.security.*;
 import java.util.*;
 
 @Disposable
@@ -19,7 +20,7 @@ public final class FreeSelector<L, R> extends ObjectSelector<L, R> {
     @BecomeDeprecated
     public void select() {
         ensure();
-        Random random = new Random();
+        SecureRandom random = new SecureRandom();
         L name = EntrustParser.select(new ArrayList<>(getTargets().keySet()), random);
         R json = getTargets().get(name);
         getTargets().clear();

@@ -34,11 +34,7 @@ public class ServerTickListener {
 
             randomRankingSwitchTick++;
 
-            try {
-                eachPlayer(players);
-            } catch (Exception e) {
-
-            }
+            EntrustExecution.tryTemporary(() -> eachPlayer(players));
 
             for (ModMdoDataProcessor processor : modmdoConnections) {
                 processor.tick(server);
@@ -51,14 +47,10 @@ public class ServerTickListener {
 
         Thread subListener = new Thread(() -> {
             while (server == null) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-
-                }
+                EntrustExecution.tryTemporary(() -> TimeUtil.barricade(100));
             }
             while (server.isRunning()) {
-                try {
+                EntrustExecution.tryTemporary(() -> {
                     PlayerManager players = server.getPlayerManager();
 
                     updateRankingShow(server);
@@ -80,10 +72,8 @@ public class ServerTickListener {
                         }
                     }
 
-                    Thread.sleep(20);
-                } catch (Exception e) {
-
-                }
+                    EntrustExecution.tryTemporary(() -> TimeUtil.barricade(20));
+                });
             }
         });
 
@@ -170,7 +160,7 @@ public class ServerTickListener {
             scoreboardPlayerScore.setScore(minedCount);
             scoreboard.updateScore(scoreboardPlayerScore);
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 

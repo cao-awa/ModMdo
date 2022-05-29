@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins;
 
+import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
@@ -47,20 +48,22 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
      */
     @Overwrite
     private void addToServer(ServerPlayerEntity player) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             if (player == null)
                 return;
 
-            if (profile == null || profile.getId() == null && preReject) {
-                return;
-            }
+            if (server.isOnlineMode()) {
+                if (profile == null || profile.getId() == null && preReject) {
+                    return;
+                }
 
-            if (config.getConfigBoolean("compatible_online_mode")) {
-                EntrustExecution.tryTemporary(() -> {
-                    serverLogin.loginUsingYgg(player.getName().asString(), profile.getId().toString());
-                }, () -> {
-                    serverLogin.reject(player.getName().asString(), profile.getId().toString(), "", new TranslatableText("multiplayer.disconnect.not_whitelisted"));
-                });
+                if (config.getConfigBoolean("compatible_online_mode")) {
+                    EntrustExecution.tryTemporary(() -> {
+                        serverLogin.loginUsingYgg(player.getName().asString(), profile.getId().toString());
+                    }, () -> {
+                        serverLogin.reject(player.getName().asString(), profile.getId().toString(), "", new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+                    });
+                }
             }
 
             if (! server.isHost(player.getGameProfile()) || modMdoType == ModMdoType.SERVER) {
@@ -141,7 +144,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     }
                 }).start();
             } else {
-                serverLogin.login(player.getName().getString(), player.getUuid().toString(), configCached.getConfigString("identifier"), MODMDO_VERSION);
+                serverLogin.login(player.getName().getString(), player.getUuid().toString(), staticConfig.getConfigString("identifier"), MODMDO_VERSION);
 
                 callOnConnect(player);
             }

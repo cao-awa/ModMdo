@@ -3,15 +3,14 @@ package com.github.cao.awa.modmdo.event.trigger.message;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
-import com.github.cao.awa.modmdo.event.trigger.selector.*;
+import com.github.cao.awa.modmdo.event.trigger.selector.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.set.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.list.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
-import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import org.json.*;
@@ -27,10 +26,10 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
     private boolean active = true;
     private String key = "";
     private EntitySelectorType selector = EntitySelectorType.SELF;
-    private MinecraftServer server;
 
     @Override
     public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
+        setMeta(metadata);
         JSONObject message = metadata.getJSONObject("message");
         key = message.getString("key");
         JSONArray array = message.getJSONArray("args");
@@ -41,7 +40,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         });
         setTarget(event.getTargeted());
         selector = EntitySelectorType.of(metadata.getString("selector"));
-        server = getTarget().get(0).getServer();
+        setServer(getTarget().get(0).getServer());
         setTrace(trace);
         return this;
     }
@@ -62,7 +61,8 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                     Entity target = getTarget().get(0);
                     target.sendSystemMessage(message, target.getUuid());
                 }
-                case ALL -> sendMessageToAllPlayer(server, message, false);
+                case ALL -> sendMessageToAllPlayer(getServer(), message, false);
+                case APPOINT -> sendMessage(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), message, false);
             }
         }
     }
@@ -88,9 +88,11 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                     active = false;
                 });
             } else {
-                EntrustExecution.notNull(formatter.get(s.get()), receptacle -> receptacle.accept(this, s));
+                EntrustExecution.tryTemporary(() -> formatter.get(s.get()).accept(this, s), ex -> {
+                });
             }
         }
+
         if (! active) {
             return null;
         }
@@ -105,10 +107,10 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         else
             user = loginUsers.getUser(getTarget().get(0).getUuid());
 
-        if (user == null) {
-            return minecraftTextFormat.format(getLanguage(), key, objs);
+        if (user != null && user.getLanguage() != null) {
+            return minecraftTextFormat.format(user, key, objs);
         }
-        return minecraftTextFormat.format(user, key, objs);
+        return minecraftTextFormat.format(getLanguage(), key, objs);
     }
 
     public UnmodifiableListReceptacle<String> supported() {

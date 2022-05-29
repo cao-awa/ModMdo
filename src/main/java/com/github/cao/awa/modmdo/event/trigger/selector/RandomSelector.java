@@ -1,8 +1,7 @@
-package com.github.cao.awa.modmdo.event.trigger.selector.random;
+package com.github.cao.awa.modmdo.event.trigger.selector;
 
 import com.github.cao.awa.modmdo.annotations.*;
-import com.github.cao.awa.modmdo.event.trigger.selector.*;
-import com.github.cao.awa.modmdo.event.trigger.selector.random.select.*;
+import com.github.cao.awa.modmdo.event.trigger.selector.algorithm.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
 

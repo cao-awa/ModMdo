@@ -45,7 +45,9 @@ public class QuitServerEvent extends EntityTargetedEvent<QuitServerEvent> {
     }
 
     public ObjectArrayList<LivingEntity> getTargeted() {
-        return ObjectArrayList.of(player);
+        ObjectArrayList<LivingEntity> list = new ObjectArrayList<>();
+        list.add(player);
+        return list;
     }
 
     public Vec3d getPos() {
