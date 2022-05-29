@@ -77,10 +77,10 @@ public class ModMdoConnectionSetting {
 
     public static ModMdoConnectionSetting localSettings() {
         ModMdoConnectionSetting setting = new ModMdoConnectionSetting();
-        setting.setName(SharedVariables.configCached.get("server_name"));
-        setting.setChat(SharedVariables.configCached.getConfigBoolean("modmdo_connection_chatting_accept"));
-        setting.setPlayerJoin(SharedVariables.configCached.getConfigBoolean("modmdo_connection_player_join_accept"));
-        setting.setPlayerQuit(SharedVariables.configCached.getConfigBoolean("modmdo_connection_player_quit_accept"));
+        setting.setName(SharedVariables.config.get("server_name"));
+        setting.setChat(SharedVariables.config.getConfigBoolean("modmdo_connection_chatting_accept"));
+        setting.setPlayerJoin(SharedVariables.config.getConfigBoolean("modmdo_connection_player_join_accept"));
+        setting.setPlayerQuit(SharedVariables.config.getConfigBoolean("modmdo_connection_player_quit_accept"));
         setting.setTesting(SharedVariables.testing);
         return setting;
     }

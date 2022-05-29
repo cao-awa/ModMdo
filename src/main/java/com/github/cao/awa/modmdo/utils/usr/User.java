@@ -15,7 +15,7 @@ public class User {
     private long onlineTime = 0;
     private String modmdoIdentifier = "";
     private int modmdoVersion;
-    private Language language = Language.ENGLISH;
+    private Language language = null;
     private Text rejectReason = null;
     private final long loginTime = TimeUtil.millions();
 

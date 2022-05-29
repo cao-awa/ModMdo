@@ -72,7 +72,7 @@ public class BlockExplosionDestroyEvent extends ModMdoEvent<BlockExplosionDestro
                 throw new IllegalArgumentException("empty name");
             }
             return str;
-        }, explosion.getCausingEntity().toString());
+        }, "");
         return EntrustParser.tryCreate(() -> String.format("BlockExplosionDestroyEvent{block=%s, pos=%s, dimension=%s, perpetrator=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().getEffects(), name), toString());
     }
 

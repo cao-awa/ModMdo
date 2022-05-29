@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.event.entity.player;
+package com.github.cao.awa.modmdo.event.entity.player.chat;
 
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
@@ -6,42 +6,34 @@ import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
-import net.minecraft.network.*;
+import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
-import net.minecraft.util.math.*;
 
 @Auto
-public class JoinServerEvent extends EntityTargetedEvent<JoinServerEvent> {
+public class GameChatEvent extends EntityTargetedEvent<GameChatEvent> {
     private final LivingEntity player;
-    private final ClientConnection connection;
-    private final Vec3d pos;
+    private final ChatMessageC2SPacket packet;
     private final MinecraftServer server;
 
-    public JoinServerEvent(ServerPlayerEntity player, ClientConnection connection, Vec3d pos, MinecraftServer server) {
+    public GameChatEvent(ServerPlayerEntity player, ChatMessageC2SPacket packet, MinecraftServer server) {
         this.player = player;
-        this.pos = pos;
+        this.packet = packet;
         this.server = server;
-        this.connection = connection;
     }
 
-    private JoinServerEvent() {
+    private GameChatEvent() {
         this.player = null;
-        this.pos = null;
+        this.packet = null;
         this.server = null;
-        this.connection = null;
     }
 
-    public static JoinServerEvent snap() {
-        return new JoinServerEvent();
+    public static GameChatEvent snap() {
+        return new GameChatEvent();
     }
 
     public LivingEntity getPlayer() {
         return player;
-    }
-
-    public ClientConnection getConnection() {
-        return connection;
     }
 
     public ObjectArrayList<LivingEntity> getTargeted() {
@@ -50,15 +42,19 @@ public class JoinServerEvent extends EntityTargetedEvent<JoinServerEvent> {
         return list;
     }
 
-    public Vec3d getPos() {
-        return pos;
+    public ChatMessageC2SPacket getPacket() {
+        return packet;
+    }
+
+    public String getMessage() {
+        return packet.getChatMessage();
     }
 
     public MinecraftServer getServer() {
         return server;
     }
 
-    public JoinServerEvent fuse(Previously<JoinServerEvent> previously, JoinServerEvent delay) {
+    public GameChatEvent fuse(Previously<GameChatEvent> previously, GameChatEvent delay) {
         return previously.target();
     }
 
@@ -70,12 +66,12 @@ public class JoinServerEvent extends EntityTargetedEvent<JoinServerEvent> {
             }
             return str;
         }, player.toString()), () -> "null");
-        return EntrustParser.tryCreate(() -> String.format("JoinServerEvent{player=%s, pos=%s, dimension=%s}", name, pos, player.getEntityWorld().getDimension().getEffects()), toString());
+        return EntrustParser.tryCreate(() -> String.format("GameChatEvent{player=%s, message=%s}", name, packet.getChatMessage()), toString());
     }
 
     @Override
     public String abbreviate() {
-        return "JoinServerEvent";
+        return "GameChatEvent";
     }
 
     public String clazz() {

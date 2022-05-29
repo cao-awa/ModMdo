@@ -1,4 +1,5 @@
 {
+    "modmdo.event.reload.success": "success to reloaded %s events, %s previously",
     "modmdo.connection.not.found": "Cannot found ModMdo Connect as name %s",
     "modmdo.connection.login.success": "success login to: %s",
     "modmdo.connection.multiplayer.player.left": "§7[%s] §e%s left the game",

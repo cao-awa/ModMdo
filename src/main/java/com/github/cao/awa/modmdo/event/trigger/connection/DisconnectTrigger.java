@@ -3,15 +3,14 @@ package com.github.cao.awa.modmdo.event.trigger.connection;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
-import com.github.cao.awa.modmdo.event.trigger.selector.*;
+import com.github.cao.awa.modmdo.event.trigger.selector.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.set.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.list.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
-import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import org.json.*;
@@ -27,10 +26,10 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
     private boolean active = true;
     private String key = "";
     private EntitySelectorType selector = EntitySelectorType.SELF;
-    private MinecraftServer server;
 
     @Override
     public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
+        setMeta(metadata);
         JSONObject message = metadata.getJSONObject("reason");
         key = message.getString("key");
         JSONArray array = message.getJSONArray("args");
@@ -41,7 +40,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
         });
         setTarget(event.getTargeted());
         selector = EntitySelectorType.of(metadata.getString("selector"));
-        server = getTarget().get(0).getServer();
+        setServer(getTarget().get(0).getServer());
         setTrace(trace);
         return this;
     }
@@ -69,6 +68,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
                         player.networkHandler.disconnect(reason);
                     });
                 }
+                case APPOINT -> getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")).networkHandler.disconnect(reason);
             }
         }
     }

@@ -14,17 +14,15 @@ public class ServerStartListener {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             SharedVariables.server = server;
 
-            try {
+            EntrustExecution.tryTemporary(() -> {
                 commandRegister = new ModMdoCommandRegister(server);
 
                 ModMdoStdInitializer.initForLevel(server);
-            } catch (Exception e) {
-
-            }
+            });
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            if (extras != null && extras.isActive(EXTRA_ID)) {
+            if (SharedVariables.isActive()) {
                 tps.init(server, - 1);
                 event.submitServerStarted(server);
             }

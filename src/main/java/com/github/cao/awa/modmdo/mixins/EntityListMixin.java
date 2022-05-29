@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins;
 
+import com.github.cao.awa.modmdo.storage.*;
 import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.entity.*;
 import net.minecraft.util.*;
@@ -27,7 +28,7 @@ public class EntityListMixin {
      */
     @Overwrite
     public void forEach(Consumer<Entity> action) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             if (this.iterating != null) {
                 throw new UnsupportedOperationException("Only one concurrent iteration supported");
             } else {

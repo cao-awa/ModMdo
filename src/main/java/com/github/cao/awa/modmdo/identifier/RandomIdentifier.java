@@ -24,16 +24,12 @@ public class RandomIdentifier {
                     nano.delete(0, 1);
                 });
             } else {
-                builder.append(randomString());
+                builder.append(CHARS[RANDOM.nextInt(CHARS.length)]);
             }
         }
 
         builder.append(nano);
 
         return builder.toString();
-    }
-
-    private static char randomString() {
-        return CHARS[RANDOM.nextInt(CHARS.length)];
     }
 }

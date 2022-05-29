@@ -65,6 +65,10 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
         action();
     }
 
+    public int registered() {
+        return actions.size();
+    }
+
     public abstract T fuse(Previously<T> previously, T delay);
 
     public abstract String synopsis();

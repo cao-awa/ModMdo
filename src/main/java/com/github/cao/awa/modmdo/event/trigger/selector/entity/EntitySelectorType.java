@@ -1,7 +1,7 @@
-package com.github.cao.awa.modmdo.event.trigger.selector;
+package com.github.cao.awa.modmdo.event.trigger.selector.entity;
 
 public enum EntitySelectorType {
-    ALL("all"), SELF("self");
+    ALL("all"), SELF("self"), APPOINT("appoint");
 
     final String name;
 
@@ -9,9 +9,14 @@ public enum EntitySelectorType {
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public static EntitySelectorType of(String name) {
         return switch (name) {
             case "all" -> ALL;
+            case "appoint" -> APPOINT;
             default -> SELF;
         };
     }

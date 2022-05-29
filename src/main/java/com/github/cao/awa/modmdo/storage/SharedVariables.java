@@ -1,43 +1,59 @@
 package com.github.cao.awa.modmdo.storage;
 
-import com.github.cao.awa.modmdo.cavas.*;
-import com.github.cao.awa.modmdo.commands.*;
-import com.github.cao.awa.modmdo.event.*;
-import com.github.cao.awa.modmdo.event.trigger.*;
-import com.github.cao.awa.modmdo.event.variable.*;
-import com.github.cao.awa.modmdo.extra.loader.*;
-import com.github.cao.awa.modmdo.format.console.*;
-import com.github.cao.awa.modmdo.format.minecraft.*;
+import com.github.cao.awa.modmdo.cavas.CavaUtil;
+import com.github.cao.awa.modmdo.commands.ModMdoCommandRegister;
+import com.github.cao.awa.modmdo.event.ModMdoEventTracer;
+import com.github.cao.awa.modmdo.event.trigger.ModMdoTriggerBuilder;
+import com.github.cao.awa.modmdo.event.variable.ModMdoPersistent;
+import com.github.cao.awa.modmdo.event.variable.ModMdoVariableBuilder;
+import com.github.cao.awa.modmdo.extra.loader.ModMdoExtra;
+import com.github.cao.awa.modmdo.extra.loader.ModMdoExtraLoader;
+import com.github.cao.awa.modmdo.format.console.ConsoleTextFormat;
+import com.github.cao.awa.modmdo.format.minecraft.MinecraftTextFormat;
 import com.github.cao.awa.modmdo.lang.Language;
-import com.github.cao.awa.modmdo.mixins.*;
-import com.github.cao.awa.modmdo.network.forwarder.process.*;
-import com.github.cao.awa.modmdo.ranking.*;
-import com.github.cao.awa.modmdo.server.login.*;
-import com.github.cao.awa.modmdo.subscribable.*;
-import com.github.cao.awa.modmdo.type.*;
-import com.github.cao.awa.modmdo.utils.command.*;
-import com.github.cao.awa.modmdo.utils.enchant.*;
-import com.github.cao.awa.modmdo.utils.usr.*;
-import com.github.cao.awa.modmdo.whitelist.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import com.mojang.brigadier.context.*;
-import io.netty.buffer.*;
-import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.network.*;
-import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.scoreboard.*;
-import net.minecraft.server.*;
-import net.minecraft.server.command.*;
-import net.minecraft.server.network.*;
-import net.minecraft.text.*;
-import net.minecraft.util.*;
-import org.apache.logging.log4j.*;
-import org.json.*;
+import com.github.cao.awa.modmdo.mixins.MinecraftServerSession;
+import com.github.cao.awa.modmdo.network.forwarder.process.ModMdoDataProcessor;
+import com.github.cao.awa.modmdo.ranking.Rank;
+import com.github.cao.awa.modmdo.server.login.ServerLogin;
+import com.github.cao.awa.modmdo.subscribable.TickPerSecondAnalyzer;
+import com.github.cao.awa.modmdo.type.ModMdoType;
+import com.github.cao.awa.modmdo.utils.command.SimpleCommandOperation;
+import com.github.cao.awa.modmdo.utils.enchant.EnchantLevelController;
+import com.github.cao.awa.modmdo.utils.usr.User;
+import com.github.cao.awa.modmdo.utils.usr.UserUtil;
+import com.github.cao.awa.modmdo.whitelist.PermanentWhitelist;
+import com.github.cao.awa.modmdo.whitelist.TemporaryWhitelist;
+import com.github.cao.awa.modmdo.whitelist.WhiteLists;
+import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.EntrustExecution;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.EntrustParser;
+import com.mojang.brigadier.context.CommandContext;
+import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.ScoreboardCriterion;
+import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import java.net.*;
-import java.text.*;
-import java.util.*;
+import java.net.SocketAddress;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.UUID;
 
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
@@ -58,6 +74,7 @@ public class SharedVariables {
     public static final Identifier DATA = new Identifier("modmdo:data");
     public static final Identifier TOKEN = new Identifier("modmdo:token");
     public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> variables = new Object2ObjectOpenHashMap<>();
+    public static String identifier;
     public static String rankingObject = "Nan";
     public static int rankingRandomSwitchInterval = 20 * 60 * 8;
     public static boolean rankingOnlineTimeScaleChanged = false;
@@ -74,11 +91,12 @@ public class SharedVariables {
     public static boolean timeActive = true;
     public static boolean rejectNoFallCheat = true;
     public static boolean modmdoWhitelist = false;
+    public static boolean enableBlockRecorder = false;
     public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
     public static UserUtil users;
-    public static DiskObjectConfigUtil configCached;
-    public static ObjectConfigUtil config;
+    public static DiskObjectConfigUtil config;
+    public static DiskObjectConfigUtil staticConfig;
     public static CavaUtil cavas;
     public static MinecraftServer server;
     public static ModMdoType modMdoType = ModMdoType.NONE;
@@ -315,16 +333,16 @@ public class SharedVariables {
         config.setIfNoExist("compatible_online_mode", true);
         config.setIfNoExist("modmdo_connecting", true);
         config.setIfNoExist("modmdo_connecting_whitelist", new JSONObject());
-        configCached.setIfNoExist("modmdo_connection_chatting_format", ModMdoDataProcessor.CONSOLE_CHAT_FORMAT);
-        configCached.setIfNoExist("modmdo_connection_chatting_forward", true);
-        configCached.setIfNoExist("modmdo_connection_chatting_accept", true);
-        configCached.setIfNoExist("modmdo_connection_player_join_forward", true);
-        configCached.setIfNoExist("modmdo_connection_player_quit_forward", true);
-        configCached.setIfNoExist("modmdo_connection_player_join_accept", true);
-        configCached.setIfNoExist("modmdo_connection_player_quit_accept", true);
+        config.setIfNoExist("modmdo_connection_chatting_format", ModMdoDataProcessor.CONSOLE_CHAT_FORMAT);
+        config.setIfNoExist("modmdo_connection_chatting_forward", true);
+        config.setIfNoExist("modmdo_connection_chatting_accept", true);
+        config.setIfNoExist("modmdo_connection_player_join_forward", true);
+        config.setIfNoExist("modmdo_connection_player_quit_forward", true);
+        config.setIfNoExist("modmdo_connection_player_join_accept", true);
+        config.setIfNoExist("modmdo_connection_player_quit_accept", true);
     }
 
-    public static void updateModMdoVariables() {
+    public static void saveVariables() {
         config.set("here_command", enableHereCommand);
         config.set("dead_message", enableDeadMessage);
         config.set("cava", enableCava);
@@ -377,7 +395,7 @@ public class SharedVariables {
     }
 
     public static Language getLanguage() {
-        return Language.valueOf(config.getConfigString("default_language"));
+        return Language.ofs(config.getConfigString("default_language"));
     }
 
     public static boolean isUserHereReceive(UUID userUUID) {
@@ -486,5 +504,9 @@ public class SharedVariables {
         } else {
             extras.register(extra.getId(), extra);
         }
+    }
+
+    public static boolean isActive() {
+        return EntrustParser.trying(() -> extras.isActive(EXTRA_ID), () -> false);
     }
 }

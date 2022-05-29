@@ -11,9 +11,9 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class ModMdoUserCommand extends ConfigurableCommand<ModMdoUserCommand> {
     public ModMdoUserCommand init() {
-        Object projectConf = SharedVariables.config.getConfig("user_profiles");
+        String projectConf = SharedVariables.config.get("user_profiles");
         if (projectConf != null) {
-            SharedVariables.users = new UserUtil(new JSONObject(projectConf.toString()));
+            SharedVariables.users = new UserUtil(new JSONObject(projectConf));
         } else {
             SharedVariables.users = new UserUtil();
             SharedVariables.config.set("user_profiles", new JSONObject());

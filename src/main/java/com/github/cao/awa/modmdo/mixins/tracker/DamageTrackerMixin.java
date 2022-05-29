@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins.tracker;
 
+import com.github.cao.awa.modmdo.storage.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.*;
 import org.spongepowered.asm.mixin.*;
@@ -14,7 +15,7 @@ public class DamageTrackerMixin {
 
     @Inject(method = "onDamage", at = @At("HEAD"))
     public void onDamage(DamageSource damageSource, float originalHealth, float damage, CallbackInfo ci) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             event.submitEntityDamage(entity, damageSource, originalHealth, damage, entity.getEntityWorld(), entity.getServer());
         }
     }

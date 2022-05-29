@@ -1,14 +1,11 @@
 package com.github.cao.awa.modmdo.mixins;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.github.cao.awa.modmdo.storage.*;
+import net.minecraft.entity.*;
+import net.minecraft.world.*;
+import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -31,7 +28,7 @@ public abstract class ItemEntityMixin extends Entity {
      */
     @Inject(method = "tick",at = @At("RETURN"))
     public void tick(CallbackInfo ci) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             if (age == - 1) {
                 age = itemAge;
             }

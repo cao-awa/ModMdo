@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.event.variable;
 
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.utils.file.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
 
 import java.io.*;
@@ -10,6 +11,15 @@ import java.io.*;
 public abstract class ModMdoPersistent<T> {
     public File file;
     public String name;
+    public JSONObject meta;
+
+    public JSONObject getMeta() {
+        return meta;
+    }
+
+    public void setMeta(JSONObject meta) {
+        this.meta = meta;
+    }
 
     public String getName() {
         return name;
@@ -28,16 +38,22 @@ public abstract class ModMdoPersistent<T> {
     }
 
     public void save() {
-        JSONObject json = new JSONObject();
-        json.put("variable", toJSONObject());
-        FileUtil.write(file, json.toString());
+        EntrustExecution.tryTemporary(() -> {
+            JSONObject json = new JSONObject();
+            json.put("variable", toJSONObject());
+            FileUtil.write(file, json.toString());
+        });
     }
 
     public abstract JSONObject toJSONObject();
 
     public abstract T get();
 
-    public abstract void build(File file, JSONObject json);
+    public abstract ModMdoPersistent<T> build(File file, JSONObject json);
 
-    public abstract void handle(JSONObject json);
+    public abstract ModMdoPersistent<T> clone();
+
+    public void handle(JSONObject json) {
+
+    }
 }

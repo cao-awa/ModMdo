@@ -42,7 +42,9 @@ public class EntityDamageEvent extends EntityTargetedEvent<EntityDamageEvent> {
     }
 
     public ObjectArrayList<LivingEntity> getTargeted() {
-        return ObjectArrayList.of(entity);
+        ObjectArrayList<LivingEntity> list = new ObjectArrayList<>();
+        list.add(entity);
+        return list;
     }
 
     public DamageSource getDamageSource() {

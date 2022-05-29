@@ -1,5 +1,7 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
+import com.github.cao.awa.modmdo.event.*;
+
 import java.util.*;
 
 public abstract class ModMdoExtra<T> {
@@ -16,7 +18,7 @@ public abstract class ModMdoExtra<T> {
         if (active) {
             init();
             initCommand();
-            initEvent();
+            ModMdoEventCenter.callingBuilding.put(id, this);
         }
     }
 

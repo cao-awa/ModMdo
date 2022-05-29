@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.set;
+package com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.list;
 
 import java.util.*;
 import java.util.function.*;

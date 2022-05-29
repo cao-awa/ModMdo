@@ -35,7 +35,9 @@ public class EntityDeathEvent extends EntityTargetedEvent<EntityDeathEvent> {
     }
 
     public ObjectArrayList<LivingEntity> getTargeted() {
-        return ObjectArrayList.of(entity);
+        ObjectArrayList<LivingEntity> list = new ObjectArrayList<>();
+        list.add(entity);
+        return list;
     }
 
     public Vec3d getPos() {
