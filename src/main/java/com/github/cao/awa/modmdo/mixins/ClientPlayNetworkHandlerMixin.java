@@ -5,6 +5,7 @@ import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
+import net.minecraft.client.*;
 import net.minecraft.client.network.*;
 import net.minecraft.entity.player.*;
 import net.minecraft.network.*;
@@ -28,6 +29,8 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     @Shadow
     @Final
     private GameProfile profile;
+
+    @Shadow @Final private MinecraftClient client;
 
     /**
      * 与服务端进行自定义通信

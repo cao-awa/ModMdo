@@ -105,11 +105,11 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onClientSettings", at = @At("HEAD"))
     private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            loginUsers.getUser(player).setLanguage(Language.of(packet.getLanguage()));
+            loginUsers.getUser(player).setLanguage(Language.of(packet.language()));
         }
     }
 
-    @Inject(method = "onGameMessage", at = @At("HEAD"))
+    @Inject(method = "onChatMessage", at = @At("HEAD"))
     public void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             event.submitGameChat(player, packet, server);
