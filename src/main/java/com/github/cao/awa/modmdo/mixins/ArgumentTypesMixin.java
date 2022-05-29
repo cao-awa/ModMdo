@@ -1,20 +1,15 @@
 package com.github.cao.awa.modmdo.mixins;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.argument.ArgumentTypes;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.util.Identifier;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.github.cao.awa.modmdo.storage.*;
+import com.mojang.brigadier.arguments.*;
+import net.minecraft.command.argument.*;
+import net.minecraft.command.argument.serialize.*;
+import net.minecraft.util.*;
+import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.*;
 
-import java.util.Map;
-
-import static com.github.cao.awa.modmdo.storage.SharedVariables.EXTRA_ID;
-import static com.github.cao.awa.modmdo.storage.SharedVariables.extras;
+import java.util.*;
 
 @Mixin(ArgumentTypes.class)
 public class ArgumentTypesMixin {
@@ -27,7 +22,7 @@ public class ArgumentTypesMixin {
      */
     @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;Lnet/minecraft/command/argument/serialize/ArgumentSerializer;)V", at = @At("HEAD"))
     private static <T extends ArgumentType<?>> void register(String id, Class<T> class_, ArgumentSerializer<T> argumentSerializer, CallbackInfo ci) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             Identifier identifier = new Identifier(id);
             CLASS_MAP.remove(class_);
             ID_MAP.remove(identifier);

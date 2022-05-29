@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.mixins;
 
 import com.github.cao.awa.modmdo.commands.argument.*;
+import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
@@ -41,7 +42,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      */
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             PacketByteBuf data = packet.getData();
 
             try {
@@ -52,7 +53,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                 LOGGER.info("server sent a payload in channel: " + channel);
 
                 if (informationSign.equals(CHECKING) || informationSign.equals(LOGIN)) {
-                    connection.send(new CustomPayloadC2SPacket(CLIENT, (new PacketByteBuf(Unpooled.buffer())).writeIdentifier(LOGIN).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(configCached.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION))));
+                    connection.send(new CustomPayloadC2SPacket(CLIENT, (new PacketByteBuf(Unpooled.buffer())).writeIdentifier(LOGIN).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
                 }
 
                 if (informationSign.equals(DATA)) {

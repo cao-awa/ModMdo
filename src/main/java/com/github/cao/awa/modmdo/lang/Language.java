@@ -1,5 +1,7 @@
 package com.github.cao.awa.modmdo.lang;
 
+import static com.github.cao.awa.modmdo.storage.SharedVariables.getLanguage;
+
 public enum Language {
     CHINESE(0, "Chinese"), ENGLISH(1, "English"), CHINESE_TW(2, "Chinese_tw");
 
@@ -21,9 +23,10 @@ public enum Language {
 
     public static Language of(String name) {
         return switch(name.toLowerCase()) {
-            case "chinese", "zh_cn" -> CHINESE;
+            case "chinese" -> CHINESE;
             case "chinese_tw" -> CHINESE_TW;
-            default -> ENGLISH;
+            case "english" -> ENGLISH;
+            default -> getLanguage();
         };
     }
 
@@ -34,17 +37,10 @@ public enum Language {
         if (name.startsWith("zh_tw")) {
             return CHINESE_TW;
         }
-        return ENGLISH;
-    }
-
-    public static String getNameForLanguage(Language language) {
-        String name = "";
-        switch(language) {
-            case CHINESE -> name = "Chinese";
-            case ENGLISH -> name = "English";
-            case CHINESE_TW -> name = "Chinese_tw";
+        if (name.startsWith("en_us")) {
+            return ENGLISH;
         }
-        return name;
+        return of(name);
     }
 
     /**

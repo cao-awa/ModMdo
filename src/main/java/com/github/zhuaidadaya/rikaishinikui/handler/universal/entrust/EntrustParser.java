@@ -38,14 +38,6 @@ public class EntrustParser {
         }
     }
 
-    public static <T> T trying(ExceptingSupplier<T> action) {
-        try {
-            return action.get();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     public static <T> T operation(Supplier<T> target) {
         return target.get();
     }
@@ -59,13 +51,17 @@ public class EntrustParser {
         return defaultValue;
     }
 
-    public static void main(String[] args) {
-        EntrustExecution.trying("", System.out::println);
-    }
-
     public static <T> T operation(T target, Consumer<T> action) {
         action.accept(target);
         return target;
+    }
+
+    public static <T> T trying(ExceptingSupplier<T> action) {
+        try {
+            return action.get();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static <T> T trying(ExceptingSupplier<T> action, Supplier<T> actionWhenException) {

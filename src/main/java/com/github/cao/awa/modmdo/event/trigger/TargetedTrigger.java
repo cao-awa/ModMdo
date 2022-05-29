@@ -2,14 +2,16 @@ package com.github.cao.awa.modmdo.event.trigger;
 
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.entity.*;
+import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.simple.vec.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.set.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.list.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
+import org.json.*;
 
 import java.util.function.*;
 
@@ -34,7 +36,11 @@ public abstract class TargetedTrigger<T extends EntityTargetedEvent<?>> extends 
             }
         });
         map.put("^{variable}", (trigger, str) -> {
-            str.set(SharedVariables.variables.get(str.getSub()).get().toString());
+            ModMdoPersistent<?> v = SharedVariables.variables.get(str.getSub()).clone();
+            EntrustExecution.tryTemporary(() -> {
+                v.handle(new JSONObject(str.get()));
+            });
+            str.set(v.get().toString());
         });
     });
 

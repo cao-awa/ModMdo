@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.mixins;
 
 import com.github.cao.awa.modmdo.lang.Language;
+import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
@@ -44,7 +45,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
      */
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo ci) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             try {
                 Identifier channel = EntrustParser.tryCreate(packet::getChannel, new Identifier(""));
 
@@ -62,6 +63,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     String data2 = EntrustParser.tryCreate(buf::readString, "");
                     String data3 = EntrustParser.tryCreate(buf::readString, "");
                     String data4 = EntrustParser.tryCreate(buf::readString, "");
+                    String data5 = EntrustParser.tryCreate(buf::readString, "");
 
                     if (TOKEN.equals(channel)) {
                         serverLogin.reject(data1, oldLogin, "", new LiteralText("obsolete login type"));
@@ -71,7 +73,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     if (channel.equals(CLIENT)) {
                         if (informationSign.equals(LOGIN)) {
                             if (modMdoType == ModMdoType.SERVER) {
-                                serverLogin.login(data1, data2, data3, data4);
+                                serverLogin.login(data1, data2, data3, data4, data5);
                             }
                         }
                     }
@@ -86,29 +88,31 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
     @Inject(method = "onDisconnected", at = @At("RETURN"))
     public void onDisconnected(Text reason, CallbackInfo ci) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             serverLogin.logout(player);
             EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(player.getName().asString()));
+            event.submitQuitServer(player, connection, player.getPos(), server);
         }
     }
 
     @Inject(method = "executeCommand", at = @At("HEAD"))
     private void executeCommand(String input, CallbackInfo ci) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
         }
     }
 
     @Inject(method = "onClientSettings", at = @At("HEAD"))
     private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
-            loginUsers.getUser(player).setLanguage(Language.of(packet.language()));
+        if (SharedVariables.isActive()) {
+            loginUsers.getUser(player).setLanguage(Language.of(packet.getLanguage()));
         }
     }
 
-    @Inject(method = "onChatMessage", at = @At("HEAD"))
+    @Inject(method = "onGameMessage", at = @At("HEAD"))
     public void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
+            event.submitGameChat(player, packet, server);
             if (! packet.getChatMessage().startsWith("/")) {
                 EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), player.getName().asString()));
             }
@@ -117,7 +121,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;disconnect(Lnet/minecraft/text/Text;)V"))
     public void disconnect(ServerPlayNetworkHandler instance, Text reason) {
-        if (extras != null && extras.isActive(EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             if (reason.getString().equals("disconnect.timeout")) {
                 if (loginUsers.getUser(player).getLoginTime() > 10000) {
                     instance.disconnect(reason);
@@ -125,7 +129,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     waitingForKeepAlive = false;
                 }
             }
-            event.submitQuitServer(player, connection, player.getPos(), server);
         }
     }
 }

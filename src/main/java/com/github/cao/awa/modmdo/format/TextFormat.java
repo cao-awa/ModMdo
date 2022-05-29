@@ -5,6 +5,7 @@ import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.text.*;
 import org.json.*;
@@ -55,23 +56,24 @@ public abstract class TextFormat<T> {
 
     public String formatted(Language language, String key, Object... args) {
         try {
-            String formatReturn = format.get(language).get(key);
+            Receptacle<String> formatReturn = new Receptacle<>(format.get(language).get(key));
 
-            if (formatReturn == null) {
-                formatReturn = key;
+            if (formatReturn.get() == null) {
+                formatReturn.set(key);
             }
 
             for (Object o : args) {
                 if (o instanceof TranslatableText translatable) {
                     o = formatted(language, translatable.getKey(), translatable.getArgs());
                 }
+                final String str = o.toString();
                 try {
-                    formatReturn = formatReturn.replaceFirst("%s", o.toString());
+                    EntrustExecution.tryTemporary(() -> formatReturn.set(formatReturn.get().replaceFirst("%s", format.get(language).get(str))), ex -> formatReturn.set(formatReturn.get().replaceFirst("%s", str)));
                 } catch (Exception ex) {
-                    return formatReturn;
+                    return formatReturn.get();
                 }
             }
-            return formatReturn;
+            return formatReturn.get();
         } catch (Exception e) {
             return key;
         }

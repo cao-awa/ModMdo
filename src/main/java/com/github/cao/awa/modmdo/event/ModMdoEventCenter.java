@@ -6,13 +6,18 @@ import com.github.cao.awa.modmdo.event.block.state.*;
 import com.github.cao.awa.modmdo.event.entity.damage.*;
 import com.github.cao.awa.modmdo.event.entity.death.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
+import com.github.cao.awa.modmdo.event.entity.player.chat.*;
 import com.github.cao.awa.modmdo.event.server.*;
 import com.github.cao.awa.modmdo.event.server.tick.*;
+import com.github.cao.awa.modmdo.extra.loader.*;
 import com.github.cao.awa.modmdo.storage.*;
 
+import java.util.*;
 import java.util.function.*;
 
 public class ModMdoEventCenter {
+    public static final HashMap<UUID, ModMdoExtra<?>> callingBuilding = new HashMap<>();
+
     public static void registerEntityDeath(Consumer<EntityDeathEvent> action) {
         SharedVariables.event.entityDeath.register(action);
     }
@@ -47,5 +52,9 @@ public class ModMdoEventCenter {
 
     public static void registerServerStarted(Consumer<ServerStartedEvent> action) {
         SharedVariables.event.serverStarted.register(action);
+    }
+
+    public static void registerGameChat(Consumer<GameChatEvent> action) {
+        SharedVariables.event.gameChat.register(action);
     }
 }

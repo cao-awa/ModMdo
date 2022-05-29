@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.server.login;
 
+import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.cao.awa.modmdo.whitelist.*;
@@ -9,12 +10,14 @@ import net.minecraft.text.*;
 
 import java.util.*;
 
+import static com.github.cao.awa.modmdo.storage.SharedVariables.getLanguage;
+
 public class ServerLogin {
     public void login(String name, String uuid, String identifier, int modmdoVersion) {
-        login(name, uuid, identifier, String.valueOf(modmdoVersion));
+        login(name, uuid, identifier, String.valueOf(modmdoVersion), null);
     }
 
-    public void login(String name, String uuid, String identifier, String modmdoVersion) {
+    public void login(String name, String uuid, String identifier, String modmdoVersion, String language) {
         int version = EntrustParser.tryCreate(() -> Integer.valueOf(modmdoVersion), - 1);
 
         if (! identifier.equals("")) {
@@ -27,7 +30,7 @@ public class ServerLogin {
             } else {
                 EntrustExecution.tryTemporary(() -> {
                     SharedVariables.LOGGER.info("login player: " + name);
-                    SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version));
+                    SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setLanguage(language == null ? getLanguage() : Language.ofs(language)));
                 });
             }
         }
@@ -38,7 +41,7 @@ public class ServerLogin {
             if (e.isValid()) {
                 if (SharedVariables.whitelist.getFromId(identifier) == null) {
                     SharedVariables.whitelist.put(name, new PermanentWhitelist(name, identifier, UUID.fromString(uuid)));
-                    SharedVariables.updateModMdoVariables();
+                    SharedVariables.saveVariables();
                 }
             }
             SharedVariables.temporaryWhitelist.remove(name);
@@ -60,7 +63,7 @@ public class ServerLogin {
             if (e.isValid()) {
                 if (EntrustParser.trying(() -> ! SharedVariables.whitelist.get(name).getIdentifier().equals(identifier), () -> true)) {
                     SharedVariables.whitelist.put(name, new PermanentWhitelist(name, identifier, UUID.fromString(uuid)));
-                    SharedVariables.updateModMdoVariables();
+                    SharedVariables.saveVariables();
                 }
             }
             SharedVariables.temporaryWhitelist.remove(name);
@@ -92,7 +95,7 @@ public class ServerLogin {
 
                 }
                 SharedVariables.whitelist.put(name, new PermanentWhitelist(name, "", UUID.fromString(uuid)));
-                SharedVariables.updateModMdoVariables();
+                SharedVariables.saveVariables();
             }
             SharedVariables.temporaryWhitelist.remove(name);
         });

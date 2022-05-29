@@ -47,8 +47,6 @@ public class GameTickStartEvent extends EntityTargetedEvent<GameTickStartEvent> 
 
     @Override
     public ObjectArrayList<? extends Entity> getTargeted() {
-        ObjectArrayList<Entity> targeted = new ObjectArrayList<>();
-        EntrustExecution.tryTemporary(() -> targeted.addAll(server.getPlayerManager().getPlayerList()));
-        return targeted;
+        return EntrustParser.operation(new ObjectArrayList<>(), targeted -> EntrustExecution.tryTemporary(() -> targeted.addAll(server.getPlayerManager().getPlayerList())));
     }
 }
