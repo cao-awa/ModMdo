@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.extra.loader;
 
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.commands.argument.*;
+import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.format.console.*;
@@ -54,10 +55,8 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
     public void initCommand() {
         try {
-            new ModMdoUserCommand().register().init();
             new HereCommand().register();
             new DimensionHereCommand().register();
-            new RankingCommand().register();
             new TestCommand().register();
             new TemporaryWhitelistCommand().register();
             new ModMdoCommand().register();
@@ -102,18 +101,25 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         });
 
         Resource<Language> resource = new Resource<>();
-        resource.set(Language.CHINESE, "/assets/modmdo/lang/zh_cn.json");
-        resource.set(Language.ENGLISH, "/assets/modmdo/lang/en_us.json");
+        resource.set(Language.ZH_CN, "/assets/modmdo/lang/zh_cn.json");
+        resource.set(Language.EN_US, "/assets/modmdo/lang/en_us.json");
 
         EntrustExecution.tryTemporary(() -> {
             new File(getServerLevelPath(getServer())  + "/modmdo/resources/lang/").mkdirs();
 
-            for (File f : EntrustParser.getNotNull(new File(getServerLevelPath(getServer())  + "/modmdo/resources/lang/").listFiles(), new File[0])) {
-                resource.set(Language.ofs(f.getName()), f.getAbsolutePath());
-            }
+            EntrustExecution.tryFor(EntrustParser.getNotNull(new File(getServerLevelPath(getServer())  + "/modmdo/resources/lang/").listFiles(), new File[0]), file -> {
+                Language lang = Language.ofs(file.getName());
+                if (lang != null) {
+                    resource.set(lang, file.getAbsolutePath());
+                }
+            });
         });
         SharedVariables.consoleTextFormat = new ConsoleTextFormat(resource);
         SharedVariables.minecraftTextFormat = new MinecraftTextFormat(resource);
+
+        ModMdoEventCenter.registerClientSetting(event -> {
+            loginUsers.getUser(event.getPlayer()).setLanguage(Language.ofs(event.getLanguage()));
+        });
     }
 
     public boolean needEnsure() {

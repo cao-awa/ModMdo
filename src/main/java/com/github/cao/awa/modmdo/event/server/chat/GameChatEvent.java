@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.event.entity.player.chat;
+package com.github.cao.awa.modmdo.event.server.chat;
 
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;

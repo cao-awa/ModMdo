@@ -45,9 +45,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         EntrustExecution.notNull(config.getConfigBoolean("here_command"), here -> {
             SharedVariables.enableHereCommand = here;
         });
-        EntrustExecution.notNull(config.getConfigBoolean("dead_message"), dMessage-> {
-            SharedVariables.enableDeadMessage = dMessage;
-        });
         EntrustExecution.notNull(config.getConfigBoolean("cava"), cava -> {
             SharedVariables.enableCava = cava;
         });

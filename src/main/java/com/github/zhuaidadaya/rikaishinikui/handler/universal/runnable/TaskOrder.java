@@ -10,18 +10,26 @@ import java.util.function.*;
 
 @AsyncDelay
 public class TaskOrder<T> {
-    private final @SingleThread @NotNull TargetCountBoolean<Consumer<T>> action;
+    private final @SingleThread
+    @NotNull TargetCountBoolean<Consumer<T>> action;
     private final ObjectArrayList<T> delay = new ObjectArrayList<>();
+    private final boolean disposable;
+    private boolean usable = true;
     private @NotNull Thread thread = new Thread(() -> {
     });
 
     public TaskOrder(Consumer<T> action) {
+        this(action, false);
+    }
+
+    public TaskOrder(Consumer<T> action, boolean disposable) {
         this.action = new TargetCountBoolean<>(action, true, true);
+        this.disposable = disposable;
     }
 
     @AsyncDelay
     public void call(T target) {
-        if (action.satisfy() && ! thread.isAlive()) {
+        if (action.satisfy() && ! thread.isAlive() && usable) {
             action.reverse();
             call(EntrustParser.thread(() -> {
                 EntrustExecution.tryTemporary(() -> {
@@ -31,7 +39,33 @@ public class TaskOrder<T> {
                 action.reverse();
             }));
         } else {
-            delay.add(target);
+            if (usable) {
+                delay.add(target);
+            }
+        }
+
+        if (disposable) {
+            usable = false;
+        }
+    }
+
+    @AsyncDelay
+    public void enforce(T target) {
+        if (action.satisfy() && ! thread.isAlive() && usable) {
+            action.reverse();
+            EntrustExecution.tryTemporary(() -> {
+                action.getTarget().accept(target);
+                resolve();
+            });
+            action.reverse();
+        } else {
+            if (usable) {
+                delay.add(target);
+            }
+        }
+
+        if (disposable) {
+            usable = false;
         }
     }
 

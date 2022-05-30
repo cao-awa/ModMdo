@@ -19,15 +19,15 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
         SharedVariables.commandRegister.register(literal("temporary").then(literal("whitelist").then(literal("add").then(argument("name", StringArgumentType.string()).executes(addDefault -> {
             String name = StringArgumentType.getString(addDefault, "name");
             if (SharedVariables.temporaryWhitelist.containsName(name)) {
-                sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.already.is.whitelist", name), 21);
+                sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.already.is.whitelist", name));
                 return - 1;
             }
             if (SharedVariables.whitelist.containsName(name)) {
-                sendFeedback(addDefault, new TranslatableText("modmdo.whitelist.add.already.is.whitelist", name), 21);
+                sendFeedback(addDefault, new TranslatableText("modmdo.whitelist.add.already.is.whitelist", name));
                 return - 1;
             }
             temporary(name, 1000 * 60 * 5);
-            sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.default", name), 21);
+            sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.default", name));
             SharedVariables.updateTemporaryWhitelistNames(getServer(addDefault), true);
             return 0;
         }))).then(literal("list").executes(showTemporary -> {
@@ -42,16 +42,16 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
                 SharedVariables.updateTemporaryWhitelistNames(getServer(remove), true);
                 return 0;
             }
-            sendError(remove, new TranslatableText("arguments.temporary.whitelist.not.registered", wl.getName()), 25);
+            sendError(remove, new TranslatableText("arguments.temporary.whitelist.not.registered", wl.getName()));
             return - 1;
         })))).then(literal("connection").then(literal("whitelist").executes(whitelist -> {
             if (SharedVariables.modmdoConnectionAccepting.isValid()) {
                 long million = SharedVariables.modmdoConnectionAccepting.millions() - TimeUtil.processMillion(SharedVariables.modmdoConnectionAccepting.recording());
                 long minute = TimeUtil.processRemainingMinutes(million);
                 long second = TimeUtil.processRemainingSeconds(million);
-                sendFeedback(whitelist, new TranslatableText("connection.whitelist.accepting", minute, second), 28);
+                sendFeedback(whitelist, new TranslatableText("connection.whitelist.accepting", minute, second));
             } else {
-                sendFeedback(whitelist, new TranslatableText("connection.whitelist.no.accepting"), 28);
+                sendFeedback(whitelist, new TranslatableText("connection.whitelist.no.accepting"));
             }
             return 0;
         }).then(literal("accept").then(literal("one").executes(acceptOne -> {
@@ -59,9 +59,9 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
                 long million = SharedVariables.modmdoConnectionAccepting.millions() - TimeUtil.processMillion(SharedVariables.modmdoConnectionAccepting.recording());
                 long minute = TimeUtil.processRemainingMinutes(million);
                 long second = TimeUtil.processRemainingSeconds(million);
-                sendError(acceptOne, new TranslatableText("connection.whitelist.accepting", minute, second), 28);
+                sendError(acceptOne, new TranslatableText("connection.whitelist.accepting", minute, second));
             } else {
-                sendFeedback(acceptOne, new TranslatableText("connection.whitelist.accepting.one"), 28);
+                sendFeedback(acceptOne, new TranslatableText("connection.whitelist.accepting.one"));
                 SharedVariables.modmdoConnectionAccepting = new TemporaryWhitelist("", TimeUtil.millions(), 1000 * 60 * 5);
             }
             return 0;
@@ -69,7 +69,7 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
             if (SharedVariables.modmdoConnectionAccepting.isValid()) {
                 SharedVariables.modmdoConnectionAccepting = new TemporaryWhitelist("", - 1, - 1);
             } else {
-                sendError(cancel, new TranslatableText("connection.whitelist.no.accepting"), 28);
+                sendError(cancel, new TranslatableText("connection.whitelist.no.accepting"));
             }
             return 0;
         })))));
@@ -90,9 +90,9 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
                 builder.append("\n");
             }
             builder.delete(builder.length() - 1, builder.length());
-            sendMessage(player, new TranslatableText("commands.temporary.whitelist.list", SharedVariables.temporaryWhitelist.size(), builder.toString()), false, 22);
+            sendMessage(player, new TranslatableText("commands.temporary.whitelist.list", SharedVariables.temporaryWhitelist.size(), builder.toString()), false);
         } else {
-            sendMessage(player, new TranslatableText("commands.temporary.whitelist.none"), false, 22);
+            sendMessage(player, new TranslatableText("commands.temporary.whitelist.none"), false);
 
         }
     }
