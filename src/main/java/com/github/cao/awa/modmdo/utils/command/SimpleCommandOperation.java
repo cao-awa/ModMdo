@@ -1,14 +1,14 @@
 package com.github.cao.awa.modmdo.utils.command;
 
-import com.github.cao.awa.modmdo.storage.SharedVariables;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import com.github.cao.awa.modmdo.storage.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.mojang.brigadier.context.*;
+import com.mojang.brigadier.exceptions.*;
+import net.minecraft.network.*;
+import net.minecraft.server.*;
+import net.minecraft.server.command.*;
+import net.minecraft.server.network.*;
+import net.minecraft.text.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -17,15 +17,51 @@ public class SimpleCommandOperation {
         return minecraftTextFormat.format(loginUsers.getUser(player), "command.require.version", modMdoIdToVersionMap.get(versionRequire));
     }
 
-    public static void sendFeedback(CommandContext<ServerCommandSource> source, TranslatableText message, int version) {
+    public static void sendFeedback(CommandContext<ServerCommandSource> source, TranslatableText message) {
         try {
-            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
-                sendFeedback(source, message);
-            } else {
-                SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
-            }
+            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
         } catch (Exception e) {
-            LOGGER.error("failed to feedback command result: " + consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+        }
+    }
+
+    public static void sendFeedback(ServerCommandSource source, TranslatableText message) {
+        try {
+            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
+        } catch (Exception e) {
+            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+        }
+    }
+
+    public static void sendFeedback(ServerPlayerEntity player, TranslatableText message) {
+        try {
+            SharedVariables.sendMessage(player, minecraftTextFormat.format(loginUsers.getUser(player), message.getKey(), message.getArgs()), false);
+        } catch (Exception e) {
+            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+        }
+    }
+
+    public static void sendMessage(CommandContext<ServerCommandSource> source, TranslatableText message, boolean actionbar) {
+        try {
+            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), actionbar);
+        } catch (Exception e) {
+            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+        }
+    }
+
+    public static void sendMessage(ServerCommandSource source, TranslatableText message, boolean actionbar) {
+        try {
+            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), actionbar);
+        } catch (Exception e) {
+            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+        }
+    }
+
+    public static void sendMessage(ServerPlayerEntity source, TranslatableText message, boolean actionbar) {
+        try {
+            SharedVariables.sendMessage(source, minecraftTextFormat.format(loginUsers.getUser(source), message.getKey(), message.getArgs()), actionbar);
+        } catch (Exception e) {
+            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 
@@ -41,34 +77,6 @@ public class SimpleCommandOperation {
         }
     }
 
-    public static void sendFeedback(CommandContext<ServerCommandSource> source, TranslatableText message) {
-        SimpleCommandOperation.sendFeedback(source.getSource(), message);
-    }
-
-    public static void sendFeedback(ServerCommandSource source, TranslatableText message) {
-        try {
-            source.getPlayer();
-            source.sendFeedback(message, false);
-        } catch (Exception e) {
-            TranslatableText text = message;
-            LOGGER.info(consoleTextFormat.format(text.getKey(), text.getArgs()));
-        }
-    }
-
-    public static void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, TranslatableText message) {
-        sendFeedbackAndInform(source.getSource(), message);
-    }
-
-    public static void sendFeedbackAndInform(ServerCommandSource source, TranslatableText message) {
-        try {
-            source.getPlayer();
-            source.sendFeedback(message, true);
-        } catch (Exception e) {
-            TranslatableText text = message;
-            LOGGER.info(consoleTextFormat.format(text.getKey(), text.getArgs()));
-        }
-    }
-
     public static void sendFeedbackAndInform(ServerCommandSource source, LiteralText message) {
         try {
             source.getPlayer();
@@ -78,13 +86,9 @@ public class SimpleCommandOperation {
         }
     }
 
-    public static void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, TranslatableText message, int version) {
+    public static void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, TranslatableText message) {
         try {
-            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
-                sendFeedbackAndInform(source.getSource(), message);
-            } else {
-                SharedVariables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
-            }
+            SharedVariables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
         } catch (Exception e) {
 
         }
@@ -110,81 +114,20 @@ public class SimpleCommandOperation {
         return source.getPlayer().networkHandler.connection;
     }
 
-    public static void sendFeedback(ServerCommandSource source, TranslatableText message, int version) {
-        try {
-            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
-                sendFeedback(source, message);
-            } else {
-                SharedVariables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
-            }
-        } catch (Exception e) {
-            LOGGER.error("failed to feedback command result to ops: " + consoleTextFormat.format(message.getKey(), message.getArgs()));
-        }
-    }
-
-    public static void sendMessage(ServerCommandSource source, TranslatableText message, boolean actionbar, int version) {
-        try {
-            if (getPlayerModMdoVersion(getPlayer(source)) == version) {
-                SharedVariables.sendMessage(getPlayer(source), message, actionbar);
-            } else {
-                SharedVariables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), actionbar);
-            }
-        } catch (Exception e) {
-            LOGGER.error("failed to send message: " + consoleTextFormat.format(message.getKey(), message.getArgs()));
-        }
-    }
-
-    public static void sendMessage(CommandContext<ServerCommandSource> source, TranslatableText message, boolean actionbar, int version) {
-        try {
-            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
-                SharedVariables.sendMessage(getPlayer(source), message, actionbar);
-            } else {
-                SharedVariables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), actionbar);
-            }
-        } catch (Exception e) {
-            LOGGER.error("failed to send message: " + consoleTextFormat.format(message.getKey(), message.getArgs()));
-        }
-    }
-
-    public static void sendMessage(ServerPlayerEntity source, TranslatableText message, boolean actionbar, int version) {
-        try {
-            if (getPlayerModMdoVersion(source) >= version) {
-                SharedVariables.sendMessage(source, message, actionbar);
-            } else {
-                SharedVariables.sendMessage(source, new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), actionbar);
-            }
-        } catch (Exception e) {
-            LOGGER.error("failed to send message: " + consoleTextFormat.format(message.getKey(), message.getArgs()));
-        }
-    }
-
-    public static void sendError(CommandContext<ServerCommandSource> source, TranslatableText message, int version) {
-        try {
-            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
-                sendError(source, message);
-            } else {
-                SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
-            }
-        } catch (Exception e) {
-            LOGGER.info(consoleTextFormat.format(message.getKey(), message.getArgs()));
-        }
-    }
-
     public static void sendError(CommandContext<ServerCommandSource> source, TranslatableText message) {
-        sendError(source.getSource(), message);
+        EntrustExecution.tryTemporary(() -> {
+            sendError(source.getSource(), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()));
+        }, ex -> {
+            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+        });
     }
 
     public static void sendError(ServerCommandSource source, TranslatableText message) {
-        try {
-            source.getPlayer();
-            source.sendError(message);
-        } catch (Exception e) {
-            LOGGER.info(consoleTextFormat.format(message.getKey(), message.getArgs()));
-        }
-    }
-
-    public static void sendError(CommandContext<ServerCommandSource> source, LiteralText message) {
-        sendError(source.getSource(), message);
+        EntrustExecution.tryTemporary(() -> {
+            sendError(source, minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()));
+        }, ex -> {
+            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+        });
     }
 
     public static void sendError(ServerCommandSource source, LiteralText message) {
@@ -193,18 +136,6 @@ public class SimpleCommandOperation {
             source.sendError(message);
         } catch (Exception e) {
             LOGGER.info(message.asString());
-        }
-    }
-
-    public static void sendError(ServerCommandSource source, TranslatableText message, int version) {
-        try {
-            if (getPlayerModMdoVersion(getPlayer(source)) >= version) {
-                sendError(source, message);
-            } else {
-                SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
-            }
-        } catch (Exception e) {
-            LOGGER.info(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 }

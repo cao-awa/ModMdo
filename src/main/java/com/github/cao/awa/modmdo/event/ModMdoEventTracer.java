@@ -3,11 +3,13 @@ package com.github.cao.awa.modmdo.event;
 import com.github.cao.awa.modmdo.event.block.destroy.*;
 import com.github.cao.awa.modmdo.event.block.place.*;
 import com.github.cao.awa.modmdo.event.block.state.*;
+import com.github.cao.awa.modmdo.event.client.*;
 import com.github.cao.awa.modmdo.event.entity.damage.*;
 import com.github.cao.awa.modmdo.event.entity.death.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
-import com.github.cao.awa.modmdo.event.entity.player.chat.*;
 import com.github.cao.awa.modmdo.event.server.*;
+import com.github.cao.awa.modmdo.event.server.chat.*;
+import com.github.cao.awa.modmdo.event.server.query.*;
 import com.github.cao.awa.modmdo.event.server.tick.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
@@ -19,6 +21,7 @@ import net.minecraft.entity.player.*;
 import net.minecraft.item.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.network.packet.s2c.query.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.util.math.*;
@@ -37,6 +40,8 @@ public class ModMdoEventTracer {
     public final GameTickStartEvent gameTickStart = GameTickStartEvent.snap();
     public final ServerStartedEvent serverStarted = ServerStartedEvent.snap();
     public final GameChatEvent gameChat = GameChatEvent.snap();
+    public final ClientSettingEvent clientSetting = ClientSettingEvent.snap();
+    public final ServerQueryEvent serverQuery = ServerQueryEvent.snap();
     public final Object2ObjectOpenHashMap<String, ModMdoEvent<?>> events = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
         map.put(entityDeath.clazz(), entityDeath);
         map.put(blockDestroy.clazz(), blockDestroy);
@@ -49,6 +54,8 @@ public class ModMdoEventTracer {
         map.put(gameTickStart.clazz(), gameTickStart);
         map.put(serverStarted.clazz(), serverStarted);
         map.put(gameChat.clazz(), gameChat);
+        map.put(clientSetting.clazz(), clientSetting);
+        map.put(serverQuery.clazz(), serverQuery);
     });
 
     public void build() {
@@ -111,5 +118,13 @@ public class ModMdoEventTracer {
 
     public void submitGameChat(ServerPlayerEntity player, ChatMessageC2SPacket message, MinecraftServer server) {
         gameChat.immediately(new GameChatEvent(player, message, server));
+    }
+
+    public void submitClientSetting(ServerPlayerEntity player, ClientSettingsC2SPacket message, MinecraftServer server) {
+        clientSetting.immediately(new ClientSettingEvent(player, message, server));
+    }
+
+    public void submitQueryRequest(ClientConnection connection, QueryResponseS2CPacket packet, MinecraftServer server) {
+        serverQuery.refrainAsync(new ServerQueryEvent(connection, packet, server));
     }
 }
