@@ -1,53 +1,51 @@
 package com.github.cao.awa.modmdo.lang;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.getLanguage;
-
 public enum Language {
-    CHINESE(0, "Chinese"), ENGLISH(1, "English"), CHINESE_TW(2, "Chinese_tw");
+    ZH_CN("zh_cn"), EN_US("en_us"), ZH_TW("zh_tw"), JA_JP("ja_jp");
 
-    private final int value;
     private final String name;
 
     /**
      * init, set language
      *
-     * @param value
-     *         value(ID) of language
      * @param name
      *         name of Languagel
      */
-    Language(int value, String name) {
-        this.value = value;
+    Language(String name) {
         this.name = name;
     }
 
-    public static Language of(String name) {
-        return switch(name.toLowerCase()) {
-            case "chinese" -> CHINESE;
-            case "chinese_tw" -> CHINESE_TW;
-            case "english" -> ENGLISH;
-            default -> getLanguage();
-        };
-    }
-
     public static Language ofs(String name) {
+        name = name.toLowerCase();
         if (name.startsWith("zh_cn")) {
-            return CHINESE;
+            return ZH_CN;
         }
         if (name.startsWith("zh_tw")) {
-            return CHINESE_TW;
+            return ZH_TW;
         }
         if (name.startsWith("en_us")) {
-            return ENGLISH;
+            return EN_US;
+        }
+        if (name.startsWith("ja_jp")) {
+            return JA_JP;
         }
         return of(name);
     }
 
-    /**
-     * get language value(ID)
-     */
-    public int getValue() {
-        return value;
+    public static Language of(String name) {
+        if (name.startsWith("chinese")) {
+            return ZH_CN;
+        }
+        if (name.startsWith("chinese_tw")) {
+            return ZH_TW;
+        }
+        if (name.startsWith("english")) {
+            return EN_US;
+        }
+        if (name.startsWith("japanese")) {
+            return JA_JP;
+        }
+        return null;
     }
 
     /**

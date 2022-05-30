@@ -46,7 +46,7 @@ public class PlayerManagerMixin {
                         break;
                     if (player.getUuid().equals(uuid)) {
                         if (SharedVariables.loginUsers.hasUser(player)) {
-                            SimpleCommandOperation.sendMessage(player, new TranslatableText("login.dump.rejected"), false, 15);
+                            SimpleCommandOperation.sendMessage(player, new TranslatableText("login.dump.rejected"), false);
                         }
                         cir.setReturnValue(null);
                         cir.cancel();

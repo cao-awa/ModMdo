@@ -23,180 +23,165 @@ import net.minecraft.util.*;
 import org.json.*;
 
 import java.net.*;
-import java.util.*;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.config;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class ModMdoCommand extends SimpleCommand {
     public ModMdoCommand register() {
         SharedVariables.commandRegister.register(literal("modmdo").executes(modmdo -> {
-            SimpleCommandOperation.sendFeedback(modmdo, formatModMdoDescription(SimpleCommandOperation.getPlayer(modmdo)), Integer.MAX_VALUE);
+            SimpleCommandOperation.sendFeedback(modmdo, formatModMdoDescription(SimpleCommandOperation.getPlayer(modmdo)));
             return 0;
         }).requires(level -> level.hasPermissionLevel(4)).then(literal("here").executes(here -> {
-            SimpleCommandOperation.sendFeedback(here, formatConfigReturnMessage("here_command"), 1);
+            SimpleCommandOperation.sendFeedback(here, formatConfigReturnMessage("here_command"));
             return 2;
         }).then(literal("enable").executes(enableHere -> {
             SharedVariables.enableHereCommand = true;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(enableHere, formatEnableHere(), 1);
+            SimpleCommandOperation.sendFeedback(enableHere, formatEnableHere());
             return 1;
         })).then(literal("disable").executes(disableHere -> {
             SharedVariables.enableHereCommand = false;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(disableHere, formatDisableHere(), 1);
+            SimpleCommandOperation.sendFeedback(disableHere, formatDisableHere());
             return 0;
         }))).then(literal("secureEnchant").executes(secureEnchant -> {
-            SimpleCommandOperation.sendFeedback(secureEnchant, formatConfigReturnMessage("secure_enchant"), 1);
+            SimpleCommandOperation.sendFeedback(secureEnchant, formatConfigReturnMessage("secure_enchant"));
             return 2;
         }).then(literal("enable").executes(enableSecureEnchant -> {
             SharedVariables.enableSecureEnchant = true;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(enableSecureEnchant, formatEnableSecureEnchant(), 1);
+            SimpleCommandOperation.sendFeedback(enableSecureEnchant, formatEnableSecureEnchant());
             return 1;
         })).then(literal("disable").executes(disableSecureEnchant -> {
             SharedVariables.enableSecureEnchant = false;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(disableSecureEnchant, formatDisableSecureEnchant(), 1);
+            SimpleCommandOperation.sendFeedback(disableSecureEnchant, formatDisableSecureEnchant());
             return 0;
         }))).then(literal("useModMdoWhitelist").executes(whitelist -> {
             SharedVariables.saveVariables();
 
-            SimpleCommandOperation.sendFeedback(whitelist, formatConfigReturnMessage("modmdo_whitelist"), 1);
+            SimpleCommandOperation.sendFeedback(whitelist, formatConfigReturnMessage("modmdo_whitelist"));
             return 2;
         }).then(literal("enable").executes(enableWhitelist -> {
             config.set("modmdo_whitelist", SharedVariables.modmdoWhitelist = true);
             SharedVariables.saveVariables();
 
-            SimpleCommandOperation.sendFeedback(enableWhitelist, formatUseModMdoWhitelist(), 1);
+            SimpleCommandOperation.sendFeedback(enableWhitelist, formatUseModMdoWhitelist());
             return 1;
         })).then(literal("disable").executes(disableWhitelist -> {
             config.set("modmdo_whitelist", SharedVariables.modmdoWhitelist = false);
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(disableWhitelist, formatDisableModMdoWhitelist(), 1);
+            SimpleCommandOperation.sendFeedback(disableWhitelist, formatDisableModMdoWhitelist());
             return 0;
         }))).then(literal("rejectReconnect").executes(rejectReconnect -> {
-            SimpleCommandOperation.sendFeedback(rejectReconnect, formatConfigReturnMessage("reject_reconnect"), 1);
+            SimpleCommandOperation.sendFeedback(rejectReconnect, formatConfigReturnMessage("reject_reconnect"));
             return 2;
         }).then(literal("enable").executes(reject -> {
             if (SharedVariables.commandApplyToPlayer(1, SimpleCommandOperation.getPlayer(reject), reject)) {
                 SharedVariables.enableRejectReconnect = true;
                 SharedVariables.saveVariables();
 
-                SimpleCommandOperation.sendFeedback(reject, formatEnableRejectReconnect(), 1);
+                SimpleCommandOperation.sendFeedback(reject, new TranslatableText("reject_reconnect.true.rule.format"));
             }
             return 1;
         })).then(literal("disable").executes(receive -> {
             SharedVariables.enableRejectReconnect = false;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(receive, formatDisableRejectReconnect(), 1);
-            return 0;
-        }))).then(literal("deadMessage").executes(deadMessage -> {
-            SimpleCommandOperation.sendFeedback(deadMessage, formatConfigReturnMessage("dead_message"), 1);
-            return 2;
-        }).then(literal("enable").executes(enabled -> {
-            SharedVariables.enableDeadMessage = true;
-            SharedVariables.saveVariables();
-
-            SimpleCommandOperation.sendFeedback(enabled, formatEnableDeadMessage(), 1);
-            return 1;
-        })).then(literal("disable").executes(disable -> {
-            SharedVariables.enableDeadMessage = false;
-            SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(disable, formatDisabledDeadMessage(), 1);
+            SimpleCommandOperation.sendFeedback(receive, formatDisableRejectReconnect());
             return 0;
         }))).then(literal("itemDespawnTicks").executes(getDespawnTicks -> {
-            SimpleCommandOperation.sendFeedback(getDespawnTicks, formatItemDespawnTicks(), 1);
+            SimpleCommandOperation.sendFeedback(getDespawnTicks, formatItemDespawnTicks());
             return 2;
         }).then(literal("become").then(argument("ticks", IntegerArgumentType.integer(- 1)).executes(setTicks -> {
             SharedVariables.itemDespawnAge = IntegerArgumentType.getInteger(setTicks, "ticks");
 
-            SimpleCommandOperation.sendFeedbackAndInform(setTicks, formatItemDespawnTicks(), 1);
+            SimpleCommandOperation.sendFeedbackAndInform(setTicks, formatItemDespawnTicks());
             return 1;
         }))).then(literal("original").executes(setTicksToDefault -> {
             SharedVariables.itemDespawnAge = 6000;
 
-            SimpleCommandOperation.sendFeedbackAndInform(setTicksToDefault, formatItemDespawnTicks(), 1);
+            SimpleCommandOperation.sendFeedbackAndInform(setTicksToDefault, formatItemDespawnTicks());
             return 2;
         }))).then(literal("tickingEntities").executes(getTickingEntities -> {
-            SimpleCommandOperation.sendFeedbackAndInform(getTickingEntities, formatTickingEntitiesTick(), 1);
+            SimpleCommandOperation.sendFeedbackAndInform(getTickingEntities, formatTickingEntitiesTick());
             return 0;
         }).then(literal("enable").executes(enableTickingEntities -> {
             SharedVariables.cancelEntitiesTick = false;
 
-            SimpleCommandOperation.sendFeedbackAndInform(enableTickingEntities, formatTickingEntitiesTick(), 1);
+            SimpleCommandOperation.sendFeedbackAndInform(enableTickingEntities, formatTickingEntitiesTick());
             return 1;
         })).then(literal("disable").executes(disableTickingEntities -> {
             SharedVariables.cancelEntitiesTick = true;
 
-            SimpleCommandOperation.sendFeedbackAndInform(disableTickingEntities, formatTickingEntitiesTick(), 1);
+            SimpleCommandOperation.sendFeedbackAndInform(disableTickingEntities, formatTickingEntitiesTick());
             return 2;
         }))).then(literal("timeActive").executes(getTimeActive -> {
-            SimpleCommandOperation.sendFeedback(getTimeActive, formatConfigReturnMessage("time_active"), 15);
+            SimpleCommandOperation.sendFeedback(getTimeActive, formatConfigReturnMessage("time_active"));
             return 0;
         }).then(literal("enable").executes(enableTimeActive -> {
             SharedVariables.timeActive = true;
 
             SharedVariables.saveVariables();
 
-            SimpleCommandOperation.sendFeedback(enableTimeActive, formatConfigReturnMessage("time_active"), 15);
+            SimpleCommandOperation.sendFeedback(enableTimeActive, formatConfigReturnMessage("time_active"));
             return 0;
         })).then(literal("disable").executes(disableTimeActive -> {
             SharedVariables.timeActive = false;
 
             SharedVariables.saveVariables();
 
-            SimpleCommandOperation.sendFeedback(disableTimeActive, formatConfigReturnMessage("time_active"), 15);
+            SimpleCommandOperation.sendFeedback(disableTimeActive, formatConfigReturnMessage("time_active"));
             return 0;
         }))).then(literal("loginCheckTimeLimit").executes(getTimeLimit -> {
-            SimpleCommandOperation.sendFeedback(getTimeLimit, formatCheckerTimeLimit(), 16);
+            SimpleCommandOperation.sendFeedback(getTimeLimit, formatCheckerTimeLimit());
             return 0;
         }).then(argument("ms", IntegerArgumentType.integer(500)).executes(setTimeLimit -> {
             config.set("checker_time_limit", IntegerArgumentType.getInteger(setTimeLimit, "ms"));
 
             SharedVariables.saveVariables();
 
-            SimpleCommandOperation.sendFeedback(setTimeLimit, formatCheckerTimeLimit(), 16);
+            SimpleCommandOperation.sendFeedback(setTimeLimit, formatCheckerTimeLimit());
             return 0;
         }))).then(literal("language").executes(getLanguage -> {
-            SimpleCommandOperation.sendFeedback(getLanguage, new TranslatableText("language.default", SharedVariables.getLanguage()), 20);
+            SimpleCommandOperation.sendFeedback(getLanguage, new TranslatableText("language.default", SharedVariables.getLanguage()));
             return 0;
         }).then(literal("zh_cn").executes(chinese -> {
-            config.set("default_language", com.github.cao.awa.modmdo.lang.Language.CHINESE);
+            config.set("default_language", com.github.cao.awa.modmdo.lang.Language.ZH_CN);
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(chinese, new TranslatableText("language.default", SharedVariables.getLanguage()), 20);
+            SimpleCommandOperation.sendFeedback(chinese, new TranslatableText("language.default", SharedVariables.getLanguage()));
             return 0;
         })).then(literal("en_us").executes(english -> {
-            config.set("default_language", Language.ENGLISH);
+            config.set("default_language", Language.EN_US);
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(english, new TranslatableText("language.default", SharedVariables.getLanguage()), 20);
+            SimpleCommandOperation.sendFeedback(english, new TranslatableText("language.default", SharedVariables.getLanguage()));
             return 0;
         }))).then(literal("maxEnchantmentLevel").executes(getEnchantControlEnable -> {
-            SimpleCommandOperation.sendFeedback(getEnchantControlEnable, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"), 21);
+            SimpleCommandOperation.sendFeedback(getEnchantControlEnable, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
             return 0;
         }).then(literal("enable").executes(enableEnchantLimit -> {
             SharedVariables.enchantLevelController.setEnabledControl(true);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(enableEnchantLimit, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"), 21);
+            SimpleCommandOperation.sendFeedback(enableEnchantLimit, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
             return 0;
         })).then(literal("disable").executes(disableEnchantLimit -> {
             SharedVariables.enchantLevelController.setEnabledControl(false);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(disableEnchantLimit, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"), 21);
+            SimpleCommandOperation.sendFeedback(disableEnchantLimit, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
             return 0;
         })).then(literal("limit").then(literal("all").then(argument("all", IntegerArgumentType.integer(0, Short.MAX_VALUE)).executes(setDef -> {
             short level = (short) IntegerArgumentType.getInteger(setDef, "all");
             SharedVariables.enchantLevelController.setAll(level);
-            SimpleCommandOperation.sendFeedback(setDef, new TranslatableText("enchantment.max.level.limit.all", level), 21);
+            SimpleCommandOperation.sendFeedback(setDef, new TranslatableText("enchantment.max.level.limit.all", level));
             return 0;
         })).then(literal("default").executes(recoveryAll -> {
             SharedVariables.enchantLevelController.allDefault();
-            SimpleCommandOperation.sendFeedback(recoveryAll, new TranslatableText("enchantment.max.level.limit.all.default"), 21);
+            SimpleCommandOperation.sendFeedback(recoveryAll, new TranslatableText("enchantment.max.level.limit.all.default"));
             return 0;
         }))).then(literal("appoint").then(argument("appoint", EnchantmentArgumentType.enchantment()).executes(getLimit -> {
             Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(getLimit, "appoint"));
             short level = SharedVariables.enchantLevelController.get(name).getMax();
-            SimpleCommandOperation.sendFeedback(getLimit, new TranslatableText("enchantment.max.level.limit", name, level), 21);
+            SimpleCommandOperation.sendFeedback(getLimit, new TranslatableText("enchantment.max.level.limit", name, level));
             SharedVariables.saveEnchantmentMaxLevel();
             return 0;
         }).then(argument("limit", IntegerArgumentType.integer(0, Short.MAX_VALUE)).executes(setLimit -> {
@@ -204,51 +189,51 @@ public class ModMdoCommand extends SimpleCommand {
             short level = (short) IntegerArgumentType.getInteger(setLimit, "limit");
             SharedVariables.enchantLevelController.set(name, level);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(setLimit, new TranslatableText("enchantment.max.level.limit", name, level), 21);
+            SimpleCommandOperation.sendFeedback(setLimit, new TranslatableText("enchantment.max.level.limit", name, level));
             return 0;
         })).then(literal("default").executes(recoveryLevel -> {
             Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(recoveryLevel, "appoint"));
             short level = SharedVariables.enchantLevelController.get(name).getDefaultMax();
             SharedVariables.enchantLevelController.set(name, level);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(recoveryLevel, new TranslatableText("enchantment.max.level.limit", name, level), 21);
+            SimpleCommandOperation.sendFeedback(recoveryLevel, new TranslatableText("enchantment.max.level.limit", name, level));
             return 0;
         })))))).then(literal("clearEnchantIfLevelTooHigh").executes(getClear -> {
-            SimpleCommandOperation.sendFeedback(getClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", SharedVariables.clearEnchantIfLevelTooHigh ? "enabled" : "disabled"), 21);
+            SimpleCommandOperation.sendFeedback(getClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", SharedVariables.clearEnchantIfLevelTooHigh ? "enabled" : "disabled"));
             return 0;
         }).then(literal("enable").executes(enableClear -> {
             SharedVariables.clearEnchantIfLevelTooHigh = true;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(enableClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", "enabled"), 21);
+            SimpleCommandOperation.sendFeedback(enableClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", "enabled"));
             return 0;
         })).then(literal("disable").executes(disableClear -> {
             SharedVariables.clearEnchantIfLevelTooHigh = false;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(disableClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", "disabled"), 21);
+            SimpleCommandOperation.sendFeedback(disableClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", "disabled"));
             return 0;
         }))).then(literal("rejectNoFallCheat").executes(getRejectNoFall -> {
-            SimpleCommandOperation.sendFeedback(getRejectNoFall, new TranslatableText(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
+            SimpleCommandOperation.sendFeedback(getRejectNoFall, new TranslatableText(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
             return 0;
         }).then(literal("enable").executes(reject -> {
             SharedVariables.rejectNoFallCheat = true;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(reject, new TranslatableText(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
+            SimpleCommandOperation.sendFeedback(reject, new TranslatableText(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
             return 0;
         })).then(literal("disable").executes(receive -> {
             SharedVariables.rejectNoFallCheat = false;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(receive, new TranslatableText(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"), 21);
+            SimpleCommandOperation.sendFeedback(receive, new TranslatableText(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
             return 0;
         }))).then(literal("onlyCheckIdentifier").executes(check -> {
-            SimpleCommandOperation.sendFeedback(check, formatConfigReturnMessage("whitelist_only_id"), 28);
+            SimpleCommandOperation.sendFeedback(check, formatConfigReturnMessage("whitelist_only_id"));
             return 0;
         }).then(literal("enable").executes(enable -> {
             config.set("whitelist_only_id", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigReturnMessage("whitelist_only_id"), 28);
+            SimpleCommandOperation.sendFeedback(enable, formatConfigReturnMessage("whitelist_only_id"));
             return 0;
         })).then(literal("disable").executes(disable -> {
             config.set("whitelist_only_id", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("whitelist_only_id"), 28);
+            SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("whitelist_only_id"));
             return 0;
         }))).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
             Whitelist wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
@@ -259,43 +244,43 @@ public class ModMdoCommand extends SimpleCommand {
                 SharedVariables.saveVariables();
                 return 0;
             }
-            SimpleCommandOperation.sendError(remove, new TranslatableText("arguments.permanent.whitelist.not.registered"), 25);
+            SimpleCommandOperation.sendError(remove, new TranslatableText("arguments.permanent.whitelist.not.registered"));
             return - 1;
         }))).then(literal("list").executes(showWhiteList -> {
             showWhitelist(showWhiteList);
             return 0;
         }))).then(literal("compatibleOnlineMode").executes(getCompatible -> {
-            SimpleCommandOperation.sendFeedback(getCompatible, formatConfigReturnMessage("compatible_online_mode"), 28);
+            SimpleCommandOperation.sendFeedback(getCompatible, formatConfigReturnMessage("compatible_online_mode"));
             return 0;
         }).then(literal("enable").executes(enable -> {
             config.set("compatible_online_mode", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigReturnMessage("compatible_online_mode"), 28);
+            SimpleCommandOperation.sendFeedback(enable, formatConfigReturnMessage("compatible_online_mode"));
             return 0;
         })).then(literal("disable").executes(disable -> {
             config.set("compatible_online_mode", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("compatible_online_mode"), 28);
+            SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("compatible_online_mode"));
             return 0;
         }))).then(literal("modmdoConnecting").executes(modmdoConnecting -> {
-            SimpleCommandOperation.sendFeedback(modmdoConnecting, formatConfigReturnMessage("modmdo_connecting"), 28);
+            SimpleCommandOperation.sendFeedback(modmdoConnecting, formatConfigReturnMessage("modmdo_connecting"));
             return 0;
         }).then(literal("enable").executes(enable -> {
             config.set("modmdo_connecting", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigReturnMessage("modmdo_connecting"), 28);
+            SimpleCommandOperation.sendFeedback(enable, formatConfigReturnMessage("modmdo_connecting"));
             return 0;
         })).then(literal("disable").executes(disable -> {
             config.set("modmdo_connecting", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("modmdo_connecting"), 28);
+            SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("modmdo_connecting"));
             return 0;
         }))).then(literal("connection").then(literal("connections").then(argument("name", ModMdoConnectionArgumentType.connection()).executes(getConnectInfo -> {
             // TODO: 2022/5/10
             return 0;
         }).then(literal("disconnect").executes(disconnect -> {
             Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(disconnect, "name");
-            EntrustExecution.tryTemporary(pair.getRight()::disconnect, nullProcessor -> SimpleCommandOperation.sendError(disconnect, new TranslatableText("modmdo.connection.not.found", pair.getLeft()), 28));
+            EntrustExecution.tryTemporary(pair.getRight()::disconnect, nullProcessor -> SimpleCommandOperation.sendError(disconnect, new TranslatableText("modmdo.connection.not.found", pair.getLeft())));
             return 0;
         })).then(literal("traffic").executes(test -> {
             Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(test, "name");
-            EntrustExecution.tryTemporary(pair.getRight()::sendTraffic, nullProcessor -> SimpleCommandOperation.sendError(test, new TranslatableText("modmdo.connection.not.found", pair.getLeft()), 28));
+            EntrustExecution.tryTemporary(pair.getRight()::sendTraffic, nullProcessor -> SimpleCommandOperation.sendError(test, new TranslatableText("modmdo.connection.not.found", pair.getLeft())));
             return 0;
         })))).then(literal("connect").then(argument("ip", StringArgumentType.string()).then(argument("port", IntegerArgumentType.integer(0, 65565)).executes(connectTo -> {
             if (config.getConfigString("server_name") != null) {
@@ -312,88 +297,88 @@ public class ModMdoCommand extends SimpleCommand {
         }))).then(literal("config").then(literal("chatting").then(literal("format").then(argument("format", StringArgumentType.string()).executes(format -> {
             String formatting = StringArgumentType.getString(format, "format");
             config.set("modmdo_connection_chatting_format", formatting);
-            SimpleCommandOperation.sendFeedback(format, new TranslatableText("modmdo.connection.chatting.format", formatting.replace("%server", "TestServer").replace("%name", "PlayerName233").replace("%msg", "Hi!")), Integer.MAX_VALUE);
+            SimpleCommandOperation.sendFeedback(format, new TranslatableText("modmdo.connection.chatting.format", formatting.replace("%server", "TestServer").replace("%name", "PlayerName233").replace("%msg", "Hi!")));
             return 0;
         }))).then(literal("accept").executes(getAccept -> {
-            SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"), 28);
+            SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"));
             return 0;
         }).then(literal("enable").executes(enable -> {
             config.set("modmdo_connection_chatting_accept", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"), 28);
+            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         })).then(literal("disable").executes(disable -> {
             config.set("modmdo_connection_chatting_accept", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"), 28);
+            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         }))).then(literal("forward").executes(getForward -> {
-            SimpleCommandOperation.sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"), 28);
+            SimpleCommandOperation.sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"));
             return 0;
         }).then(literal("enable").executes(enable -> {
             config.set("modmdo_connection_chatting_forward", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"), 28);
+            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         })).then(literal("disable").executes(disable -> {
             config.set("modmdo_connection_chatting_forward", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"), 28);
+            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"));
             return 0;
         })))).then(literal("gameMessage").then(literal("playerJoin").then(literal("forward").executes(getForward -> {
-            SimpleCommandOperation.sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"), 28);
+            SimpleCommandOperation.sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"));
             return 0;
         }).then(literal("enable").executes(enable -> {
             config.set("modmdo_connection_player_join_forward", false);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"), 28);
+            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         })).then(literal("disable").executes(disable -> {
             config.set("modmdo_connection_player_join_forward", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"), 28);
+            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         }))).then(literal("accept").executes(getAccept -> {
-            SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"), 28);
+            SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"));
             return 0;
         })).then(literal("enable").executes(enable -> {
             config.set("modmdo_connection_player_join_accept", false);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"), 28);
+            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         })).then(literal("disable").executes(disable -> {
             config.set("modmdo_connection_player_join_accept", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"), 28);
+            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         }))).then(literal("playerQuit").then(literal("forward").executes(getForward -> {
-            SimpleCommandOperation.sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"), 28);
+            SimpleCommandOperation.sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"));
             return 0;
         }).then(literal("enable").executes(enable -> {
             config.set("modmdo_connection_player_quit_forward", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"), 28);
+            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         })).then(literal("disable").executes(disable -> {
             config.set("modmdo_connection_player_quit_forward", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"), 28);
+            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         }))).then(literal("accept").executes(getAccept -> {
-            SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"), 28);
+            SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"));
             return 0;
         }).then(literal("enable").executes(enable -> {
             config.set("modmdo_connection_player_quit_accept", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"), 28);
+            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         })).then(literal("disable").executes(disable -> {
             config.set("modmdo_connection_player_quit_accept", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"), 28);
+            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
         })))))))).then(literal("event").then(literal("reload").executes(e -> {
             Pair<Integer, Integer> pair = ModMdoStdInitializer.loadEvent(true);
-            sendFeedback(e, new TranslatableText("modmdo.event.reload.success", pair.getLeft(), pair.getRight()), 29);
+            sendFeedback(e, new TranslatableText("modmdo.event.reload.success", pair.getLeft(), pair.getRight()));
             return 0;
         }))));
         return this;
@@ -408,9 +393,9 @@ public class ModMdoCommand extends SimpleCommand {
                 builder.append(wl.getName()).append(", ");
             }
             builder.delete(builder.length() - 2, builder.length());
-            SimpleCommandOperation.sendMessage(player, new TranslatableText("commands.modmdo.whitelist.list", SharedVariables.whitelist.size(), builder.toString()), false, 22);
+            SimpleCommandOperation.sendMessage(player, new TranslatableText("commands.modmdo.whitelist.list", SharedVariables.whitelist.size(), builder.toString()), false);
         } else {
-            SimpleCommandOperation.sendMessage(player, new TranslatableText("commands.modmdo.whitelist.none"), false, 22);
+            SimpleCommandOperation.sendMessage(player, new TranslatableText("commands.modmdo.whitelist.none"), false);
 
         }
     }
@@ -463,20 +448,8 @@ public class ModMdoCommand extends SimpleCommand {
         return new TranslatableText("modmdo_whitelist.false.rule.format");
     }
 
-    public TranslatableText formatEnableRejectReconnect() {
-        return new TranslatableText("reject_reconnect.true.rule.format");
-    }
-
     public TranslatableText formatDisableRejectReconnect() {
         return new TranslatableText("reject_reconnect.reject.false.rule.format");
-    }
-
-    public TranslatableText formatEnableDeadMessage() {
-        return new TranslatableText("dead_message.true.rule.format");
-    }
-
-    public TranslatableText formatDisabledDeadMessage() {
-        return new TranslatableText("dead_message.false.rule.format");
     }
 
     public TranslatableText formatModMdoDescription(ServerPlayerEntity player) {
@@ -487,13 +460,5 @@ public class ModMdoCommand extends SimpleCommand {
             modmdoVersion = new TranslatableText("modmdo.description.you.do.not.have.modmdo");
         }
         return new TranslatableText("modmdo.description", SharedVariables.MODMDO_VERSION_NAME, SharedVariables.RELEASE_TIME, modmdoVersion);
-    }
-
-    public TranslatableText formatJoinGameFollow() {
-        return TranslateUtil.formatRule("follow.join.server", config.getConfigString("join_server_follow").toLowerCase(Locale.ROOT));
-    }
-
-    public TranslatableText formatRunCommandFollow() {
-        return TranslateUtil.formatRule("follow.run.command", config.getConfigString("run_command_follow").toLowerCase(Locale.ROOT));
     }
 }

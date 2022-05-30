@@ -5,6 +5,7 @@ import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.trigger.selector.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
+import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.list.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -26,6 +27,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
     private boolean active = true;
     private String key = "";
     private EntitySelectorType selector = EntitySelectorType.SELF;
+    private Language dictionary = null;
 
     @Override
     public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
@@ -41,6 +43,9 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         setTarget(event.getTargeted());
         selector = EntitySelectorType.of(metadata.getString("selector"));
         setServer(getTarget().get(0).getServer());
+        if (message.has("dictionary")) {
+            dictionary = Language.ofs(message.getString("dictionary"));
+        }
         setTrace(trace);
         return this;
     }
@@ -82,13 +87,13 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                     break;
                 }
                 EntrustExecution.tryTemporary(() -> {
-                    formatter.get("^{variable}").accept(this, s.setSub(name));
+                    BASE_FORMATTER.get("^{variable}").accept(this, s.setSub(name));
                 }, e -> {
                     err("Cannot find target variable: " + name, e);
                     active = false;
                 });
             } else {
-                EntrustExecution.tryTemporary(() -> formatter.get(s.get()).accept(this, s), ex -> {
+                EntrustExecution.tryTemporary(() -> BASE_FORMATTER.get(s.get()).accept(this, s), ex -> {
                 });
             }
         }
@@ -107,10 +112,13 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         else
             user = loginUsers.getUser(getTarget().get(0).getUuid());
 
-        if (user != null && user.getLanguage() != null) {
-            return minecraftTextFormat.format(user, key, objs);
+        if (dictionary == null) {
+            if (user != null && user.getLanguage() != null) {
+                return minecraftTextFormat.format(user, key, objs);
+            }
+            return minecraftTextFormat.format(getLanguage(), key, objs);
         }
-        return minecraftTextFormat.format(getLanguage(), key, objs);
+        return minecraftTextFormat.format(dictionary, key, objs);
     }
 
     public UnmodifiableListReceptacle<String> supported() {

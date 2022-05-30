@@ -129,12 +129,12 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
 
     public void cancelSub(ServerPlayerEntity player) {
         subs.removeIf(counter -> counter.getTarget() == player);
-        sendMessage(player, new TranslatableText("subscribe.remove.from", "tps"), false, 20);
+        sendMessage(player, new TranslatableText("subscribe.remove.from", "tps"), false);
     }
 
     public void addSub(ServerPlayerEntity player, long ticks) {
         subs.add(new TargetCountLong<>(player, ticks));
-        sendMessage(player, new TranslatableText("subscribe.add.to", "tps"), false, 20);
+        sendMessage(player, new TranslatableText("subscribe.add.to", "tps"), false);
     }
 
     public boolean hasSub(ServerPlayerEntity player) {

@@ -22,29 +22,23 @@ public class DimensionHereCommand extends SimpleCommand {
                     XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
                     String dimension = DimensionUtil.getDimension(whoUseHere);
                     for (ServerPlayerEntity player : p.getPlayerList()) {
-                        if (SharedVariables.isUserHereReceive(player.getUuid())) {
-                            TranslatableText hereMessage = formatHereTip(dimension, xyz, whoUseHere);
-                            sendMessage(player, hereMessage, false, 1);
-                        }
+                        TranslatableText hereMessage = formatHereTip(dimension, xyz, whoUseHere);
+                        sendMessage(player, hereMessage, false);
                     }
                     whoUseHere.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), whoUseHere);
-                    sendFeedback(source, formatHereFeedBack(source.getPlayer()), 1);
+                    sendFeedback(source, new TranslatableText("command.here.feedback", whoUseHere.getName().asString()));
                     return 1;
                 } catch (Exception e) {
-                    sendError(source, formatHereFailedFeedBack(), 1);
+                    sendError(source, new TranslatableText("command.here.failed.feedback"));
 
                     return - 1;
                 }
             } else {
-                sendError(source, formatHereDisabled(), 1);
+                sendError(source, new TranslatableText("here_command.false.rule.format"));
             }
             return 0;
         }));
         return this;
-    }
-
-    public TranslatableText formatHereDisabled() {
-        return new TranslatableText("here_command.disable.rule.format");
     }
 
     public TranslatableText formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity whoUseHere) {
@@ -63,14 +57,5 @@ public class DimensionHereCommand extends SimpleCommand {
         }
 
         return new TranslatableText("command.dhere", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), DimensionUtil.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
-    }
-
-    public TranslatableText formatHereFeedBack(ServerPlayerEntity player) {
-        String playerName = player.getName().asString();
-        return new TranslatableText("command.here.feedback", playerName);
-    }
-
-    public TranslatableText formatHereFailedFeedBack() {
-        return new TranslatableText("command.here.failed.feedback");
     }
 }

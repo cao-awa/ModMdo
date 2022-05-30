@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.mixins;
 
-import com.github.cao.awa.modmdo.lang.Language;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -105,7 +104,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onClientSettings", at = @At("HEAD"))
     private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            loginUsers.getUser(player).setLanguage(Language.of(packet.getLanguage()));
+            event.submitClientSetting(player, packet, server);
         }
     }
 

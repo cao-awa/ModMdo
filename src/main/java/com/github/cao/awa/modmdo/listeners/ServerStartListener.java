@@ -18,13 +18,15 @@ public class ServerStartListener {
                 commandRegister = new ModMdoCommandRegister(server);
 
                 ModMdoStdInitializer.initForLevel(server);
-            });
+            }, Throwable::printStackTrace);
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (SharedVariables.isActive()) {
                 tps.init(server, - 1);
-                event.submitServerStarted(server);
+                if (event != null) {
+                    event.submitServerStarted(server);
+                }
             }
         });
 

@@ -88,13 +88,13 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
                     break;
                 }
                 EntrustExecution.tryTemporary(() -> {
-                    formatter.get("^{variable}").accept(this, s.setSub(name));
+                    TARGETED_FORMATTER.get("^{variable}").accept(this, s.setSub(name));
                 }, e -> {
                     err("Cannot find target variable: " + name, e);
                     active = false;
                 });
             } else {
-                EntrustExecution.notNull(formatter.get(s.get()), receptacle -> receptacle.accept(this, s));
+                EntrustExecution.notNull(TARGETED_FORMATTER.get(s.get()), receptacle -> receptacle.accept(this, s));
             }
         }
         if (! active) {

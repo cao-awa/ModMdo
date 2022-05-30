@@ -21,6 +21,7 @@
         "entity.player.ServerPlayerEntityMixin",
         "explosion.ExplosionMixin",
         "network.ServerNetworkIoMixin",
+        "network.ServerQueryNetworkHandlerMixin",
         "tracker.DamageTrackerMixin",
         "world.WorldMixin"
     ],

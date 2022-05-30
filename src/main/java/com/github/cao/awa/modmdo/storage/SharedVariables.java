@@ -1,59 +1,42 @@
 package com.github.cao.awa.modmdo.storage;
 
-import com.github.cao.awa.modmdo.cavas.CavaUtil;
-import com.github.cao.awa.modmdo.commands.ModMdoCommandRegister;
-import com.github.cao.awa.modmdo.event.ModMdoEventTracer;
-import com.github.cao.awa.modmdo.event.trigger.ModMdoTriggerBuilder;
-import com.github.cao.awa.modmdo.event.variable.ModMdoPersistent;
-import com.github.cao.awa.modmdo.event.variable.ModMdoVariableBuilder;
-import com.github.cao.awa.modmdo.extra.loader.ModMdoExtra;
-import com.github.cao.awa.modmdo.extra.loader.ModMdoExtraLoader;
-import com.github.cao.awa.modmdo.format.console.ConsoleTextFormat;
-import com.github.cao.awa.modmdo.format.minecraft.MinecraftTextFormat;
+import com.github.cao.awa.modmdo.cavas.*;
+import com.github.cao.awa.modmdo.commands.*;
+import com.github.cao.awa.modmdo.event.*;
+import com.github.cao.awa.modmdo.event.trigger.*;
+import com.github.cao.awa.modmdo.event.variable.*;
+import com.github.cao.awa.modmdo.extra.loader.*;
+import com.github.cao.awa.modmdo.format.console.*;
+import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.Language;
-import com.github.cao.awa.modmdo.mixins.MinecraftServerSession;
-import com.github.cao.awa.modmdo.network.forwarder.process.ModMdoDataProcessor;
-import com.github.cao.awa.modmdo.ranking.Rank;
-import com.github.cao.awa.modmdo.server.login.ServerLogin;
-import com.github.cao.awa.modmdo.subscribable.TickPerSecondAnalyzer;
-import com.github.cao.awa.modmdo.type.ModMdoType;
-import com.github.cao.awa.modmdo.utils.command.SimpleCommandOperation;
-import com.github.cao.awa.modmdo.utils.enchant.EnchantLevelController;
-import com.github.cao.awa.modmdo.utils.usr.User;
-import com.github.cao.awa.modmdo.utils.usr.UserUtil;
-import com.github.cao.awa.modmdo.whitelist.PermanentWhitelist;
-import com.github.cao.awa.modmdo.whitelist.TemporaryWhitelist;
-import com.github.cao.awa.modmdo.whitelist.WhiteLists;
-import com.github.zhuaidadaya.rikaishinikui.handler.config.DiskObjectConfigUtil;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.EntrustExecution;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.EntrustParser;
-import com.mojang.brigadier.context.CommandContext;
-import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.ScoreboardCriterion;
-import net.minecraft.scoreboard.ServerScoreboard;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.github.cao.awa.modmdo.mixins.*;
+import com.github.cao.awa.modmdo.network.forwarder.process.*;
+import com.github.cao.awa.modmdo.ranking.*;
+import com.github.cao.awa.modmdo.server.login.*;
+import com.github.cao.awa.modmdo.subscribable.*;
+import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.utils.command.*;
+import com.github.cao.awa.modmdo.utils.enchant.*;
+import com.github.cao.awa.modmdo.utils.usr.*;
+import com.github.cao.awa.modmdo.whitelist.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.mojang.brigadier.context.*;
+import io.netty.buffer.*;
+import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.network.*;
+import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.scoreboard.*;
+import net.minecraft.server.*;
+import net.minecraft.server.command.*;
+import net.minecraft.server.network.*;
+import net.minecraft.text.*;
+import net.minecraft.util.*;
+import org.apache.logging.log4j.*;
+import org.json.*;
 
-import java.net.SocketAddress;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.UUID;
+import java.text.*;
+import java.util.*;
 
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
@@ -75,15 +58,9 @@ public class SharedVariables {
     public static final Identifier TOKEN = new Identifier("modmdo:token");
     public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> variables = new Object2ObjectOpenHashMap<>();
     public static String identifier;
-    public static String rankingObject = "Nan";
-    public static int rankingRandomSwitchInterval = 20 * 60 * 8;
-    public static boolean rankingOnlineTimeScaleChanged = false;
-    public static String rankingOnlineTimeScale = "minute";
     public static String entrust = "ModMdo";
-    public static boolean rankingSwitchNoDump = true;
     public static boolean enableRanking = false;
     public static boolean enableHereCommand = true;
-    public static boolean enableDeadMessage = true;
     public static boolean enableCava = true;
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
@@ -91,10 +68,8 @@ public class SharedVariables {
     public static boolean timeActive = true;
     public static boolean rejectNoFallCheat = true;
     public static boolean modmdoWhitelist = false;
-    public static boolean enableBlockRecorder = false;
     public static UserUtil rejectUsers;
     public static UserUtil loginUsers;
-    public static UserUtil users;
     public static DiskObjectConfigUtil config;
     public static DiskObjectConfigUtil staticConfig;
     public static CavaUtil cavas;
@@ -104,8 +79,6 @@ public class SharedVariables {
     public static EnchantLevelController enchantLevelController;
     public static boolean clearEnchantIfLevelTooHigh = false;
     public static ServerLogin serverLogin = new ServerLogin();
-    public static ObjectArrayList<Rank> rankingObjects = new ObjectArrayList<>();
-    public static ObjectArrayList<Rank> rankingObjectsNoDump = new ObjectArrayList<>();
     public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
     public static ObjectArrayList<String> modmdoConnectionNames = new ObjectArrayList<>();
     public static ObjectArrayList<ModMdoDataProcessor> modmdoConnections = new ObjectArrayList<>();
@@ -140,14 +113,8 @@ public class SharedVariables {
         fractionDigits2.setMinimumFractionDigits(2);
         fractionDigits2.setMaximumFractionDigits(2);
 
-        rankingObject = "Nan";
-        rankingRandomSwitchInterval = 20 * 60 * 8;
-        rankingOnlineTimeScaleChanged = false;
-        rankingOnlineTimeScale = "minute";
-        rankingSwitchNoDump = true;
         enableRanking = false;
         enableHereCommand = true;
-        enableDeadMessage = true;
         enableCava = true;
         enableSecureEnchant = true;
         enableRejectReconnect = true;
@@ -155,12 +122,8 @@ public class SharedVariables {
         timeActive = true;
         rejectUsers = new UserUtil();
         loginUsers = new UserUtil();
-        users = new UserUtil();
         cavas = new CavaUtil();
         itemDespawnAge = 6000;
-
-        rankingObjects = new ObjectArrayList<>();
-        rankingObjectsNoDump = new ObjectArrayList<>();
 
         enchantLevelController.setNoVanillaDefaultMaxLevel((short) 5);
 
@@ -200,18 +163,6 @@ public class SharedVariables {
         config.set("enchantment_level_limit", enchantLevelController.toJSONObject());
     }
 
-    public static void showScoreboard(MinecraftServer server, String name, String display) {
-        ServerScoreboard scoreboard = server.getScoreboard();
-
-        if (scoreboard.containsObjective(name)) {
-            config.set("ranking_object", rankingObject = display);
-
-            ((Scoreboard) scoreboard).setObjectiveSlot(1, scoreboard.getObjective(name));
-        } else {
-            throw new IllegalStateException();
-        }
-    }
-
     public static void addScoreboard(MinecraftServer server, Text displayName, String id) {
         ServerScoreboard scoreboard = server.getScoreboard();
         if (scoreboard.containsObjective(id)) {
@@ -227,28 +178,6 @@ public class SharedVariables {
         return supportedRankingObjects.get(ranking).isStat();
     }
 
-    public static String getRandomRankingObject() {
-        if (rankingObjects.size() > 0) {
-            Random r = new Random();
-            return rankingObjects.toArray()[Math.max(0, r.nextInt(rankingObjects.size()))].toString();
-        } else {
-            return "Nan";
-        }
-    }
-
-    public static String getRandomRankingObjectNoDump() {
-        if (rankingObjectsNoDump.size() == 0) {
-            rankingObjectsNoDump.addAll(rankingObjects.stream().toList());
-        }
-        if (rankingObjectsNoDump.size() > 0) {
-            Random r = new Random();
-            Rank ranking = (Rank) rankingObjectsNoDump.toArray()[Math.max(0, r.nextInt(rankingObjectsNoDump.size()))];
-            rankingObjectsNoDump.remove(ranking);
-            return ranking.getName();
-        } else {
-            return "Nan";
-        }
-    }
 
     public static String getServerLevelPath(MinecraftServer server) {
         return (server.isDedicated() ? "" : "saves/") + getServerLevelNamePath(server);
@@ -283,16 +212,6 @@ public class SharedVariables {
         player.sendMessage(message, actionBar);
     }
 
-    public static String formatAddress(SocketAddress socketAddress) {
-        String address = socketAddress.toString();
-
-        try {
-            return address.substring(0, address.indexOf("/")) + ":" + address.substring(address.lastIndexOf(":") + 1);
-        } catch (Exception e) {
-            return address;
-        }
-    }
-
     public static boolean equalsModMdoVersion(ServerPlayerEntity player) {
         return getPlayerModMdoVersion(player) == MODMDO_VERSION;
     }
@@ -318,9 +237,8 @@ public class SharedVariables {
     }
 
     public static void defaultConfig() {
-        config.setIfNoExist("default_language", Language.ENGLISH);
+        config.setIfNoExist("default_language", Language.EN_US);
         config.setIfNoExist("here_command", true);
-        config.setIfNoExist("dead_message", true);
         config.setIfNoExist("cava", true);
         config.setIfNoExist("secure_enchant", true);
         config.setIfNoExist("modmdo_whitelist", false);
@@ -344,7 +262,6 @@ public class SharedVariables {
 
     public static void saveVariables() {
         config.set("here_command", enableHereCommand);
-        config.set("dead_message", enableDeadMessage);
         config.set("cava", enableCava);
         config.set("secure_enchant", enableSecureEnchant);
         config.set("reject_reconnect", enableRejectReconnect);
@@ -377,57 +294,8 @@ public class SharedVariables {
         config.set("cavas", cavas.toJSONObject());
     }
 
-    public static void setUserProfile(User user, String changeKey, String changeValue) {
-        JSONObject userInfo;
-        try {
-            userInfo = users.getJSONObject(user.getID());
-        } catch (Exception e) {
-            userInfo = new JSONObject().put("uuid", user.getID()).put("name", user.getName());
-        }
-        userInfo.put(changeKey, changeValue);
-        users.put(user.getID(), userInfo);
-
-        updateUserProfiles();
-    }
-
-    public static void updateUserProfiles() {
-        config.set("user_profiles", users.toJSONObject());
-    }
-
     public static Language getLanguage() {
         return Language.ofs(config.getConfigString("default_language"));
-    }
-
-    public static boolean isUserHereReceive(UUID userUUID) {
-        try {
-            return users.getUserConfig(userUUID.toString(), "receiveHereMessage").toString().equals("receive");
-        } catch (Exception e) {
-            return enableHereCommand;
-        }
-    }
-
-    public static String getUserHereReceive(UUID userUUID) {
-        try {
-            return users.getUserConfig(userUUID.toString(), "receiveHereMessage").toString();
-        } catch (Exception e) {
-            return enableHereCommand ? "receive" : "rejected";
-        }
-    }
-
-    public static boolean isUserDeadMessageReceive(UUID userUUID) {
-        try {
-            return users.getUserConfig(userUUID.toString(), "receiveDeadMessage").toString().equals("receive");
-        } catch (Exception e) {
-            return enableDeadMessage;
-        }
-    }
-
-    public static String getUserDeadMessageReceive(UUID userUUID) {
-        try {
-            return users.getUserConfig(userUUID.toString(), "receiveDeadMessage").toString();
-        } catch (Exception e) {
-            return enableDeadMessage ? "receive" : "rejected";
-        }
     }
 
     public static void updateWhitelistNames(MinecraftServer server, boolean force) {
