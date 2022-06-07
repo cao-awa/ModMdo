@@ -27,7 +27,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
     private boolean active = true;
     private String key = "";
     private EntitySelectorType selector = EntitySelectorType.SELF;
-    private Language dictionary = null;
+    private Dictionary dictionary = null;
 
     @Override
     public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
@@ -44,7 +44,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         selector = EntitySelectorType.of(metadata.getString("selector"));
         setServer(getTarget().get(0).getServer());
         if (message.has("dictionary")) {
-            dictionary = Language.ofs(message.getString("dictionary"));
+            dictionary = new Dictionary(message.getString("dictionary"));
         }
         setTrace(trace);
         return this;

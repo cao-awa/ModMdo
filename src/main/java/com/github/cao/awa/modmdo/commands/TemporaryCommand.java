@@ -1,6 +1,8 @@
 package com.github.cao.awa.modmdo.commands;
 
+import com.github.cao.awa.modmdo.commands.argument.ban.*;
 import com.github.cao.awa.modmdo.commands.argument.whitelist.*;
+import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.cao.awa.modmdo.whitelist.*;
@@ -11,12 +13,24 @@ import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
 
-public class TemporaryWhitelistCommand extends SimpleCommand {
+public class TemporaryCommand extends SimpleCommand {
     @Override
-    public TemporaryWhitelistCommand register() {
-        SharedVariables.commandRegister.register(literal("temporary").then(literal("whitelist").then(literal("add").then(argument("name", StringArgumentType.string()).executes(addDefault -> {
+    public TemporaryCommand register() {
+        SharedVariables.commandRegister.register(literal("temporary").then(literal("ban").then(literal("add").then(argument("target", ModMdoWhitelistArgumentType.whitelist()).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
+            return ban(ban, IntegerArgumentType.getInteger(ban, "minutes"));
+        })).then(literal("-1").executes(ban -> {
+            return ban(ban, -1);
+        })).then(literal("60").executes(ban -> {
+            return ban(ban, 60);
+        })))).then(literal("remove").then(argument("target", ModMdoTemporaryBanArgumentType.banned()).executes(remove -> {
+            Certificate certificate = ModMdoTemporaryBanArgumentType.getCertificate(remove, "target");
+            banned.remove(certificate.getName());
+            saveVariables();
+            return 0;
+        })))).then(literal("whitelist").then(literal("add").then(argument("name", StringArgumentType.string()).executes(addDefault -> {
             String name = StringArgumentType.getString(addDefault, "name");
             if (SharedVariables.temporaryWhitelist.containsName(name)) {
                 sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.already.is.whitelist", name));
@@ -26,7 +40,7 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
                 sendFeedback(addDefault, new TranslatableText("modmdo.whitelist.add.already.is.whitelist", name));
                 return - 1;
             }
-            temporary(name, 1000 * 60 * 5);
+            temporaryWhitelist(name, 1000 * 60 * 5);
             sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.default", name));
             SharedVariables.updateTemporaryWhitelistNames(getServer(addDefault), true);
             return 0;
@@ -35,7 +49,7 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
             SharedVariables.updateTemporaryWhitelistNames(getServer(showTemporary), true);
             return 0;
         })).then(literal("remove").then(argument("name", ModMdoTemporaryWhitelistArgumentType.whitelist()).executes(remove -> {
-            TemporaryWhitelist wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove, "name");
+            TemporaryCertificate wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove, "name");
             if (SharedVariables.temporaryWhitelist.containsName(wl.getName())) {
                 SharedVariables.temporaryWhitelist.remove(wl.name());
                 sendFeedback(remove, new TranslatableText("temporary.whitelist.removed", wl.name()));
@@ -46,7 +60,7 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
             return - 1;
         })))).then(literal("connection").then(literal("whitelist").executes(whitelist -> {
             if (SharedVariables.modmdoConnectionAccepting.isValid()) {
-                long million = SharedVariables.modmdoConnectionAccepting.millions() - TimeUtil.processMillion(SharedVariables.modmdoConnectionAccepting.recording());
+                long million = SharedVariables.modmdoConnectionAccepting.getMillions() - TimeUtil.processMillion(SharedVariables.modmdoConnectionAccepting.getRecording());
                 long minute = TimeUtil.processRemainingMinutes(million);
                 long second = TimeUtil.processRemainingSeconds(million);
                 sendFeedback(whitelist, new TranslatableText("connection.whitelist.accepting", minute, second));
@@ -56,18 +70,18 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
             return 0;
         }).then(literal("accept").then(literal("one").executes(acceptOne -> {
             if (SharedVariables.modmdoConnectionAccepting.isValid()) {
-                long million = SharedVariables.modmdoConnectionAccepting.millions() - TimeUtil.processMillion(SharedVariables.modmdoConnectionAccepting.recording());
+                long million = SharedVariables.modmdoConnectionAccepting.getMillions() - TimeUtil.processMillion(SharedVariables.modmdoConnectionAccepting.getRecording());
                 long minute = TimeUtil.processRemainingMinutes(million);
                 long second = TimeUtil.processRemainingSeconds(million);
                 sendError(acceptOne, new TranslatableText("connection.whitelist.accepting", minute, second));
             } else {
                 sendFeedback(acceptOne, new TranslatableText("connection.whitelist.accepting.one"));
-                SharedVariables.modmdoConnectionAccepting = new TemporaryWhitelist("", TimeUtil.millions(), 1000 * 60 * 5);
+                SharedVariables.modmdoConnectionAccepting = new TemporaryCertificate("", TimeUtil.millions(), 1000 * 60 * 5);
             }
             return 0;
         }))).then(literal("cancel").executes(cancel -> {
             if (SharedVariables.modmdoConnectionAccepting.isValid()) {
-                SharedVariables.modmdoConnectionAccepting = new TemporaryWhitelist("", - 1, - 1);
+                SharedVariables.modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
             } else {
                 sendError(cancel, new TranslatableText("connection.whitelist.no.accepting"));
             }
@@ -81,8 +95,8 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
         ServerPlayerEntity player = getPlayer(source);
         if (SharedVariables.temporaryWhitelist.size() > 0) {
             StringBuilder builder = new StringBuilder();
-            for (TemporaryWhitelist wl : SharedVariables.temporaryWhitelist.values()) {
-                long million = wl.millions() - TimeUtil.processMillion(wl.recording());
+            for (TemporaryCertificate wl : SharedVariables.temporaryWhitelist.values()) {
+                long million = wl.getMillions() - TimeUtil.processMillion(wl.getRecording());
                 long minute = TimeUtil.processRemainingMinutes(million);
                 long second = TimeUtil.processRemainingSeconds(million);
                 builder.append(wl.name()).append(": ");
@@ -97,7 +111,41 @@ public class TemporaryWhitelistCommand extends SimpleCommand {
         }
     }
 
-    public void temporary(String name, long millions) {
-        SharedVariables.temporaryWhitelist.put(name, new TemporaryWhitelist(name, TimeUtil.millions(), millions));
+    public void temporaryWhitelist(String name, long millions) {
+        SharedVariables.temporaryWhitelist.put(name, new TemporaryCertificate(name, TimeUtil.millions(), millions));
+    }
+
+    public void temporaryBan(ServerPlayerEntity player, Certificate certificate, long millions) {
+        Certificate c;
+        if (millions == - 1) {
+            c = new PermanentCertificate(certificate.name, certificate.getIdentifier(), certificate.getRecorde().uuid());
+        } else {
+            if (certificate.getIdentifier().equals("")) {
+                c = new TemporaryCertificate(certificate.name, new LoginRecorde(certificate.name, certificate.getRecorde().uuid(), LoginRecordeType.TEMPORARY), TimeUtil.millions(), millions);
+            } else {
+                c = new TemporaryCertificate(certificate.name, new LoginRecorde(certificate.getRecorde().modmdoUniqueId(), null, LoginRecordeType.TEMPORARY), TimeUtil.millions(), millions);
+            }
+        }
+        c.setLastLanguage(SharedVariables.loginUsers.getUser(player).getLanguage().getName());
+        banned.put(certificate.name, c);
+    }
+
+    public int ban(CommandContext<ServerCommandSource> ban, int minutes) throws CommandSyntaxException {
+        ServerPlayerEntity player = getPlayer(ban);
+        force.add(player);
+        Certificate certificate = ModMdoWhitelistArgumentType.getWhiteList(ban, "target");
+        String name = player.getName().asString();
+        Certificate banned = SharedVariables.banned.get(name);
+        if (banned == null) {
+            temporaryBan(getPlayer(ban), certificate, minutes == -1 ? -1 : minutes * 1000L * 60L);
+            banned = SharedVariables.banned.get(name);
+        }
+        if (banned instanceof TemporaryCertificate temp) {
+            sendFeedback(ban, new TranslatableText("modmdo.banned.time-limit", certificate.name, temp.formatRemaining()));
+        } else {
+            sendFeedback(ban, new TranslatableText("modmdo.banned.indefinite", certificate.name));
+        }
+        saveVariables();
+        return 0;
     }
 }

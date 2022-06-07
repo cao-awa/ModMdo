@@ -61,10 +61,7 @@ public class ModMdoTriggerBuilder {
                     JSONObject awaiting = json.getJSONObject("await");
                     int wait = awaiting.getInt("or-wait");
                         SharedVariables.event.events.get(awaiting.getString("instanceof")).await(action, wait);
-                }, ex -> {
-                    ex.printStackTrace();
-                    action.apply();
-                });
+                }, ex -> action.apply());
             });
         }
     }

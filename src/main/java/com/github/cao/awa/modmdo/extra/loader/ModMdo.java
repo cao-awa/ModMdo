@@ -58,7 +58,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             new HereCommand().register();
             new DimensionHereCommand().register();
             new TestCommand().register();
-            new TemporaryWhitelistCommand().register();
+            new TemporaryCommand().register();
             new ModMdoCommand().register();
 
             ArgumentInit.init();
@@ -100,17 +100,25 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             });
         });
 
-        Resource<Language> resource = new Resource<>();
-        resource.set(Language.ZH_CN, "/assets/modmdo/lang/zh_cn.json");
-        resource.set(Language.EN_US, "/assets/modmdo/lang/en_us.json");
+        Resource<String> resource = new Resource<>();
+        resource.set(Language.ZH_CN.getName(), "/assets/modmdo/lang/zh_cn.json");
+        resource.set(Language.EN_US.getName(), "/assets/modmdo/lang/en_us.json");
 
         EntrustExecution.tryTemporary(() -> {
             new File(getServerLevelPath(getServer())  + "/modmdo/resources/lang/").mkdirs();
 
             EntrustExecution.tryFor(EntrustParser.getNotNull(new File(getServerLevelPath(getServer())  + "/modmdo/resources/lang/").listFiles(), new File[0]), file -> {
-                Language lang = Language.ofs(file.getName());
-                if (lang != null) {
-                    resource.set(lang, file.getAbsolutePath());
+                if (file.getName().startsWith("dictionary_")) {
+                    EntrustExecution.tryTemporary(() -> {
+                        resource.set(file.getName().substring(11, file.getName().indexOf(".")), file.getAbsolutePath());
+                    }, ex -> {
+                        resource.set(file.getName(), file.getAbsolutePath());
+                    });
+                } else {
+                    Language lang = Language.ofs(file.getName());
+                    if (lang != null) {
+                        resource.set(lang.getName(), file.getAbsolutePath());
+                    }
                 }
             });
         });

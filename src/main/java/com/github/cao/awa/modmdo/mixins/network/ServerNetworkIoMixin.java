@@ -39,20 +39,19 @@ public class ServerNetworkIoMixin {
     @Overwrite
     public void bind(@Nullable InetAddress address, int port) {
         synchronized(this.channels) {
-            Class class_;
-            Lazy lazy;
-            Lazy httpLazy;
+            Class<? extends ServerChannel> clazz;
+            Lazy<? extends EventLoopGroup> lazy;
             if (Epoll.isAvailable() && this.server.isUsingNativeTransport()) {
-                class_ = EpollServerSocketChannel.class;
+                clazz = EpollServerSocketChannel.class;
                 lazy = EPOLL_CHANNEL;
                 LOGGER.info("Using epoll channel type");
             } else {
-                class_ = NioServerSocketChannel.class;
+                clazz = NioServerSocketChannel.class;
                 lazy = DEFAULT_CHANNEL;
                 LOGGER.info("Using default channel type");
             }
 
-            this.channels.add((new ServerBootstrap()).channel(class_).childHandler(new ChannelInitializer<>() {
+            this.channels.add((new ServerBootstrap()).channel(clazz).childHandler(new ChannelInitializer<>() {
                 protected void initChannel(Channel channel) {
                     try {
                         channel.config().setOption(ChannelOption.TCP_NODELAY, true);
@@ -68,7 +67,7 @@ public class ServerNetworkIoMixin {
                     channel.pipeline().addLast("packet_handler", clientConnection);
                     clientConnection.setPacketListener(new ServerHandshakeNetworkHandler(server, clientConnection));
                 }
-            }).group((EventLoopGroup)lazy.get()).localAddress(address, port).bind().syncUninterruptibly());
+            }).group(lazy.get()).localAddress(address, port).bind().syncUninterruptibly());
         }
     }
 }
