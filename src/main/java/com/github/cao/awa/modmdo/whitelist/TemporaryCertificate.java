@@ -8,20 +8,17 @@ import org.json.*;
 import java.util.*;
 
 public final class TemporaryCertificate extends Certificate {
-    private final String name;
     private final long recording;
-    private final long millions;
+    private long millions;
 
     public TemporaryCertificate(String name, long recording, long millions) {
         super(name, new LoginRecorde(name, null, LoginRecordeType.TEMPORARY));
-        this.name = name;
         this.recording = recording;
         this.millions = millions;
     }
 
     public TemporaryCertificate(String name, LoginRecorde recorde, long recording, long millions) {
         super(name, recorde);
-        this.name = name;
         this.recording = recording;
         this.millions = millions;
     }
@@ -42,16 +39,16 @@ public final class TemporaryCertificate extends Certificate {
         return TimeUtil.processMillion(recording);
     }
 
-    public String name() {
-        return name;
-    }
-
     public long getRecording() {
         return recording;
     }
 
     public long getMillions() {
         return millions;
+    }
+
+    public void setMillions(long millions) {
+        this.millions = millions;
     }
 
     public String formatRemaining() {
@@ -80,6 +77,7 @@ public final class TemporaryCertificate extends Certificate {
         json.put("millions", millions);
         json.put("uuid", getRecorde().uuid());
         json.put("unique_id", getRecorde().modmdoUniqueId());
+        json.put("name", getName());
         return json;
     }
 }

@@ -174,7 +174,7 @@ public class SharedVariables {
             for (String s : json.keySet()) {
                 banned.put(s, Certificate.build(json.getJSONObject(s)));
             }
-        });
+        }, Throwable::printStackTrace);
     }
 
     public static void saveEnchantmentMaxLevel() {
@@ -409,7 +409,22 @@ public class SharedVariables {
     public static void flushTemporaryWhitelist() {
         for (TemporaryCertificate wl : temporaryWhitelist.values()) {
             if (! wl.isValid()) {
-                temporaryWhitelist.remove(wl.name());
+                temporaryWhitelist.remove(wl.getName());
+            }
+        }
+    }
+
+    public static void flushTemporaryBan() {
+        for (String name : banned.keySet()) {
+            Certificate ban = banned.get(name);
+            if (ban == null) {
+                banned.remove(name);
+                continue;
+            }
+            if (ban instanceof TemporaryCertificate temp) {
+                if (! temp.isValid()) {
+                    banned.remove(name);
+                }
             }
         }
     }
@@ -428,14 +443,14 @@ public class SharedVariables {
 
     public static boolean hasWhitelist(ServerPlayerEntity player) {
         try {
-            switch (whitelist.get(player.getName().getString()).getRecorde().type()) {
+            switch (whitelist.get(player.getName().asString()).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (whitelist.get(player.getName().getString()).getRecorde().modmdoUniqueId().equals("")) {
+                    if (whitelist.get(player.getName().asString()).getRecorde().modmdoUniqueId().equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(whitelist.get(player.getName().getString()).getRecorde().uuid())) {
+                    if (! player.getUuid().equals(whitelist.get(player.getName().asString()).getRecorde().uuid())) {
                         return false;
                     }
                 }
@@ -447,16 +462,18 @@ public class SharedVariables {
     }
 
     public static boolean handleBanned(ServerPlayerEntity player) {
-        if (hasBan(player)) {
-            Certificate certificate = banned.get(player.getName().getString());
-            if (certificate instanceof TemporaryCertificate temp) {
-                if (temp.isValid()) {
-                    return true;
+        if (config.getConfigBoolean("modmdo_whitelist")) {
+            if (hasBan(player)) {
+                Certificate certificate = banned.get(player.getName().asString());
+                if (certificate instanceof TemporaryCertificate temp) {
+                    if (temp.isValid()) {
+                        return true;
+                    } else {
+                        banned.remove(player.getName().asString());
+                    }
                 } else {
-                    banned.remove(player.getName().getString());
+                    return true;
                 }
-            } else {
-                return true;
             }
         }
         return false;
@@ -464,14 +481,14 @@ public class SharedVariables {
 
     public static boolean hasBan(ServerPlayerEntity player) {
         try {
-            switch (banned.get(player.getName().getString()).getRecorde().type()) {
+            switch (banned.get(player.getName().asString()).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (banned.get(player.getName().getString()).getRecorde().modmdoUniqueId().equals("")) {
+                    if (banned.get(player.getName().asString()).getRecorde().modmdoUniqueId().equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(banned.get(player.getName().getString()).getRecorde().uuid())) {
+                    if (! player.getUuid().equals(banned.get(player.getName().asString()).getRecorde().uuid())) {
                         return false;
                     }
                 }
