@@ -18,10 +18,10 @@ public class ModMdoWhitelistArgumentType implements ArgumentType<String> {
         return new ModMdoWhitelistArgumentType();
     }
 
-    public static Whitelist getWhiteList(CommandContext<ServerCommandSource> context, String name) {
+    public static Certificate getWhiteList(CommandContext<ServerCommandSource> context, String name) {
         String string = context.getArgument(name, String.class);
-        Whitelist whiteList = whitelist.get(string);
-        return whiteList == null ? new TemporaryWhitelist(string, - 1, - 1) : whiteList;
+        Certificate whiteList = whitelist.get(string);
+        return whiteList == null ? new TemporaryCertificate(string, - 1, - 1) : whiteList;
     }
 
     @Override

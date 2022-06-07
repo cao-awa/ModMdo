@@ -22,6 +22,7 @@
         "explosion.ExplosionMixin",
         "network.ServerNetworkIoMixin",
         "network.ServerQueryNetworkHandlerMixin",
+        "server.MinecraftServerMixin",
         "tracker.DamageTrackerMixin",
         "world.WorldMixin"
     ],

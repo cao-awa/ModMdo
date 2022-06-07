@@ -3,39 +3,39 @@ package com.github.cao.awa.modmdo.whitelist;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 
-public class WhiteLists<T extends Whitelist> {
-    private final Object2ObjectArrayMap<String, T> whitelist = new Object2ObjectArrayMap<>();
+public class Certificates<T extends Certificate> {
+    private final Object2ObjectArrayMap<String, T> certificate = new Object2ObjectArrayMap<>();
     private final Object2ObjectArrayMap<String, String> idToName = new Object2ObjectArrayMap<>();
 
     public void put(String name,T whiteList) {
-        whitelist.put(name, whiteList);
+        certificate.put(name, whiteList);
         EntrustExecution.notNull(whiteList, wl -> idToName.put(wl.getIdentifier(), wl.getName()));
     }
 
     public T get(String name) {
-        return whitelist.get(name);
+        return certificate.get(name);
     }
 
     public T getFromId(String id) {
-        return whitelist.get(idToName.get(id));
+        return certificate.get(idToName.get(id));
     }
 
     public void remove(String name) {
-        idToName.remove(whitelist.get(name).getIdentifier());
-        whitelist.remove(name);
+        idToName.remove(certificate.get(name).getIdentifier());
+        certificate.remove(name);
     }
 
     public void removeFromId(String id) {
-        whitelist.remove(idToName.get(id));
+        certificate.remove(idToName.get(id));
         idToName.remove(id);
     }
 
     public ObjectSet<String> keySet() {
-        return whitelist.keySet();
+        return certificate.keySet();
     }
 
     public ObjectCollection<T> values() {
-        return whitelist.values();
+        return certificate.values();
     }
 
     public ObjectSet<String> identifiers() {
@@ -43,7 +43,7 @@ public class WhiteLists<T extends Whitelist> {
     }
 
     public int size() {
-        return whitelist.size();
+        return certificate.size();
     }
 
     public boolean containsIdentifier(String id) {
@@ -51,11 +51,11 @@ public class WhiteLists<T extends Whitelist> {
     }
 
     public boolean containsName(String name) {
-        return whitelist.containsKey(name);
+        return certificate.containsKey(name);
     }
 
     public void clear() {
-        whitelist.clear();
+        certificate.clear();
         idToName.clear();
     }
 }

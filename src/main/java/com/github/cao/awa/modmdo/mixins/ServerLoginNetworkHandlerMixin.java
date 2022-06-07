@@ -1,9 +1,11 @@
 package com.github.cao.awa.modmdo.mixins;
 
+import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
+import com.github.cao.awa.modmdo.whitelist.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
@@ -114,7 +116,19 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                                 break;
                             }
 
-                            EntrustExecution.tryTemporary(() -> TimeUtil.barricade(15));
+                            EntrustExecution.tryTemporary(() -> TimeUtil.barricade(10));
+                        }
+                    }
+
+                    if (handleBanned(player)) {
+                        Certificate ban = banned.get(player.getName().asString());
+                        if (ban instanceof TemporaryCertificate temporary) {
+                            String remaining = temporary.formatRemaining();
+                            player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining)));
+                            player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining));
+                        } else {
+                            player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite")));
+                            player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite"));
                         }
                     }
 

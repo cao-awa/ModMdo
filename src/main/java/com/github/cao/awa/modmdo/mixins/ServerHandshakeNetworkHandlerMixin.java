@@ -54,7 +54,7 @@ public class ServerHandshakeNetworkHandlerMixin {
                 }
                 break;
             case PLAY:
-                if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
+                if (SharedVariables.isActive()) {
                     this.connection.setState(NetworkState.PLAY);
                     new ModMdoServerDataHandler(this.server, (InetSocketAddress) connection.getAddress(), this.connection);
                 }

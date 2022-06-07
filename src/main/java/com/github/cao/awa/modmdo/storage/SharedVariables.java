@@ -42,7 +42,7 @@ public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static final String VERSION_ID = "1.0.35";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + "-ES";
-    public static final String RELEASE_TIME = "2022.5.16";
+    public static final String RELEASE_TIME = "2022.6.7";
     public static final int MODMDO_VERSION = 29;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
@@ -82,12 +82,14 @@ public class SharedVariables {
     public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
     public static ObjectArrayList<String> modmdoConnectionNames = new ObjectArrayList<>();
     public static ObjectArrayList<ModMdoDataProcessor> modmdoConnections = new ObjectArrayList<>();
-    public static TemporaryWhitelist modmdoConnectionAccepting = new TemporaryWhitelist("", - 1, - 1);
-    public static WhiteLists<PermanentWhitelist> modmdoConnectionWhitelist = new WhiteLists<>();
-    public static WhiteLists<PermanentWhitelist> whitelist = new WhiteLists<>();
-    public static WhiteLists<TemporaryWhitelist> temporaryWhitelist = new WhiteLists<>();
+    public static TemporaryCertificate modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
+    public static Certificates<PermanentCertificate> modmdoConnectionWhitelist = new Certificates<>();
+    public static Certificates<PermanentCertificate> whitelist = new Certificates<>();
+    public static Certificates<TemporaryCertificate> temporaryWhitelist = new Certificates<>();
+    public static Certificates<Certificate> banned = new Certificates<>();
     public static int whitelistHash = whitelist.hashCode();
     public static int temporaryWhitelistHash = temporaryWhitelist.hashCode();
+    public static int temporaryBanHash = banned.hashCode();
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
     public static ArrayList<ModMdoExtra<?>> extrasWaitingForRegister = new ArrayList<>();
@@ -99,6 +101,8 @@ public class SharedVariables {
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
     public static TickPerSecondAnalyzer tps = new TickPerSecondAnalyzer();
+
+    public static ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
@@ -140,13 +144,15 @@ public class SharedVariables {
     }
 
     public static void initWhiteList() {
-        temporaryWhitelist = new WhiteLists<>();
+        temporaryWhitelist = new Certificates<>();
+        whitelist = new Certificates<>();
+        modmdoConnectionWhitelist = new Certificates<>();
 
         EntrustExecution.tryTemporary(() -> {
             JSONObject json = config.getConfigJSONObject("whitelist");
 
             for (String s : json.keySet()) {
-                whitelist.put(s, PermanentWhitelist.build(json.getJSONObject(s)));
+                whitelist.put(s, PermanentCertificate.build(json.getJSONObject(s)));
             }
         });
 
@@ -154,7 +160,19 @@ public class SharedVariables {
             JSONObject json = config.getConfigJSONObject("connection-whitelist");
 
             for (String s : json.keySet()) {
-                modmdoConnectionWhitelist.put(s, PermanentWhitelist.build(json.getJSONObject(s)));
+                modmdoConnectionWhitelist.put(s, PermanentCertificate.build(json.getJSONObject(s)));
+            }
+        });
+    }
+
+    public static void initBan() {
+        banned = new Certificates<>();
+
+        EntrustExecution.tryTemporary(() -> {
+            JSONObject json = config.getConfigJSONObject("banned");
+
+            for (String s : json.keySet()) {
+                banned.put(s, Certificate.build(json.getJSONObject(s)));
             }
         });
     }
@@ -286,7 +304,15 @@ public class SharedVariables {
                     json.put(s, modmdoConnectionWhitelist.get(s).toJSONObject());
                 }
                 config.set("connection-whitelist", json);
-            }, Throwable::printStackTrace);
+            });
+
+            EntrustExecution.tryTemporary(() -> {
+                JSONObject json = new JSONObject();
+                for (String s : banned.keySet()) {
+                    json.put(s, banned.get(s).toJSONObject());
+                }
+                config.set("banned", json);
+            });
         }
     }
 
@@ -327,15 +353,37 @@ public class SharedVariables {
             }
         }
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("temporary_whitelist_names").writeString(getTemporaryWhitelistHashNamesJSONObject().toString())));
+            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("temporary_whitelist_names").writeString(getTemporaryWhitelistNamesJSONObject().toString())));
         }
         temporaryWhitelistHash = temporaryWhitelist.hashCode();
     }
 
-    public static JSONObject getTemporaryWhitelistHashNamesJSONObject() {
+    public static JSONObject getTemporaryWhitelistNamesJSONObject() {
         JSONObject json = new JSONObject();
         JSONArray array = new JSONArray();
         for (String s : temporaryWhitelist.keySet()) {
+            array.put(s);
+        }
+        json.put("names", array);
+        return json;
+    }
+
+    public static void updateTemporaryBanNames(MinecraftServer server, boolean force) {
+        if (! force) {
+            if (banned.hashCode() == temporaryBanHash) {
+                return;
+            }
+        }
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("ban_names").writeString(getBannedNamesJSONObject().toString())));
+        }
+        temporaryBanHash = banned.hashCode();
+    }
+
+    public static JSONObject getBannedNamesJSONObject() {
+        JSONObject json = new JSONObject();
+        JSONArray array = new JSONArray();
+        for (String s : banned.keySet()) {
             array.put(s);
         }
         json.put("names", array);
@@ -359,7 +407,7 @@ public class SharedVariables {
     }
 
     public static void flushTemporaryWhitelist() {
-        for (TemporaryWhitelist wl : temporaryWhitelist.values()) {
+        for (TemporaryCertificate wl : temporaryWhitelist.values()) {
             if (! wl.isValid()) {
                 temporaryWhitelist.remove(wl.name());
             }
@@ -376,5 +424,61 @@ public class SharedVariables {
 
     public static boolean isActive() {
         return EntrustParser.trying(() -> extras.isActive(EXTRA_ID), () -> false);
+    }
+
+    public static boolean hasWhitelist(ServerPlayerEntity player) {
+        try {
+            switch (whitelist.get(player.getName().asString()).getRecorde().type()) {
+                case IDENTIFIER -> {
+                    if (whitelist.get(player.getName().asString()).getRecorde().modmdoUniqueId().equals("")) {
+                        return false;
+                    }
+                }
+                case UUID -> {
+                    if (! player.getUuid().equals(whitelist.get(player.getName().asString()).getRecorde().uuid())) {
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean handleBanned(ServerPlayerEntity player) {
+        if (hasBan(player)) {
+            Certificate certificate = banned.get(player.getName().asString());
+            if (certificate instanceof TemporaryCertificate temp) {
+                if (temp.isValid()) {
+                    return true;
+                } else {
+                    banned.remove(player.getName().asString());
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasBan(ServerPlayerEntity player) {
+        try {
+            switch (banned.get(player.getName().asString()).getRecorde().type()) {
+                case IDENTIFIER -> {
+                    if (banned.get(player.getName().asString()).getRecorde().modmdoUniqueId().equals("")) {
+                        return false;
+                    }
+                }
+                case UUID -> {
+                    if (! player.getUuid().equals(banned.get(player.getName().asString()).getRecorde().uuid())) {
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }
