@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.server.*;
 import org.json.*;
 
+import java.security.*;
 import java.util.function.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
@@ -24,6 +25,9 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
                 v.handle(new JSONObject(str.get()));
             });
             str.set(v.get().toString());
+        });
+        map.put("^{random}", (trigger, str) -> {
+            str.set(String.valueOf(new SecureRandom().nextInt(101)));
         });
     });
     private TriggerTrace trace;

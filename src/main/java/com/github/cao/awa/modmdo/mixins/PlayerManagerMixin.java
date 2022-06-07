@@ -12,19 +12,22 @@ import net.minecraft.text.TranslatableText;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 import java.util.UUID;
 
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
+
 @Mixin(PlayerManager.class)
-public class PlayerManagerMixin {
+public abstract class PlayerManagerMixin {
     @Shadow
     @Final
     private List<ServerPlayerEntity> players;
+
+    @Shadow protected abstract void savePlayerData(ServerPlayerEntity player);
 
     /**
      * 当相同的玩家在线时, 禁止重复创建玩家
@@ -38,14 +41,14 @@ public class PlayerManagerMixin {
      */
     @Inject(method = "createPlayer", at = @At("HEAD"))
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
-        if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             if (SharedVariables.enableRejectReconnect) {
                 UUID uuid = PlayerEntity.getUuidFromProfile(profile);
                 for (ServerPlayerEntity player : this.players) {
                     if (player.networkHandler.connection.getAddress() == null)
                         break;
                     if (player.getUuid().equals(uuid)) {
-                        if (SharedVariables.loginUsers.hasUser(player)) {
+                        if (loginUsers.hasUser(player)) {
                             SimpleCommandOperation.sendMessage(player, new TranslatableText("login.dump.rejected"), false);
                         }
                         cir.setReturnValue(null);
@@ -61,6 +64,15 @@ public class PlayerManagerMixin {
         if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, processor -> processor.sendPlayerJoin(player.getName().asString()));
             SharedVariables.event.submitJoinServer(player, connection, player.getPos(), SharedVariables.server);
+        }
+    }
+
+    @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;savePlayerData(Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
+    public void remove(PlayerManager instance, ServerPlayerEntity player) {
+        if (loginUsers.hasUser(player) && !banned.containsIdentifier(loginUsers.getUser(player.getUuid()).getIdentifier()) || force.contains(player)) {
+            System.out.println("???");
+            force.remove(player);
+            savePlayerData(player);
         }
     }
 }

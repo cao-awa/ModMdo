@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.mixins;
 
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.c2s.play.*;
@@ -29,6 +30,10 @@ public abstract class ServerPlayNetworkHandlerMixin {
     private MinecraftServer server;
 
     @Shadow private boolean waitingForKeepAlive;
+
+    @Shadow private long lastKeepAliveTime;
+
+    @Shadow private long keepAliveId;
 
     /**
      * 与客户端进行自定义通信
@@ -80,7 +85,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
                 ci.cancel();
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
     }
@@ -91,6 +96,15 @@ public abstract class ServerPlayNetworkHandlerMixin {
             serverLogin.logout(player);
             EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(player.getName().asString()));
             event.submitQuitServer(player, connection, player.getPos(), server);
+        }
+    }
+
+    @Inject(method = "onDisconnected", at = @At("HEAD"), cancellable = true)
+    public void onDisconnected0(Text reason, CallbackInfo ci) {
+        if (SharedVariables.isActive()) {
+            if (! loginUsers.hasUser(player)) {
+                ci.cancel();
+            }
         }
     }
 
@@ -118,14 +132,16 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;disconnect(Lnet/minecraft/text/Text;)V"))
+    @Redirect(method = "onKeepAlive", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;disconnect(Lnet/minecraft/text/Text;)V"))
     public void disconnect(ServerPlayNetworkHandler instance, Text reason) {
         if (SharedVariables.isActive()) {
             if (reason.getString().equals("disconnect.timeout")) {
-                if (loginUsers.getUser(player).getLoginTime() > 10000) {
+                if (TimeUtil.processMillion(loginUsers.getUser(player).getLoginTime()) > 10000) {
                     instance.disconnect(reason);
                 } else {
                     waitingForKeepAlive = false;
+                    lastKeepAliveTime = TimeUtil.millions();
+                    keepAliveId = lastKeepAliveTime;
                 }
             }
         }
