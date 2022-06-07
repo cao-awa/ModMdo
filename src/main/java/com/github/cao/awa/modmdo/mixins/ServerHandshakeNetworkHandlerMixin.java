@@ -32,15 +32,15 @@ public class ServerHandshakeNetworkHandlerMixin {
             case LOGIN:
                 this.connection.setState(NetworkState.LOGIN);
                 if (packet.getProtocolVersion() != SharedConstants.getGameVersion().getProtocolVersion()) {
-                    TranslatableText text;
+                    TranslatableTextContent text;
                     if (packet.getProtocolVersion() < 754) {
-                        text = new TranslatableText("multiplayer.disconnect.outdated_client", SharedConstants.getGameVersion().getName());
+                        text = new TranslatableTextContent("multiplayer.disconnect.outdated_client", SharedConstants.getGameVersion().getName());
                     } else {
-                        text = new TranslatableText("multiplayer.disconnect.incompatible", SharedConstants.getGameVersion().getName());
+                        text = new TranslatableTextContent("multiplayer.disconnect.incompatible", SharedConstants.getGameVersion().getName());
                     }
 
-                    this.connection.send(new LoginDisconnectS2CPacket(text));
-                    this.connection.disconnect(text);
+                    this.connection.send(new LoginDisconnectS2CPacket(MutableText.of(text)));
+                    this.connection.disconnect(MutableText.of(text));
                 } else {
                     this.connection.setPacketListener(new ServerLoginNetworkHandler(this.server, this.connection));
                 }

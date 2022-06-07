@@ -52,7 +52,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> send(format()));
+        EntrustExecution.tryTemporary(() -> send(MutableText.of(format())));
     }
 
     public void send(Text message) {
@@ -64,7 +64,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                         return;
                     }
                     Entity target = getTarget().get(0);
-                    target.sendSystemMessage(message, target.getUuid());
+                    target.sendMessage(message);
                 }
                 case ALL -> sendMessageToAllPlayer(getServer(), message, false);
                 case APPOINT -> sendMessage(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), message, false);
@@ -72,7 +72,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         }
     }
 
-    public LiteralText format() {
+    public LiteralTextContent format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
                 String name = EntrustParser.trying(() -> {

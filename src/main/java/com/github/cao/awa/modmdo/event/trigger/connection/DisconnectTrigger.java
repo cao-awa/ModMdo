@@ -47,7 +47,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> disconnect(format()));
+        EntrustExecution.tryTemporary(() -> disconnect(MutableText.of(format())));
     }
 
     public void disconnect(Text reason) {
@@ -73,7 +73,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
         }
     }
 
-    public LiteralText format() {
+    public LiteralTextContent format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
                 String name = EntrustParser.trying(() -> {

@@ -73,7 +73,7 @@ public abstract class TextFormat<T> {
             }
 
             for (Object o : args) {
-                if (o instanceof TranslatableText translatable) {
+                if (o instanceof TranslatableTextContent translatable) {
                     o = formatted(language.get(), translatable.getKey(), translatable.getArgs());
                 }
                 final String str = o.toString();

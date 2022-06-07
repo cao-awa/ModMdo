@@ -70,7 +70,7 @@ public class BlockStateSetEvent extends ModMdoEvent<BlockStateSetEvent> {
     }
 
     public String synopsis() {
-        return EntrustParser.tryCreate(() -> String.format("BlockStateSetEvent{block=%s, pos=%s, dimension=%s, flag=%s, maxUpdateDepth=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().getEffects(), flags, maxUpdateDepth), toString());
+        return EntrustParser.tryCreate(() -> String.format("BlockStateSetEvent{block=%s, pos=%s, dimension=%s, flag=%s, maxUpdateDepth=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().effects(), flags, maxUpdateDepth), toString());
     }
 
     @Override

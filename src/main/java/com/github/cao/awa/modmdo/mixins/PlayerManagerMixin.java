@@ -1,23 +1,19 @@
 package com.github.cao.awa.modmdo.mixins;
 
 import com.github.cao.awa.modmdo.storage.*;
-import com.github.cao.awa.modmdo.utils.command.SimpleCommandOperation;
+import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.TranslatableText;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import com.mojang.authlib.*;
+import net.minecraft.network.*;
+import net.minecraft.network.encryption.*;
+import net.minecraft.server.*;
+import net.minecraft.server.network.*;
+import net.minecraft.text.*;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -40,16 +36,16 @@ public abstract class PlayerManagerMixin {
      * @author 草二号机
      */
     @Inject(method = "createPlayer", at = @At("HEAD"))
-    public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
+    public void createPlayer(GameProfile profile, PlayerPublicKey publicKey, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         if (SharedVariables.isActive()) {
             if (SharedVariables.enableRejectReconnect) {
-                UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+                UUID uuid = profile.getId();
                 for (ServerPlayerEntity player : this.players) {
                     if (player.networkHandler.connection.getAddress() == null)
                         break;
                     if (player.getUuid().equals(uuid)) {
                         if (loginUsers.hasUser(player)) {
-                            SimpleCommandOperation.sendMessage(player, new TranslatableText("login.dump.rejected"), false);
+                            SimpleCommandOperation.sendMessage(player, new TranslatableTextContent("login.dump.rejected"), false);
                         }
                         cir.setReturnValue(null);
                         cir.cancel();
@@ -62,7 +58,7 @@ public abstract class PlayerManagerMixin {
     @Inject(method = "onPlayerConnect", at = @At("RETURN"))
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, processor -> processor.sendPlayerJoin(player.getName().asString()));
+            EntrustExecution.tryFor(SharedVariables.modmdoConnections, processor -> processor.sendPlayerJoin(player.getName().getString()));
             SharedVariables.event.submitJoinServer(player, connection, player.getPos(), SharedVariables.server);
         }
     }

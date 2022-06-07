@@ -44,23 +44,9 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
 
     }
 
-    @Override
-    public void onVibration(VibrationS2CPacket packet) {
-
-    }
-
-    @Override
-    public void onMobSpawn(MobSpawnS2CPacket packet) {
-
-    }
 
     @Override
     public void onScoreboardObjectiveUpdate(ScoreboardObjectiveUpdateS2CPacket packet) {
-
-    }
-
-    @Override
-    public void onPaintingSpawn(PaintingSpawnS2CPacket packet) {
 
     }
 
@@ -111,6 +97,21 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
 
     @Override
     public void onGameMessage(GameMessageS2CPacket packet) {
+
+    }
+
+    @Override
+    public void onChatMessage(ChatMessageS2CPacket packet) {
+
+    }
+
+    @Override
+    public void onChatPreview(ChatPreviewS2CPacket packet) {
+
+    }
+
+    @Override
+    public void onChatPreviewStateChange(ChatPreviewStateChangeS2CPacket packet) {
 
     }
 
@@ -541,6 +542,11 @@ public class ModMdoClientDataNetworkHandler implements ClientPlayPacketListener 
 
     @Override
     public void onTitleClear(ClearTitleS2CPacket packet) {
+
+    }
+
+    @Override
+    public void onServerMetadata(ServerMetadataS2CPacket packet) {
 
     }
 }

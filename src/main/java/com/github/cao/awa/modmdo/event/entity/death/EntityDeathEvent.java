@@ -54,20 +54,20 @@ public class EntityDeathEvent extends EntityTargetedEvent<EntityDeathEvent> {
 
     public String synopsis() {
         String name = EntrustParser.trying(() -> EntrustParser.tryCreate(() -> {
-             String str = entity.getDisplayName().asString();
+             String str = entity.getDisplayName().getString();
              if (str.equals("")) {
                  throw new IllegalArgumentException("empty name");
              }
              return str;
          }, entity.toString()), () -> "null");
         String perpetratorName = EntrustParser.trying(() -> EntrustParser.tryCreate(() -> {
-            String str = perpetrator.getDisplayName().asString();
+            String str = perpetrator.getDisplayName().getString();
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }
             return str;
         }, perpetrator.toString()), () -> "null");
-        return EntrustParser.tryCreate(() -> String.format("EntityDeathEvent{player=%s, perpetrator=%s, pos=%s, dimension=%s}", name, perpetratorName, pos, entity.getEntityWorld().getDimension().getEffects()), toString());
+        return EntrustParser.tryCreate(() -> String.format("EntityDeathEvent{player=%s, perpetrator=%s, pos=%s, dimension=%s}", name, perpetratorName, pos, entity.getEntityWorld().getDimension().effects()), toString());
     }
 
     @Override

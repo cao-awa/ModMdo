@@ -114,8 +114,8 @@ public class ModMdoDataProcessor {
     private void onPlayerJoin(String name) {
         if (SharedVariables.config.getConfigBoolean("modmdo_connection_player_join_accept")) {
             EntrustExecution.tryFor(server.getPlayerManager().getPlayerList(), player -> {
-                LiteralText message = SharedVariables.minecraftTextFormat.format(SharedVariables.loginUsers.getUser(player), "modmdo.connection.multiplayer.player.joined", getModMdoConnection().getName(), name);
-                player.sendMessage(message, false);
+                LiteralTextContent message = SharedVariables.minecraftTextFormat.format(SharedVariables.loginUsers.getUser(player), "modmdo.connection.multiplayer.player.joined", getModMdoConnection().getName(), name);
+                player.sendMessage(MutableText.of(message), false);
             });
             SharedVariables.LOGGER.info(SharedVariables.consoleTextFormat.format("modmdo.connection.multiplayer.player.joined", getModMdoConnection().getName(), name));
         }
@@ -124,8 +124,8 @@ public class ModMdoDataProcessor {
     private void onPlayerQuit(String name) {
         if (SharedVariables.config.getConfigBoolean("modmdo_connection_player_quit_accept")) {
             EntrustExecution.tryFor(server.getPlayerManager().getPlayerList(), player -> {
-                LiteralText message = SharedVariables.minecraftTextFormat.format(SharedVariables.loginUsers.getUser(player), "modmdo.connection.multiplayer.player.left", getModMdoConnection().getName(), name);
-                player.sendMessage(message, false);
+                LiteralTextContent message = SharedVariables.minecraftTextFormat.format(SharedVariables.loginUsers.getUser(player), "modmdo.connection.multiplayer.player.left", getModMdoConnection().getName(), name);
+                player.sendMessage(MutableText.of(message), false);
             });
             SharedVariables.LOGGER.info(SharedVariables.consoleTextFormat.format("modmdo.connection.multiplayer.player.left", getModMdoConnection().getName(), name));
         }
@@ -133,9 +133,9 @@ public class ModMdoDataProcessor {
 
     private void onChat(JSONObject chat) {
         if (SharedVariables.config.getConfigBoolean("modmdo_connection_chatting_accept")) {
-            LiteralText message = new LiteralText(SharedVariables.config.getConfigString("modmdo_connection_chatting_format").replace("%server", getModMdoConnection().getName()).replace("%name", chat.getString("player")).replace("%msg", chat.getString("msg")));
+            LiteralTextContent message = new LiteralTextContent(SharedVariables.config.getConfigString("modmdo_connection_chatting_format").replace("%server", getModMdoConnection().getName()).replace("%name", chat.getString("player")).replace("%msg", chat.getString("msg")));
             EntrustExecution.tryFor(server.getPlayerManager().getPlayerList(), player -> {
-                player.sendMessage(message, false);
+                player.sendMessage(MutableText.of(message), false);
             });
             SharedVariables.LOGGER.info(CONSOLE_CHAT_FORMAT.replace("%server", getModMdoConnection().getName()).replace("%name", chat.getString("player")).replace("%msg", chat.getString("msg")));
         }
@@ -145,32 +145,32 @@ public class ModMdoDataProcessor {
         try {
             String selfName = SharedVariables.config.getConfigString("server_name");
             if (selfName == null || "".equals(selfName)) {
-                TranslatableText rejectReason = new TranslatableText("modmdo.connection.not.ready");
+                TranslatableTextContent rejectReason = new TranslatableTextContent("modmdo.connection.not.ready");
                 modMdoConnection.send(builder.getBuilder().buildDisconnect("modmdo.connection.not.ready"));
-                modMdoConnection.disconnect(rejectReason);
+                modMdoConnection.disconnect(MutableText.of(rejectReason));
                 SharedVariables.modmdoConnections.remove(this);
                 return;
             }
             if (identifier.equals(SharedVariables.config.getConfigString("identifier"))) {
-                TranslatableText rejectReason = new TranslatableText("modmdo.connection.cannot.connect.to.self", SharedVariables.config.get("server_name"));
+                TranslatableTextContent rejectReason = new TranslatableTextContent("modmdo.connection.cannot.connect.to.self", SharedVariables.config.get("server_name"));
                 modMdoConnection.send(builder.getBuilder().buildDisconnect(rejectReason.getKey()));
-                modMdoConnection.disconnect(rejectReason);
+                modMdoConnection.disconnect(MutableText.of(rejectReason));
                 SharedVariables.modmdoConnections.remove(this);
                 return;
             }
             if (name.equals("")) {
-                TranslatableText rejectReason = new TranslatableText("modmdo.connection.check.failed.need.you.name", SharedVariables.config.get("server_name"));
+                TranslatableTextContent rejectReason = new TranslatableTextContent("modmdo.connection.check.failed.need.you.name", SharedVariables.config.get("server_name"));
                 modMdoConnection.send(builder.getBuilder().buildDisconnect(rejectReason.getKey()));
-                modMdoConnection.disconnect(rejectReason);
+                modMdoConnection.disconnect(MutableText.of(rejectReason));
                 SharedVariables.modmdoConnections.remove(this);
             } else {
                 SharedVariables.LOGGER.info("ModMdo Connection \"" + name + "\" try logging to server");
 
-                TranslatableText rejectReason = new TranslatableText("modmdo.connection.check.failed", SharedVariables.config.get("server_name"));
+                TranslatableTextContent rejectReason = new TranslatableTextContent("modmdo.connection.check.failed", SharedVariables.config.get("server_name"));
                 boolean reject = false;
 
                 if (version < MINIMUM_COMPATIBILITY) {
-                    onLoginReject(name, new TranslatableText("modmdo.connection.cannot.compatible", SharedVariables.config.get("server_name")));
+                    onLoginReject(name, new TranslatableTextContent("modmdo.connection.cannot.compatible", SharedVariables.config.get("server_name")));
                     return;
                 } else {
                     if (SharedVariables.modmdoConnectionAccepting.isValid()) {
@@ -185,7 +185,7 @@ public class ModMdoDataProcessor {
                 for (ModMdoDataProcessor processor : SharedVariables.modmdoConnections) {
                     if (identifier.equals(processor.getModMdoConnection().getIdentifier())) {
                         reject = true;
-                        rejectReason = new TranslatableText("modmdo.connection.already.connect", SharedVariables.config.get("server_name"));
+                        rejectReason = new TranslatableTextContent("modmdo.connection.already.connect", SharedVariables.config.get("server_name"));
                         break;
                     }
                 }
@@ -205,10 +205,10 @@ public class ModMdoDataProcessor {
         }
     }
 
-    public void onLoginReject(String name, TranslatableText reason) {
+    public void onLoginReject(String name, TranslatableTextContent reason) {
         SharedVariables.LOGGER.warn("ModMdo Connection \"" + name + "\" failed to login");
         modMdoConnection.send(builder.getBuilder().buildDisconnect(reason.getKey()));
-        modMdoConnection.disconnect(reason);
+        modMdoConnection.disconnect(MutableText.of(reason));
         SharedVariables.modmdoConnections.remove(this);
     }
 
@@ -224,8 +224,8 @@ public class ModMdoDataProcessor {
     private void onLoginSuccess() {
         updateSetting();
         EntrustExecution.tryFor(server.getPlayerManager().getPlayerList(), player -> {
-            String message = SharedVariables.minecraftTextFormat.format(SharedVariables.loginUsers.getUser(player), "modmdo.connection.login.success", getSetting().getName()).asString();
-            player.sendMessage(new LiteralText("[ModMdo Connection] " + message), false);
+            String message = SharedVariables.minecraftTextFormat.format(SharedVariables.loginUsers.getUser(player), "modmdo.connection.login.success", getSetting().getName()).string();
+            player.sendMessage(MutableText.of(new LiteralTextContent("[ModMdo Connection] " + message)), false);
             SharedVariables.LOGGER.info(message);
         });
         logged = TimeUtil.millions();
@@ -307,7 +307,7 @@ public class ModMdoDataProcessor {
         }
         send(builder.getBuilder().buildDisconnect("modmdo.connection.target.disconnect.initiative"));
         onDisconnect("modmdo.connection.target.disconnect.initiative");
-        modMdoConnection.disconnect(new TranslatableText("modmdo.connection.target.disconnect.initiative"));
+        modMdoConnection.disconnect(MutableText.of(new TranslatableTextContent("modmdo.connection.target.disconnect.initiative")));
     }
 
     public void send(Packet<?> packet) {
@@ -315,10 +315,10 @@ public class ModMdoDataProcessor {
     }
 
     private void onDisconnect(String message) {
-        EntrustExecution.tryFor(() -> server.getPlayerManager().getPlayerList(), player -> player.sendMessage(new LiteralText("[ModMdo Connection] " + SharedVariables.minecraftTextFormat.format(SharedVariables.loginUsers.getUser(player), message, getAddress()).asString()), false));
+        EntrustExecution.tryFor(() -> server.getPlayerManager().getPlayerList(), player -> player.sendMessage(MutableText.of(new LiteralTextContent("[ModMdo Connection] " + SharedVariables.minecraftTextFormat.format(SharedVariables.loginUsers.getUser(player), message, getAddress()).string())), false));
         disconnected = true;
         status = "disconnected";
-        EntrustExecution.notNull(modMdoConnection.getConnection(), connection -> connection.disconnect(new TranslatableText(message)));
+        EntrustExecution.notNull(modMdoConnection.getConnection(), connection -> connection.disconnect(MutableText.of(new TranslatableTextContent(message))));
         SharedVariables.updateModMdoConnectionsNames(server);
         SharedVariables.LOGGER.info(SharedVariables.consoleTextFormat.format(message, getAddress()));
         if (SharedVariables.testing) {
@@ -381,6 +381,6 @@ public class ModMdoDataProcessor {
         disconnected = true;
         modMdoConnection.send(builder.getBuilder().buildDisconnect(reason));
         onDisconnect(reason);
-        modMdoConnection.disconnect(new TranslatableText(reason));
+        modMdoConnection.disconnect(MutableText.of(new TranslatableTextContent(reason)));
     }
 }

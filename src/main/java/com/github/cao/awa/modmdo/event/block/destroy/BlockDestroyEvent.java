@@ -65,13 +65,13 @@ public class BlockDestroyEvent extends ModMdoEvent<BlockDestroyEvent> {
 
     public String synopsis() {
         String name = EntrustParser.tryCreate(() -> {
-            String str = destroyBy.getDisplayName().asString();
+            String str = destroyBy.getDisplayName().getString();
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }
             return str;
         }, destroyBy.toString());
-        return EntrustParser.tryCreate(() -> String.format("BlockDestroyEvent{block=%s, pos=%s, dimension=%s, perpetrator=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().getEffects(), name), toString());
+        return EntrustParser.tryCreate(() -> String.format("BlockDestroyEvent{block=%s, pos=%s, dimension=%s, perpetrator=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().effects(), name), toString());
     }
 
     @Override

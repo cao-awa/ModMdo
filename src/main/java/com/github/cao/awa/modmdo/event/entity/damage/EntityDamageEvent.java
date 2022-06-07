@@ -74,13 +74,13 @@ public class EntityDamageEvent extends EntityTargetedEvent<EntityDamageEvent> {
 
     public String synopsis() {
         String name = EntrustParser.tryCreate(() -> {
-            String str = entity.getDisplayName().asString();
+            String str = entity.getDisplayName().getString();
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }
             return str;
         }, entity.toString());
-        return EntrustParser.tryCreate(() -> String.format("EntityDamageEvent{entity=%s, pos=%s, dimension=%s, origin-health=%s, damage=%s}", name, entity.getPos(), world.getDimension().getEffects(), originalHealth, damage), toString());
+        return EntrustParser.tryCreate(() -> String.format("EntityDamageEvent{entity=%s, pos=%s, dimension=%s, origin-health=%s, damage=%s}", name, entity.getPos(), world.getDimension().effects(), originalHealth, damage), toString());
     }
 
     @Override

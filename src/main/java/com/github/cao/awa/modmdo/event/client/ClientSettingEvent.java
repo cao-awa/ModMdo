@@ -60,7 +60,7 @@ public class ClientSettingEvent extends EntityTargetedEvent<ClientSettingEvent> 
 
     public String synopsis() {
         String name = EntrustParser.trying(() -> EntrustParser.tryCreate(() -> {
-            String str = player.getDisplayName().asString();
+            String str = player.getDisplayName().getString();
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }

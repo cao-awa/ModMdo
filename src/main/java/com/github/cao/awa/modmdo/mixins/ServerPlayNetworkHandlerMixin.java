@@ -70,7 +70,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     String data5 = EntrustParser.tryCreate(buf::readString, "");
 
                     if (TOKEN.equals(channel)) {
-                        serverLogin.reject(data1, oldLogin, "", new LiteralText("obsolete login type"));
+                        serverLogin.reject(data1, oldLogin, "", MutableText.of(new LiteralTextContent("obsolete login type")));
                         return;
                     }
 
@@ -94,15 +94,15 @@ public abstract class ServerPlayNetworkHandlerMixin {
     public void onDisconnected(Text reason, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             serverLogin.logout(player);
-            EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(player.getName().asString()));
+            EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(player.getName().getString()));
             event.submitQuitServer(player, connection, player.getPos(), server);
         }
     }
 
-    @Inject(method = "executeCommand", at = @At("HEAD"))
-    private void executeCommand(String input, CallbackInfo ci) {
+    @Inject(method = "onCommandExecution", at = @At("HEAD"))
+    private void executeCommand(CommandExecutionC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
+            LOGGER.info(player.getName().getString() + "(" + player.getUuid().toString() + ") run the command: " + packet.command());
         }
     }
 
@@ -118,7 +118,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         if (SharedVariables.isActive()) {
             event.submitGameChat(player, packet, server);
             if (! packet.getChatMessage().startsWith("/")) {
-                EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), player.getName().asString()));
+                EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), player.getName().getString()));
             }
         }
     }

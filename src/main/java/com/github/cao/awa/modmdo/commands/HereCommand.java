@@ -20,30 +20,30 @@ public class HereCommand extends SimpleCommand {
                     ServerPlayerEntity whoUseHere = source.getPlayer();
                     PlayerManager p = source.getServer().getPlayerManager();
                     XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
-                    String dimension = whoUseHere.getEntityWorld().getDimension().getEffects().getPath();
+                    String dimension = whoUseHere.getEntityWorld().getDimension().effects().getPath();
                     for (ServerPlayerEntity player : p.getPlayerList()) {
-                        TranslatableText hereMessage = formatHereTip(dimension, xyz, whoUseHere);
+                        TranslatableTextContent hereMessage = formatHereTip(dimension, xyz, whoUseHere);
                         sendMessage(player, hereMessage, false);
                     }
                     whoUseHere.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), whoUseHere);
-                    sendFeedback(source, new TranslatableText("command.here.feedback", whoUseHere.getName().asString()));
+                    sendFeedback(source, new TranslatableTextContent("command.here.feedback", whoUseHere.getName().getString()));
                     return 1;
                 } catch (Exception e) {
-                    sendError(source, new TranslatableText("command.here.failed.feedback"));
+                    sendError(source, new TranslatableTextContent("command.here.failed.feedback"));
 
                     return - 1;
                 }
             } else {
-                sendError(source, new TranslatableText("here_command.false.rule.format"));
+                sendError(source, new TranslatableTextContent("here_command.false.rule.format"));
             }
             return 0;
         }));
         return this;
     }
 
-    public TranslatableText formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity whoUseHere) {
-        String useHerePlayerName = whoUseHere.getName().asString();
+    public TranslatableTextContent formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity whoUseHere) {
+        String useHerePlayerName = whoUseHere.getName().getString();
 
-        return new TranslatableText("command.here", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ());
+        return new TranslatableTextContent("command.here", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ());
     }
 }

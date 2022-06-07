@@ -22,27 +22,27 @@ public class DimensionHereCommand extends SimpleCommand {
                     XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
                     String dimension = DimensionUtil.getDimension(whoUseHere);
                     for (ServerPlayerEntity player : p.getPlayerList()) {
-                        TranslatableText hereMessage = formatHereTip(dimension, xyz, whoUseHere);
+                        TranslatableTextContent hereMessage = formatHereTip(dimension, xyz, whoUseHere);
                         sendMessage(player, hereMessage, false);
                     }
                     whoUseHere.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), whoUseHere);
-                    sendFeedback(source, new TranslatableText("command.here.feedback", whoUseHere.getName().asString()));
+                    sendFeedback(source, new TranslatableTextContent("command.here.feedback", whoUseHere.getName().getString()));
                     return 1;
                 } catch (Exception e) {
-                    sendError(source, new TranslatableText("command.here.failed.feedback"));
+                    sendError(source, new TranslatableTextContent("command.here.failed.feedback"));
 
                     return - 1;
                 }
             } else {
-                sendError(source, new TranslatableText("here_command.false.rule.format"));
+                sendError(source, new TranslatableTextContent("here_command.false.rule.format"));
             }
             return 0;
         }));
         return this;
     }
 
-    public TranslatableText formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity whoUseHere) {
-        String useHerePlayerName = whoUseHere.getName().asString();
+    public TranslatableTextContent formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity whoUseHere) {
+        String useHerePlayerName = whoUseHere.getName().getString();
         String convertTarget = "";
         switch (dimension) {
             case "overworld" -> convertTarget = "the_nether";
@@ -56,6 +56,6 @@ public class DimensionHereCommand extends SimpleCommand {
             convertXYZ.multiplyXZ(8, 8);
         }
 
-        return new TranslatableText("command.dhere", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), DimensionUtil.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
+        return new TranslatableTextContent("command.dhere", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), DimensionUtil.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
     }
 }

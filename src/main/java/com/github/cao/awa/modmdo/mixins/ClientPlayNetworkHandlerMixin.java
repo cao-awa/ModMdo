@@ -7,7 +7,6 @@ import com.mojang.authlib.*;
 import io.netty.buffer.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
-import net.minecraft.entity.player.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.c2s.play.*;
@@ -57,7 +56,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
 
                 if (informationSign.equals(CHECKING) || informationSign.equals(LOGIN)) {
                     System.out.println(staticConfig.getConfigString("identifier"));
-                    connection.send(new CustomPayloadC2SPacket(CLIENT, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN.toString()).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
+                    connection.send(new CustomPayloadC2SPacket(CLIENT, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN.toString()).writeString(profile.getName()).writeString(profile.getId().toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
                 }
 
                 if (informationSign.equals(DATA)) {

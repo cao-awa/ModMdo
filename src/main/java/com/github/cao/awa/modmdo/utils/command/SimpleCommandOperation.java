@@ -13,53 +13,53 @@ import net.minecraft.text.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class SimpleCommandOperation {
-    public static LiteralText formatModMdoVersionRequire(int versionRequire, ServerPlayerEntity player) {
+    public static LiteralTextContent formatModMdoVersionRequire(int versionRequire, ServerPlayerEntity player) {
         return minecraftTextFormat.format(loginUsers.getUser(player), "command.require.version", modMdoIdToVersionMap.get(versionRequire));
     }
 
-    public static void sendFeedback(CommandContext<ServerCommandSource> source, TranslatableText message) {
+    public static void sendFeedback(CommandContext<ServerCommandSource> source, TranslatableTextContent message) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
+            SharedVariables.sendMessage(getPlayer(source), MutableText.of(minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs())), false);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 
-    public static void sendFeedback(ServerCommandSource source, TranslatableText message) {
+    public static void sendFeedback(ServerCommandSource source, TranslatableTextContent message) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
+            SharedVariables.sendMessage(getPlayer(source), MutableText.of(minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs())), false);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 
-    public static void sendFeedback(ServerPlayerEntity player, TranslatableText message) {
+    public static void sendFeedback(ServerPlayerEntity player, TranslatableTextContent message) {
         try {
-            SharedVariables.sendMessage(player, minecraftTextFormat.format(loginUsers.getUser(player), message.getKey(), message.getArgs()), false);
+            SharedVariables.sendMessage(player, MutableText.of(minecraftTextFormat.format(loginUsers.getUser(player), message.getKey(), message.getArgs())), false);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 
-    public static void sendMessage(CommandContext<ServerCommandSource> source, TranslatableText message, boolean actionbar) {
+    public static void sendMessage(CommandContext<ServerCommandSource> source, TranslatableTextContent message, boolean actionbar) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), actionbar);
+            SharedVariables.sendMessage(getPlayer(source), MutableText.of(minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs())), actionbar);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 
-    public static void sendMessage(ServerCommandSource source, TranslatableText message, boolean actionbar) {
+    public static void sendMessage(ServerCommandSource source, TranslatableTextContent message, boolean actionbar) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), actionbar);
+            SharedVariables.sendMessage(getPlayer(source), MutableText.of(minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs())), actionbar);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
     }
 
-    public static void sendMessage(ServerPlayerEntity source, TranslatableText message, boolean actionbar) {
+    public static void sendMessage(ServerPlayerEntity source, TranslatableTextContent message, boolean actionbar) {
         try {
-            SharedVariables.sendMessage(source, minecraftTextFormat.format(loginUsers.getUser(source), message.getKey(), message.getArgs()), actionbar);
+            SharedVariables.sendMessage(source, MutableText.of(minecraftTextFormat.format(loginUsers.getUser(source), message.getKey(), message.getArgs())), actionbar);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
@@ -77,18 +77,18 @@ public class SimpleCommandOperation {
         }
     }
 
-    public static void sendFeedbackAndInform(ServerCommandSource source, LiteralText message) {
+    public static void sendFeedbackAndInform(ServerCommandSource source, LiteralTextContent message) {
         try {
             source.getPlayer();
-            source.sendFeedback(message, true);
+            source.sendFeedback(MutableText.of(message), true);
         } catch (Exception e) {
             LOGGER.info(message);
         }
     }
 
-    public static void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, TranslatableText message) {
+    public static void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, TranslatableTextContent message) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), new LiteralText(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
+            SharedVariables.sendMessage(getPlayer(source),MutableText.of( new LiteralTextContent(consoleTextFormat.format(message.getKey(), message.getArgs()))), false);
         } catch (Exception e) {
 
         }
@@ -114,7 +114,7 @@ public class SimpleCommandOperation {
         return source.getPlayer().networkHandler.connection;
     }
 
-    public static void sendError(CommandContext<ServerCommandSource> source, TranslatableText message) {
+    public static void sendError(CommandContext<ServerCommandSource> source, TranslatableTextContent message) {
         EntrustExecution.tryTemporary(() -> {
             sendError(source.getSource(), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()));
         }, ex -> {
@@ -122,7 +122,7 @@ public class SimpleCommandOperation {
         });
     }
 
-    public static void sendError(ServerCommandSource source, TranslatableText message) {
+    public static void sendError(ServerCommandSource source, TranslatableTextContent message) {
         EntrustExecution.tryTemporary(() -> {
             sendError(source, minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()));
         }, ex -> {
@@ -130,12 +130,12 @@ public class SimpleCommandOperation {
         });
     }
 
-    public static void sendError(ServerCommandSource source, LiteralText message) {
+    public static void sendError(ServerCommandSource source, LiteralTextContent message) {
         try {
             source.getPlayer();
-            source.sendError(message);
+            source.sendError(MutableText.of(message));
         } catch (Exception e) {
-            LOGGER.info(message.asString());
+            LOGGER.info(message.string());
         }
     }
 }

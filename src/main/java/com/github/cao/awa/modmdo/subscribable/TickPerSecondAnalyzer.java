@@ -105,7 +105,7 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
                         for (TargetCountLong<ServerPlayerEntity> counter : subs) {
                             ServerPlayerEntity player = counter.getTarget();
                             if (player.networkHandler.connection.isOpen()) {
-                                SharedVariables.sendMessage(player, new LiteralText("§etick-" + countTicks + ": §b(mspt: §a[r: " + realMspt + "ms, sub: " + subTps + "ms]§b, tps: §a[r: " + tpsCurrent + "§a, target: " + tpsTarget + "]§b)"), true);
+                                SharedVariables.sendMessage(player, MutableText.of(new LiteralTextContent("§etick-" + countTicks + ": §b(mspt: §a[r: " + realMspt + "ms, sub: " + subTps + "ms]§b, tps: §a[r: " + tpsCurrent + "§a, target: " + tpsTarget + "]§b)")), true);
                             } else {
                                 cancelSub(player);
                             }
@@ -129,12 +129,12 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
 
     public void cancelSub(ServerPlayerEntity player) {
         subs.removeIf(counter -> counter.getTarget() == player);
-        sendMessage(player, new TranslatableText("subscribe.remove.from", "tps"), false);
+        sendMessage(player, new TranslatableTextContent("subscribe.remove.from", "tps"), false);
     }
 
     public void addSub(ServerPlayerEntity player, long ticks) {
         subs.add(new TargetCountLong<>(player, ticks));
-        sendMessage(player, new TranslatableText("subscribe.add.to", "tps"), false);
+        sendMessage(player, new TranslatableTextContent("subscribe.add.to", "tps"), false);
     }
 
     public boolean hasSub(ServerPlayerEntity player) {

@@ -50,11 +50,11 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
             if (favicon != null) {
                 packet.getServerMetadata().setFavicon(favicon);
             }
-            packet.getServerMetadata().setDescription(format());
+            packet.getServerMetadata().setDescription(MutableText.of(format()));
         });
     }
 
-    public LiteralText format() {
+    public LiteralTextContent format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
                 String name = EntrustParser.trying(() -> {

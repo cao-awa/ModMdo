@@ -64,13 +64,13 @@ public class JoinServerEvent extends EntityTargetedEvent<JoinServerEvent> {
 
     public String synopsis() {
         String name = EntrustParser.trying(() -> EntrustParser.tryCreate(() -> {
-            String str = player.getDisplayName().asString();
+            String str = player.getDisplayName().getString();
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }
             return str;
         }, player.toString()), () -> "null");
-        return EntrustParser.tryCreate(() -> String.format("JoinServerEvent{player=%s, pos=%s, dimension=%s}", name, pos, player.getEntityWorld().getDimension().getEffects()), toString());
+        return EntrustParser.tryCreate(() -> String.format("JoinServerEvent{player=%s, pos=%s, dimension=%s}", name, pos, player.getEntityWorld().getDimension().effects()), toString());
     }
 
     @Override

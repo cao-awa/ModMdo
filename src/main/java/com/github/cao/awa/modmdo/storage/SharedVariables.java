@@ -428,14 +428,14 @@ public class SharedVariables {
 
     public static boolean hasWhitelist(ServerPlayerEntity player) {
         try {
-            switch (whitelist.get(player.getName().asString()).getRecorde().type()) {
+            switch (whitelist.get(player.getName().getString()).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (whitelist.get(player.getName().asString()).getRecorde().modmdoUniqueId().equals("")) {
+                    if (whitelist.get(player.getName().getString()).getRecorde().modmdoUniqueId().equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(whitelist.get(player.getName().asString()).getRecorde().uuid())) {
+                    if (! player.getUuid().equals(whitelist.get(player.getName().getString()).getRecorde().uuid())) {
                         return false;
                     }
                 }
@@ -448,12 +448,12 @@ public class SharedVariables {
 
     public static boolean handleBanned(ServerPlayerEntity player) {
         if (hasBan(player)) {
-            Certificate certificate = banned.get(player.getName().asString());
+            Certificate certificate = banned.get(player.getName().getString());
             if (certificate instanceof TemporaryCertificate temp) {
                 if (temp.isValid()) {
                     return true;
                 } else {
-                    banned.remove(player.getName().asString());
+                    banned.remove(player.getName().getString());
                 }
             } else {
                 return true;
@@ -464,14 +464,14 @@ public class SharedVariables {
 
     public static boolean hasBan(ServerPlayerEntity player) {
         try {
-            switch (banned.get(player.getName().asString()).getRecorde().type()) {
+            switch (banned.get(player.getName().getString()).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (banned.get(player.getName().asString()).getRecorde().modmdoUniqueId().equals("")) {
+                    if (banned.get(player.getName().getString()).getRecorde().modmdoUniqueId().equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(banned.get(player.getName().asString()).getRecorde().uuid())) {
+                    if (! player.getUuid().equals(banned.get(player.getName().getString()).getRecorde().uuid())) {
                         return false;
                     }
                 }

@@ -47,18 +47,18 @@ public class ServerTickListener {
         for (ServerPlayerEntity player : players.getPlayerList()) {
             if (modmdoWhitelist) {
                 if (!hasWhitelist(player)) {
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(new TranslatableText("multiplayer.disconnect.not_whitelisted")));
-                    player.networkHandler.connection.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(MutableText.of(new TranslatableTextContent("multiplayer.disconnect.not_whitelisted"))));
+                    player.networkHandler.connection.disconnect(MutableText.of(new TranslatableTextContent("multiplayer.disconnect.not_whitelisted")));
                 }
                 if (hasBan(player)) {
-                    Certificate ban = banned.get(player.getName().asString());
+                    Certificate ban = banned.get(player.getName().getString());
                     if (ban instanceof TemporaryCertificate temporary) {
                         String remaining = temporary.formatRemaining();
-                        player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining)));
-                        player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining));
+                        player.networkHandler.connection.send(new DisconnectS2CPacket(MutableText.of(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining))));
+                        player.networkHandler.connection.disconnect(MutableText.of(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining)));
                     } else {
-                        player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite")));
-                        player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite"));
+                        player.networkHandler.connection.send(new DisconnectS2CPacket(MutableText.of(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite"))));
+                        player.networkHandler.connection.disconnect(MutableText.of(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite")));
                     }
                 }
             }

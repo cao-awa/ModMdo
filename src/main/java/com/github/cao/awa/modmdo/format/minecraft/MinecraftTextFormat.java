@@ -6,24 +6,24 @@ import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import net.minecraft.text.*;
 
-public class MinecraftTextFormat extends TextFormat<LiteralText> {
+public class MinecraftTextFormat extends TextFormat<LiteralTextContent> {
     public MinecraftTextFormat(Resource<String> resource) {
         super(resource);
     }
 
-    public LiteralText format(String key, Object... args) {
-        return new LiteralText(formatted(key, args));
+    public LiteralTextContent format(String key, Object... args) {
+        return new LiteralTextContent(formatted(key, args));
     }
 
-    public LiteralText format(User user, String key, Object... args) {
-        return new LiteralText(formatted(user, key, args));
+    public LiteralTextContent format(User user, String key, Object... args) {
+        return new LiteralTextContent(formatted(user, key, args));
     }
 
-    public LiteralText format(Language language, String key, Object... args) {
-        return new LiteralText(formatted(language, key, args));
+    public LiteralTextContent format(Language language, String key, Object... args) {
+        return new LiteralTextContent(formatted(language, key, args));
     }
 
-    public LiteralText format(Dictionary dictionary, String key, Object... args) {
-        return new LiteralText(formatted(dictionary, key, args));
+    public LiteralTextContent format(Dictionary dictionary, String key, Object... args) {
+        return new LiteralTextContent(formatted(dictionary, key, args));
     }
 }

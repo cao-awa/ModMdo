@@ -7,6 +7,7 @@ import net.minecraft.item.*;
 import net.minecraft.util.*;
 import net.minecraft.util.collection.*;
 import net.minecraft.util.math.*;
+import net.minecraft.util.math.random.Random;
 import org.spongepowered.asm.mixin.*;
 
 import java.security.*;

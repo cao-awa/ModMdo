@@ -26,10 +26,10 @@ public class DimensionUtil {
     }
 
     public static String getDimension(ServerPlayerEntity player) {
-        return player.getEntityWorld().getDimension().getEffects().getPath();
+        return player.getEntityWorld().getDimension().effects().getPath();
     }
 
     public static String getDimension(World world) {
-        return world.getDimension().getEffects().getPath();
+        return world.getDimension().effects().getPath();
     }
 }

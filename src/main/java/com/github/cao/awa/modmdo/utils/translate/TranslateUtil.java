@@ -1,13 +1,13 @@
 package com.github.cao.awa.modmdo.utils.translate;
 
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.TranslatableTextContent;
 
 public class TranslateUtil {
-    public static TranslatableText formatRule(String head, String info) {
-        return new TranslatableText(head + "." + info + ".rule.format");
+    public static TranslatableTextContent formatRule(String head, String info) {
+        return new TranslatableTextContent(head + "." + info + ".rule.format");
     }
 
-    public static TranslatableText translatableText(String key, Object... args) {
-        return new TranslatableText(key,args);
+    public static TranslatableTextContent TranslatableTextContent(String key, Object... args) {
+        return new TranslatableTextContent(key,args);
     }
 }

@@ -32,6 +32,16 @@ public class ModMdoServerDataHandler implements ServerPlayPacketListener {
     }
 
     @Override
+    public void onCommandExecution(CommandExecutionC2SPacket packet) {
+        
+    }
+
+    @Override
+    public void onRequestChatPreview(RequestChatPreviewC2SPacket packet) {
+
+    }
+
+    @Override
     public void onClientStatus(ClientStatusC2SPacket packet) {
 
     }

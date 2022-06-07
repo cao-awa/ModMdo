@@ -25,7 +25,7 @@ public abstract class TargetedTrigger<T extends EntityTargetedEvent<?>> extends 
             str.set(new XYZ(trigger.target.get(0).getPos()).toString(2));
         });
         map.put("%{target_name}", (trigger, str) -> {
-            String name = trigger.target.get(0).getName().asString();
+            String name = trigger.target.get(0).getName().getString();
             if (name.equals("")) {
                 str.set(trigger.target.toString());
             } else {

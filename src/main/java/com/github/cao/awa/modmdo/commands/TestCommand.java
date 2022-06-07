@@ -12,11 +12,11 @@ public class TestCommand extends SimpleCommand {
     public TestCommand register() {
         SharedVariables.commandRegister.register(literal("testmodmdo").executes(e -> {
             SharedVariables.testing = ! SharedVariables.testing;
-            SimpleCommandOperation.sendFeedback(e, new TranslatableText("testing: " + SharedVariables.testing));
+            SimpleCommandOperation.sendFeedback(e, new TranslatableTextContent("testing: " + SharedVariables.testing));
             return 0;
         }).then(literal("trace").executes(e -> {
             PrintUtil.debugging = !PrintUtil.debugging;
-            SimpleCommandOperation.sendFeedback(e, new TranslatableText("trace: " + PrintUtil.debugging));
+            SimpleCommandOperation.sendFeedback(e, new TranslatableTextContent("trace: " + PrintUtil.debugging));
             return 0;
         })));
         return this;

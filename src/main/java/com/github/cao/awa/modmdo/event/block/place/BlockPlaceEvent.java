@@ -73,13 +73,13 @@ public class BlockPlaceEvent extends ModMdoEvent<BlockPlaceEvent> {
 
     public String synopsis() {
         String name = EntrustParser.tryCreate(() -> {
-            String str = placer.getDisplayName().asString();
+            String str = placer.getDisplayName().getString();
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }
             return str;
         }, placer.toString());
-        return EntrustParser.tryCreate(() -> String.format("BlockPlaceEvent{block=%s, pos=%s, dimension=%s, placer=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().getEffects(), name), toString());
+        return EntrustParser.tryCreate(() -> String.format("BlockPlaceEvent{block=%s, pos=%s, dimension=%s, placer=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().effects(), name), toString());
     }
 
     @Override
