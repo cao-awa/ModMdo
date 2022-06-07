@@ -175,9 +175,9 @@ public class ModMdoDataProcessor {
                 } else {
                     if (SharedVariables.modmdoConnectionAccepting.isValid()) {
                         if (EntrustParser.trying(() -> ! SharedVariables.modmdoConnectionWhitelist.containsIdentifier(identifier), () -> true)) {
-                            SharedVariables.modmdoConnectionWhitelist.put(name, new PermanentWhitelist(name, identifier, null));
+                            SharedVariables.modmdoConnectionWhitelist.put(name, new PermanentCertificate(name, identifier, null));
                             SharedVariables.saveVariables();
-                            SharedVariables.modmdoConnectionAccepting = new TemporaryWhitelist("", - 1, - 1);
+                            SharedVariables.modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
                         }
                     }
                 }

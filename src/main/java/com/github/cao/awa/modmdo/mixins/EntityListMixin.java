@@ -55,27 +55,4 @@ public class EntityListMixin {
             }
         }
     }
-
-    /**
-     * @author 草awa
-     * @reason
-     */
-    @Overwrite
-    private void ensureSafe() {
-        if (this.iterating == this.entities) {
-            try {
-                this.temp.clear();
-
-                for (Int2ObjectMap.Entry<Entity> entityEntry : Int2ObjectMaps.fastIterable(this.entities)) {
-                    this.temp.put(entityEntry.getIntKey(), entityEntry.getValue());
-                }
-
-                Int2ObjectMap<Entity> int2ObjectMap = this.entities;
-                this.entities = this.temp;
-                this.temp = int2ObjectMap;
-            } catch (Exception e) {
-
-            }
-        }
-    }
 }

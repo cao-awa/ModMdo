@@ -19,7 +19,8 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
     private final ObjectArrayList<Receptacle<String>> args = new ObjectArrayList<>();
     private boolean active = true;
     private String key = "";
-    private Language dictionary = null;
+    private Dictionary dictionary = null;
+    private String favicon = null;
 
     @Override
     public ModMdoEventTrigger<ServerQueryEvent> build(ServerQueryEvent event, JSONObject metadata, TriggerTrace trace) {
@@ -34,7 +35,10 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
         });
         packet = event.getPacket();
         if (motd.has("dictionary")) {
-            dictionary = Language.ofs(motd.getString("dictionary"));
+            dictionary = new Dictionary(motd.getString("dictionary"));
+        }
+        if (motd.has("favicon")) {
+            favicon = motd.getString("favicon");
         }
         setTrace(trace);
         return this;
@@ -42,7 +46,12 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> packet.getServerMetadata().setDescription(format()));
+        EntrustExecution.tryTemporary(() -> {
+            if (favicon != null) {
+                packet.getServerMetadata().setFavicon(favicon);
+            }
+            packet.getServerMetadata().setDescription(format());
+        });
     }
 
     public LiteralText format() {
@@ -80,6 +89,6 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
             }
         });
 
-        return minecraftTextFormat.format(dictionary == null ? getLanguage() : dictionary, key, objs);
+        return minecraftTextFormat.format(new Dictionary(dictionary == null ? getLanguage().getName() : dictionary.name()), key, objs);
     }
 }

@@ -20,19 +20,19 @@ public class ServerLogin {
     public void login(String name, String uuid, String identifier, String modmdoVersion, String language) {
         int version = EntrustParser.tryCreate(() -> Integer.valueOf(modmdoVersion), - 1);
 
-        if (! identifier.equals("")) {
-            if (SharedVariables.config.getConfigBoolean("modmdo_whitelist")) {
-                if (SharedVariables.config.getConfigBoolean("whitelist_only_id")) {
-                    loginUsingId(name, uuid, identifier, version);
-                } else {
-                    strictLogin(name, uuid, identifier, version);
-                }
+        System.out.println(identifier);
+
+        if (SharedVariables.config.getConfigBoolean("modmdo_whitelist")) {
+            if (SharedVariables.config.getConfigBoolean("whitelist_only_id")) {
+                loginUsingId(name, uuid, identifier, version);
             } else {
-                EntrustExecution.tryTemporary(() -> {
-                    SharedVariables.LOGGER.info("login player: " + name);
-                    SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setLanguage(language == null ? getLanguage() : Language.ofs(language)));
-                });
+                strictLogin(name, uuid, identifier, version);
             }
+        } else {
+            EntrustExecution.tryTemporary(() -> {
+                SharedVariables.LOGGER.info("login player: " + name);
+                SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setLanguage(language == null ? getLanguage() : Language.ofs(language)));
+            });
         }
     }
 
@@ -40,7 +40,7 @@ public class ServerLogin {
         EntrustExecution.notNull(SharedVariables.temporaryWhitelist.get(name), e -> {
             if (e.isValid()) {
                 if (SharedVariables.whitelist.getFromId(identifier) == null) {
-                    SharedVariables.whitelist.put(name, new PermanentWhitelist(name, identifier, UUID.fromString(uuid)));
+                    SharedVariables.whitelist.put(name, new PermanentCertificate(name, identifier, UUID.fromString(uuid)));
                     SharedVariables.saveVariables();
                 }
             }
@@ -62,7 +62,7 @@ public class ServerLogin {
         EntrustExecution.notNull(SharedVariables.temporaryWhitelist.get(name), e -> {
             if (e.isValid()) {
                 if (EntrustParser.trying(() -> ! SharedVariables.whitelist.get(name).getIdentifier().equals(identifier), () -> true)) {
-                    SharedVariables.whitelist.put(name, new PermanentWhitelist(name, identifier, UUID.fromString(uuid)));
+                    SharedVariables.whitelist.put(name, new PermanentCertificate(name, identifier, UUID.fromString(uuid)));
                     SharedVariables.saveVariables();
                 }
             }
@@ -94,7 +94,7 @@ public class ServerLogin {
                 } catch (Exception ex) {
 
                 }
-                SharedVariables.whitelist.put(name, new PermanentWhitelist(name, "", UUID.fromString(uuid)));
+                SharedVariables.whitelist.put(name, new PermanentCertificate(name, "", UUID.fromString(uuid)));
                 SharedVariables.saveVariables();
             }
             SharedVariables.temporaryWhitelist.remove(name);

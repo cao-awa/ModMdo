@@ -76,9 +76,8 @@ public class ModMdoStdInitializer implements ModInitializer {
 
         if (SharedVariables.modMdoType == ModMdoType.SERVER) {
             SharedVariables.initWhiteList();
+            SharedVariables.initBan();
         }
-
-        staticConfig.setIfNoExist("identifier", RandomIdentifier.randomIdentifier());
     }
 
     @Override
@@ -88,6 +87,10 @@ public class ModMdoStdInitializer implements ModInitializer {
         SharedVariables.LOGGER.info("Loading for ModMdo Std init");
 
         staticConfig = new DiskObjectConfigUtil("ModMdo", "config/modmdo", "modmdo", false);
+
+        staticConfig.setIfNoExist("identifier", RandomIdentifier.randomIdentifier());
+
+        event = new ModMdoEventTracer();
 
         SharedVariables.loginUsers = new UserUtil();
         SharedVariables.rejectUsers = new UserUtil();

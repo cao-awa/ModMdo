@@ -236,7 +236,7 @@ public class ModMdoCommand extends SimpleCommand {
             SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("whitelist_only_id"));
             return 0;
         }))).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
-            Whitelist wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
+            Certificate wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
             if (SharedVariables.whitelist.containsName(wl.getName())) {
                 SharedVariables.whitelist.remove(wl.getName());
                 SimpleCommandOperation.sendFeedback(remove, new TranslatableText("modmdo.whitelist.removed", wl.getName()));
@@ -389,7 +389,7 @@ public class ModMdoCommand extends SimpleCommand {
         ServerPlayerEntity player = SimpleCommandOperation.getPlayer(source);
         if (SharedVariables.whitelist.size() > 0) {
             StringBuilder builder = new StringBuilder();
-            for (Whitelist wl : SharedVariables.whitelist.values()) {
+            for (Certificate wl : SharedVariables.whitelist.values()) {
                 builder.append(wl.getName()).append(", ");
             }
             builder.delete(builder.length() - 2, builder.length());
