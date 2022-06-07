@@ -7,7 +7,7 @@ import com.github.cao.awa.modmdo.utils.usr.*;
 import net.minecraft.text.*;
 
 public class MinecraftTextFormat extends TextFormat<LiteralText> {
-    public MinecraftTextFormat(Resource<Language> resource) {
+    public MinecraftTextFormat(Resource<String> resource) {
         super(resource);
     }
 
@@ -21,5 +21,9 @@ public class MinecraftTextFormat extends TextFormat<LiteralText> {
 
     public LiteralText format(Language language, String key, Object... args) {
         return new LiteralText(formatted(language, key, args));
+    }
+
+    public LiteralText format(Dictionary dictionary, String key, Object... args) {
+        return new LiteralText(formatted(dictionary, key, args));
     }
 }

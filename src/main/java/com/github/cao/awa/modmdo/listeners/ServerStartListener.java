@@ -18,7 +18,7 @@ public class ServerStartListener {
                 commandRegister = new ModMdoCommandRegister(server);
 
                 ModMdoStdInitializer.initForLevel(server);
-            }, Throwable::printStackTrace);
+            });
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {

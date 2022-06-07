@@ -1,4 +1,8 @@
 {
+    "multiplayer.disconnect.banned-indefinite": "§7你已被此服务器无期限封禁, 咨询管理员以尝试恢复访问权限",
+    "multiplayer.disconnect.banned-time-limited": "§7你已被此服务器临时封禁, 将在 §b%s §7后恢复访问权限",
+    "modmdo.banned.indefinite": "已对 %s 进行无期限封禁",
+    "modmdo.banned.time-limit": "已对 %s 进行 %s 的封禁",
     "modmdo.event.reload.success": "%s 个事件已被成功重新加载, 先前为 %s 个",
     "modmdo.connection.not.found": "无法找到名为 %s 的 ModMdo 连接",
     "modmdo.connection.login.success": "成功登录到: %s",

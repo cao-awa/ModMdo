@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.format;
 
 import com.github.cao.awa.modmdo.lang.*;
+import com.github.cao.awa.modmdo.lang.Dictionary;
 import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -14,14 +15,14 @@ import java.util.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public abstract class TextFormat<T> {
-    protected final Object2ObjectLinkedOpenHashMap<Language, Object2ObjectLinkedOpenHashMap<String, String>> format = new Object2ObjectLinkedOpenHashMap<>();
+    protected final Object2ObjectLinkedOpenHashMap<String, Object2ObjectLinkedOpenHashMap<String, String>> format = new Object2ObjectLinkedOpenHashMap<>();
 
-    public TextFormat(Resource<Language> resource) {
+    public TextFormat(Resource<String> resource) {
         set(resource);
     }
 
-    public void set(Resource<Language> resource) {
-        for (Language lang : resource.getNames()) {
+    public void set(Resource<String> resource) {
+        for (String lang : resource.getNames()) {
             try {
                 Object2ObjectLinkedOpenHashMap<String, String> map = new Object2ObjectLinkedOpenHashMap<>();
                 for (String res : resource.read(lang)) {
@@ -37,7 +38,7 @@ public abstract class TextFormat<T> {
         }
     }
 
-    public Set<Language> supported() {
+    public Set<String> supported() {
         return format.keySet();
     }
 
@@ -52,10 +53,18 @@ public abstract class TextFormat<T> {
     }
 
     public String formatted(Language lang, String key, Object... args) {
+        return formatted(lang.getName(), key, args);
+    }
+
+    public String formatted(Dictionary lang, String key, Object... args) {
+        return formatted(lang.name(), key, args);
+    }
+
+    private String formatted(String lang, String key, Object... args) {
         try {
-            Receptacle<Language> language = new Receptacle<>(format.containsKey(lang) ? lang : getLanguage());
+            Receptacle<String> language = new Receptacle<>(format.containsKey(lang) ? lang : getLanguage().getName());
             if (format.get(language.get()).get(key) == null) {
-                language.set(getLanguage());
+                language.set(getLanguage().getName());
             }
             Receptacle<String> formatReturn = new Receptacle<>(format.get(language.get()).get(key));
 
@@ -78,5 +87,22 @@ public abstract class TextFormat<T> {
         } catch (Exception e) {
             return key;
         }
+    }
+
+    public String auto(String key, Object... args) {
+        ObjectOpenHashSet<String> languages = EntrustParser.operation(new ObjectOpenHashSet<>(), set -> {
+            set.addAll(format.keySet());
+            set.remove(getLanguage().getName());
+        });
+        String preselection = formatted(getLanguage().getName(), key, args);
+        if (preselection.equals(key)) {
+            for (String name : languages) {
+                preselection = formatted(name, key, args);
+                if (!preselection.equals(key)) {
+                    return preselection;
+                }
+            }
+        }
+        return preselection;
     }
 }

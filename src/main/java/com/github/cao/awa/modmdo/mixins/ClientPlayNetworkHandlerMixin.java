@@ -53,12 +53,13 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
             try {
                 Identifier channel = packet.getChannel();
 
-                Identifier informationSign = data.readIdentifier();
+                Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
 
                 LOGGER.info("server sent a payload in channel: " + channel);
 
                 if (informationSign.equals(CHECKING) || informationSign.equals(LOGIN)) {
-                    connection.send(new CustomPayloadC2SPacket(CLIENT, (new PacketByteBuf(Unpooled.buffer())).writeIdentifier(LOGIN).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
+                    System.out.println(staticConfig.getConfigString("identifier"));
+                    connection.send(new CustomPayloadC2SPacket(CLIENT, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN.toString()).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
                 }
 
                 if (informationSign.equals(DATA)) {
@@ -87,6 +88,13 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                                 modmdoConnectionNames.add(o.toString());
                             }
                         });
+                        case "ban_names" -> {
+                            banned.clear();
+                            JSONObject json = new JSONObject(data2);
+                            for (Object o : json.getJSONArray("names")) {
+                                banned.put(o.toString(), null);
+                            }
+                        }
                     }
                     ArgumentInit.init();
                 }

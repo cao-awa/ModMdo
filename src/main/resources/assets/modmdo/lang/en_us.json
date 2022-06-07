@@ -1,4 +1,8 @@
 {
+    "multiplayer.disconnect.banned-indefinite": "§7You have been no indefinite banned from this server, consult with administrator to try restore your access",
+    "multiplayer.disconnect.banned-time-limited": "§7You have been temporarily banned from this server and will regain access in §b%s",
+    "modmdo.banned.indefinite": "Banned %s for indefinite",
+    "modmdo.banned.time-limit": "Banned %s for %s",
     "modmdo.event.reload.success": "success to reloaded %s events, %s previously",
     "modmdo.connection.not.found": "Cannot found ModMdo Connect as name %s",
     "modmdo.connection.login.success": "success login to: %s",

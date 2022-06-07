@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.commands.argument.whitelist;
+package com.github.cao.awa.modmdo.commands.argument.ban;
 
 import com.github.cao.awa.modmdo.whitelist.*;
 import com.mojang.brigadier.*;
@@ -13,14 +13,14 @@ import java.util.concurrent.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
-public class ModMdoTemporaryWhitelistArgumentType implements ArgumentType<String> {
-    public static ModMdoTemporaryWhitelistArgumentType whitelist() {
-        return new ModMdoTemporaryWhitelistArgumentType();
+public class ModMdoTemporaryBanArgumentType implements ArgumentType<String> {
+    public static ModMdoTemporaryBanArgumentType banned() {
+        return new ModMdoTemporaryBanArgumentType();
     }
 
-    public static TemporaryCertificate getWhiteList(CommandContext<ServerCommandSource> context, String name) {
+    public static Certificate getCertificate(CommandContext<ServerCommandSource> context, String name) {
         String string = context.getArgument(name, String.class);
-        TemporaryCertificate whiteList = temporaryWhitelist.get(string);
+        Certificate whiteList = banned.get(string);
         return whiteList == null ? new TemporaryCertificate(string, -1, -1) : whiteList;
     }
 
@@ -31,7 +31,7 @@ public class ModMdoTemporaryWhitelistArgumentType implements ArgumentType<String
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(temporaryWhitelist.keySet(), builder);
+        return CommandSource.suggestMatching(banned.keySet(), builder);
     }
 
     @Override
