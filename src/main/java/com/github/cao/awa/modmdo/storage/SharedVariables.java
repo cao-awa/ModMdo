@@ -41,8 +41,8 @@ import java.util.*;
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static final String VERSION_ID = "1.0.35";
-    public static final String MODMDO_VERSION_NAME = VERSION_ID + "-ES";
-    public static final String RELEASE_TIME = "2022.6.7";
+    public static final String MODMDO_VERSION_NAME = VERSION_ID + "-Dump";
+    public static final String RELEASE_TIME = "2022.6.8";
     public static final int MODMDO_VERSION = 29;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
@@ -443,14 +443,14 @@ public class SharedVariables {
 
     public static boolean hasWhitelist(ServerPlayerEntity player) {
         try {
-            switch (whitelist.get(player.getName().asString()).getRecorde().type()) {
+            switch (whitelist.get(player.getName().getString()).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (whitelist.get(player.getName().asString()).getRecorde().modmdoUniqueId().equals("")) {
+                    if (whitelist.get(player.getName().getString()).getRecorde().modmdoUniqueId().equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(whitelist.get(player.getName().asString()).getRecorde().uuid())) {
+                    if (! player.getUuid().equals(whitelist.get(player.getName().getString()).getRecorde().uuid())) {
                         return false;
                     }
                 }
@@ -464,12 +464,12 @@ public class SharedVariables {
     public static boolean handleBanned(ServerPlayerEntity player) {
         if (config.getConfigBoolean("modmdo_whitelist")) {
             if (hasBan(player)) {
-                Certificate certificate = banned.get(player.getName().asString());
+                Certificate certificate = banned.get(player.getName().getString());
                 if (certificate instanceof TemporaryCertificate temp) {
                     if (temp.isValid()) {
                         return true;
                     } else {
-                        banned.remove(player.getName().asString());
+                        banned.remove(player.getName().getString());
                     }
                 } else {
                     return true;
@@ -481,14 +481,14 @@ public class SharedVariables {
 
     public static boolean hasBan(ServerPlayerEntity player) {
         try {
-            switch (banned.get(player.getName().asString()).getRecorde().type()) {
+            switch (banned.get(player.getName().getString()).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (banned.get(player.getName().asString()).getRecorde().modmdoUniqueId().equals("")) {
+                    if (banned.get(player.getName().getString()).getRecorde().modmdoUniqueId().equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(banned.get(player.getName().asString()).getRecorde().uuid())) {
+                    if (! player.getUuid().equals(banned.get(player.getName().getString()).getRecorde().uuid())) {
                         return false;
                     }
                 }
