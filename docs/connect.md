@@ -9,7 +9,7 @@ __服务器和服务器通信__
 #显示流量传输
 /modmdo connection connections <name> traffic
 ```
-### 白名单
+### 白名单相关
 __永久白名单__
 ```sh
 #添加 
@@ -28,4 +28,12 @@ __临时白名单__
 #列出已添加临时白名单的玩家
 /temporary whitelist list
 ```
-
+__封禁玩家__
+```sh
+#临时封禁 > 以分钟为单位
+/temporary ban add <name> <time>
+#永久封禁
+/temporary ban add <name> -1
+#显示被封禁的玩家
+/temporary ban list
+```
