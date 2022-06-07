@@ -141,6 +141,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                                 updateWhitelistNames(server, true);
                                 updateTemporaryWhitelistNames(server, true);
                                 updateModMdoConnectionsNames(server);
+                                updateTemporaryBanNames(server, true);
                             } else {
                                 LOGGER.info("expired nano: " + nano + " (" + player.getName().asString() + ")");
                             }
