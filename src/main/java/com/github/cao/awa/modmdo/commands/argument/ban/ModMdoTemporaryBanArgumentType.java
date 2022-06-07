@@ -21,7 +21,7 @@ public class ModMdoTemporaryBanArgumentType implements ArgumentType<String> {
     public static Certificate getCertificate(CommandContext<ServerCommandSource> context, String name) {
         String string = context.getArgument(name, String.class);
         Certificate whiteList = banned.get(string);
-        return whiteList == null ? new TemporaryCertificate(string, -1, -1) : whiteList;
+        return whiteList == null ? new TemporaryCertificate(string, - 1, - 1) : whiteList;
     }
 
     @Override

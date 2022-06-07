@@ -20,8 +20,6 @@ public class ServerLogin {
     public void login(String name, String uuid, String identifier, String modmdoVersion, String language) {
         int version = EntrustParser.tryCreate(() -> Integer.valueOf(modmdoVersion), - 1);
 
-        System.out.println(identifier);
-
         if (SharedVariables.config.getConfigBoolean("modmdo_whitelist")) {
             if (SharedVariables.config.getConfigBoolean("whitelist_only_id")) {
                 loginUsingId(name, uuid, identifier, version);
@@ -87,12 +85,8 @@ public class ServerLogin {
     public void loginUsingYgg(String name, String uuid) {
         EntrustExecution.notNull(SharedVariables.temporaryWhitelist.get(name), e -> {
             if (e.isValid()) {
-                try {
-                    if (uuid.equals(SharedVariables.whitelist.get(name).getRecorde().uuid().toString())) {
-                        return;
-                    }
-                } catch (Exception ex) {
-
+                if (EntrustParser.trying(() -> uuid.equals(SharedVariables.whitelist.get(name).getRecorde().uuid().toString()), ex -> false)) {
+                    return;
                 }
                 SharedVariables.whitelist.put(name, new PermanentCertificate(name, "", UUID.fromString(uuid)));
                 SharedVariables.saveVariables();
@@ -108,10 +102,8 @@ public class ServerLogin {
     }
 
     public void logout(ServerPlayerEntity player) {
-        try {
+        EntrustExecution.tryTemporary(() -> {
             SharedVariables.loginUsers.removeUser(player);
-        } catch (Exception e) {
-
-        }
+        });
     }
 }

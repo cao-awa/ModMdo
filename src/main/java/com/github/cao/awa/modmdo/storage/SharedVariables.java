@@ -174,7 +174,7 @@ public class SharedVariables {
             for (String s : json.keySet()) {
                 banned.put(s, Certificate.build(json.getJSONObject(s)));
             }
-        });
+        }, Throwable::printStackTrace);
     }
 
     public static void saveEnchantmentMaxLevel() {
@@ -409,7 +409,22 @@ public class SharedVariables {
     public static void flushTemporaryWhitelist() {
         for (TemporaryCertificate wl : temporaryWhitelist.values()) {
             if (! wl.isValid()) {
-                temporaryWhitelist.remove(wl.name());
+                temporaryWhitelist.remove(wl.getName());
+            }
+        }
+    }
+
+    public static void flushTemporaryBan() {
+        for (String name : banned.keySet()) {
+            Certificate ban = banned.get(name);
+            if (ban == null) {
+                banned.remove(name);
+                continue;
+            }
+            if (ban instanceof TemporaryCertificate temp) {
+                if (! temp.isValid()) {
+                    banned.remove(name);
+                }
             }
         }
     }
@@ -447,16 +462,18 @@ public class SharedVariables {
     }
 
     public static boolean handleBanned(ServerPlayerEntity player) {
-        if (hasBan(player)) {
-            Certificate certificate = banned.get(player.getName().asString());
-            if (certificate instanceof TemporaryCertificate temp) {
-                if (temp.isValid()) {
-                    return true;
+        if (config.getConfigBoolean("modmdo_whitelist")) {
+            if (hasBan(player)) {
+                Certificate certificate = banned.get(player.getName().asString());
+                if (certificate instanceof TemporaryCertificate temp) {
+                    if (temp.isValid()) {
+                        return true;
+                    } else {
+                        banned.remove(player.getName().asString());
+                    }
                 } else {
-                    banned.remove(player.getName().asString());
+                    return true;
                 }
-            } else {
-                return true;
             }
         }
         return false;

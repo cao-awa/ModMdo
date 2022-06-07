@@ -44,6 +44,9 @@ public abstract class Certificate {
             } else {
                 return PermanentCertificate.build(json);
             }
+        }, ex -> {
+            ex.printStackTrace();
+            return null;
         });
     }
 }
