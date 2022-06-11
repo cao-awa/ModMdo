@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.utils.usr;
 
+import com.github.cao.awa.modmdo.utils.entity.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.json.JSONObject;
@@ -62,7 +63,7 @@ public class UserUtil {
 
     public User getUser(ServerPlayerEntity player) {
         if (users.get(player.getUuid().toString()) == null)
-            put(player.getUuid().toString(), new User(player.getName().getString(), player.getUuid().toString(), 0, "", -1).toJSONObject());
+            put(player.getUuid().toString(), new User(EntityUtil.getName(player), player.getUuid().toString(), 0, "", -1).toJSONObject());
         return users.get(player.getUuid().toString());
     }
 

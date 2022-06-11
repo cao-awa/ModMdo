@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.simple.vec.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import net.minecraft.entity.effect.*;
 import net.minecraft.server.*;
@@ -21,13 +22,13 @@ public class HereCommand extends SimpleCommand {
                     ServerPlayerEntity whoUseHere = source.getPlayer();
                     PlayerManager p = source.getServer().getPlayerManager();
                     XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
-                    String dimension = whoUseHere.getEntityWorld().getDimension().effects().getPath();
+                    String dimension = whoUseHere.getEntityWorld().getDimension().getEffects().getPath();
                     for (ServerPlayerEntity player : p.getPlayerList()) {
                         Translatable hereMessage = formatHereTip(dimension, xyz, whoUseHere);
                         sendMessage(player, hereMessage, false);
                     }
                     whoUseHere.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), whoUseHere);
-                    sendFeedback(source, TextUtil.translatable("command.here.feedback", whoUseHere.getName().getString()));
+                    sendFeedback(source, TextUtil.translatable("command.here.feedback", whoUseHere.getName().asString()));
                     return 1;
                 } catch (Exception e) {
                     sendError(source, TextUtil.translatable("command.here.failed.feedback"));
@@ -43,7 +44,7 @@ public class HereCommand extends SimpleCommand {
     }
 
     public Translatable formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity whoUseHere) {
-        String useHerePlayerName = whoUseHere.getName().getString();
+        String useHerePlayerName = EntityUtil.getName(whoUseHere);
 
         return TextUtil.translatable("command.here", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ());
     }

@@ -5,6 +5,7 @@ import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.event.server.chat.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -106,7 +107,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     public void onDisconnected(Text reason, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             serverLogin.logout(player);
-            EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(player.getName().getString()));
+            EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(player.getName().asString()));
             event.submit(new QuitServerEvent(player, connection, player.getPos(), server));
         }
     }
@@ -120,10 +121,10 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(method = "onCommandExecution", at = @At("HEAD"))
-    private void onCommandExecution(CommandExecutionC2SPacket packet, CallbackInfo ci) {
+    @Inject(method = "executeCommand", at = @At("HEAD"))
+    private void executeCommand(String input, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            LOGGER.info(player.getName().getString() + "(" + player.getUuid().toString() + ") run the command: " + packet.command());
+            LOGGER.info(EntityUtil.getName(player) + "(" + player.getUuid().toString() + ") run the command: " + input);
         }
     }
 
@@ -134,12 +135,12 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(method = "onChatMessage", at = @At("HEAD"))
-    public void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
+    @Inject(method = "onGameMessage", at = @At("HEAD"))
+    public void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             event.submit(new GameChatEvent(player, packet, server));
             if (! packet.getChatMessage().startsWith("/")) {
-                EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), player.getName().getString()));
+                EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), player.getName().asString()));
             }
         }
     }

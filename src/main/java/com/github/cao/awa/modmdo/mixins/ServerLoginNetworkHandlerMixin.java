@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
@@ -62,9 +63,9 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
                 if (config.getConfigBoolean("compatible_online_mode")) {
                     EntrustExecution.tryTemporary(() -> {
-                        serverLogin.loginUsingYgg(player.getName().getString(), profile.getId().toString());
+                        serverLogin.loginUsingYgg(EntityUtil.getName(player), profile.getId().toString());
                     }, () -> {
-                        serverLogin.reject(player.getName().getString(), profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
+                        serverLogin.reject(EntityUtil.getName(player), profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
                     });
                 }
             }
@@ -73,7 +74,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 new Thread(() -> {
                     Thread.currentThread().setName("ModMdo accepting");
                     long nano = System.nanoTime();
-                    LOGGER.info("nano " + nano + " (" + player.getName().getString() + ") trying join server");
+                    LOGGER.info("nano " + nano + " (" + EntityUtil.getName(player) + ") trying join server");
 
                     long waiting = TimeUtil.millions();
 
@@ -102,22 +103,22 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             if (rejectUsers.hasUser(player)) {
                                 User rejected = rejectUsers.getUser(player.getUuid());
                                 if (rejected.getRejectReason() == null) {
-                                    LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().getString() + "\", because player are not white-listed");
+                                    LOGGER.warn("ModMdo reject a login request, player \"" + EntityUtil.getName(player) + "\", because player are not white-listed");
                                 } else {
-                                    LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().getString() + "\"");
+                                    LOGGER.warn("ModMdo reject a login request, player \"" + EntityUtil.getName(player) + "\"");
                                 }
                                 disc(rejected.getRejectReason() == null ? TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text() : rejected.getRejectReason());
 
                                 rejectUsers.removeUser(player);
 
-                                LOGGER.info("rejected nano: " + nano + " (" + player.getName().getString() + ")");
+                                LOGGER.info("rejected nano: " + nano + " (" + EntityUtil.getName(player) + ")");
                                 return;
                             } else {
                                 if (TimeUtil.processMillion(waiting) > loginCheckTimeLimit) {
                                     disc(TextUtil.literal("server enabled ModMdo secure module, please login with ModMdo").text());
-                                    LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().getString() + "\", because player not login with ModMdo");
+                                    LOGGER.warn("ModMdo reject a login request, player \"" + EntityUtil.getName(player) + "\", because player not login with ModMdo");
 
-                                    LOGGER.info("rejected nano: " + nano + " (" + player.getName().getString() + ")");
+                                    LOGGER.info("rejected nano: " + nano + " (" + EntityUtil.getName(player) + ")");
                                     return;
                                 }
                             }
@@ -131,7 +132,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     }
 
                     if (handleBanned(player)) {
-                        Certificate ban = banned.get(player.getName().getString());
+                        Certificate ban = banned.get(player.getName().asString());
                         if (ban instanceof TemporaryCertificate temporary) {
                             String remaining = temporary.formatRemaining();
                             player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
@@ -146,22 +147,22 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                         try {
                             if (connection.isOpen()) {
                                 callOnConnect(player);
-                                LOGGER.info("accepted nano: " + nano + " (" + player.getName().getString() + ")");
+                                LOGGER.info("accepted nano: " + nano + " (" + EntityUtil.getName(player) + ")");
 
                                 updateWhitelistNames(server, true);
                                 updateTemporaryWhitelistNames(server, true);
                                 updateModMdoConnectionsNames(server);
                                 updateTemporaryBanNames(server, true);
                             } else {
-                                LOGGER.info("expired nano: " + nano + " (" + player.getName().getString() + ")");
+                                LOGGER.info("expired nano: " + nano + " (" + EntityUtil.getName(player) + ")");
                             }
                         } catch (Exception e) {
                             if (! server.isHost(player.getGameProfile())) {
-                                LOGGER.info("player " + player.getName().getString() + " lost status synchronize");
+                                LOGGER.info("player " + EntityUtil.getName(player) + " lost status synchronize");
 
                                 disc(TextUtil.literal("lost status synchronize, please connect again").text());
                             } else {
-                                LOGGER.info("player " + player.getName().getString() + " lost status synchronize, but will not be process");
+                                LOGGER.info("player " + EntityUtil.getName(player) + " lost status synchronize, but will not be process");
                             }
                         }
                     } catch (Exception e) {
