@@ -1,11 +1,12 @@
 package com.github.cao.awa.modmdo.commands;
 
+import com.github.cao.awa.modmdo.certificate.*;
+import com.github.cao.awa.modmdo.certificate.pass.*;
 import com.github.cao.awa.modmdo.commands.argument.ban.*;
 import com.github.cao.awa.modmdo.commands.argument.whitelist.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.times.*;
-import com.github.cao.awa.modmdo.whitelist.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
@@ -35,19 +36,27 @@ public class TemporaryCommand extends SimpleCommand {
             showTemporaryBan(list);
             SharedVariables.updateTemporaryBanNames(getServer(list), true);
             return 0;
+        }))).then(literal("pass").then(literal("add").then(argument("target", StringArgumentType.string()).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
+            String name = StringArgumentType.getString(ban, "target");
+            int minute = IntegerArgumentType.getInteger(ban, "minutes");
+            return 0;
+        })).then(literal("-1").executes(ban -> {
+            String name = StringArgumentType.getString(ban, "target");
+            return 0;
+        })).then(literal("60").executes(ban -> {
+            String name = StringArgumentType.getString(ban, "target");
+            return 0;
+        })))).then(literal("remove").then(argument("target", ModMdoPassArgumentType.pass()).executes(remove -> {
+            Certificate certificate = ModMdoTemporaryBanArgumentType.getCertificate(remove, "target");
+            temporaryPass.remove(certificate.getName());
+            sendFeedback(getPlayer(remove), new TranslatableText("modmdo.pass.cancel", certificate.getName()));
+            return 0;
+        }))).then(literal("list").executes(list -> {
+            showTemporaryBan(list);
+            SharedVariables.updateTemporaryBanNames(getServer(list), true);
+            return 0;
         }))).then(literal("whitelist").then(literal("add").then(argument("name", StringArgumentType.string()).executes(addDefault -> {
-            String name = StringArgumentType.getString(addDefault, "name");
-            if (SharedVariables.temporaryWhitelist.containsName(name)) {
-                sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.already.is.whitelist", name));
-                return - 1;
-            }
-            if (SharedVariables.whitelist.containsName(name)) {
-                sendFeedback(addDefault, new TranslatableText("modmdo.whitelist.add.already.is.whitelist", name));
-                return - 1;
-            }
-            temporaryWhitelist(name, 1000 * 60 * 5);
-            sendFeedback(addDefault, new TranslatableText("temporary.whitelist.add.default", name));
-            SharedVariables.updateTemporaryWhitelistNames(getServer(addDefault), true);
+            whitelist(addDefault, TemporaryPass.empty());
             return 0;
         }))).then(literal("list").executes(showTemporary -> {
             showTemporaryWhitelist(showTemporary);
@@ -110,6 +119,22 @@ public class TemporaryCommand extends SimpleCommand {
         } else {
             sendMessage(player, new TranslatableText("commands.temporary.whitelist.none"), false);
         }
+    }
+
+    public int whitelist(CommandContext<ServerCommandSource> source, Pass pass) {
+        String name = StringArgumentType.getString(source, "name");
+        if (SharedVariables.temporaryWhitelist.containsName(name)) {
+            sendFeedback(source, new TranslatableText("temporary.whitelist.add.already.is.whitelist", name));
+            return - 1;
+        }
+        if (SharedVariables.whitelist.containsName(name)) {
+            sendFeedback(source, new TranslatableText("modmdo.whitelist.add.already.is.whitelist", name));
+            return - 1;
+        }
+        temporaryWhitelist(name, 1000 * 60 * 5);
+        sendFeedback(source, new TranslatableText("temporary.whitelist.add.default", name));
+        SharedVariables.updateTemporaryWhitelistNames(getServer(source), true);
+        return 0;
     }
 
     public void showTemporaryBan(CommandContext<ServerCommandSource> source) {

@@ -1,8 +1,18 @@
 package com.github.cao.awa.hyacinth.logging.track;
 
+import com.github.cao.awa.hyacinth.logging.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
+import org.apache.logging.log4j.*;
+
+import java.text.*;
+import java.util.*;
 
 public class Tracking {
+    private static final Logger TRACKER = LogManager.getLogger("Hyacinth:Tracker");
+    private static final Calendar calendar = Calendar.getInstance();
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss" );
+    private Thread parent;
     private StackTraceElement[] tracker;
     private String[] messages;
     private int startFrom;
@@ -47,6 +57,23 @@ public class Tracking {
         this.trackLimit = trackLimit;
         this.startFrom = startFrom;
         this.pause = pause;
+    }
+
+    public Tracking(Thread parent, StackTraceElement[] tracker, int trackLimit, int startFrom , String... messages) {
+        this.tracker = tracker;
+        this.messages = messages;
+        this.trackLimit = trackLimit;
+        this.startFrom = startFrom;
+        this.parent = parent;
+    }
+
+    public Tracking(Thread parent, StackTraceElement[] tracker, int trackLimit, int startFrom, long pause, String... messages) {
+        this.tracker = tracker;
+        this.messages = messages;
+        this.trackLimit = trackLimit;
+        this.startFrom = startFrom;
+        this.pause = pause;
+        this.parent = parent;
     }
 
     public long getPause() {
@@ -97,6 +124,50 @@ public class Tracking {
     public ExceptingTemporary pause() {
         return () -> {
             Thread.sleep(pause);
+            EntrustExecution.tryAssertNotNull(parent, thread -> thread.join(pause));
         };
+    }
+
+    public ExceptingTemporary pause(boolean parent) {
+        return () -> {
+            Thread.sleep(pause);
+            if (parent) {
+                EntrustExecution.tryAssertNotNull(this.parent, thread -> thread.join(pause));
+            }
+        };
+    }
+
+    public void print() {
+        int limit = getTrackLimit();
+        PrintUtil.info(TRACKER, "--Hyacinth Tracking: ");
+        for (String message : getMessages()) {
+            TRACKER.debug("      " + message);
+        }
+        PrintUtil.info(TRACKER, "      --Hyacinth Tracking(Thread Traces): ");
+        for (int i = getStartFrom(), trackerLength = getTracker().length; i < trackerLength; i++) {
+            StackTraceElement elements = getTracker()[i];
+            if (limit-- == 0) {
+                break;
+            }
+            TRACKER.debug("         " + elements);
+        }
+    }
+
+    public String shortPrint() {
+        StringBuilder builder = new StringBuilder();
+        int limit = getTrackLimit();
+        TRACKER.info("--Hyacinth Tracking: ");
+        for (String message : getMessages()) {
+            TRACKER.info("    " + message);
+            builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append(" ").append(message).append("\n");
+        }
+        for (int i = getStartFrom(), trackerLength = getTracker().length; i < trackerLength; i++) {
+            StackTraceElement elements = getTracker()[i];
+            if (limit-- == 0) {
+                break;
+            }
+            builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append("     ").append(elements.toString()).append("\n");
+        }
+        return builder.toString();
     }
 }

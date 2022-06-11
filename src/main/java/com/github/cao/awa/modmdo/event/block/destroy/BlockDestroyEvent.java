@@ -1,10 +1,12 @@
 package com.github.cao.awa.modmdo.event.block.destroy;
 
 import com.github.cao.awa.modmdo.annotations.*;
-import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.delay.*;
+import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.block.*;
+import net.minecraft.entity.*;
 import net.minecraft.entity.player.*;
 import net.minecraft.server.*;
 import net.minecraft.util.math.*;
@@ -12,7 +14,7 @@ import net.minecraft.util.registry.*;
 import net.minecraft.world.*;
 
 @Auto
-public class BlockDestroyEvent extends ModMdoEvent<BlockDestroyEvent> {
+public class BlockDestroyEvent extends EntityTargetedEvent<BlockDestroyEvent> {
     private final PlayerEntity destroyBy;
     private final BlockState state;
     private final BlockPos pos;
@@ -81,5 +83,20 @@ public class BlockDestroyEvent extends ModMdoEvent<BlockDestroyEvent> {
 
     public String clazz() {
         return getClass().getName();
+    }
+
+    @Override
+    public ObjectArrayList<? extends Entity> getTargeted() {
+        ObjectArrayList<Entity> list = new ObjectArrayList<>();
+        list.add(destroyBy);
+        return list;
+    }
+
+    public void adaptive(BlockDestroyEvent event) {
+        if (isSubmitted()) {
+            action();
+        } else {
+            submit(event);
+        }
     }
 }

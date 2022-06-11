@@ -49,20 +49,25 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
             PacketByteBuf data = packet.getData();
 
             try {
-                Identifier channel = packet.getChannel();
-
                 Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
 
-                LOGGER.info("server sent a payload in channel: " + channel);
-
-                if (informationSign.equals(CHECKING) || informationSign.equals(LOGIN)) {
-                    System.out.println(staticConfig.getConfigString("identifier"));
-                    connection.send(new CustomPayloadC2SPacket(CLIENT, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN.toString()).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
+                if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
+                    tracker.submit("Server are requesting login data", () -> {
+                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
+                    });
                 }
 
-                if (informationSign.equals(DATA)) {
+                if (informationSign.equals(SUFFIX_CHANNEL)) {
+                    tracker.submit("Server are requesting suffix data", () -> {
+                        connection.send(new CustomPayloadC2SPacket(SUFFIX_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(SUFFIX_CHANNEL.toString()).writeString(SUFFIX)));
+                    });
+                }
+
+                if (informationSign.equals(DATA_CHANNEL)) {
                     String data1 = EntrustParser.tryCreate(data::readString, "");
                     String data2 = EntrustParser.tryCreate(data::readString, "");
+
+                    tracker.submit(String.format("Server are requesting client process data: type={%s} | information={%s}", data1, data2));
 
                     switch (data1) {
                         case "whitelist_names" -> {
@@ -97,7 +102,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                     ArgumentInit.init();
                 }
             } catch (Exception e) {
-                LOGGER.error("error in connecting ModMdo server", e);
+                tracker.submit("Error in connecting ModMdo server", e);
             }
             ci.cancel();
         }
