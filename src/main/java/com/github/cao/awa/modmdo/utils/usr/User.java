@@ -9,19 +9,19 @@ import org.json.*;
 import java.util.*;
 
 public class User {
+    private final long loginTime = TimeUtil.millions();
     private String name;
     private UUID uuid;
     private int level = 1;
     private long onlineTime = 0;
     private String modmdoIdentifier = "";
+    private String suffix = null;
     private int modmdoVersion;
     private Language language = null;
     private Text rejectReason = null;
-    private final long loginTime = TimeUtil.millions();
 
     public User() {
     }
-
     public User(String name) {
         this.name = name;
     }
@@ -71,6 +71,14 @@ public class User {
         modmdoVersion = EntrustParser.tryCreate(() -> json.getInt("version"), - 1);
 
         modmdoIdentifier = EntrustParser.tryCreate(() -> json.getString("identifier"), "");
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
     }
 
     public long getLoginTime() {

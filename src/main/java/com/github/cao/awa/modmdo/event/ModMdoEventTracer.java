@@ -4,6 +4,9 @@ import com.github.cao.awa.modmdo.event.block.destroy.*;
 import com.github.cao.awa.modmdo.event.block.place.*;
 import com.github.cao.awa.modmdo.event.block.state.*;
 import com.github.cao.awa.modmdo.event.client.*;
+import com.github.cao.awa.modmdo.event.command.*;
+import com.github.cao.awa.modmdo.event.command.block.*;
+import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.event.entity.damage.*;
 import com.github.cao.awa.modmdo.event.entity.death.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
@@ -14,19 +17,6 @@ import com.github.cao.awa.modmdo.event.server.tick.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.block.*;
-import net.minecraft.entity.*;
-import net.minecraft.entity.damage.*;
-import net.minecraft.entity.player.*;
-import net.minecraft.item.*;
-import net.minecraft.network.*;
-import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.network.packet.s2c.query.*;
-import net.minecraft.server.*;
-import net.minecraft.server.network.*;
-import net.minecraft.util.math.*;
-import net.minecraft.world.*;
-import net.minecraft.world.explosion.*;
 
 public class ModMdoEventTracer {
     public final EntityDeathEvent entityDeath = EntityDeathEvent.snap();
@@ -42,6 +32,8 @@ public class ModMdoEventTracer {
     public final GameChatEvent gameChat = GameChatEvent.snap();
     public final ClientSettingEvent clientSetting = ClientSettingEvent.snap();
     public final ServerQueryEvent serverQuery = ServerQueryEvent.snap();
+    public final CommandExecuteEvent commandExecute = CommandExecuteEvent.snap();
+    public final CommandBlockExecuteEvent commandBlockExecute = CommandBlockExecuteEvent.snap();
     public final Object2ObjectOpenHashMap<String, ModMdoEvent<?>> events = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
         map.put(entityDeath.clazz(), entityDeath);
         map.put(blockDestroy.clazz(), blockDestroy);
@@ -56,6 +48,20 @@ public class ModMdoEventTracer {
         map.put(gameChat.clazz(), gameChat);
         map.put(clientSetting.clazz(), clientSetting);
         map.put(serverQuery.clazz(), serverQuery);
+        map.put(commandExecute.clazz(), commandExecute);
+        map.put(commandBlockExecute.clazz(), commandBlockExecute);
+    });
+    public final Object2ObjectOpenHashMap<String, EntityTargetedEvent<?>> targeted = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
+        map.put(entityDeath.clazz(), entityDeath);
+        map.put(blockDestroy.clazz(), blockDestroy);
+        map.put(blockPlace.clazz(), blockPlace);
+        map.put(blockExplosion.clazz(), blockExplosion);
+        map.put(entityDamage.clazz(), entityDamage);
+        map.put(joinServer.clazz(), joinServer);
+        map.put(quitServer.clazz(), quitServer);
+        map.put(gameTickStart.clazz(), gameTickStart);
+        map.put(gameChat.clazz(), gameChat);
+        map.put(clientSetting.clazz(), clientSetting);
     });
 
     public void build() {
@@ -68,63 +74,7 @@ public class ModMdoEventTracer {
         return result.get();
     }
 
-    public void submitBlockDestroy(PlayerEntity player, BlockState state, BlockPos pos, World world, MinecraftServer server) {
-        if (blockDestroy.isSubmitted()) {
-            blockDestroy.action();
-        } else {
-            blockDestroy.submit(new BlockDestroyEvent(player, state, pos, world, server));
-        }
-    }
-
-    public void submitBlockPlace(LivingEntity player, BlockState state, BlockPos pos, World world, ItemStack itemStack, MinecraftServer server) {
-        if (blockPlace.isSubmitted()) {
-            blockPlace.action();
-        } else {
-            blockPlace.submit(new BlockPlaceEvent(player, state, pos, world, itemStack, server));
-        }
-    }
-
-    public void submitBlockExplosion(Explosion explosion, BlockState state, BlockPos pos, World world, MinecraftServer server) {
-        blockExplosion.immediately(new BlockExplosionDestroyEvent(explosion, state, pos, world, server));
-    }
-
-    public void submitBlockStateSet(BlockState state, BlockPos pos, int flags, int maxUpdateDepth, World world, MinecraftServer server) {
-        blockStateSet.immediately(new BlockStateSetEvent(state, pos, flags, maxUpdateDepth, world, server));
-    }
-
-    public void submitEntityDeath(LivingEntity entity, LivingEntity perpetrator, Vec3d pos, MinecraftServer server) {
-        entityDeath.immediately(new EntityDeathEvent(entity, perpetrator, pos, server));
-    }
-
-    public void submitEntityDamage(LivingEntity entity, DamageSource damageSource, float originalHealth, float damage, World world, MinecraftServer server) {
-        entityDamage.immediately(new EntityDamageEvent(entity, damageSource, originalHealth, damage, world, server));
-    }
-
-    public void submitJoinServer(ServerPlayerEntity player, ClientConnection connection, Vec3d pos, MinecraftServer server) {
-        joinServer.immediately(new JoinServerEvent(player, connection, pos, server));
-    }
-
-    public void submitQuitServer(ServerPlayerEntity player, ClientConnection connection, Vec3d pos, MinecraftServer server) {
-        quitServer.immediately(new QuitServerEvent(player, connection, pos, server));
-    }
-
-    public void submitGameTickStart(MinecraftServer server) {
-        gameTickStart.skipDelay(new GameTickStartEvent(server));
-    }
-
-    public void submitServerStarted(MinecraftServer server) {
-        serverStarted.immediately(new ServerStartedEvent(server));
-    }
-
-    public void submitGameChat(ServerPlayerEntity player, ChatMessageC2SPacket message, MinecraftServer server) {
-        gameChat.immediately(new GameChatEvent(player, message, server));
-    }
-
-    public void submitClientSetting(ServerPlayerEntity player, ClientSettingsC2SPacket message, MinecraftServer server) {
-        clientSetting.immediately(new ClientSettingEvent(player, message, server));
-    }
-
-    public void submitQueryRequest(ClientConnection connection, QueryResponseS2CPacket packet, MinecraftServer server) {
-        serverQuery.refrainAsync(new ServerQueryEvent(connection, packet, server));
+    public void submit(ModMdoEvent<?> event) {
+        events.get(event.clazz()).auto(event);
     }
 }

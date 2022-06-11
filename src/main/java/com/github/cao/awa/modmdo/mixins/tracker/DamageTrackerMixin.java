@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins.tracker;
 
+import com.github.cao.awa.modmdo.event.entity.damage.*;
 import com.github.cao.awa.modmdo.storage.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.*;
@@ -16,7 +17,7 @@ public class DamageTrackerMixin {
     @Inject(method = "onDamage", at = @At("HEAD"))
     public void onDamage(DamageSource damageSource, float originalHealth, float damage, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            event.submitEntityDamage(entity, damageSource, originalHealth, damage, entity.getEntityWorld(), entity.getServer());
+            event.submit(new EntityDamageEvent(entity, damageSource, originalHealth, damage, entity.getEntityWorld(), entity.getServer()));
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.github.cao.awa.modmdo.commands.argument.whitelist;
 
-import com.github.cao.awa.modmdo.whitelist.*;
+import com.github.cao.awa.modmdo.certificate.*;
 import com.mojang.brigadier.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;

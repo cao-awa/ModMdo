@@ -1,10 +1,12 @@
 package com.github.cao.awa.modmdo.event.block.destroy;
 
 import com.github.cao.awa.modmdo.annotations.*;
-import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.delay.*;
+import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.block.*;
+import net.minecraft.entity.*;
 import net.minecraft.server.*;
 import net.minecraft.util.math.*;
 import net.minecraft.util.registry.*;
@@ -12,7 +14,7 @@ import net.minecraft.world.*;
 import net.minecraft.world.explosion.*;
 
 @Auto
-public class BlockExplosionDestroyEvent extends ModMdoEvent<BlockExplosionDestroyEvent> {
+public class BlockExplosionDestroyEvent extends EntityTargetedEvent<BlockExplosionDestroyEvent> {
     private Explosion explosion;
     private final BlockState state;
     private final BlockPos pos;
@@ -83,5 +85,12 @@ public class BlockExplosionDestroyEvent extends ModMdoEvent<BlockExplosionDestro
 
     public String clazz() {
         return getClass().getName();
+    }
+
+    @Override
+    public ObjectArrayList<? extends Entity> getTargeted() {
+        ObjectArrayList<Entity> list = new ObjectArrayList<>();
+        list.add(explosion.getCausingEntity());
+        return list;
     }
 }

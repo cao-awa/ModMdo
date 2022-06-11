@@ -65,7 +65,7 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
         action(false);
     }
 
-        @AsyncDelay
+    @AsyncDelay
     public synchronized void submit(T target) {
         if (previously.size() > 0) {
             target = fuse(previously.get(0), target);
@@ -144,6 +144,16 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     public void refrainAsync(T target) {
         submit(target);
         action(true);
+    }
+
+    public void adaptive(T target) {
+        immediately(target);
+    }
+
+    public void auto(ModMdoEvent<?> target) {
+        if (target.clazz().equals(clazz())) {
+            adaptive((T)target);
+        }
     }
 
     public abstract String abbreviate();

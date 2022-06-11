@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins.world;
 
+import com.github.cao.awa.modmdo.event.block.state.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.block.*;
 import net.minecraft.server.*;
@@ -21,6 +22,6 @@ public abstract class WorldMixin {
 
     @Inject(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;II)Z", at = @At("HEAD"))
     public void setBlockState(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, CallbackInfoReturnable<Boolean> cir) {
-       event.submitBlockStateSet(state, pos, flags, maxUpdateDepth, EntrustParser.trying(() -> getServer().getWorld(getRegistryKey())) , getServer());
+       event.submit(new BlockStateSetEvent(state, pos, flags, maxUpdateDepth, EntrustParser.trying(() -> getServer().getWorld(getRegistryKey())) , getServer()));
     }
 }

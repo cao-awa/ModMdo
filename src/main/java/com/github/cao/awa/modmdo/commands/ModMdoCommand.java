@@ -9,7 +9,7 @@ import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.translate.*;
-import com.github.cao.awa.modmdo.whitelist.*;
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
@@ -455,7 +455,8 @@ public class ModMdoCommand extends SimpleCommand {
     public TranslatableText formatModMdoDescription(ServerPlayerEntity player) {
         TranslatableText modmdoVersion;
         if (SharedVariables.getPlayerModMdoVersion(player) > 0) {
-            modmdoVersion = new TranslatableText("modmdo.description.your.modmdo", SharedVariables.modMdoIdToVersionMap.get(SharedVariables.getPlayerModMdoVersion(player)));
+            String suffix = loginUsers.getUser(player).getSuffix();
+            modmdoVersion = new TranslatableText("modmdo.description.your.modmdo", SharedVariables.modMdoIdToVersionMap.get(SharedVariables.getPlayerModMdoVersion(player)) + (suffix == null ? "" : loginUsers.getUser(player).getSuffix()));
         } else {
             modmdoVersion = new TranslatableText("modmdo.description.you.do.not.have.modmdo");
         }

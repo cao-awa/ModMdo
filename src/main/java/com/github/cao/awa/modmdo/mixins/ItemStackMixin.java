@@ -32,46 +32,48 @@ public abstract class ItemStackMixin {
     }
 
     public void filterLevel() {
-        if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
+        if (SharedVariables.isActive()) {
             EntrustExecution.tryTemporary(() -> {
                 if (SharedVariables.enchantLevelController.isEnabledControl() && nbt != null) {
                     NbtList list = nbt.getList("Enchantments", 10);
-                    NbtList addTo = new NbtList();
-                    for (NbtElement element : list) {
-                        try {
-                            NbtCompound enchantment = (NbtCompound) element;
-                            String name = enchantment.get("id").asString();
-                            String lvl = enchantment.get("lvl").asString();
-                            short max = SharedVariables.enchantLevelController.get(name.hashCode()).getMax();
-                            short real;
+                    if (list.size() > 0) {
+                        NbtList addTo = new NbtList();
+                        for (NbtElement element : list) {
                             try {
-                                real = Short.parseShort(lvl.replaceAll("\\D+", ""));
+                                NbtCompound enchantment = (NbtCompound) element;
+                                String name = enchantment.get("id").asString();
+                                String lvl = enchantment.get("lvl").asString();
+                                short max = SharedVariables.enchantLevelController.get(name.hashCode()).getMax();
+                                short real;
+                                try {
+                                    real = Short.parseShort(lvl.replaceAll("\\D+", ""));
+                                } catch (Exception e) {
+                                    LOGGER.warn("level " + lvl + " is too large, removed this element");
+                                    continue;
+                                }
+                                if (max == 0) {
+                                    continue;
+                                }
+                                if (real > max) {
+                                    if (SharedVariables.clearEnchantIfLevelTooHigh) {
+                                        addTo = null;
+                                        LOGGER.warn("a item got invalid enchant nbt, cleared enchant nbt");
+                                        break;
+                                    }
+                                    LOGGER.warn("level of " + name + " out of limit " + max + ": " + real);
+                                    enchantment.putShort("lvl", SharedVariables.enchantLevelController.getDefaultEnchantmentLevel(name).getMax());
+                                }
+                                addTo.add(enchantment);
                             } catch (Exception e) {
-                                LOGGER.warn("level " + lvl + " is too large, removed this element");
-                                continue;
-                            }
-                            if (max == 0) {
-                                continue;
-                            }
-                            if (real > max) {
-                                if (SharedVariables.clearEnchantIfLevelTooHigh) {
-                                    addTo = null;
-                                    LOGGER.warn("a item got invalid enchant nbt, cleared enchant nbt");
+                                if (addTo == null) {
                                     break;
                                 }
-                                LOGGER.warn("level of " + name + " out of limit " + max + ": " + real);
-                                enchantment.putShort("lvl", SharedVariables.enchantLevelController.getDefaultEnchantmentLevel(name).getMax());
-                            }
-                            addTo.add(enchantment);
-                        } catch (Exception e) {
-                            if (addTo == null) {
-                                break;
                             }
                         }
-                    }
-                    nbt.remove("Enchantments");
-                    if (addTo != null) {
-                        nbt.put("Enchantments", addTo);
+                        nbt.remove("Enchantments");
+                        if (addTo != null) {
+                            nbt.put("Enchantments", addTo);
+                        }
                     }
                 }
             });

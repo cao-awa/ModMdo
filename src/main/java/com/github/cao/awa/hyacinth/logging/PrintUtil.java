@@ -7,7 +7,6 @@ import org.apache.logging.log4j.*;
 import java.util.*;
 
 public class PrintUtil {
-    private static final Logger TRACKER = LogManager.getLogger("Hyacinth:Tracker");
     public static boolean debugging = false;
 
     @SafeVarargs
@@ -99,21 +98,13 @@ public class PrintUtil {
         return new Tracking(tracker, trackLimit, startFrom, messages);
     }
 
+    public static Tracking tacker(Thread parent ,StackTraceElement[] tracker, int trackLimit, int startFrom, String... messages) {
+        return new Tracking(parent, tracker, trackLimit, startFrom, messages);
+    }
+
     public static void messageToTracker(Tracking tracking) {
         if (debugging) {
-            int limit = tracking.getTrackLimit();
-            PrintUtil.info(TRACKER, "--Hyacinth Tracking: ");
-            for (String message : tracking.getMessages()) {
-                TRACKER.info("      " + message);
-            }
-            PrintUtil.info(TRACKER, "      --Hyacinth Tracking(Thread Traces): ");
-            for (int i = tracking.getStartFrom(), trackerLength = tracking.getTracker().length; i < trackerLength; i++) {
-                StackTraceElement elements = tracking.getTracker()[i];
-                if (limit-- == 0) {
-                    break;
-                }
-                TRACKER.info("         " + elements);
-            }
+            tracking.print();
 
             EntrustExecution.tryTemporary(tracking.pause());
         }

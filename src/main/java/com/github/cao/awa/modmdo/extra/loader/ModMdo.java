@@ -2,7 +2,6 @@ package com.github.cao.awa.modmdo.extra.loader;
 
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.commands.argument.*;
-import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.format.console.*;
@@ -125,9 +124,18 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         SharedVariables.consoleTextFormat = new ConsoleTextFormat(resource);
         SharedVariables.minecraftTextFormat = new MinecraftTextFormat(resource);
 
-        ModMdoEventCenter.registerClientSetting(event -> {
+        event.clientSetting.register(event -> {
             loginUsers.getUser(event.getPlayer()).setLanguage(Language.ofs(event.getLanguage()));
         });
+
+//        event.events.forEach((k, v) -> {
+//            if (v.getClass().getName().equals("com.github.cao.awa.modmdo.event.server.tick.GameTickStartEvent")) {
+//                return;
+//            }
+//            v.register(e -> {
+//                tracker.submit("Handle event: " + e.getClass().getName());
+//            });
+//        });
     }
 
     public boolean needEnsure() {

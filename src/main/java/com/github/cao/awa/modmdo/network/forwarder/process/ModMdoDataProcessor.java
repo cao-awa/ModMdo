@@ -5,7 +5,7 @@ import com.github.cao.awa.modmdo.network.forwarder.connection.*;
 import com.github.cao.awa.modmdo.network.forwarder.connection.setting.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.times.*;
-import com.github.cao.awa.modmdo.whitelist.*;
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -66,17 +66,17 @@ public class ModMdoDataProcessor {
 
     private void process(Identifier channel, PacketByteBuf packet) {
         try {
-            if (SharedVariables.DATA.equals(channel)) {
+            if (SharedVariables.DATA_CHANNEL.equals(channel)) {
                 Identifier sign = packet.readIdentifier();
 
-                if (SharedVariables.LOGIN.equals(sign)) {
+                if (SharedVariables.LOGIN_CHANNEL.equals(sign)) {
                     JSONObject data = new JSONObject(packet.readString());
                     EntrustExecution.tryTemporary(() -> {
                         onLogin(data.getString("name"), data.getString("identifier"), data.getInt("version"));
                     }, () -> {
                         disconnect("modmdo.connection.server.internal.error");
                     });
-                } else if (modMdoConnection.isLogged() && SharedVariables.DATA.equals(sign)) {
+                } else if (modMdoConnection.isLogged() && SharedVariables.DATA_CHANNEL.equals(sign)) {
                     String target = packet.readString();
                     String data = packet.readString();
 

@@ -13,34 +13,34 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoClientPacketBuilder extends PacketBuilder<Packet<ServerPlayPacketListener>> {
     public CustomPayloadC2SPacket buildDisconnect(String reason) {
-        return new CustomPayloadC2SPacket(DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("disconnect").writeString(reason));
+        return new CustomPayloadC2SPacket(DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("disconnect").writeString(reason));
     }
 
     public CustomPayloadC2SPacket buildChat(String message,String player) {
         JSONObject chat = new JSONObject();
         chat.put("msg", message);
         chat.put("player", player);
-        return new CustomPayloadC2SPacket(DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("chat").writeString(chat.toString()));
+        return new CustomPayloadC2SPacket(DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("chat").writeString(chat.toString()));
     }
 
     public CustomPayloadC2SPacket buildSetting(ModMdoConnectionSetting setting) {
-        return new CustomPayloadC2SPacket(DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("settings").writeString(setting.toJSONObject().toString()));
+        return new CustomPayloadC2SPacket(DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("settings").writeString(setting.toJSONObject().toString()));
     }
 
     public CustomPayloadC2SPacket buildLoginSuccess() {
-        return new CustomPayloadC2SPacket(DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("login-success").writeString("yes"));
+        return new CustomPayloadC2SPacket(DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("login-success").writeString("yes"));
     }
 
     public CustomPayloadC2SPacket buildPlayerJoin(String name) {
-        return new CustomPayloadC2SPacket(DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("player-join").writeString(name));
+        return new CustomPayloadC2SPacket(DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("player-join").writeString(name));
     }
 
     public CustomPayloadC2SPacket buildPlayerQuit(String name) {
-        return new CustomPayloadC2SPacket(DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("player-quit").writeString(name));
+        return new CustomPayloadC2SPacket(DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("player-quit").writeString(name));
     }
 
     public CustomPayloadC2SPacket buildKeepAlive(long lastKeepAlive) {
-        return new CustomPayloadC2SPacket(DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("keepalive").writeString(String.valueOf(lastKeepAlive)));
+        return new CustomPayloadC2SPacket(DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("keepalive").writeString(String.valueOf(lastKeepAlive)));
     }
 
     public CustomPayloadC2SPacket buildTraffic(OperationalLong traffic, Object2ObjectRBTreeMap<String, OperationalLong> processed) {
@@ -51,7 +51,7 @@ public class ModMdoClientPacketBuilder extends PacketBuilder<Packet<ServerPlayPa
             process.put(s, processed.get(s).get());
         }
         json.put("packets-processed", process);
-        return new CustomPayloadC2SPacket(DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("traffic").writeString(json.toString()));
+        return new CustomPayloadC2SPacket(DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("traffic").writeString(json.toString()));
     }
 
     public CustomPayloadC2SPacket buildTrafficResult(OperationalLong traffic, Object2ObjectRBTreeMap<String, OperationalLong> processed) {
@@ -62,6 +62,6 @@ public class ModMdoClientPacketBuilder extends PacketBuilder<Packet<ServerPlayPa
             process.put(s, processed.get(s).get());
         }
         json.put("packets-processed", process);
-        return new CustomPayloadC2SPacket(DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("traffic-result").writeString(json.toString()));
+        return new CustomPayloadC2SPacket(DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("traffic-result").writeString(json.toString()));
     }
 }

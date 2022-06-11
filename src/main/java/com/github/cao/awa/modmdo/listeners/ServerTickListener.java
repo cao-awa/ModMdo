@@ -1,8 +1,9 @@
 package com.github.cao.awa.modmdo.listeners;
 
+import com.github.cao.awa.modmdo.event.server.tick.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.network.forwarder.process.*;
-import com.github.cao.awa.modmdo.whitelist.*;
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.*;
 import net.minecraft.network.packet.s2c.play.*;
@@ -31,7 +32,7 @@ public class ServerTickListener {
         });
 
         ServerTickEvents.START_SERVER_TICK.register(server -> {
-            event.submitGameTickStart(server);
+            event.submit(new GameTickStartEvent(server));
         });
     }
 
