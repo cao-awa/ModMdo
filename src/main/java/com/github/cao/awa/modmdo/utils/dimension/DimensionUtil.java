@@ -1,9 +1,10 @@
 package com.github.cao.awa.modmdo.utils.dimension;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.World;
+import net.minecraft.entity.*;
+import net.minecraft.world.*;
+import net.minecraft.world.dimension.*;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.consoleTextFormat;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class DimensionUtil {
     public static String getDimensionColor(String dimension) {
@@ -25,11 +26,15 @@ public class DimensionUtil {
         return consoleTextFormat.format(getDimensionKey(dimension));
     }
 
-    public static String getDimension(ServerPlayerEntity player) {
-        return player.getEntityWorld().getDimension().effects().getPath();
+    public static String getDimension(Entity player) {
+        return getDimension(player.getEntityWorld());
     }
 
     public static String getDimension(World world) {
-        return world.getDimension().effects().getPath();
+        return getDimension(world.getDimension());
+    }
+
+    public static String getDimension(DimensionType dimension) {
+        return dimension.effects().getPath();
     }
 }
