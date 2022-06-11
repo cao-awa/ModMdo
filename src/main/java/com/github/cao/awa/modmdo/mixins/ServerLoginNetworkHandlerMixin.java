@@ -1,11 +1,12 @@
 package com.github.cao.awa.modmdo.mixins;
 
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.utils.times.*;
+import com.github.cao.awa.modmdo.utils.translate.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
@@ -63,7 +64,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     EntrustExecution.tryTemporary(() -> {
                         serverLogin.loginUsingYgg(player.getName().asString(), profile.getId().toString());
                     }, () -> {
-                        serverLogin.reject(player.getName().asString(), profile.getId().toString(), "", new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+                        serverLogin.reject(player.getName().asString(), profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted"));
                     });
                 }
             }
@@ -105,7 +106,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                                 } else {
                                     LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().asString() + "\"");
                                 }
-                                disc(rejected.getRejectReason() == null ? new TranslatableText("multiplayer.disconnect.not_whitelisted") : rejected.getRejectReason());
+                                disc(rejected.getRejectReason() == null ? TextUtil.translatable("multiplayer.disconnect.not_whitelisted") : rejected.getRejectReason());
 
                                 rejectUsers.removeUser(player);
 
