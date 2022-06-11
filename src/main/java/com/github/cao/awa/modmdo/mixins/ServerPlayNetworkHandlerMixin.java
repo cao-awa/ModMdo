@@ -5,8 +5,8 @@ import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.event.server.chat.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
-import com.github.cao.awa.modmdo.utils.translate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.c2s.play.*;
@@ -76,7 +76,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
                     if (TOKEN_CHANNEL.equals(channel)) {
                         LOGGER.debug("Client are sent obsoleted login data");
-                        serverLogin.reject(data1, oldLogin, "", TextUtil.literalText("obsolete login type"));
+                        serverLogin.reject(data1, oldLogin, "", TextUtil.literal("obsolete login type").text());
                         return;
                     }
 
@@ -121,7 +121,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     }
 
     @Inject(method = "onCommandExecution", at = @At("HEAD"))
-    private void executeCommand(CommandExecutionC2SPacket packet, CallbackInfo ci) {
+    private void onCommandExecution(CommandExecutionC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             LOGGER.info(player.getName().getString() + "(" + player.getUuid().toString() + ") run the command: " + packet.command());
         }
@@ -135,7 +135,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     }
 
     @Inject(method = "onChatMessage", at = @At("HEAD"))
-    public void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
+    public void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             event.submit(new GameChatEvent(player, packet, server));
             if (! packet.getChatMessage().startsWith("/")) {

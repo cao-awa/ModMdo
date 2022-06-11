@@ -4,8 +4,8 @@ import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
-import com.github.cao.awa.modmdo.utils.translate.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
@@ -64,7 +64,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     EntrustExecution.tryTemporary(() -> {
                         serverLogin.loginUsingYgg(player.getName().getString(), profile.getId().toString());
                     }, () -> {
-                        serverLogin.reject(player.getName().getString(), profile.getId().toString(), "", MutableText.of(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")));
+                        serverLogin.reject(player.getName().getString(), profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
                     });
                 }
             }
@@ -106,7 +106,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                                 } else {
                                     LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().getString() + "\"");
                                 }
-                                disc(rejected.getRejectReason() == null ? MutableText.of(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")) : rejected.getRejectReason());
+                                disc(rejected.getRejectReason() == null ? TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text() : rejected.getRejectReason());
 
                                 rejectUsers.removeUser(player);
 
@@ -114,7 +114,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                                 return;
                             } else {
                                 if (TimeUtil.processMillion(waiting) > loginCheckTimeLimit) {
-                                    disc(MutableText.of(new LiteralTextContent("server enabled ModMdo secure module, please login with ModMdo")));
+                                    disc(TextUtil.literal("server enabled ModMdo secure module, please login with ModMdo").text());
                                     LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().getString() + "\", because player not login with ModMdo");
 
                                     LOGGER.info("rejected nano: " + nano + " (" + player.getName().getString() + ")");
@@ -134,11 +134,11 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                         Certificate ban = banned.get(player.getName().getString());
                         if (ban instanceof TemporaryCertificate temporary) {
                             String remaining = temporary.formatRemaining();
-                            player.networkHandler.connection.send(new DisconnectS2CPacket(MutableText.of(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining))));
-                            player.networkHandler.connection.disconnect(MutableText.of(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining)));
+                            player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
+                            player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
                         } else {
-                            player.networkHandler.connection.send(new DisconnectS2CPacket(MutableText.of(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite"))));
-                            player.networkHandler.connection.disconnect(MutableText.of(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite")));
+                            player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
+                            player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
                         }
                     }
 
@@ -159,7 +159,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             if (! server.isHost(player.getGameProfile())) {
                                 LOGGER.info("player " + player.getName().getString() + " lost status synchronize");
 
-                                disc(MutableText.of(new LiteralTextContent("lost status synchronize, please connect again")));
+                                disc(TextUtil.literal("lost status synchronize, please connect again").text());
                             } else {
                                 LOGGER.info("player " + player.getName().getString() + " lost status synchronize, but will not be process");
                             }

@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.trigger.motd;
 
+import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.server.query.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
@@ -8,11 +9,9 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.network.packet.s2c.query.*;
-import net.minecraft.text.*;
 import org.json.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
-import static com.github.cao.awa.modmdo.storage.SharedVariables.getLanguage;
 
 public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
     private QueryResponseS2CPacket packet;
@@ -50,11 +49,11 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
             if (favicon != null) {
                 packet.getServerMetadata().setFavicon(favicon);
             }
-            packet.getServerMetadata().setDescription(MutableText.of(format()));
+            packet.getServerMetadata().setDescription(format().text());
         });
     }
 
-    public LiteralTextContent format() {
+    public Literal format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
                 String name = EntrustParser.trying(() -> {

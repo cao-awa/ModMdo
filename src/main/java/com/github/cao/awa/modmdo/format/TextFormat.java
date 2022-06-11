@@ -1,13 +1,13 @@
 package com.github.cao.awa.modmdo.format;
 
-import com.github.cao.awa.modmdo.lang.*;
+import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.Dictionary;
+import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.text.*;
 import org.json.*;
 
 import java.util.*;
@@ -73,7 +73,7 @@ public abstract class TextFormat<T> {
             }
 
             for (Object o : args) {
-                if (o instanceof TranslatableTextContent translatable) {
+                if (o instanceof Translatable translatable) {
                     o = formatted(language.get(), translatable.getKey(), translatable.getArgs());
                 }
                 final String str = o.toString();

@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.event.trigger.message;
 
 import com.github.cao.awa.modmdo.annotations.*;
+import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.trigger.selector.entity.*;
@@ -52,7 +53,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> send(MutableText.of(format())));
+        EntrustExecution.tryTemporary(() -> send(format().text()));
     }
 
     public void send(Text message) {
@@ -72,7 +73,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         }
     }
 
-    public LiteralTextContent format() {
+    public Literal format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
                 String name = EntrustParser.trying(() -> {

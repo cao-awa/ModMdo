@@ -3,7 +3,7 @@ package com.github.cao.awa.modmdo.mixins;
 import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
-import com.github.cao.awa.modmdo.utils.translate.*;
+import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import net.minecraft.network.*;

@@ -2,13 +2,12 @@ package com.github.cao.awa.modmdo.subscribable;
 
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
-import com.github.cao.awa.modmdo.utils.translate.*;
+import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.count.*;
 import com.google.common.util.concurrent.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
-import net.minecraft.text.*;
 
 import java.util.*;
 
@@ -106,7 +105,7 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
                         for (TargetCountLong<ServerPlayerEntity> counter : subs) {
                             ServerPlayerEntity player = counter.getTarget();
                             if (player.networkHandler.connection.isOpen()) {
-                                SharedVariables.sendMessage(player, MutableText.of(new LiteralTextContent("§etick-" + countTicks + ": §b(mspt: §a[r: " + realMspt + "ms, sub: " + subTps + "ms]§b, tps: §a[r: " + tpsCurrent + "§a, target: " + tpsTarget + "]§b)")), true);
+                                SharedVariables.sendMessage(player, TextUtil.literal("§etick-" + countTicks + ": §b(mspt: §a[r: " + realMspt + "ms, sub: " + subTps + "ms]§b, tps: §a[r: " + tpsCurrent + "§a, target: " + tpsTarget + "]§b)").text(), true);
                             } else {
                                 cancelSub(player);
                             }
