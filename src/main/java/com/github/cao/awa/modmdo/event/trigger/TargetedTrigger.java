@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.simple.vec.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.list.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
@@ -25,7 +26,7 @@ public abstract class TargetedTrigger<T extends EntityTargetedEvent<?>> extends 
             str.set(new XYZ(trigger.target.get(0).getPos()).toString(2));
         });
         map.put("%{target_name}", (trigger, str) -> {
-            String name = trigger.target.get(0).getName().asString();
+            String name = EntityUtil.getName(trigger.target.get(0));
             if (name.equals("")) {
                 str.set(trigger.target.toString());
             } else {

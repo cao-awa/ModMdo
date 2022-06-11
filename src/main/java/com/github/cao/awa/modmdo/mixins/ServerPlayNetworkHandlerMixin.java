@@ -5,6 +5,7 @@ import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.event.server.chat.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -114,7 +115,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "executeCommand", at = @At("HEAD"))
     private void executeCommand(String input, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            LOGGER.info(player.getName().asString() + "(" + player.getUuid().toString() + ") run the command: " + input);
+            LOGGER.info(EntityUtil.getName(player) + "(" + player.getUuid().toString() + ") run the command: " + input);
         }
     }
 
