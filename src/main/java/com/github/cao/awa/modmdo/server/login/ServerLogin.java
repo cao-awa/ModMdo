@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.server.login;
 
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -107,7 +108,7 @@ public class ServerLogin {
     }
 
     public void logout(ServerPlayerEntity player) {
-        tracker.submit("Logout player: " + player.getName().getString());
+        tracker.submit("Logout player: " + EntityUtil.getName(player));
         EntrustExecution.tryTemporary(() -> {
             SharedVariables.loginUsers.removeUser(player);
         });

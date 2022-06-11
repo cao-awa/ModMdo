@@ -2,13 +2,12 @@ package com.github.cao.awa.modmdo.mixins;
 
 import com.github.cao.awa.modmdo.commands.argument.*;
 import com.github.cao.awa.modmdo.storage.*;
-import com.github.cao.awa.modmdo.utils.player.*;
+import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
-import net.minecraft.entity.player.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.c2s.play.*;
@@ -56,7 +55,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
 
                 if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
                     tracker.submit("Server are requesting login data", () -> {
-                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getUUID(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
+                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
                     });
                 }
 

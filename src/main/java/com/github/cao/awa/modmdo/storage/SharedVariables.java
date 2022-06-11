@@ -18,6 +18,7 @@ import com.github.cao.awa.modmdo.subscribable.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.enchant.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
@@ -472,14 +473,14 @@ public class SharedVariables {
 
     public static boolean hasWhitelist(ServerPlayerEntity player) {
         try {
-            switch (whitelist.get(player.getName().getString()).getRecorde().type()) {
+            switch (whitelist.get(EntityUtil.getName(player)).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (whitelist.get(player.getName().getString()).getRecorde().modmdoUniqueId().equals("")) {
+                    if (whitelist.get(EntityUtil.getName(player)).getRecorde().modmdoUniqueId().equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(whitelist.get(player.getName().getString()).getRecorde().uuid())) {
+                    if (! player.getUuid().equals(whitelist.get(EntityUtil.getName(player)).getRecorde().uuid())) {
                         return false;
                     }
                 }
@@ -493,12 +494,12 @@ public class SharedVariables {
     public static boolean handleBanned(ServerPlayerEntity player) {
         if (config.getConfigBoolean("modmdo_whitelist")) {
             if (hasBan(player)) {
-                Certificate certificate = banned.get(player.getName().getString());
+                Certificate certificate = banned.get(EntityUtil.getName(player));
                 if (certificate instanceof TemporaryCertificate temp) {
                     if (temp.isValid()) {
                         return true;
                     } else {
-                        banned.remove(player.getName().getString());
+                        banned.remove(EntityUtil.getName(player));
                     }
                 } else {
                     return true;
@@ -510,14 +511,14 @@ public class SharedVariables {
 
     public static boolean hasBan(ServerPlayerEntity player) {
         try {
-            switch (banned.get(player.getName().getString()).getRecorde().type()) {
+            switch (banned.get(EntityUtil.getName(player)).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (banned.get(player.getName().getString()).getRecorde().modmdoUniqueId().equals("")) {
+                    if (banned.get(EntityUtil.getName(player)).getRecorde().modmdoUniqueId().equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(banned.get(player.getName().getString()).getRecorde().uuid())) {
+                    if (! player.getUuid().equals(banned.get(EntityUtil.getName(player)).getRecorde().uuid())) {
                         return false;
                     }
                 }

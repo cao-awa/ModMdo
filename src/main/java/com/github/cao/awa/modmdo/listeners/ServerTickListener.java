@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.event.server.tick.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.network.forwarder.process.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.*;
@@ -52,7 +53,7 @@ public class ServerTickListener {
                     player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
                 }
                 if (hasBan(player)) {
-                    Certificate ban = banned.get(player.getName().getString());
+                    Certificate ban = banned.get(EntityUtil.getName(player));
                     if (ban instanceof TemporaryCertificate temporary) {
                         String remaining = temporary.formatRemaining();
                         player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
