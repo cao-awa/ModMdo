@@ -5,6 +5,7 @@ import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.event.server.chat.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
@@ -75,7 +76,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
                     if (TOKEN_CHANNEL.equals(channel)) {
                         LOGGER.debug("Client are sent obsoleted login data");
-                        serverLogin.reject(data1, oldLogin, "", new LiteralText("obsolete login type"));
+                        serverLogin.reject(data1, oldLogin, "", TextUtil.literal("obsolete login type").text());
                         return;
                     }
 
