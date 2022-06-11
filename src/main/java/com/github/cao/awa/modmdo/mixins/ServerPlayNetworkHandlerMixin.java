@@ -107,7 +107,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     public void onDisconnected(Text reason, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             serverLogin.logout(player);
-            EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(player.getName().asString()));
+            EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(EntityUtil.getName(player)));
             event.submit(new QuitServerEvent(player, connection, player.getPos(), server));
         }
     }
@@ -131,7 +131,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         if (SharedVariables.isActive()) {
             event.submit(new GameChatEvent(player, packet, server));
             if (! packet.getChatMessage().startsWith("/")) {
-                EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), player.getName().asString()));
+                EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), EntityUtil.getName(player)));
             }
         }
     }

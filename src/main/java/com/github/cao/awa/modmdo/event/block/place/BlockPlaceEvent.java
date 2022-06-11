@@ -3,6 +3,7 @@ package com.github.cao.awa.modmdo.event.block.place;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
+import com.github.cao.awa.modmdo.utils.dimension.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.block.*;
@@ -80,7 +81,7 @@ public class BlockPlaceEvent extends EntityTargetedEvent<BlockPlaceEvent> {
             }
             return str;
         }, placer.toString());
-        return EntrustParser.tryCreate(() -> String.format("BlockPlaceEvent{block=%s, pos=%s, dimension=%s, placer=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().getEffects(), name), toString());
+        return EntrustParser.tryCreate(() -> String.format("BlockPlaceEvent{block=%s, pos=%s, dimension=%s, placer=%s}", Registry.BLOCK.getId(state.getBlock()), pos, DimensionUtil.getDimension(world.getDimension()), name), toString());
     }
 
     @Override

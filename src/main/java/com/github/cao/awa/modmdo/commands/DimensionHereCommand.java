@@ -28,7 +28,7 @@ public class DimensionHereCommand extends SimpleCommand {
                         sendMessage(player, hereMessage, false);
                     }
                     whoUseHere.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), whoUseHere);
-                    sendFeedback(source, TextUtil.translatable("command.here.feedback", whoUseHere.getName().asString()));
+                    sendFeedback(source, TextUtil.translatable("command.here.feedback", EntityUtil.getName(whoUseHere)));
                     return 1;
                 } catch (Exception e) {
                     sendError(source, TextUtil.translatable("command.here.failed.feedback"));

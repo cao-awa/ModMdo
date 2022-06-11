@@ -1,10 +1,12 @@
 package com.github.cao.awa.modmdo.utils.entity.player;
 
 import com.github.cao.awa.modmdo.storage.*;
+import com.mojang.authlib.*;
 import net.minecraft.server.network.*;
 import org.json.*;
 
 import java.io.*;
+import java.util.*;
 
 public class PlayerUtil {
     public static long getPlayTime(ServerPlayerEntity player) {
@@ -43,5 +45,13 @@ public class PlayerUtil {
 
         }
         return count;
+    }
+
+    public static UUID getId(ServerPlayerEntity player) {
+        return getId(player.getGameProfile());
+    }
+
+    public static UUID getId(GameProfile profile) {
+        return profile.getId();
     }
 }

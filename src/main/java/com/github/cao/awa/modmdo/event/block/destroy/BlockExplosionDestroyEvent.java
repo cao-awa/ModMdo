@@ -3,6 +3,7 @@ package com.github.cao.awa.modmdo.event.block.destroy;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
+import com.github.cao.awa.modmdo.utils.dimension.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.block.*;
@@ -75,7 +76,7 @@ public class BlockExplosionDestroyEvent extends EntityTargetedEvent<BlockExplosi
             }
             return str;
         }, "");
-        return EntrustParser.tryCreate(() -> String.format("BlockExplosionDestroyEvent{block=%s, pos=%s, dimension=%s, perpetrator=%s}", Registry.BLOCK.getId(state.getBlock()), pos, world.getDimension().getEffects(), name), toString());
+        return EntrustParser.tryCreate(() -> String.format("BlockExplosionDestroyEvent{block=%s, pos=%s, dimension=%s, perpetrator=%s}", Registry.BLOCK.getId(state.getBlock()), pos, DimensionUtil.getDimension(world.getDimension()), name), toString());
     }
 
     @Override

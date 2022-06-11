@@ -132,7 +132,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     }
 
                     if (handleBanned(player)) {
-                        Certificate ban = banned.get(player.getName().asString());
+                        Certificate ban = banned.get(EntityUtil.getName(player));
                         if (ban instanceof TemporaryCertificate temporary) {
                             String remaining = temporary.formatRemaining();
                             player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
