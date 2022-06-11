@@ -1,5 +1,8 @@
 package com.github.cao.awa.modmdo.mixins;
 
+import com.github.cao.awa.modmdo.event.client.*;
+import com.github.cao.awa.modmdo.event.entity.player.*;
+import com.github.cao.awa.modmdo.event.server.chat.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.utils.times.*;
@@ -58,7 +61,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                 EntrustExecution.notNull(packetByteBuf, buf -> {
                     String oldLogin = "";
                     Identifier informationSign = new Identifier("");
-                    if (TOKEN.equals(channel)) {
+                    if (TOKEN_CHANNEL.equals(channel)) {
                         oldLogin = EntrustParser.tryCreate(buf::readString, "");
                     } else {
                         informationSign = new Identifier(EntrustParser.tryCreate(buf::readString, ""));
@@ -69,17 +72,25 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     String data4 = EntrustParser.tryCreate(buf::readString, "");
                     String data5 = EntrustParser.tryCreate(buf::readString, "");
 
-                    if (TOKEN.equals(channel)) {
+
+                    if (TOKEN_CHANNEL.equals(channel)) {
+                        LOGGER.debug("Client are sent obsoleted login data");
                         serverLogin.reject(data1, oldLogin, "", new LiteralText("obsolete login type"));
                         return;
                     }
 
-                    if (channel.equals(CLIENT)) {
-                        if (informationSign.equals(LOGIN)) {
+                    if (channel.equals(CLIENT_CHANNEL)) {
+                        LOGGER.debug("Client are sent login data");
+                        if (informationSign.equals(LOGIN_CHANNEL)) {
                             if (modMdoType == ModMdoType.SERVER) {
                                 serverLogin.login(data1, data2, data3, data4, data5);
                             }
                         }
+                    }
+
+                    if (channel.equals(SUFFIX_CHANNEL)) {
+                        LOGGER.debug("Client are sent suffix data: " + data1);
+                        serverLogin.suffix(loginUsers.getUser(player), data1);
                     }
                 });
 
@@ -95,7 +106,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         if (SharedVariables.isActive()) {
             serverLogin.logout(player);
             EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(player.getName().asString()));
-            event.submitQuitServer(player, connection, player.getPos(), server);
+            event.submit(new QuitServerEvent(player, connection, player.getPos(), server));
         }
     }
 
@@ -118,14 +129,14 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onClientSettings", at = @At("HEAD"))
     private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            event.submitClientSetting(player, packet, server);
+            event.submit(new ClientSettingEvent(player, packet, server));
         }
     }
 
     @Inject(method = "onGameMessage", at = @At("HEAD"))
     public void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            event.submitGameChat(player, packet, server);
+            event.submit(new GameChatEvent(player, packet, server));
             if (! packet.getChatMessage().startsWith("/")) {
                 EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), player.getName().asString()));
             }

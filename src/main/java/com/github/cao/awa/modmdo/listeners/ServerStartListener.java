@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.listeners;
 
 import com.github.cao.awa.modmdo.*;
 import com.github.cao.awa.modmdo.commands.*;
+import com.github.cao.awa.modmdo.event.server.*;
 import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -25,7 +26,7 @@ public class ServerStartListener {
             if (SharedVariables.isActive()) {
                 tps.init(server, - 1);
                 if (event != null) {
-                    event.submitServerStarted(server);
+                    event.submit(new ServerStartedEvent(server));
                 }
             }
         });

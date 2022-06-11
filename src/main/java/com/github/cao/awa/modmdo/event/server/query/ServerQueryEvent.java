@@ -58,4 +58,9 @@ public class ServerQueryEvent extends ModMdoEvent<ServerQueryEvent> {
     public String clazz() {
         return getClass().getName();
     }
+
+    @Override
+    public void adaptive(ServerQueryEvent event) {
+        refrainAsync(event);
+    }
 }

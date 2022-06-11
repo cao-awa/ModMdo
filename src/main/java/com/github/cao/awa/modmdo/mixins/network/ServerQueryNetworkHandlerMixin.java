@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins.network;
 
+import com.github.cao.awa.modmdo.event.server.query.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.c2s.query.*;
 import net.minecraft.network.packet.s2c.query.*;
@@ -7,8 +8,11 @@ import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.event;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.tracker;
 
 @Mixin(ServerQueryNetworkHandler.class)
 public class ServerQueryNetworkHandlerMixin {
@@ -26,13 +30,19 @@ public class ServerQueryNetworkHandlerMixin {
      */
     @Overwrite
     public void onRequest(QueryRequestC2SPacket packet) {
+        tracker.submit("Handle request(query)");
         if (this.responseSent) {
             this.connection.disconnect(REQUEST_HANDLED);
         } else {
             QueryResponseS2CPacket p = new QueryResponseS2CPacket(this.server.getServerMetadata());
-            event.submitQueryRequest(connection, p, server);
+            event.submit(new ServerQueryEvent(connection, p, server));
             this.responseSent = true;
             this.connection.send(p);
         }
+    }
+
+    @Inject(method = "onPing", at = @At("HEAD"))
+    public void onPing(QueryPingC2SPacket packet, CallbackInfo ci) {
+        tracker.submit("Handle ping(query)");
     }
 }

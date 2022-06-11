@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.whitelist;
+package com.github.cao.awa.modmdo.certificate;
 
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;

@@ -49,4 +49,9 @@ public class GameTickStartEvent extends EntityTargetedEvent<GameTickStartEvent> 
     public ObjectArrayList<? extends Entity> getTargeted() {
         return EntrustParser.operation(new ObjectArrayList<>(), targeted -> EntrustExecution.tryTemporary(() -> targeted.addAll(server.getPlayerManager().getPlayerList())));
     }
+
+    @Override
+    public void adaptive(GameTickStartEvent event) {
+        skipDelay(event);
+    }
 }
