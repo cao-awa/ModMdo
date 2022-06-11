@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.event.trigger.connection;
 
 import com.github.cao.awa.modmdo.annotations.*;
+import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.trigger.selector.entity.*;
@@ -47,7 +48,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> disconnect(format()));
+        EntrustExecution.tryTemporary(() -> disconnect(format().text()));
     }
 
     public void disconnect(Text reason) {
@@ -73,7 +74,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
         }
     }
 
-    public LiteralText format() {
+    public Literal format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
                 String name = EntrustParser.trying(() -> {

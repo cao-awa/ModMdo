@@ -3,7 +3,7 @@ package com.github.cao.awa.modmdo.commands;
 import com.github.cao.awa.hyacinth.logging.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
-import com.github.cao.awa.modmdo.utils.translate.*;
+import com.github.cao.awa.modmdo.utils.text.*;
 
 import static net.minecraft.server.command.CommandManager.*;
 

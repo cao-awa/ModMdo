@@ -1,15 +1,16 @@
 package com.github.cao.awa.modmdo.commands;
 
 import com.github.cao.awa.modmdo.*;
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.argument.connection.*;
 import com.github.cao.awa.modmdo.commands.argument.whitelist.*;
+import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.Language;
 import com.github.cao.awa.modmdo.network.forwarder.connection.*;
 import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
-import com.github.cao.awa.modmdo.utils.translate.*;
-import com.github.cao.awa.modmdo.certificate.*;
+import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
@@ -18,7 +19,6 @@ import net.minecraft.command.argument.*;
 import net.minecraft.enchantment.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
-import net.minecraft.text.*;
 import net.minecraft.util.*;
 import org.json.*;
 
@@ -400,23 +400,23 @@ public class ModMdoCommand extends SimpleCommand {
         }
     }
 
-    public TranslatableText formatConfigCachedReturnMessage(String config) {
+    public Translatable formatConfigCachedReturnMessage(String config) {
         return TextUtil.translatable(config + "." + SharedVariables.config.getConfigString(config) + ".rule.format");
     }
 
-    public TranslatableText formatConfigReturnMessage(String config) {
+    public Translatable formatConfigReturnMessage(String config) {
         return TextUtil.translatable(config + "." + SharedVariables.config.getConfigString(config) + ".rule.format");
     }
 
-    public TranslatableText formatCheckerTimeLimit() {
+    public Translatable formatCheckerTimeLimit() {
         return TextUtil.translatable("checker_time_limit.rule.format", config.getConfigInt("checker_time_limit"));
     }
 
-    public TranslatableText formatTickingEntitiesTick() {
+    public Translatable formatTickingEntitiesTick() {
         return TextUtil.translatable(SharedVariables.cancelEntitiesTick ? "ticking.entities.false.rule.format" : "ticking.entities.true.rule.format");
     }
 
-    public TranslatableText formatItemDespawnTicks() {
+    public Translatable formatItemDespawnTicks() {
         if (SharedVariables.itemDespawnAge > - 1) {
             return TextUtil.translatable("item.despawn.ticks.rule.format", SharedVariables.itemDespawnAge);
         } else {
@@ -424,36 +424,36 @@ public class ModMdoCommand extends SimpleCommand {
         }
     }
 
-    public TranslatableText formatEnableHere() {
+    public Translatable formatEnableHere() {
         return TextUtil.translatable("here_command.true.rule.format");
     }
 
-    public TranslatableText formatDisableHere() {
+    public Translatable formatDisableHere() {
         return TextUtil.translatable("here_command.false.rule.format");
     }
 
-    public TranslatableText formatEnableSecureEnchant() {
+    public Translatable formatEnableSecureEnchant() {
         return TextUtil.translatable("secure_enchant.true.rule.format");
     }
 
-    public TranslatableText formatDisableSecureEnchant() {
+    public Translatable formatDisableSecureEnchant() {
         return TextUtil.translatable("secure_enchant.false.rule.format");
     }
 
-    public TranslatableText formatUseModMdoWhitelist() {
+    public Translatable formatUseModMdoWhitelist() {
         return TextUtil.translatable("modmdo_whitelist.true.rule.format");
     }
 
-    public TranslatableText formatDisableModMdoWhitelist() {
+    public Translatable formatDisableModMdoWhitelist() {
         return TextUtil.translatable("modmdo_whitelist.false.rule.format");
     }
 
-    public TranslatableText formatDisableRejectReconnect() {
+    public Translatable formatDisableRejectReconnect() {
         return TextUtil.translatable("reject_reconnect.reject.false.rule.format");
     }
 
-    public TranslatableText formatModMdoDescription(ServerPlayerEntity player) {
-        TranslatableText modmdoVersion;
+    public Translatable formatModMdoDescription(ServerPlayerEntity player) {
+        Translatable modmdoVersion;
         if (SharedVariables.getPlayerModMdoVersion(player) > 0) {
             String suffix = loginUsers.getUser(player).getSuffix();
             modmdoVersion = TextUtil.translatable("modmdo.description.your.modmdo", SharedVariables.modMdoIdToVersionMap.get(SharedVariables.getPlayerModMdoVersion(player)) + (suffix == null ? "" : loginUsers.getUser(player).getSuffix()));
