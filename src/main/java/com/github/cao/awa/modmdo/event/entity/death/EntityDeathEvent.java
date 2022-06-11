@@ -3,6 +3,7 @@ package com.github.cao.awa.modmdo.event.entity.death;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
+import com.github.cao.awa.modmdo.utils.dimension.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
@@ -67,7 +68,7 @@ public class EntityDeathEvent extends EntityTargetedEvent<EntityDeathEvent> {
             }
             return str;
         }, perpetrator.toString()), () -> "null");
-        return EntrustParser.tryCreate(() -> String.format("EntityDeathEvent{player=%s, perpetrator=%s, pos=%s, dimension=%s}", name, perpetratorName, pos, entity.getEntityWorld().getDimension().getEffects()), toString());
+        return EntrustParser.tryCreate(() -> String.format("EntityDeathEvent{player=%s, perpetrator=%s, pos=%s, dimension=%s}", name, perpetratorName, pos, DimensionUtil.getDimension(entity.getEntityWorld().getDimension())), toString());
     }
 
     @Override
