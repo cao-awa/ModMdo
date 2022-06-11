@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.mixins;
 
 import com.github.cao.awa.modmdo.network.forwarder.handler.*;
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.cao.awa.modmdo.utils.translate.*;
 import net.minecraft.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.c2s.handshake.*;
@@ -34,9 +35,9 @@ public class ServerHandshakeNetworkHandlerMixin {
                 if (packet.getProtocolVersion() != SharedConstants.getGameVersion().getProtocolVersion()) {
                     TranslatableTextContent text;
                     if (packet.getProtocolVersion() < 754) {
-                        text = new TranslatableTextContent("multiplayer.disconnect.outdated_client", SharedConstants.getGameVersion().getName());
+                        text = TextUtil.translatable("multiplayer.disconnect.outdated_client", SharedConstants.getGameVersion().getName());
                     } else {
-                        text = new TranslatableTextContent("multiplayer.disconnect.incompatible", SharedConstants.getGameVersion().getName());
+                        text = TextUtil.translatable("multiplayer.disconnect.incompatible", SharedConstants.getGameVersion().getName());
                     }
 
                     this.connection.send(new LoginDisconnectS2CPacket(MutableText.of(text)));

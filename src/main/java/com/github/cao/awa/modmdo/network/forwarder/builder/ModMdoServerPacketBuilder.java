@@ -12,34 +12,34 @@ import org.json.*;
 
 public class ModMdoServerPacketBuilder extends PacketBuilder<Packet<ClientPlayPacketListener>> {
     public CustomPayloadS2CPacket buildDisconnect(String reason) {
-        return new CustomPayloadS2CPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA).writeString("disconnect").writeString(reason));
+        return new CustomPayloadS2CPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA_CHANNEL).writeString("disconnect").writeString(reason));
     }
 
     public CustomPayloadS2CPacket buildChat(String message, String player) {
         JSONObject chat = new JSONObject();
         chat.put("msg", message);
         chat.put("player", player);
-        return new CustomPayloadS2CPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA).writeString("chat").writeString(chat.toString()));
+        return new CustomPayloadS2CPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA_CHANNEL).writeString("chat").writeString(chat.toString()));
     }
 
     public CustomPayloadS2CPacket buildSetting(ModMdoConnectionSetting setting) {
-        return new CustomPayloadS2CPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA).writeString("settings").writeString(setting.toJSONObject().toString()));
+        return new CustomPayloadS2CPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA_CHANNEL).writeString("settings").writeString(setting.toJSONObject().toString()));
     }
 
     public CustomPayloadS2CPacket buildLoginSuccess() {
-        return new CustomPayloadS2CPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA).writeString("login-success").writeString("yes"));
+        return new CustomPayloadS2CPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA_CHANNEL).writeString("login-success").writeString("yes"));
     }
 
     public CustomPayloadS2CPacket buildPlayerJoin(String name) {
-        return new CustomPayloadS2CPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA).writeString("player-join").writeString(name));
+        return new CustomPayloadS2CPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA_CHANNEL).writeString("player-join").writeString(name));
     }
 
     public CustomPayloadS2CPacket buildPlayerQuit(String name) {
-        return new CustomPayloadS2CPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA).writeString("player-quit").writeString(name));
+        return new CustomPayloadS2CPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA_CHANNEL).writeString("player-quit").writeString(name));
     }
 
     public CustomPayloadS2CPacket buildKeepAlive(long lastKeepAlive) {
-        return new CustomPayloadS2CPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA).writeString("keepalive").writeString(String.valueOf(lastKeepAlive)));
+        return new CustomPayloadS2CPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA_CHANNEL).writeString("keepalive").writeString(String.valueOf(lastKeepAlive)));
     }
 
     public CustomPayloadS2CPacket buildTraffic(OperationalLong traffic, Object2ObjectRBTreeMap<String, OperationalLong> processed) {
@@ -50,7 +50,7 @@ public class ModMdoServerPacketBuilder extends PacketBuilder<Packet<ClientPlayPa
             process.put(s, processed.get(s).get());
         }
         json.put("packets-processed", process);
-        return new CustomPayloadS2CPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA).writeString("traffic").writeString(json.toString()));
+        return new CustomPayloadS2CPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA_CHANNEL).writeString("traffic").writeString(json.toString()));
     }
 
     public CustomPayloadS2CPacket buildTrafficResult(OperationalLong traffic, Object2ObjectRBTreeMap<String, OperationalLong> processed) {
@@ -61,6 +61,6 @@ public class ModMdoServerPacketBuilder extends PacketBuilder<Packet<ClientPlayPa
             process.put(s, processed.get(s).get());
         }
         json.put("packets-processed", process);
-        return new CustomPayloadS2CPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA).writeString("traffic-result").writeString(json.toString()));
+        return new CustomPayloadS2CPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.DATA_CHANNEL).writeString("traffic-result").writeString(json.toString()));
     }
 }

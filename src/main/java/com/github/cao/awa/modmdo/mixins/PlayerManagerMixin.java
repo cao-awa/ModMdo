@@ -1,14 +1,15 @@
 package com.github.cao.awa.modmdo.mixins;
 
+import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
+import com.github.cao.awa.modmdo.utils.translate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import net.minecraft.network.*;
 import net.minecraft.network.encryption.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
-import net.minecraft.text.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -45,7 +46,7 @@ public abstract class PlayerManagerMixin {
                         break;
                     if (player.getUuid().equals(uuid)) {
                         if (loginUsers.hasUser(player)) {
-                            SimpleCommandOperation.sendMessage(player, new TranslatableTextContent("login.dump.rejected"), false);
+                            SimpleCommandOperation.sendMessage(player, TextUtil.translatable("login.dump.rejected"), false);
                         }
                         cir.setReturnValue(null);
                         cir.cancel();
@@ -59,7 +60,7 @@ public abstract class PlayerManagerMixin {
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, processor -> processor.sendPlayerJoin(player.getName().getString()));
-            SharedVariables.event.submitJoinServer(player, connection, player.getPos(), SharedVariables.server);
+            SharedVariables.event.submit(new JoinServerEvent(player, connection, player.getPos(), SharedVariables.server));
         }
     }
 

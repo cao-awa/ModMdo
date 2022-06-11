@@ -9,13 +9,12 @@ import net.minecraft.network.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.util.*;
+import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.*;
 import org.spongepowered.asm.mixin.*;
 
 import java.net.*;
 import java.util.*;
-
-import static net.minecraft.util.registry.DynamicRegistryManager.*;
 
 @Mixin(ServerNetworkIo.class)
 public class ServerNetworkIoMixin {
@@ -31,9 +30,10 @@ public class ServerNetworkIoMixin {
     @Shadow @Final
     List<ClientConnection> connections;
 
+    @Shadow @Final private static Logger LOGGER;
+
     /**
      * @author 草awa
-     *
      * @reason
      */
     @Overwrite

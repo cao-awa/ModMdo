@@ -1,11 +1,12 @@
 package com.github.cao.awa.modmdo.mixins;
 
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.utils.times.*;
+import com.github.cao.awa.modmdo.utils.translate.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
-import com.github.cao.awa.modmdo.whitelist.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
@@ -63,7 +64,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     EntrustExecution.tryTemporary(() -> {
                         serverLogin.loginUsingYgg(player.getName().getString(), profile.getId().toString());
                     }, () -> {
-                        serverLogin.reject(player.getName().getString(), profile.getId().toString(), "", MutableText.of(new TranslatableTextContent("multiplayer.disconnect.not_whitelisted")));
+                        serverLogin.reject(player.getName().getString(), profile.getId().toString(), "", MutableText.of(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")));
                     });
                 }
             }
@@ -80,11 +81,20 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
                     try {
                         ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
-                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA).writeString("modmdo-connection")));
-                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
-                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING : LOGIN)));
+                        tracker.submit("Server send test packet: modmdo-connection", () -> {
+                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("modmdo-connection")));
+                        });
+                        tracker.submit("Server send test packet: old modmdo version test", () -> {
+                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
+                        });
+                        tracker.submit("Server send login packet: modmdo login", () -> {
+                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL)));
+                        });
+                        tracker.submit("Server send test packet: modmdo version suffix test", () -> {
+                            handler.sendPacket(new CustomPayloadS2CPacket(SUFFIX_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SUFFIX_CHANNEL)));
+                        });
                     } catch (Exception e) {
-
+                        e.printStackTrace();
                     }
 
                     if (modMdoType == ModMdoType.SERVER & modmdoWhitelist) {
@@ -96,7 +106,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                                 } else {
                                     LOGGER.warn("ModMdo reject a login request, player \"" + player.getName().getString() + "\"");
                                 }
-                                disc(rejected.getRejectReason() == null ? MutableText.of(new TranslatableTextContent("multiplayer.disconnect.not_whitelisted")) : rejected.getRejectReason());
+                                disc(rejected.getRejectReason() == null ? MutableText.of(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")) : rejected.getRejectReason());
 
                                 rejectUsers.removeUser(player);
 
@@ -159,7 +169,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     }
                 }).start();
             } else {
-                serverLogin.login(player.getName().getString(), player.getUuid().toString(), staticConfig.getConfigString("identifier"), MODMDO_VERSION);
+                    serverLogin.login(player.getName().getString(), player.getUuid().toString(), staticConfig.getConfigString("identifier"), String.valueOf(MODMDO_VERSION));
 
                 callOnConnect(player);
             }

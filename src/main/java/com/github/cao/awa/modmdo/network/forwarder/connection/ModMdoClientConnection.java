@@ -41,7 +41,7 @@ public class ModMdoClientConnection {
         }
 
         send(new HandshakeC2SPacket("0.0.0.0", - 1, NetworkState.PLAY));
-        send(new CustomPayloadC2SPacket(SharedVariables.DATA, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.LOGIN).writeString(loginData.toString())));
+        send(new CustomPayloadC2SPacket(SharedVariables.DATA_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SharedVariables.LOGIN_CHANNEL).writeString(loginData.toString())));
 
         setting = ModMdoConnectionSetting.localSettings();
     }
