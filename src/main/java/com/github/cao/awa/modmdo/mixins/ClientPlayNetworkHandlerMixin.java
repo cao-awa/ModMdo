@@ -7,6 +7,7 @@ import com.mojang.authlib.*;
 import io.netty.buffer.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
+import net.minecraft.entity.player.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.c2s.play.*;
@@ -21,6 +22,10 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketListener {
+    @Final
+    @Shadow
+    private MinecraftClient client;
+
     @Shadow
     @Final
     private ClientConnection connection;
@@ -28,8 +33,6 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     @Shadow
     @Final
     private GameProfile profile;
-
-    @Shadow @Final private MinecraftClient client;
 
     /**
      * 与服务端进行自定义通信
@@ -39,7 +42,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      * @param ci
      *         callback
      * @author 草二号机
-     * @author 草
+     * @author 草awa
      * @author zhuaidadaya
      */
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
@@ -48,20 +51,25 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
             PacketByteBuf data = packet.getData();
 
             try {
-                Identifier channel = packet.getChannel();
-
                 Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
 
-                LOGGER.info("server sent a payload in channel: " + channel);
-
-                if (informationSign.equals(CHECKING) || informationSign.equals(LOGIN)) {
-                    System.out.println(staticConfig.getConfigString("identifier"));
-                    connection.send(new CustomPayloadC2SPacket(CLIENT, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN.toString()).writeString(profile.getName()).writeString(profile.getId().toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
+                if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
+                    tracker.submit("Server are requesting login data", () -> {
+                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerEntity.getUuidFromProfile(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
+                    });
                 }
 
-                if (informationSign.equals(DATA)) {
+                if (informationSign.equals(SUFFIX_CHANNEL)) {
+                    tracker.submit("Server are requesting suffix data", () -> {
+                        connection.send(new CustomPayloadC2SPacket(SUFFIX_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(SUFFIX_CHANNEL.toString()).writeString(SUFFIX)));
+                    });
+                }
+
+                if (informationSign.equals(DATA_CHANNEL)) {
                     String data1 = EntrustParser.tryCreate(data::readString, "");
                     String data2 = EntrustParser.tryCreate(data::readString, "");
+
+                    tracker.submit(String.format("Server are requesting client process data: type={%s} | information={%s}", data1, data2));
 
                     switch (data1) {
                         case "whitelist_names" -> {
@@ -96,7 +104,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                     ArgumentInit.init();
                 }
             } catch (Exception e) {
-                LOGGER.error("error in connecting ModMdo server", e);
+                tracker.submit("Error in connecting ModMdo server", e);
             }
             ci.cancel();
         }

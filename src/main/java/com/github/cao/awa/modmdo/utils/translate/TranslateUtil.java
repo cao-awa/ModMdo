@@ -7,7 +7,7 @@ public class TranslateUtil {
         return new TranslatableTextContent(head + "." + info + ".rule.format");
     }
 
-    public static TranslatableTextContent TranslatableTextContent(String key, Object... args) {
+    public static TranslatableTextContent translatableText(String key, Object... args) {
         return new TranslatableTextContent(key,args);
     }
 }

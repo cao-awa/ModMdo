@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins;
 
+import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -59,7 +60,7 @@ public abstract class PlayerManagerMixin {
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, processor -> processor.sendPlayerJoin(player.getName().getString()));
-            SharedVariables.event.submitJoinServer(player, connection, player.getPos(), SharedVariables.server);
+            SharedVariables.event.submit(new JoinServerEvent(player, connection, player.getPos(), SharedVariables.server));
         }
     }
 

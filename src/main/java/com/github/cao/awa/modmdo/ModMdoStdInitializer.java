@@ -25,6 +25,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoStdInitializer implements ModInitializer {
     public static void initForLevel(MinecraftServer server) {
+        tracker.submit("ModMdo extra init");
         SharedVariables.extras.getExtra(ModMdo.class, SharedVariables.EXTRA_ID).setServer(server);
         SharedVariables.extras.load();
 
@@ -32,6 +33,7 @@ public class ModMdoStdInitializer implements ModInitializer {
     }
 
     public static Pair<Integer, Integer> loadEvent(boolean reload) {
+        tracker.submit(reload ? "ModMdo event reloading" : "ModMdo event loading");
         int old = 0;
         if (event != null) {
             old = event.registered();
@@ -82,6 +84,7 @@ public class ModMdoStdInitializer implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        tracker.submit("ModMdo loading");
         SharedVariables.LOGGER.info("Loading ModMdo " + SharedVariables.VERSION_ID + " (step 1/2)");
         SharedVariables.LOGGER.info("ModMdo Std Initiator running");
         SharedVariables.LOGGER.info("Loading for ModMdo Std init");

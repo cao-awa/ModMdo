@@ -9,7 +9,7 @@ import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.translate.*;
-import com.github.cao.awa.modmdo.whitelist.*;
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
@@ -157,17 +157,17 @@ public class ModMdoCommand extends SimpleCommand {
             SimpleCommandOperation.sendFeedback(english, new TranslatableTextContent("language.default", SharedVariables.getLanguage()));
             return 0;
         }))).then(literal("maxEnchantmentLevel").executes(getEnchantControlEnable -> {
-            SimpleCommandOperation.sendFeedback(getEnchantControlEnable, TranslateUtil.TranslatableTextContent(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
+            SimpleCommandOperation.sendFeedback(getEnchantControlEnable, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
             return 0;
         }).then(literal("enable").executes(enableEnchantLimit -> {
             SharedVariables.enchantLevelController.setEnabledControl(true);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(enableEnchantLimit, TranslateUtil.TranslatableTextContent(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
+            SimpleCommandOperation.sendFeedback(enableEnchantLimit, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
             return 0;
         })).then(literal("disable").executes(disableEnchantLimit -> {
             SharedVariables.enchantLevelController.setEnabledControl(false);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(disableEnchantLimit, TranslateUtil.TranslatableTextContent(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
+            SimpleCommandOperation.sendFeedback(disableEnchantLimit, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
             return 0;
         })).then(literal("limit").then(literal("all").then(argument("all", IntegerArgumentType.integer(0, Short.MAX_VALUE)).executes(setDef -> {
             short level = (short) IntegerArgumentType.getInteger(setDef, "all");
@@ -455,7 +455,8 @@ public class ModMdoCommand extends SimpleCommand {
     public TranslatableTextContent formatModMdoDescription(ServerPlayerEntity player) {
         TranslatableTextContent modmdoVersion;
         if (SharedVariables.getPlayerModMdoVersion(player) > 0) {
-            modmdoVersion = new TranslatableTextContent("modmdo.description.your.modmdo", SharedVariables.modMdoIdToVersionMap.get(SharedVariables.getPlayerModMdoVersion(player)));
+            String suffix = loginUsers.getUser(player).getSuffix();
+            modmdoVersion = new TranslatableTextContent("modmdo.description.your.modmdo", SharedVariables.modMdoIdToVersionMap.get(SharedVariables.getPlayerModMdoVersion(player)) + (suffix == null ? "" : loginUsers.getUser(player).getSuffix()));
         } else {
             modmdoVersion = new TranslatableTextContent("modmdo.description.you.do.not.have.modmdo");
         }

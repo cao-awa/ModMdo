@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins.entity.player;
 
+import com.github.cao.awa.modmdo.event.entity.death.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.*;
 import net.minecraft.server.network.*;
@@ -19,7 +20,7 @@ public abstract class ServerPlayerEntityMixin {
     public void onDeath(DamageSource source, CallbackInfo ci) {
         cameraEntity = null;
         if (getCameraEntity() instanceof ServerPlayerEntity entity) {
-            event.submitEntityDeath(entity, entity.getDamageTracker().getBiggestAttacker(), entity.getPos(), entity.getServer());
+            event.submit(new EntityDeathEvent(entity, entity.getDamageTracker().getBiggestAttacker(), entity.getPos(), entity.getServer()));
         }
     }
 }
