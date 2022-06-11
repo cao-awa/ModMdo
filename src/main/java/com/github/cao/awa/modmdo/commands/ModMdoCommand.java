@@ -82,7 +82,7 @@ public class ModMdoCommand extends SimpleCommand {
                 SharedVariables.enableRejectReconnect = true;
                 SharedVariables.saveVariables();
 
-                SimpleCommandOperation.sendFeedback(reject, new TranslatableText("reject_reconnect.true.rule.format"));
+                SimpleCommandOperation.sendFeedback(reject, TextUtil.translatable("reject_reconnect.true.rule.format"));
             }
             return 1;
         })).then(literal("disable").executes(receive -> {
@@ -144,44 +144,44 @@ public class ModMdoCommand extends SimpleCommand {
             SimpleCommandOperation.sendFeedback(setTimeLimit, formatCheckerTimeLimit());
             return 0;
         }))).then(literal("language").executes(getLanguage -> {
-            SimpleCommandOperation.sendFeedback(getLanguage, new TranslatableText("language.default", SharedVariables.getLanguage()));
+            SimpleCommandOperation.sendFeedback(getLanguage, TextUtil.translatable("language.default", SharedVariables.getLanguage()));
             return 0;
         }).then(literal("zh_cn").executes(chinese -> {
             config.set("default_language", com.github.cao.awa.modmdo.lang.Language.ZH_CN);
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(chinese, new TranslatableText("language.default", SharedVariables.getLanguage()));
+            SimpleCommandOperation.sendFeedback(chinese, TextUtil.translatable("language.default", SharedVariables.getLanguage()));
             return 0;
         })).then(literal("en_us").executes(english -> {
             config.set("default_language", Language.EN_US);
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(english, new TranslatableText("language.default", SharedVariables.getLanguage()));
+            SimpleCommandOperation.sendFeedback(english, TextUtil.translatable("language.default", SharedVariables.getLanguage()));
             return 0;
         }))).then(literal("maxEnchantmentLevel").executes(getEnchantControlEnable -> {
-            SimpleCommandOperation.sendFeedback(getEnchantControlEnable, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
+            SimpleCommandOperation.sendFeedback(getEnchantControlEnable, TextUtil.translatable(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
             return 0;
         }).then(literal("enable").executes(enableEnchantLimit -> {
             SharedVariables.enchantLevelController.setEnabledControl(true);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(enableEnchantLimit, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
+            SimpleCommandOperation.sendFeedback(enableEnchantLimit, TextUtil.translatable(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
             return 0;
         })).then(literal("disable").executes(disableEnchantLimit -> {
             SharedVariables.enchantLevelController.setEnabledControl(false);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(disableEnchantLimit, TranslateUtil.translatableText(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
+            SimpleCommandOperation.sendFeedback(disableEnchantLimit, TextUtil.translatable(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
             return 0;
         })).then(literal("limit").then(literal("all").then(argument("all", IntegerArgumentType.integer(0, Short.MAX_VALUE)).executes(setDef -> {
             short level = (short) IntegerArgumentType.getInteger(setDef, "all");
             SharedVariables.enchantLevelController.setAll(level);
-            SimpleCommandOperation.sendFeedback(setDef, new TranslatableText("enchantment.max.level.limit.all", level));
+            SimpleCommandOperation.sendFeedback(setDef, TextUtil.translatable("enchantment.max.level.limit.all", level));
             return 0;
         })).then(literal("default").executes(recoveryAll -> {
             SharedVariables.enchantLevelController.allDefault();
-            SimpleCommandOperation.sendFeedback(recoveryAll, new TranslatableText("enchantment.max.level.limit.all.default"));
+            SimpleCommandOperation.sendFeedback(recoveryAll, TextUtil.translatable("enchantment.max.level.limit.all.default"));
             return 0;
         }))).then(literal("appoint").then(argument("appoint", EnchantmentArgumentType.enchantment()).executes(getLimit -> {
             Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(getLimit, "appoint"));
             short level = SharedVariables.enchantLevelController.get(name).getMax();
-            SimpleCommandOperation.sendFeedback(getLimit, new TranslatableText("enchantment.max.level.limit", name, level));
+            SimpleCommandOperation.sendFeedback(getLimit, TextUtil.translatable("enchantment.max.level.limit", name, level));
             SharedVariables.saveEnchantmentMaxLevel();
             return 0;
         }).then(argument("limit", IntegerArgumentType.integer(0, Short.MAX_VALUE)).executes(setLimit -> {
@@ -189,40 +189,40 @@ public class ModMdoCommand extends SimpleCommand {
             short level = (short) IntegerArgumentType.getInteger(setLimit, "limit");
             SharedVariables.enchantLevelController.set(name, level);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(setLimit, new TranslatableText("enchantment.max.level.limit", name, level));
+            SimpleCommandOperation.sendFeedback(setLimit, TextUtil.translatable("enchantment.max.level.limit", name, level));
             return 0;
         })).then(literal("default").executes(recoveryLevel -> {
             Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(recoveryLevel, "appoint"));
             short level = SharedVariables.enchantLevelController.get(name).getDefaultMax();
             SharedVariables.enchantLevelController.set(name, level);
             SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(recoveryLevel, new TranslatableText("enchantment.max.level.limit", name, level));
+            SimpleCommandOperation.sendFeedback(recoveryLevel, TextUtil.translatable("enchantment.max.level.limit", name, level));
             return 0;
         })))))).then(literal("clearEnchantIfLevelTooHigh").executes(getClear -> {
-            SimpleCommandOperation.sendFeedback(getClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", SharedVariables.clearEnchantIfLevelTooHigh ? "enabled" : "disabled"));
+            SimpleCommandOperation.sendFeedback(getClear, TextUtil.formatRule("enchantment_clear_if_level_too_high", SharedVariables.clearEnchantIfLevelTooHigh ? "enabled" : "disabled"));
             return 0;
         }).then(literal("enable").executes(enableClear -> {
             SharedVariables.clearEnchantIfLevelTooHigh = true;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(enableClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", "enabled"));
+            SimpleCommandOperation.sendFeedback(enableClear, TextUtil.formatRule("enchantment_clear_if_level_too_high", "enabled"));
             return 0;
         })).then(literal("disable").executes(disableClear -> {
             SharedVariables.clearEnchantIfLevelTooHigh = false;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(disableClear, TranslateUtil.formatRule("enchantment_clear_if_level_too_high", "disabled"));
+            SimpleCommandOperation.sendFeedback(disableClear, TextUtil.formatRule("enchantment_clear_if_level_too_high", "disabled"));
             return 0;
         }))).then(literal("rejectNoFallCheat").executes(getRejectNoFall -> {
-            SimpleCommandOperation.sendFeedback(getRejectNoFall, new TranslatableText(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
+            SimpleCommandOperation.sendFeedback(getRejectNoFall, TextUtil.translatable(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
             return 0;
         }).then(literal("enable").executes(reject -> {
             SharedVariables.rejectNoFallCheat = true;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(reject, new TranslatableText(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
+            SimpleCommandOperation.sendFeedback(reject, TextUtil.translatable(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
             return 0;
         })).then(literal("disable").executes(receive -> {
             SharedVariables.rejectNoFallCheat = false;
             SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(receive, new TranslatableText(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
+            SimpleCommandOperation.sendFeedback(receive, TextUtil.translatable(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
             return 0;
         }))).then(literal("onlyCheckIdentifier").executes(check -> {
             SimpleCommandOperation.sendFeedback(check, formatConfigReturnMessage("whitelist_only_id"));
@@ -239,12 +239,12 @@ public class ModMdoCommand extends SimpleCommand {
             Certificate wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
             if (SharedVariables.whitelist.containsName(wl.getName())) {
                 SharedVariables.whitelist.remove(wl.getName());
-                SimpleCommandOperation.sendFeedback(remove, new TranslatableText("modmdo.whitelist.removed", wl.getName()));
+                SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.removed", wl.getName()));
                 SharedVariables.updateWhitelistNames(SimpleCommandOperation.getServer(remove), true);
                 SharedVariables.saveVariables();
                 return 0;
             }
-            SimpleCommandOperation.sendError(remove, new TranslatableText("arguments.permanent.whitelist.not.registered"));
+            SimpleCommandOperation.sendError(remove, TextUtil.translatable("arguments.permanent.whitelist.not.registered"));
             return - 1;
         }))).then(literal("list").executes(showWhiteList -> {
             showWhitelist(showWhiteList);
@@ -276,11 +276,11 @@ public class ModMdoCommand extends SimpleCommand {
             return 0;
         }).then(literal("disconnect").executes(disconnect -> {
             Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(disconnect, "name");
-            EntrustExecution.tryTemporary(pair.getRight()::disconnect, nullProcessor -> SimpleCommandOperation.sendError(disconnect, new TranslatableText("modmdo.connection.not.found", pair.getLeft())));
+            EntrustExecution.tryTemporary(pair.getRight()::disconnect, nullProcessor -> SimpleCommandOperation.sendError(disconnect, TextUtil.translatable("modmdo.connection.not.found", pair.getLeft())));
             return 0;
         })).then(literal("traffic").executes(test -> {
             Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(test, "name");
-            EntrustExecution.tryTemporary(pair.getRight()::sendTraffic, nullProcessor -> SimpleCommandOperation.sendError(test, new TranslatableText("modmdo.connection.not.found", pair.getLeft())));
+            EntrustExecution.tryTemporary(pair.getRight()::sendTraffic, nullProcessor -> SimpleCommandOperation.sendError(test, TextUtil.translatable("modmdo.connection.not.found", pair.getLeft())));
             return 0;
         })))).then(literal("connect").then(argument("ip", StringArgumentType.string()).then(argument("port", IntegerArgumentType.integer(0, 65565)).executes(connectTo -> {
             if (config.getConfigString("server_name") != null) {
@@ -297,7 +297,7 @@ public class ModMdoCommand extends SimpleCommand {
         }))).then(literal("config").then(literal("chatting").then(literal("format").then(argument("format", StringArgumentType.string()).executes(format -> {
             String formatting = StringArgumentType.getString(format, "format");
             config.set("modmdo_connection_chatting_format", formatting);
-            SimpleCommandOperation.sendFeedback(format, new TranslatableText("modmdo.connection.chatting.format", formatting.replace("%server", "TestServer").replace("%name", "PlayerName233").replace("%msg", "Hi!")));
+            SimpleCommandOperation.sendFeedback(format, TextUtil.translatable("modmdo.connection.chatting.format", formatting.replace("%server", "TestServer").replace("%name", "PlayerName233").replace("%msg", "Hi!")));
             return 0;
         }))).then(literal("accept").executes(getAccept -> {
             SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"));
@@ -378,7 +378,7 @@ public class ModMdoCommand extends SimpleCommand {
             return 0;
         })))))))).then(literal("event").then(literal("reload").executes(e -> {
             Pair<Integer, Integer> pair = ModMdoStdInitializer.loadEvent(true);
-            sendFeedback(e, new TranslatableText("modmdo.event.reload.success", pair.getLeft(), pair.getRight()));
+            sendFeedback(e, TextUtil.translatable("modmdo.event.reload.success", pair.getLeft(), pair.getRight()));
             return 0;
         }))));
         return this;
@@ -393,73 +393,73 @@ public class ModMdoCommand extends SimpleCommand {
                 builder.append(wl.getName()).append(", ");
             }
             builder.delete(builder.length() - 2, builder.length());
-            SimpleCommandOperation.sendMessage(player, new TranslatableText("commands.modmdo.whitelist.list", SharedVariables.whitelist.size(), builder.toString()), false);
+            SimpleCommandOperation.sendMessage(player, TextUtil.translatable("commands.modmdo.whitelist.list", SharedVariables.whitelist.size(), builder.toString()), false);
         } else {
-            SimpleCommandOperation.sendMessage(player, new TranslatableText("commands.modmdo.whitelist.none"), false);
+            SimpleCommandOperation.sendMessage(player, TextUtil.translatable("commands.modmdo.whitelist.none"), false);
 
         }
     }
 
     public TranslatableText formatConfigCachedReturnMessage(String config) {
-        return new TranslatableText(config + "." + SharedVariables.config.getConfigString(config) + ".rule.format");
+        return TextUtil.translatable(config + "." + SharedVariables.config.getConfigString(config) + ".rule.format");
     }
 
     public TranslatableText formatConfigReturnMessage(String config) {
-        return new TranslatableText(config + "." + SharedVariables.config.getConfigString(config) + ".rule.format");
+        return TextUtil.translatable(config + "." + SharedVariables.config.getConfigString(config) + ".rule.format");
     }
 
     public TranslatableText formatCheckerTimeLimit() {
-        return new TranslatableText("checker_time_limit.rule.format", config.getConfigInt("checker_time_limit"));
+        return TextUtil.translatable("checker_time_limit.rule.format", config.getConfigInt("checker_time_limit"));
     }
 
     public TranslatableText formatTickingEntitiesTick() {
-        return new TranslatableText(SharedVariables.cancelEntitiesTick ? "ticking.entities.false.rule.format" : "ticking.entities.true.rule.format");
+        return TextUtil.translatable(SharedVariables.cancelEntitiesTick ? "ticking.entities.false.rule.format" : "ticking.entities.true.rule.format");
     }
 
     public TranslatableText formatItemDespawnTicks() {
         if (SharedVariables.itemDespawnAge > - 1) {
-            return new TranslatableText("item.despawn.ticks.rule.format", SharedVariables.itemDespawnAge);
+            return TextUtil.translatable("item.despawn.ticks.rule.format", SharedVariables.itemDespawnAge);
         } else {
-            return new TranslatableText("item.despawn.ticks.false.rule.format", SharedVariables.itemDespawnAge);
+            return TextUtil.translatable("item.despawn.ticks.false.rule.format", SharedVariables.itemDespawnAge);
         }
     }
 
     public TranslatableText formatEnableHere() {
-        return new TranslatableText("here_command.true.rule.format");
+        return TextUtil.translatable("here_command.true.rule.format");
     }
 
     public TranslatableText formatDisableHere() {
-        return new TranslatableText("here_command.false.rule.format");
+        return TextUtil.translatable("here_command.false.rule.format");
     }
 
     public TranslatableText formatEnableSecureEnchant() {
-        return new TranslatableText("secure_enchant.true.rule.format");
+        return TextUtil.translatable("secure_enchant.true.rule.format");
     }
 
     public TranslatableText formatDisableSecureEnchant() {
-        return new TranslatableText("secure_enchant.false.rule.format");
+        return TextUtil.translatable("secure_enchant.false.rule.format");
     }
 
     public TranslatableText formatUseModMdoWhitelist() {
-        return new TranslatableText("modmdo_whitelist.true.rule.format");
+        return TextUtil.translatable("modmdo_whitelist.true.rule.format");
     }
 
     public TranslatableText formatDisableModMdoWhitelist() {
-        return new TranslatableText("modmdo_whitelist.false.rule.format");
+        return TextUtil.translatable("modmdo_whitelist.false.rule.format");
     }
 
     public TranslatableText formatDisableRejectReconnect() {
-        return new TranslatableText("reject_reconnect.reject.false.rule.format");
+        return TextUtil.translatable("reject_reconnect.reject.false.rule.format");
     }
 
     public TranslatableText formatModMdoDescription(ServerPlayerEntity player) {
         TranslatableText modmdoVersion;
         if (SharedVariables.getPlayerModMdoVersion(player) > 0) {
             String suffix = loginUsers.getUser(player).getSuffix();
-            modmdoVersion = new TranslatableText("modmdo.description.your.modmdo", SharedVariables.modMdoIdToVersionMap.get(SharedVariables.getPlayerModMdoVersion(player)) + (suffix == null ? "" : loginUsers.getUser(player).getSuffix()));
+            modmdoVersion = TextUtil.translatable("modmdo.description.your.modmdo", SharedVariables.modMdoIdToVersionMap.get(SharedVariables.getPlayerModMdoVersion(player)) + (suffix == null ? "" : loginUsers.getUser(player).getSuffix()));
         } else {
-            modmdoVersion = new TranslatableText("modmdo.description.you.do.not.have.modmdo");
+            modmdoVersion = TextUtil.translatable("modmdo.description.you.do.not.have.modmdo");
         }
-        return new TranslatableText("modmdo.description", SharedVariables.MODMDO_VERSION_NAME, SharedVariables.RELEASE_TIME, modmdoVersion);
+        return TextUtil.translatable("modmdo.description", SharedVariables.MODMDO_VERSION_NAME, SharedVariables.RELEASE_TIME, modmdoVersion);
     }
 }
