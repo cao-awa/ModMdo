@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.simple.vec.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import net.minecraft.entity.effect.*;
 import net.minecraft.server.*;
@@ -43,7 +44,7 @@ public class DimensionHereCommand extends SimpleCommand {
     }
 
     public Translatable formatHereTip(String dimension, XYZ xyz, ServerPlayerEntity whoUseHere) {
-        String useHerePlayerName = whoUseHere.getName().asString();
+        String useHerePlayerName = EntityUtil.getName(whoUseHere);
         String convertTarget = "";
         switch (dimension) {
             case "overworld" -> convertTarget = "the_nether";
