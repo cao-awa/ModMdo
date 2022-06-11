@@ -8,6 +8,7 @@ import com.mojang.authlib.*;
 import io.netty.buffer.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
+import net.minecraft.entity.player.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.c2s.play.*;
