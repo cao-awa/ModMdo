@@ -3,6 +3,7 @@ package com.github.cao.awa.modmdo.commands;
 import com.github.cao.awa.modmdo.simple.vec.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
+import com.github.cao.awa.modmdo.utils.translate.*;
 import net.minecraft.entity.effect.*;
 import net.minecraft.server.*;
 import net.minecraft.server.command.*;
@@ -26,15 +27,15 @@ public class DimensionHereCommand extends SimpleCommand {
                         sendMessage(player, hereMessage, false);
                     }
                     whoUseHere.addStatusEffect(new StatusEffectInstance(StatusEffect.byRawId(24), 400, 5), whoUseHere);
-                    sendFeedback(source, new TranslatableText("command.here.feedback", whoUseHere.getName().asString()));
+                    sendFeedback(source, TextUtil.translatable("command.here.feedback", whoUseHere.getName().asString()));
                     return 1;
                 } catch (Exception e) {
-                    sendError(source, new TranslatableText("command.here.failed.feedback"));
+                    sendError(source, TextUtil.translatable("command.here.failed.feedback"));
 
                     return - 1;
                 }
             } else {
-                sendError(source, new TranslatableText("here_command.false.rule.format"));
+                sendError(source, TextUtil.translatable("here_command.false.rule.format"));
             }
             return 0;
         }));
@@ -56,6 +57,6 @@ public class DimensionHereCommand extends SimpleCommand {
             convertXYZ.multiplyXZ(8, 8);
         }
 
-        return new TranslatableText("command.dhere", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), DimensionUtil.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
+        return TextUtil.translatable("command.dhere", useHerePlayerName, "", DimensionUtil.getDimensionColor(dimension) + useHerePlayerName, DimensionUtil.getDimensionName(dimension), "§e" + xyz.getIntegerXYZ(), DimensionUtil.getDimensionName(convertTarget), "§d" + convertXYZ.getIntegerXYZ());
     }
 }

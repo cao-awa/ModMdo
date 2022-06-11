@@ -1,15 +1,15 @@
 package com.github.cao.awa.modmdo.listeners;
 
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.event.server.tick.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.network.forwarder.process.*;
-import com.github.cao.awa.modmdo.certificate.*;
+import com.github.cao.awa.modmdo.utils.translate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
-import net.minecraft.text.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -48,8 +48,8 @@ public class ServerTickListener {
         for (ServerPlayerEntity player : players.getPlayerList()) {
             if (modmdoWhitelist) {
                 if (!hasWhitelist(player)) {
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(new TranslatableText("multiplayer.disconnect.not_whitelisted")));
-                    player.networkHandler.connection.disconnect(new TranslatableText("multiplayer.disconnect.not_whitelisted"));
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")));
+                    player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted"));
                 }
                 if (hasBan(player)) {
                     Certificate ban = banned.get(player.getName().asString());

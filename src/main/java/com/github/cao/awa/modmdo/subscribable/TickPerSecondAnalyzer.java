@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.subscribable;
 
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
+import com.github.cao.awa.modmdo.utils.translate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.count.*;
 import com.google.common.util.concurrent.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -129,12 +130,12 @@ public class TickPerSecondAnalyzer extends SimpleCommandOperation {
 
     public void cancelSub(ServerPlayerEntity player) {
         subs.removeIf(counter -> counter.getTarget() == player);
-        sendMessage(player, new TranslatableText("subscribe.remove.from", "tps"), false);
+        sendMessage(player, TextUtil.translatable("subscribe.remove.from", "tps"), false);
     }
 
     public void addSub(ServerPlayerEntity player, long ticks) {
         subs.add(new TargetCountLong<>(player, ticks));
-        sendMessage(player, new TranslatableText("subscribe.add.to", "tps"), false);
+        sendMessage(player, TextUtil.translatable("subscribe.add.to", "tps"), false);
     }
 
     public boolean hasSub(ServerPlayerEntity player) {
