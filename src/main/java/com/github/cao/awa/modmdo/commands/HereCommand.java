@@ -22,7 +22,7 @@ public class HereCommand extends SimpleCommand {
                     ServerPlayerEntity whoUseHere = source.getPlayer();
                     PlayerManager p = source.getServer().getPlayerManager();
                     XYZ xyz = new XYZ(whoUseHere.getX(), whoUseHere.getY(), whoUseHere.getZ());
-                    String dimension = whoUseHere.getEntityWorld().getDimension().getEffects().getPath();
+                    String dimension = DimensionUtil.getDimension(whoUseHere.getEntityWorld().getDimension());
                     for (ServerPlayerEntity player : p.getPlayerList()) {
                         Translatable hereMessage = formatHereTip(dimension, xyz, whoUseHere);
                         sendMessage(player, hereMessage, false);
