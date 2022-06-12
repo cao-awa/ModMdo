@@ -123,10 +123,10 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(method = "executeCommand", at = @At("HEAD"))
-    private void executeCommand(String input, CallbackInfo ci) {
+    @Inject(method = "onCommandExecution", at = @At("HEAD"))
+    private void onCommandExecution(CommandExecutionC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            LOGGER.info(EntityUtil.getName(player) + "(" + player.getUuid().toString() + ") run the command: " + input);
+            LOGGER.info(EntityUtil.getName(player) + "(" + player.getUuid().toString() + ") run the command: " + packet.command());
         }
     }
 
@@ -137,8 +137,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(method = "onGameMessage", at = @At("HEAD"))
-    public void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
+    @Inject(method = "onChatMessage", at = @At("HEAD"))
+    public void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             event.submit(new GameChatEvent(player, packet, server));
             if (! packet.getChatMessage().startsWith("/")) {

@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins.network;
 
+import com.github.cao.awa.modmdo.storage.*;
 import io.netty.bootstrap.*;
 import io.netty.channel.*;
 import io.netty.channel.epoll.*;
@@ -9,7 +10,6 @@ import net.minecraft.network.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.util.*;
-import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.*;
 import org.spongepowered.asm.mixin.*;
 
@@ -30,8 +30,6 @@ public class ServerNetworkIoMixin {
     @Shadow @Final
     List<ClientConnection> connections;
 
-    @Shadow @Final private static Logger LOGGER;
-
     /**
      * @author 草awa
      * @reason
@@ -44,15 +42,15 @@ public class ServerNetworkIoMixin {
             if (Epoll.isAvailable() && this.server.isUsingNativeTransport()) {
                 clazz = EpollServerSocketChannel.class;
                 lazy = EPOLL_CHANNEL;
-                LOGGER.info("Using epoll channel type");
+                SharedVariables.LOGGER.info("Using epoll channel type");
             } else {
                 clazz = NioServerSocketChannel.class;
                 lazy = DEFAULT_CHANNEL;
-                LOGGER.info("Using default channel type");
+                SharedVariables.LOGGER.info("Using default channel type");
             }
 
             this.channels.add((new ServerBootstrap()).channel(clazz).childHandler(new ChannelInitializer<>() {
-                protected void initChannel(Channel channel) {
+                protected void initChannel(@NotNull Channel channel) {
                     try {
                         channel.config().setOption(ChannelOption.TCP_NODELAY, true);
                     } catch (ChannelException var4) {
