@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
@@ -65,7 +66,7 @@ public class JoinServerEvent extends EntityTargetedEvent<JoinServerEvent> {
 
     public String synopsis() {
         String name = EntrustParser.trying(() -> EntrustParser.tryCreate(() -> {
-            String str = player.getDisplayName().asString();
+            String str = EntityUtil.getName(player);
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }

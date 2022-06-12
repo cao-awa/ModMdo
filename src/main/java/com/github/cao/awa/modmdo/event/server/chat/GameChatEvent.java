@@ -3,6 +3,7 @@ package com.github.cao.awa.modmdo.event.server.chat;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
@@ -60,7 +61,7 @@ public class GameChatEvent extends EntityTargetedEvent<GameChatEvent> {
 
     public String synopsis() {
         String name = EntrustParser.trying(() -> EntrustParser.tryCreate(() -> {
-            String str = player.getDisplayName().getString();
+            String str = EntityUtil.getName(player);
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }
