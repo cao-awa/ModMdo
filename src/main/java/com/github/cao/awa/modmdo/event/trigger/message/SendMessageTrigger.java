@@ -65,10 +65,15 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                         return;
                     }
                     Entity target = getTarget().get(0);
-                    target.sendSystemMessage(message, target.getUuid());
+                    if (target instanceof ServerPlayerEntity player) {
+                        player.sendMessage(message, false);
+                    }
                 }
+                case WORLD -> EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
+                    player.sendMessage(message, false);
+                }));
                 case ALL -> sendMessageToAllPlayer(getServer(), message, false);
-                case APPOINT -> sendMessage(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), message, false);
+                case APPOINT -> EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), target -> sendMessage(target, message, false));
             }
         }
     }

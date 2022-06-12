@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.storage;
 
 import com.github.cao.awa.hyacinth.logging.*;
 import com.github.cao.awa.modmdo.cavas.*;
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
@@ -20,7 +21,6 @@ import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.enchant.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.context.*;
@@ -61,6 +61,7 @@ public class SharedVariables {
     public static final Identifier TOKEN_CHANNEL = new Identifier("modmdo:token");
     public static final Identifier SUFFIX_CHANNEL = new Identifier("modmdo:suffix");
     public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> variables = new Object2ObjectOpenHashMap<>();
+    public static final GlobalTracker tracker = new GlobalTracker();
     public static String identifier;
     public static String entrust = "ModMdo";
     public static boolean enableRanking = false;
@@ -89,13 +90,13 @@ public class SharedVariables {
     public static TemporaryCertificate modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
     public static Certificates<PermanentCertificate> modmdoConnectionWhitelist = new Certificates<>();
     public static Certificates<PermanentCertificate> whitelist = new Certificates<>();
-    public static Certificates<TemporaryCertificate> temporaryWhitelist = new Certificates<>();
-    public static Certificates<TemporaryCertificate> temporaryPass = new Certificates<>();
+    public static Certificates<TemporaryCertificate> temporaryStation = new Certificates<>();
+    public static Certificates<TemporaryCertificate> temporaryInvite = new Certificates<>();
     public static Certificates<Certificate> banned = new Certificates<>();
     public static int whitelistHash = whitelist.hashCode();
-    public static int temporaryWhitelistHash = temporaryWhitelist.hashCode();
+    public static int temporaryWhitelistHash = temporaryStation.hashCode();
     public static int temporaryBanHash = banned.hashCode();
-    public static int temporaryPassHash = temporaryPass.hashCode();
+    public static int temporaryInviteHash = temporaryInvite.hashCode();
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
     public static ArrayList<ModMdoExtra<?>> extrasWaitingForRegister = new ArrayList<>();
@@ -107,10 +108,7 @@ public class SharedVariables {
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
     public static TickPerSecondAnalyzer tps = new TickPerSecondAnalyzer();
-
     public static ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
-
-    public static final GlobalTracker tracker = new GlobalTracker();
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
@@ -152,7 +150,7 @@ public class SharedVariables {
     }
 
     public static void initWhiteList() {
-        temporaryWhitelist = new Certificates<>();
+        temporaryStation = new Certificates<>();
         whitelist = new Certificates<>();
         modmdoConnectionWhitelist = new Certificates<>();
 
@@ -356,21 +354,23 @@ public class SharedVariables {
 
     public static void updateTemporaryWhitelistNames(MinecraftServer server, boolean force) {
         if (! force) {
-            if (temporaryWhitelist.hashCode() == temporaryWhitelistHash) {
+            if (temporaryStation.hashCode() == temporaryWhitelistHash) {
                 return;
             }
         }
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("temporary_whitelist_names").writeString(getTemporaryWhitelistNamesJSONObject().toString())));
         }
-        temporaryWhitelistHash = temporaryWhitelist.hashCode();
+        temporaryWhitelistHash = temporaryStation.hashCode();
     }
 
     public static JSONObject getTemporaryWhitelistNamesJSONObject() {
         JSONObject json = new JSONObject();
         JSONArray array = new JSONArray();
-        for (String s : temporaryWhitelist.keySet()) {
-            array.put(s);
+        for (TemporaryCertificate certificate : temporaryStation.values()) {
+            if (certificate.getType().equals("whitelist")) {
+                array.put(certificate.name);
+            }
         }
         json.put("names", array);
         return json;
@@ -388,33 +388,38 @@ public class SharedVariables {
         temporaryBanHash = banned.hashCode();
     }
 
-    public static JSONObject getPassNamesJSONObject() {
+    public static JSONObject getBannedNamesJSONObject() {
         JSONObject json = new JSONObject();
         JSONArray array = new JSONArray();
-        for (String s : temporaryPass.keySet()) {
+        for (String s : banned.keySet()) {
             array.put(s);
         }
         json.put("names", array);
         return json;
     }
 
-    public static void updateTemporaryPassNames(MinecraftServer server, boolean force) {
+    public static void updateTemporaryInviteNames(MinecraftServer server, boolean force) {
         if (! force) {
-            if (temporaryPass.hashCode() == temporaryPassHash) {
+            if (temporaryInvite.hashCode() == temporaryInviteHash) {
                 return;
             }
         }
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("ban_names").writeString(getPassNamesJSONObject().toString())));
+            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("temporary_invite").writeString(getInviteNamesJSONObject().toString())));
         }
-        temporaryPassHash = temporaryPass.hashCode();
+        temporaryInviteHash = temporaryInvite.hashCode();
     }
 
-    public static JSONObject getBannedNamesJSONObject() {
+    public static JSONObject getInviteNamesJSONObject() {
         JSONObject json = new JSONObject();
         JSONArray array = new JSONArray();
-        for (String s : banned.keySet()) {
+        for (String s : temporaryInvite.keySet()) {
             array.put(s);
+        }
+        for (TemporaryCertificate certificate : temporaryStation.values()) {
+            if (certificate.getType().equals("invite")) {
+                array.put(certificate.name);
+            }
         }
         json.put("names", array);
         return json;
@@ -437,9 +442,9 @@ public class SharedVariables {
     }
 
     public static void flushTemporaryWhitelist() {
-        for (TemporaryCertificate wl : temporaryWhitelist.values()) {
+        for (TemporaryCertificate wl : temporaryStation.values()) {
             if (! wl.isValid()) {
-                temporaryWhitelist.remove(wl.getName());
+                temporaryStation.remove(wl.getName());
             }
         }
     }
@@ -473,6 +478,20 @@ public class SharedVariables {
 
     public static boolean hasWhitelist(ServerPlayerEntity player) {
         try {
+            if (temporaryInvite.containsName(EntityUtil.getName(player))) {
+                if (temporaryInvite.get(EntityUtil.getName(player)).getMillions() == -1) {
+                    temporaryInvite.remove(EntityUtil.getName(player));
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled").text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled").text());
+                    return true;
+                }
+                if (! temporaryInvite.get(EntityUtil.getName(player)).isValid()) {
+                    temporaryInvite.remove(EntityUtil.getName(player));
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.expired").text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.expired").text());
+                }
+                return true;
+            }
             switch (whitelist.get(EntityUtil.getName(player)).getRecorde().type()) {
                 case IDENTIFIER -> {
                     if (whitelist.get(EntityUtil.getName(player)).getRecorde().modmdoUniqueId().equals("")) {

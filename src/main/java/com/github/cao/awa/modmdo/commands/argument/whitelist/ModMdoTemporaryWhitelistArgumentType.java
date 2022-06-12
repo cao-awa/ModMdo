@@ -20,7 +20,7 @@ public class ModMdoTemporaryWhitelistArgumentType implements ArgumentType<String
 
     public static TemporaryCertificate getWhiteList(CommandContext<ServerCommandSource> context, String name) {
         String string = context.getArgument(name, String.class);
-        TemporaryCertificate whiteList = temporaryWhitelist.get(string);
+        TemporaryCertificate whiteList = temporaryStation.get(string);
         return whiteList == null ? new TemporaryCertificate(string, -1, -1) : whiteList;
     }
 
@@ -31,7 +31,7 @@ public class ModMdoTemporaryWhitelistArgumentType implements ArgumentType<String
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(temporaryWhitelist.keySet(), builder);
+        return CommandSource.suggestMatching(temporaryStation.keySet(), builder);
     }
 
     @Override

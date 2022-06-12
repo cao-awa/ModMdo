@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.event.trigger.motd;
 
+import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.server.query.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
@@ -13,6 +14,7 @@ import org.json.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
+@Auto
 public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
     private QueryResponseS2CPacket packet;
     private final ObjectArrayList<Receptacle<String>> args = new ObjectArrayList<>();

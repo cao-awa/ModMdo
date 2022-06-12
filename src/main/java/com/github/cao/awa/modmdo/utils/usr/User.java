@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.utils.usr;
 
 import com.github.cao.awa.modmdo.lang.*;
+import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.text.*;
@@ -17,8 +18,8 @@ public class User {
     private String modmdoIdentifier = "";
     private String suffix = null;
     private int modmdoVersion;
-    private Language language = null;
-    private Text rejectReason = null;
+    private Language language = SharedVariables.getLanguage();
+    private Text message = null;
 
     public User() {
     }
@@ -85,12 +86,12 @@ public class User {
         return loginTime;
     }
 
-    public Text getRejectReason() {
-        return rejectReason;
+    public Text getMessage() {
+        return message;
     }
 
-    public User setRejectReason(Text rejectReason) {
-        this.rejectReason = rejectReason;
+    public User setMessage(Text message) {
+        this.message = message;
         return this;
     }
 

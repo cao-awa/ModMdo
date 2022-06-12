@@ -8,10 +8,34 @@ public abstract class Certificate {
     public final String name;
     public final LoginRecorde recorde;
     public String lastLanguage = "en_us";
+    private String type;
 
     public Certificate(String name, LoginRecorde recorde) {
         this.name = name;
         this.recorde = recorde;
+    }
+
+    public static Certificate build(JSONObject json) {
+        return EntrustParser.trying(() -> {
+            String type = json.getString("type");
+            if (type.equals("temporary")) {
+                return TemporaryCertificate.build(json);
+            } else {
+                return PermanentCertificate.build(json);
+            }
+        }, ex -> {
+            ex.printStackTrace();
+            return null;
+        });
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public Certificate setType(String type) {
+        this.type = type;
+        return this;
     }
 
     public String getLastLanguage() {
@@ -34,19 +58,5 @@ public abstract class Certificate {
 
     public LoginRecorde getRecorde() {
         return recorde;
-    }
-
-    public static Certificate build(JSONObject json) {
-        return EntrustParser.trying(() -> {
-            String type = json.getString("type");
-            if (type.equals("temporary")) {
-                return TemporaryCertificate.build(json);
-            } else {
-                return PermanentCertificate.build(json);
-            }
-        }, ex -> {
-            ex.printStackTrace();
-            return null;
-        });
     }
 }

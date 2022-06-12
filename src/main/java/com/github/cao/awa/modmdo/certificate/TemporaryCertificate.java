@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.certificate;
 
+import com.github.cao.awa.modmdo.certificate.pass.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -10,6 +11,8 @@ import java.util.*;
 public final class TemporaryCertificate extends Certificate {
     private final long recording;
     private long millions;
+    private TemporaryCertificate spare;
+    private TemporaryPass pass;
 
     public TemporaryCertificate(String name, long recording, long millions) {
         super(name, new LoginRecorde(name, null, LoginRecordeType.TEMPORARY));
@@ -31,6 +34,30 @@ public final class TemporaryCertificate extends Certificate {
         return new TemporaryCertificate(json.getString("name"), new LoginRecorde(uniqueId, uuid, LoginRecordeType.TEMPORARY), recording, millions);
     }
 
+    public TemporaryPass getPass() {
+        return pass;
+    }
+
+    public void setPass(TemporaryPass pass) {
+        this.pass = pass;
+    }
+
+    public TemporaryCertificate getSpare() {
+        return new TemporaryCertificate(getName(), TimeUtil.millions(), spare.getMillions());
+    }
+
+    public void setSpare(TemporaryCertificate spare) {
+        this.spare = spare;
+    }
+
+    public long getMillions() {
+        return millions;
+    }
+
+    public void setMillions(long millions) {
+        this.millions = millions;
+    }
+
     public boolean isValid() {
         return calculateMillions() < millions;
     }
@@ -43,16 +70,12 @@ public final class TemporaryCertificate extends Certificate {
         return recording;
     }
 
-    public long getMillions() {
-        return millions;
-    }
-
-    public void setMillions(long millions) {
-        this.millions = millions;
-    }
-
     public String formatRemaining() {
-        long calculated = millions - calculateMillions();
+        return remaining(getMillions(), calculateMillions());
+    }
+
+    public static String remaining(long millions, long calculate) {
+        long calculated = Math.abs(millions - calculate);
         long second;
         if ((second = TimeUtil.formatSecond(calculated)) > 59) {
             long minute;
@@ -67,6 +90,11 @@ public final class TemporaryCertificate extends Certificate {
             return minute + "m, " + TimeUtil.processRemainingSeconds(calculated) + "s";
         }
         return second + "s";
+    }
+
+    public TemporaryCertificate setType(String type) {
+        super.setType(type);
+        return this;
     }
 
     @Override

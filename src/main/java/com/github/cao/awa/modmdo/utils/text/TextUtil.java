@@ -9,7 +9,13 @@ public class TextUtil {
     }
 
     public static Translatable translatable(String key, Object... args) {
-        return Translatable.translatable(key,args);
+        return Translatable.translatable(key, args);
+    }
+
+    public static Translatable translatable(Text text) {
+        if (text instanceof TranslatableText translatable)
+            return new Translatable(translatable);
+        return Translatable.translatable(text.getString());
     }
 
     public static Literal literal(String str) {

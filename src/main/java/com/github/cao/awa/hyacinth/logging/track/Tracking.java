@@ -9,7 +9,7 @@ import java.text.*;
 import java.util.*;
 
 public class Tracking {
-    private static final Logger TRACKER = LogManager.getLogger("Hyacinth:Tracker");
+    public static final Logger TRACKER = LogManager.getLogger("Hyacinth:Tracker");
     private static final Calendar calendar = Calendar.getInstance();
     private static final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss" );
     private Thread parent;
@@ -153,6 +153,14 @@ public class Tracking {
         }
     }
 
+    public Thread getParent() {
+        return parent;
+    }
+
+    public StackTraceElement[] getParentTracker() {
+        return parent.getStackTrace();
+    }
+
     public String shortPrint() {
         StringBuilder builder = new StringBuilder();
         int limit = getTrackLimit();
@@ -163,6 +171,14 @@ public class Tracking {
         }
         for (int i = getStartFrom(), trackerLength = getTracker().length; i < trackerLength; i++) {
             StackTraceElement elements = getTracker()[i];
+            if (limit-- == 0) {
+                break;
+            }
+            builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append("     ").append(elements.toString()).append("\n");
+        }
+        builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append(" ").append("Cause by: ").append("\n");
+        for (int i = getStartFrom(), trackerLength = getParentTracker().length; i < trackerLength; i++) {
+            StackTraceElement elements = getParentTracker()[i];
             if (limit-- == 0) {
                 break;
             }
