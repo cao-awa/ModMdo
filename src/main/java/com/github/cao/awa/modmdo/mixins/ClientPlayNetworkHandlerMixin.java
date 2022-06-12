@@ -80,10 +80,10 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             }
                         }
                         case "temporary_whitelist_names" -> {
-                            temporaryWhitelist.clear();
+                            temporaryStation.clear();
                             JSONObject json = new JSONObject(data2);
                             for (Object o : json.getJSONArray("names")) {
-                                temporaryWhitelist.put(o.toString(), null);
+                                temporaryStation.put(o.toString(), null);
                             }
                         }
                         case "connections" -> EntrustExecution.tryTemporary(() -> {
@@ -98,6 +98,13 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             JSONObject json = new JSONObject(data2);
                             for (Object o : json.getJSONArray("names")) {
                                 banned.put(o.toString(), null);
+                            }
+                        }
+                        case "temporary_invite" -> {
+                            temporaryInvite.clear();
+                            JSONObject json = new JSONObject(data2);
+                            for (Object o : json.getJSONArray("names")) {
+                                temporaryInvite.put(o.toString(), null);
                             }
                         }
                     }

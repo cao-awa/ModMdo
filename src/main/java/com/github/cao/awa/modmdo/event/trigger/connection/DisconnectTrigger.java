@@ -64,12 +64,15 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
                         player.networkHandler.disconnect(reason);
                     }
                 }
+                case WORLD -> EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
+                    player.networkHandler.disconnect(reason);
+                }));
                 case ALL -> {
                     EntrustExecution.tryFor(server.getPlayerManager().getPlayerList(), player -> {
                         player.networkHandler.disconnect(reason);
                     });
                 }
-                case APPOINT -> getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")).networkHandler.disconnect(reason);
+                case APPOINT -> EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), target -> target.networkHandler.disconnect(reason));
             }
         }
     }
