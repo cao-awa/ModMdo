@@ -16,7 +16,7 @@ import java.util.concurrent.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoInviteArgumentType implements ArgumentType<String> {
-    public static ModMdoInviteArgumentType pass() {
+    public static ModMdoInviteArgumentType invite() {
         return new ModMdoInviteArgumentType();
     }
 

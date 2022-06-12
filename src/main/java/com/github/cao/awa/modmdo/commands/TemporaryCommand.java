@@ -57,7 +57,7 @@ public class TemporaryCommand extends SimpleCommand {
         })).then(literal("5").executes(invite -> {
             String name = StringArgumentType.getString(invite, "target");
             return invite(invite, name, 5);
-        })))).then(literal("remove").then(argument("target", ModMdoInviteArgumentType.pass()).executes(remove -> {
+        })))).then(literal("remove").then(argument("target", ModMdoInviteArgumentType.invite()).executes(remove -> {
             Certificate certificate = ModMdoInviteArgumentType.getInvite(remove, "target");
             EntrustExecution.notNull(temporaryStation.get(certificate.getName()), c -> {
                 if (c.getType().equals("invite")) {
@@ -71,7 +71,7 @@ public class TemporaryCommand extends SimpleCommand {
             showTemporaryInvite(list);
             updateTemporaryInviteNames(getServer(list), true);
             return 0;
-        })).then(literal("reduce").then(argument("target", ModMdoInviteArgumentType.pass()).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
+        })).then(literal("reduce").then(argument("target", ModMdoInviteArgumentType.invite()).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
             String name = ModMdoInviteArgumentType.getInvite(invite, "target").getName();
             if (temporaryInvite.containsName(name)) {
                 int minute = IntegerArgumentType.getInteger(invite, "minutes");
