@@ -16,6 +16,7 @@ public class ArgumentInit {
         EntrustExecution.tryTemporary(() -> force(ArgumentTypes.class.getDeclaredMethod("register", Registry.class, String.class, Class.class, ArgumentSerializer.class), "modmdo:temporary_whitelist", ModMdoTemporaryWhitelistArgumentType.class, ConstantArgumentSerializer.of(ModMdoTemporaryWhitelistArgumentType::whitelist)));
         EntrustExecution.tryTemporary(() -> force(ArgumentTypes.class.getDeclaredMethod("register", Registry.class, String.class, Class.class, ArgumentSerializer.class), "modmdo:connections", ModMdoConnectionArgumentType.class, ConstantArgumentSerializer.of(ModMdoConnectionArgumentType::connection)));
         EntrustExecution.tryTemporary(() -> force(ArgumentTypes.class.getDeclaredMethod("register", Registry.class, String.class, Class.class, ArgumentSerializer.class), "modmdo:banned", ModMdoTemporaryBanArgumentType.class, ConstantArgumentSerializer.of(ModMdoTemporaryBanArgumentType::banned)));
+        EntrustExecution.tryTemporary(() -> force(ArgumentTypes.class.getDeclaredMethod("register", Registry.class, String.class, Class.class, ArgumentSerializer.class), "modmdo:invite", ModMdoInviteArgumentType.class, ConstantArgumentSerializer.of(ModMdoInviteArgumentType::invite)));
     }
 
     public static void force(Method method, String id, Class<?> clazz, ArgumentSerializer<?,?> serializer) throws InvocationTargetException, IllegalAccessException {
