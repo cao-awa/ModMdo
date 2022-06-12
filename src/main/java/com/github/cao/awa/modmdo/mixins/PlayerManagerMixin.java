@@ -4,10 +4,10 @@ import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
+import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
-import net.minecraft.entity.player.*;
 import net.minecraft.network.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
@@ -41,7 +41,7 @@ public abstract class PlayerManagerMixin {
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         if (SharedVariables.isActive()) {
             if (SharedVariables.enableRejectReconnect) {
-                UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+                UUID uuid = PlayerUtil.getId(profile);
                 for (ServerPlayerEntity player : this.players) {
                     if (player.networkHandler.connection.getAddress() == null)
                         break;
