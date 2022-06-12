@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.event;
 
 import com.github.cao.awa.hyacinth.logging.*;
 import com.github.cao.awa.modmdo.event.delay.*;
+import com.github.cao.awa.modmdo.extra.loader.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
@@ -10,6 +11,7 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import it.unimi.dsi.fastutil.objects.*;
 
+import java.io.*;
 import java.util.function.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
@@ -22,8 +24,21 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     private final ObjectArrayList<Previously<T>> previously = new ObjectArrayList<>();
     private boolean submitted = false;
 
-    public synchronized void register(Consumer<T> action) {
-        actions.add(new TaskOrder<>(action));
+    public synchronized void register(Consumer<T> action, File register) {
+        actions.add(new TaskOrder<>(action, "File: \n  " +  register.getPath()));
+    }
+
+    public synchronized void register(Consumer<T> action, ModMdoExtra<?> register) {
+        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+        actions.add(new TaskOrder<>(action, "Mod \"" + register.getName() + "\": \n  " + trace[2]));
+    }
+
+    public ObjectArrayList<String> getRegistered() {
+        return EntrustParser.operation(new ObjectArrayList<>(), list -> {
+            for (TaskOrder<T> task : actions) {
+                list.add(task.getRegister());
+            }
+        });
     }
 
     public boolean isSubmitted() {
@@ -83,8 +98,8 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     public abstract String synopsis();
 
     @AsyncDelay
-    public void await(Temporary action, int orWait) {
-        orWait(new TaskOrder<>(e -> action.apply(), true), orWait);
+    public void await(Temporary action, int orWait, File register) {
+        orWait(new TaskOrder<>(e -> action.apply(), true, "File: \n  " +  register.getPath()), orWait);
     }
 
     public void orWait(TaskOrder<T> order, final int wait) {

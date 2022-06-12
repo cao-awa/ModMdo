@@ -10,20 +10,27 @@ import java.util.function.*;
 
 @AsyncDelay
 public class TaskOrder<T> {
-    private final @SingleThread @NotNull TargetCountBoolean<Consumer<T>> action;
+    private final @SingleThread
+    @NotNull TargetCountBoolean<Consumer<T>> action;
     private final ObjectArrayList<T> delay = new ObjectArrayList<>();
     private final boolean disposable;
+    private final String register;
     private boolean usable = true;
     private @NotNull Thread thread = new Thread(() -> {
     });
 
-    public TaskOrder(Consumer<T> action) {
-        this(action, false);
+    public TaskOrder(Consumer<T> action, String register) {
+        this(action, false, register);
     }
 
-    public TaskOrder(Consumer<T> action, boolean disposable) {
+    public TaskOrder(Consumer<T> action, boolean disposable, String register) {
         this.action = new TargetCountBoolean<>(action, true, true);
         this.disposable = disposable;
+        this.register = register;
+    }
+
+    public String getRegister() {
+        return register;
     }
 
     @AsyncDelay

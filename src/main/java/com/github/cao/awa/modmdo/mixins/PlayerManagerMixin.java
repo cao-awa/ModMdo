@@ -30,7 +30,6 @@ public abstract class PlayerManagerMixin {
 
     /**
      * 当相同的玩家在线时, 禁止重复创建玩家
-     * 几乎解决了玩家异地登录下线的问题
      *
      * @param profile
      *         即将加入的玩家

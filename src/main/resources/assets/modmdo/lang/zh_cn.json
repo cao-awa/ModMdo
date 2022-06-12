@@ -1,4 +1,5 @@
 {
+    "modmdo.event.total": "§a总计 %s 个已注册的事件",
     "modmdo.invite.add.already.is": "%s 已经在邀请列表中, 请将其删除后重试",
     "commands.temporary.invite.remaining": "已加入, 失效于 %s 后",
     "commands.temporary.invite.not.ready": "未加入, 失效于 %s 后",
