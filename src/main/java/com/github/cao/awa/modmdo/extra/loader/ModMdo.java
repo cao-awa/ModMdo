@@ -10,6 +10,8 @@ import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.reads.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.cao.awa.modmdo.utils.text.*;
+import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.server.*;
@@ -126,6 +128,14 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
         event.clientSetting.register(event -> {
             loginUsers.getUser(event.getPlayer()).setLanguage(Language.ofs(event.getLanguage()));
+        });
+
+        event.clientSetting.register(event -> {
+            User user = loginUsers.getUser(event.getPlayer());
+            if (user.getMessage() != null) {
+                event.getPlayer().sendMessage(minecraftTextFormat.format(new Dictionary(user.getLanguage().getName()), TextUtil.translatable(user.getMessage())).text(), false);
+                user.setMessage(null);
+            }
         });
 
 //        event.events.forEach((k, v) -> {

@@ -1,5 +1,6 @@
 package com.github.cao.awa.hyacinth.logging;
 
+import com.github.cao.awa.hyacinth.logging.track.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
@@ -28,7 +29,7 @@ public class GlobalTracker {
                 }
             });
         } else {
-            SharedVariables.LOGGER.info(message);
+            Tracking.TRACKER.info(message);
         }
     }
 
@@ -49,7 +50,7 @@ public class GlobalTracker {
                 }
             });
         } else {
-            SharedVariables.LOGGER.info(message, throwable);
+            Tracking.TRACKER.info(message, throwable);
         }
     }
 
@@ -63,7 +64,7 @@ public class GlobalTracker {
                 }
             });
         } else {
-            SharedVariables.LOGGER.info(message);
+            Tracking.TRACKER.info(message);
         }
     }
 
@@ -84,7 +85,7 @@ public class GlobalTracker {
                 }
             });
         } else {
-            SharedVariables.LOGGER.info(message, throwable);
+            Tracking.TRACKER.info(message, throwable);
         }
     }
 }
