@@ -1,4 +1,5 @@
 {
+    "modmdo.event.total": "§aTotal %s events registered",
     "modmdo.invite.add.already.is": "%s already in invited, remove it and try again",
     "commands.temporary.invite.remaining": "joined, expire after %s",
     "commands.temporary.invite.not.ready": "not joined, expire after %s",
