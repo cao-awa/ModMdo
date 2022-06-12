@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
@@ -75,7 +76,7 @@ public class EntityDamageEvent extends EntityTargetedEvent<EntityDamageEvent> {
 
     public String synopsis() {
         String name = EntrustParser.tryCreate(() -> {
-            String str = entity.getDisplayName().asString();
+            String str = EntityUtil.getName(entity);
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }

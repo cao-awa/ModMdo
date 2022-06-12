@@ -5,6 +5,6 @@ import org.jetbrains.annotations.*;
 
 public class EntityUtil {
     public static String getName(@Nullable Entity player) {
-        return player == null ? "" : player.getName().asString();
+        return player == null ? "" : player.getName().getString();
     }
 }
