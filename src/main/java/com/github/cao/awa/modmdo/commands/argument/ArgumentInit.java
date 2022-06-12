@@ -12,6 +12,6 @@ public class ArgumentInit {
         ArgumentTypes.register("modmdo:temporary_whitelist", ModMdoTemporaryWhitelistArgumentType.class, new ConstantArgumentSerializer<>(ModMdoTemporaryWhitelistArgumentType::whitelist));
         ArgumentTypes.register("modmdo:connections", ModMdoConnectionArgumentType.class, new ConstantArgumentSerializer<>(ModMdoConnectionArgumentType::connection));
         ArgumentTypes.register("modmdo:banned", ModMdoTemporaryBanArgumentType.class, new ConstantArgumentSerializer<>(ModMdoTemporaryBanArgumentType::banned));
-        ArgumentTypes.register("modmdo:pass", ModMdoPassArgumentType.class, new ConstantArgumentSerializer<>(ModMdoPassArgumentType::pass));
+        ArgumentTypes.register("modmdo:invite", ModMdoInviteArgumentType.class, new ConstantArgumentSerializer<>(ModMdoInviteArgumentType::invite));
     }
 }

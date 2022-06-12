@@ -22,7 +22,7 @@ import org.json.*;
 
 import java.io.*;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.event;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoTriggerBuilder {
     public static final Object2ObjectOpenHashMap<String, String> classMap = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
@@ -157,7 +157,10 @@ public class ModMdoTriggerBuilder {
                     EntrustExecution.notNull(EntrustParser.trying(() -> {
                         TargetedTrigger<EntityTargetedEvent<?>> trigger = (TargetedTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                         return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
-                    }, ex -> null), ModMdoEventTrigger::action);
+                    }, ex -> {
+                        tracker.submit("Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
+                        return null;
+                    }), ModMdoEventTrigger::action);
                     i.add();
                 };
 
@@ -186,7 +189,10 @@ public class ModMdoTriggerBuilder {
                 EntrustExecution.notNull(EntrustParser.trying(() -> {
                     ModMdoEventTrigger<ModMdoEvent<?>> trigger = (ModMdoEventTrigger<ModMdoEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                     return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
-                }, ex -> null), ModMdoEventTrigger::action);
+                }, ex -> {
+                    tracker.submit("Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
+                    return null;
+                }), ModMdoEventTrigger::action);
                 i.add();
             };
 
