@@ -15,6 +15,7 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.command.argument.*;
 import net.minecraft.enchantment.*;
 import net.minecraft.server.command.*;
@@ -376,7 +377,21 @@ public class ModMdoCommand extends SimpleCommand {
             SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"));
             EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
             return 0;
-        })))))))).then(literal("event").then(literal("reload").executes(e -> {
+        })))))))).then(literal("event").then(literal("list").executes(list -> {
+            StringBuilder builder = new StringBuilder();
+            event.events.forEach((k, v) -> {
+                if (v.registered() > 0) {
+                    ObjectArrayList<String> registered = v.getRegistered();
+                    builder.append("§7").append(k).append(": ").append("\n");
+                    for (String s : registered) {
+                        builder.append(s.startsWith("Mod") ? "§b" : "§6").append(" ").append(s).append("\n");
+                    }
+                }
+            });
+            builder.append(minecraftTextFormat.format(loginUsers.getUser(getPlayer(list)),"modmdo.event.total", event.registered()).getString());
+            sendFeedback(list, TextUtil.translatable(builder.toString()));
+            return 0;
+        })).then(literal("reload").executes(e -> {
             Pair<Integer, Integer> pair = ModMdoStdInitializer.loadEvent(true);
             sendFeedback(e, TextUtil.translatable("modmdo.event.reload.success", pair.getLeft(), pair.getRight()));
             return 0;
