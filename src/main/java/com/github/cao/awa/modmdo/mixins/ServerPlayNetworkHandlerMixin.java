@@ -92,7 +92,9 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
                     if (channel.equals(SUFFIX_CHANNEL)) {
                         LOGGER.debug("Client are sent suffix data: " + data1);
-                        serverLogin.suffix(loginUsers.getUser(player), data1);
+                        if (loginUsers.hasUser(player)) {
+                            serverLogin.suffix(loginUsers.getUser(player), data1);
+                        }
                     }
                 });
 

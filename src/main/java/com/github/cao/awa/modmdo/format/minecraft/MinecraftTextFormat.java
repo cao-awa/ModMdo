@@ -27,4 +27,8 @@ public class MinecraftTextFormat extends TextFormat<Literal> {
     public Literal format(Dictionary dictionary, String key, Object... args) {
         return TextUtil.literal(formatted(dictionary, key, args));
     }
+
+    public Literal format(Dictionary dictionary, Translatable translatable) {
+        return TextUtil.literal(formatted(dictionary, translatable.getKey(), translatable.getArgs()));
+    }
 }
