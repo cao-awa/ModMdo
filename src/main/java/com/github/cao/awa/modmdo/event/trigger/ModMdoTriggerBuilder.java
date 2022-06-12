@@ -138,9 +138,9 @@ public class ModMdoTriggerBuilder {
             ModMdoEvent<?> register = event.targeted.get(name);
             if (register == null) {
                 register = event.events.get(name);
-                register.register(event -> prepare(e, event, trace));
+                register.register(event -> prepare(e, event, trace), trace);
             } else {
-                register.register(event -> prepareTargeted(e, (EntityTargetedEvent<?>) event, trace));
+                register.register(event -> prepareTargeted(e, (EntityTargetedEvent<?>) event, trace), trace);
             }
         } catch (Exception ex) {
             throw new IllegalArgumentException("Event \"" + name + "\" not found, may you got key it wrong? will be not register this event", ex);
@@ -167,18 +167,10 @@ public class ModMdoTriggerBuilder {
                 EntrustExecution.tryTemporary(() -> {
                     JSONObject awaiting = json.getJSONObject("await");
                     int wait = awaiting.getInt("or-wait");
-                    SharedVariables.event.events.get(awaiting.getString("instanceof")).await(action, wait);
+                    SharedVariables.event.events.get(awaiting.getString("instanceof")).await(action, wait, trace);
                 }, ex -> action.apply());
             });
         }
-    }
-
-    public TriggerSelector controller(JSONObject json) {
-        return EntrustParser.trying(() -> {
-            TriggerSelector selector = (TriggerSelector) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
-            selector.build(json);
-            return selector;
-        }, AllSelector::new);
     }
 
     public void prepare(JSONObject event, ModMdoEvent<?> targeted, File trace) {
@@ -199,8 +191,16 @@ public class ModMdoTriggerBuilder {
             EntrustExecution.tryTemporary(() -> {
                 JSONObject awaiting = json.getJSONObject("await");
                 int wait = awaiting.getInt("or-wait");
-                SharedVariables.event.events.get(awaiting.getString("instanceof")).await(action, wait);
+                SharedVariables.event.events.get(awaiting.getString("instanceof")).await(action, wait, trace);
             }, ex -> action.apply());
         });
+    }
+
+    public TriggerSelector controller(JSONObject json) {
+        return EntrustParser.trying(() -> {
+            TriggerSelector selector = (TriggerSelector) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
+            selector.build(json);
+            return selector;
+        }, AllSelector::new);
     }
 }
