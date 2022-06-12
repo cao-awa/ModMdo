@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.block.*;
@@ -75,7 +76,7 @@ public class BlockPlaceEvent extends EntityTargetedEvent<BlockPlaceEvent> {
 
     public String synopsis() {
         String name = EntrustParser.tryCreate(() -> {
-            String str = placer.getDisplayName().asString();
+            String str = EntityUtil.getName(placer);
             if (str.equals("")) {
                 throw new IllegalArgumentException("empty name");
             }
