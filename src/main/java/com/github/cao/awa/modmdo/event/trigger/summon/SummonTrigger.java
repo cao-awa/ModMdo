@@ -7,6 +7,7 @@ import com.github.cao.awa.modmdo.event.trigger.trace.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import net.minecraft.entity.*;
+import net.minecraft.text.*;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.util.registry.*;
@@ -16,6 +17,12 @@ import org.json.*;
 @Auto
 public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<T> {
     private String id;
+    // TODO: 2022/6/14
+    //private String nbt;
+    private String name;
+    private String dimension;
+    private boolean alignPosition;
+    private boolean invertY;
     private BlockPos pos;
     private int count;
 
@@ -28,6 +35,11 @@ public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<
         JSONObject position = metadata.getJSONObject("pos");
         this.pos = new BlockPos(position.getInt("x"), position.getInt("y"), position.getInt("z"));
         this.count = EntrustParser.tryCreate(() -> metadata.getInt("count"), 1);
+        // TODO: 2022/6/14
+        //this.nbt = EntrustParser.trying(() -> metadata.getString("nbt"));
+        this.name = EntrustParser.trying(() -> metadata.getString("name"));
+        this.alignPosition = EntrustParser.trying(() -> metadata.getBoolean("alignPosition"), ex -> false);
+        this.invertY = EntrustParser.trying(() -> metadata.getBoolean("invertY"), ex -> false);
         return this;
     }
 
@@ -35,8 +47,16 @@ public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<
     public void action() {
         EntrustExecution.tryTemporary(() -> {
             OperationalInteger integer = new OperationalInteger(count);
-            while (integer.reduce() > -1) {
-                Registry.ENTITY_TYPE.get(new Identifier(id)).spawn(getServer().getWorld(World.OVERWORLD), null, null, null, pos, SpawnReason.EVENT, false, false);
+            while (integer.reduce() > - 1) {
+                RegistryKey<World> world;
+                if (dimension.equals(World.OVERWORLD.getValue().toString())) {
+                    world = World.OVERWORLD;
+                } else if (dimension.equals(World.NETHER.getValue().toString())) {
+                    world = World.NETHER;
+                } else {
+                    world = World.END;
+                }
+                Registry.ENTITY_TYPE.get(new Identifier(id)).spawn(getServer().getWorld(world), null, name == null ? null : new LiteralText(name), null, pos, SpawnReason.EVENT, alignPosition, invertY);
             }
         });
     }
