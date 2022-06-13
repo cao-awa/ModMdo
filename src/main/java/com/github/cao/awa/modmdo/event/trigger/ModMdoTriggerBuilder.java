@@ -26,6 +26,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoTriggerBuilder {
     public static final Object2ObjectOpenHashMap<String, String> classMap = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
+
         map.put("net.minecraft.server.network.ServerPlayerEntity", ServerPlayerEntity.class.getName());
         map.put("net.minecraft.entity.passive.PigEntity", PigEntity.class.getName());
         map.put("net.minecraft.entity.passive.AxolotlEntity", AxolotlEntity.class.getName());
@@ -61,6 +62,8 @@ public class ModMdoTriggerBuilder {
         map.put("net.minecraft.entity.passive.TurtleEntity", TurtleEntity.class.getName());
         map.put("net.minecraft.entity.passive.VillagerEntity", VillagerEntity.class.getName());
         map.put("net.minecraft.entity.passive.ZombifiedPiglinEntity", ZombifiedPiglinEntity.class.getName());
+        map.put("net.minecraft.entity.passive.AllayEntity", AllayEntity.class.getName());
+        map.put("net.minecraft.entity.passive.FrogEntity", FrogEntity.class.getName());
         map.put("net.minecraft.entity.vehicle.WanderingTraderEntity", WanderingTraderEntity.class.getName());
         map.put("net.minecraft.entity.vehicle.BoatEntity", BoatEntity.class.getName());
         map.put("net.minecraft.entity.vehicle.ChestMinecartEntity", ChestMinecartEntity.class.getName());
@@ -70,6 +73,7 @@ public class ModMdoTriggerBuilder {
         map.put("net.minecraft.entity.vehicle.MinecartEntity", MinecartEntity.class.getName());
         map.put("net.minecraft.entity.vehicle.SpawnerMinecartEntity", SpawnerMinecartEntity.class.getName());
         map.put("net.minecraft.entity.vehicle.TntMinecartEntity", TntMinecartEntity.class.getName());
+        map.put("net.minecraft.entity.vehicle.ChestBoatEntity", ChestBoatEntity.class.getName());
         map.put("net.minecraft.entity.boss.WitherEntity", WitherEntity.class.getName());
         map.put("net.minecraft.entity.boss.dragon.EnderDragonEntity", EnderDragonEntity.class.getName());
         map.put("net.minecraft.entity.mob.BlazeEntity", BlazeEntity.class.getName());
@@ -107,6 +111,7 @@ public class ModMdoTriggerBuilder {
         map.put("net.minecraft.entity.mob.ZombieEntity", ZombieEntity.class.getName());
         map.put("net.minecraft.entity.mob.ZombieHorseEntity", ZombieHorseEntity.class.getName());
         map.put("net.minecraft.entity.mob.ZombieVillagerEntity", ZombieVillagerEntity.class.getName());
+        map.put("net.minecraft.entity.mob.WardenEntity", WardenEntity.class.getName());
         map.put("net.minecraft.entity.projectile.ArrowEntity", ArrowEntity.class.getName());
         map.put("net.minecraft.entity.projectile.DragonFireballEntity", DragonFireballEntity.class.getName());
         map.put("net.minecraft.entity.projectile.FireballEntity", FireballEntity.class.getName());
