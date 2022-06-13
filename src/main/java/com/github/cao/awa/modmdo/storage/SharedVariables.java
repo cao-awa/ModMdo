@@ -44,7 +44,7 @@ public class SharedVariables {
     public static final String VERSION_ID = "1.0.36";
     public static final String SUFFIX = "-ES";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
-    public static final String RELEASE_TIME = "2022.6.8";
+    public static final String RELEASE_TIME = "2022.6.14";
     public static final int MODMDO_VERSION = 30;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
