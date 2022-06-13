@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.mixins.network;
 
-import com.github.cao.awa.modmdo.storage.*;
 import io.netty.bootstrap.*;
 import io.netty.channel.*;
 import io.netty.channel.epoll.*;
@@ -15,6 +14,8 @@ import org.spongepowered.asm.mixin.*;
 
 import java.net.*;
 import java.util.*;
+
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerNetworkIo.class)
 public class ServerNetworkIoMixin {
@@ -42,15 +43,15 @@ public class ServerNetworkIoMixin {
             if (Epoll.isAvailable() && this.server.isUsingNativeTransport()) {
                 clazz = EpollServerSocketChannel.class;
                 lazy = EPOLL_CHANNEL;
-                SharedVariables.LOGGER.info("Using epoll channel type");
+                TRACKER.info("Using epoll channel type");
             } else {
                 clazz = NioServerSocketChannel.class;
                 lazy = DEFAULT_CHANNEL;
-                SharedVariables.LOGGER.info("Using default channel type");
+                TRACKER.info("Using default channel type");
             }
 
             this.channels.add((new ServerBootstrap()).channel(clazz).childHandler(new ChannelInitializer<>() {
-                protected void initChannel(@NotNull Channel channel) {
+                protected void initChannel(Channel channel) {
                     try {
                         channel.config().setOption(ChannelOption.TCP_NODELAY, true);
                     } catch (ChannelException var4) {
