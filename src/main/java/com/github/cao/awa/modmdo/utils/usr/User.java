@@ -146,16 +146,12 @@ public class User {
         JSONObject json = new JSONObject();
         json.put("onlineTime", onlineTime);
         json.put("name", name);
-        json.put("uuid", getID());
+        json.put("uuid", getUuid().toString());
         json.put("level", level);
         json.put("version", modmdoVersion);
         json.put("identifier", modmdoIdentifier);
 
         return json;
-    }
-
-    public String getID() {
-        return uuid.toString();
     }
 
     public int getLevel() {

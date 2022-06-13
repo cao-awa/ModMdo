@@ -17,7 +17,7 @@
   },
 
   "license": "GPL-3.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/modmdo/icon.png",
 
   "environment": "*",
   "entrypoints": {
