@@ -25,7 +25,7 @@ public class ModMdoInviteArgumentType implements ArgumentType<String> {
         TemporaryCertificate invite = temporaryInvite.get(string);
         if (invite == null) {
             TemporaryCertificate certificate = temporaryStation.get(string);
-            if (certificate.getType().equals("invite")) {
+            if ("invite".equals(certificate.getType())) {
                 invite = certificate;
             }
         }

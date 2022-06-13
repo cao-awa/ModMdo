@@ -5,7 +5,6 @@ import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.simple.vec.*;
 import com.github.cao.awa.modmdo.utils.dimension.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.list.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -45,5 +44,5 @@ public abstract class TargetedTrigger<T extends EntityTargetedEvent<?>> extends 
         this.target = target;
     }
 
-    public abstract UnmodifiableListReceptacle<String> supported();
+    public abstract boolean supported(String target);
 }

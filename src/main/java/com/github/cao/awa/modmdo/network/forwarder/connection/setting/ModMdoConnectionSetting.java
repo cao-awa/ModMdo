@@ -7,7 +7,6 @@ public class ModMdoConnectionSetting {
     private boolean chat = true;
     private boolean playerJoin = true;
     private boolean playerQuit = true;
-    private boolean testing = false;
 
     public boolean isPlayerQuit() {
         return playerQuit;
@@ -51,7 +50,6 @@ public class ModMdoConnectionSetting {
         json.put("playerJoin", playerJoin);
         json.put("playerQuit", playerQuit);
         json.put("name", name);
-        json.put("testing", testing);
         return json;
     }
 
@@ -64,15 +62,6 @@ public class ModMdoConnectionSetting {
         this.playerJoin = json.getBoolean("playerJoin");
         this.playerQuit = json.getBoolean("playerQuit");
         this.name = json.getString("name");
-        this.testing = json.getBoolean("testing");
-    }
-
-    public boolean isTesting() {
-        return testing;
-    }
-
-    public void setTesting(boolean testing) {
-        this.testing = testing;
     }
 
     public static ModMdoConnectionSetting localSettings() {
@@ -81,7 +70,6 @@ public class ModMdoConnectionSetting {
         setting.setChat(SharedVariables.config.getConfigBoolean("modmdo_connection_chatting_accept"));
         setting.setPlayerJoin(SharedVariables.config.getConfigBoolean("modmdo_connection_player_join_accept"));
         setting.setPlayerQuit(SharedVariables.config.getConfigBoolean("modmdo_connection_player_quit_accept"));
-        setting.setTesting(SharedVariables.testing);
         return setting;
     }
 }

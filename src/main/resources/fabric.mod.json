@@ -1,43 +1,47 @@
 {
-    "schemaVersion": 1,
-    "id": "modmdo",
-    "version": "${version}",
-    "name": "ModMdo",
-    "description": "This Mod are testing",
-    "authors": [
-        "草awa",
-        "草二号机",
-        "zhuaidadaya"
+  "schemaVersion": 1,
+  "id": "modmdo",
+  "version": "${version}",
+
+  "name": "ModMdo",
+  "description": "This Mod are testing",
+  "authors": [
+    "草awa",
+    "草二号机",
+    "zhuaidadaya"
+  ],
+  "contact": {
+    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
+    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
+    "issues": "https://github.com/zhuaidadaya/ModMdo/issues"
+  },
+
+  "license": "GPL-3.0",
+  "icon": "assets/modmdo/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+        "com.github.cao.awa.modmdo.ModMdoStdInitializer"
     ],
-    "contact": {
-        "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.18.x",
-        "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.18.x",
-        "issues": "https://github.com/zhuaidadaya/ModMdo/issues"
-    },
-    "license": "GPL-3.0",
-    "icon": "assets/modid/icon.png",
-    "environment": "*",
-    "entrypoints": {
-        "main": [
-            "com.github.cao.awa.modmdo.ModMdoStdInitializer"
-        ],
-        "server": [
-            "com.github.cao.awa.modmdo.ModMdoServerInitializer"
-        ],
-        "client": [
-            "com.github.cao.awa.modmdo.ModMdoClientInitializer"
-        ]
-    },
-    "mixins": [
-        "modmdo.mixins.json"
+    "client": [
+        "com.github.cao.awa.modmdo.ModMdoClientInitializer"
     ],
-    "depends": {
-        "fabricloader": ">=0.14.6",
-        "fabric": "*",
-        "minecraft": "1.19.x",
-        "java": ">=17"
-    },
-    "suggests": {
-        "another-mod": "*"
-    }
+    "server": [
+        "com.github.cao.awa.modmdo.ModMdoServerInitializer"
+    ]
+  },
+  "mixins": [
+    "modmdo.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "java": ">=16"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
 }

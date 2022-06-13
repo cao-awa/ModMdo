@@ -54,13 +54,13 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                 Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
 
                 if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
-                    tracker.submit("Server are requesting login data", () -> {
+                    TRACKER.submit("Server are requesting login data", () -> {
                         connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
                     });
                 }
 
                 if (informationSign.equals(SUFFIX_CHANNEL)) {
-                    tracker.submit("Server are requesting suffix data", () -> {
+                    TRACKER.submit("Server are requesting suffix data", () -> {
                         connection.send(new CustomPayloadC2SPacket(SUFFIX_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(SUFFIX_CHANNEL.toString()).writeString(SUFFIX)));
                     });
                 }
@@ -69,7 +69,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                     String data1 = EntrustParser.tryCreate(data::readString, "");
                     String data2 = EntrustParser.tryCreate(data::readString, "");
 
-                    tracker.submit(String.format("Server are requesting client process data: type={%s} | information={%s}", data1, data2));
+                    TRACKER.submit(String.format("Server are requesting client process data: type={%s} | information={%s}", data1, data2));
 
                     switch (data1) {
                         case "whitelist_names" -> {
@@ -111,7 +111,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                     ArgumentInit.init();
                 }
             } catch (Exception e) {
-                tracker.submit("Error in connecting ModMdo server", e);
+                TRACKER.err("Error in connecting ModMdo server", e);
             }
             ci.cancel();
         }

@@ -2,7 +2,14 @@ package com.github.cao.awa.modmdo.event.trigger;
 
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.entity.*;
+import com.github.cao.awa.modmdo.event.trigger.connection.*;
+import com.github.cao.awa.modmdo.event.trigger.kill.*;
+import com.github.cao.awa.modmdo.event.trigger.message.*;
+import com.github.cao.awa.modmdo.event.trigger.motd.*;
+import com.github.cao.awa.modmdo.event.trigger.persistent.*;
 import com.github.cao.awa.modmdo.event.trigger.selector.*;
+import com.github.cao.awa.modmdo.event.trigger.summon.*;
+import com.github.cao.awa.modmdo.event.trigger.teleport.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -135,13 +142,28 @@ public class ModMdoTriggerBuilder {
         map.put("net.minecraft.entity.FallingBlockEntity", FallingBlockEntity.class.getName());
         map.put("net.minecraft.entity.LightningEntity", LightningEntity.class.getName());
     });
+    public final ObjectArrayList<String> events = EntrustParser.operation(new ObjectArrayList<>(), list -> {
+        list.add(DisconnectTrigger.class.getName());
+        list.add(KillEntityTrigger.class.getName());
+        list.add(SendMessageTrigger.class.getName());
+        list.add(MotdModifyTrigger.class.getName());
+        list.add(PersistentModifyTrigger.class.getName());
+        list.add(SummonTrigger.class.getName());
+        list.add(TeleportEntityTrigger.class.getName());
+    });
+    public final ObjectArrayList<String> targeted = EntrustParser.operation(new ObjectArrayList<>(), list -> {
+        list.add(DisconnectTrigger.class.getName());
+        list.add(KillEntityTrigger.class.getName());
+        list.add(SendMessageTrigger.class.getName());
+        list.add(TeleportEntityTrigger.class.getName());
+    });
 
     public void register(JSONObject json, File trace) {
         JSONObject e = json.getJSONObject("event");
         String name = e.getString("instanceof");
         try {
             ModMdoEvent<?> register = event.targeted.get(name);
-            if (register == null) {
+            if (register == null || !targeted.contains(name)) {
                 register = event.events.get(name);
                 register.register(event -> prepare(e, event, trace), trace);
             } else {
@@ -163,7 +185,8 @@ public class ModMdoTriggerBuilder {
                         TargetedTrigger<EntityTargetedEvent<?>> trigger = (TargetedTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                         return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
                     }, ex -> {
-                        tracker.submit("Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
+                        ex.printStackTrace();
+                        TRACKER.submit(Thread.currentThread(), "Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
                         return null;
                     }), ModMdoEventTrigger::action);
                     i.add();
@@ -187,7 +210,7 @@ public class ModMdoTriggerBuilder {
                     ModMdoEventTrigger<ModMdoEvent<?>> trigger = (ModMdoEventTrigger<ModMdoEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                     return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
                 }, ex -> {
-                    tracker.submit("Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
+                    TRACKER.submit("Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
                     return null;
                 }), ModMdoEventTrigger::action);
                 i.add();
