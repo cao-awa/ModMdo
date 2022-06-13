@@ -4,10 +4,10 @@ import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
+import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import net.minecraft.entity.*;
-import net.minecraft.text.*;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.util.registry.*;
@@ -57,7 +57,7 @@ public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<
                 } else {
                     world = World.END;
                 }
-                Registry.ENTITY_TYPE.get(new Identifier(id)).spawn(getServer().getWorld(world), null, name == null ? null : new LiteralText(name), null, pos, SpawnReason.EVENT, alignPosition, invertY);
+                Registry.ENTITY_TYPE.get(new Identifier(id)).spawn(getServer().getWorld(world), null, name == null ? null : TextUtil.literal(name).text(), null, pos, SpawnReason.EVENT, alignPosition, invertY);
             }
         });
     }
