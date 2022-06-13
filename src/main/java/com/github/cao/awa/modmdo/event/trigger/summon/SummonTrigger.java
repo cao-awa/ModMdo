@@ -37,6 +37,7 @@ public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<
         this.count = EntrustParser.tryCreate(() -> metadata.getInt("count"), 1);
         // TODO: 2022/6/14
         //this.nbt = EntrustParser.trying(() -> metadata.getString("nbt"));
+        this.dimension = metadata.getString("world");
         this.name = EntrustParser.trying(() -> metadata.getString("name"));
         this.alignPosition = EntrustParser.trying(() -> metadata.getBoolean("alignPosition"), ex -> false);
         this.invertY = EntrustParser.trying(() -> metadata.getBoolean("invertY"), ex -> false);
