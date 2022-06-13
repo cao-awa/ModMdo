@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.event;
 
-import com.github.cao.awa.hyacinth.logging.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.extra.loader.*;
 import com.github.cao.awa.modmdo.utils.times.*;
@@ -10,11 +9,10 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.a
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.server.*;
 
 import java.io.*;
 import java.util.function.*;
-
-import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @AsyncDelay
 public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
@@ -88,9 +86,6 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
         }
         delay.add(target);
         submitted = true;
-        if (testing) {
-            PrintUtil.messageToTracker(PrintUtil.tacker(Thread.currentThread().getStackTrace(), - 1, target.synopsis()));
-        }
     }
 
     public abstract T fuse(Previously<T> previously, T delay);
@@ -174,4 +169,6 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     public abstract String abbreviate();
 
     public abstract String clazz();
+
+    public abstract MinecraftServer getServer();
 }

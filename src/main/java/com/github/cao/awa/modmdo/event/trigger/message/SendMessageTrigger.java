@@ -17,6 +17,7 @@ import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import org.json.*;
 
+import static com.github.cao.awa.modmdo.event.trigger.selector.entity.EntitySelectorType.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Auto
@@ -27,7 +28,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
     private final ObjectArrayList<Receptacle<String>> args = new ObjectArrayList<>();
     private boolean active = true;
     private String key = "";
-    private EntitySelectorType selector = EntitySelectorType.SELF;
+    private EntitySelector selector;
     private Dictionary dictionary = null;
 
     @Override
@@ -42,8 +43,8 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
             }
         });
         setTarget(event.getTargeted());
-        selector = EntitySelectorType.of(metadata.getString("selector"));
-        setServer(getTarget().get(0).getServer());
+        selector = new EntitySelector(metadata.getJSONObject("selector"), this);
+        setServer(event.getServer());
         if (message.has("dictionary")) {
             dictionary = new Dictionary(message.getString("dictionary"));
         }
@@ -58,23 +59,30 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
 
     public void send(Text message) {
         if (active) {
-            switch (selector) {
-                case SELF -> {
-                    if (getTarget().size() > 1) {
-                        err("Cannot use \"SELF\" selector in targeted more than one", new IllegalArgumentException("Unable to process \"SELF\" selector for entities, it need appoint an entity"));
-                        return;
-                    }
-                    Entity target = getTarget().get(0);
-                    if (target instanceof ServerPlayerEntity player) {
-                        player.sendMessage(message, false);
-                    }
+            selector.prepare(SELF, target -> {
+                if (getTarget().size() > 1) {
+                    err("Cannot use \"SELF\" selector in targeted more than one", new IllegalArgumentException("Unable to process \"SELF\" selector for entities, it need appoint an entity"));
+                    return;
                 }
-                case WORLD -> EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
+                Entity targeted = getTarget().get(0);
+                if (targeted instanceof ServerPlayerEntity player) {
+                    player.sendMessage(message, false);
+                }
+            });
+            selector.prepare(WORLD, target -> {
+                EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
                     player.sendMessage(message, false);
                 }));
-                case ALL -> sendMessageToAllPlayer(getServer(), message, false);
-                case APPOINT -> EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), target -> sendMessage(target, message, false));
-            }
+            });
+            selector.prepare(ALL, target -> {
+                selector.filter(getServer().getPlayerManager().getPlayerList(), targeted -> {
+                    sendMessage((ServerPlayerEntity) targeted, message, false);
+                });
+            });
+            selector.prepare(APPOINT, target -> {
+                EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(target), targeted -> sendMessage(targeted, message, false));
+            });
+            selector.action();
         }
     }
 
@@ -127,7 +135,8 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         return minecraftTextFormat.format(dictionary, key, objs);
     }
 
-    public UnmodifiableListReceptacle<String> supported() {
-        return supported;
+    @Override
+    public boolean supported(String target) {
+        return supported.contains(target);
     }
 }

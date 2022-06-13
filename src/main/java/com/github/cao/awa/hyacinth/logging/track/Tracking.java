@@ -1,6 +1,5 @@
 package com.github.cao.awa.hyacinth.logging.track;
 
-import com.github.cao.awa.hyacinth.logging.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
 import org.apache.logging.log4j.*;
@@ -11,7 +10,7 @@ import java.util.*;
 public class Tracking {
     public static final Logger TRACKER = LogManager.getLogger("Hyacinth:Tracker");
     private static final Calendar calendar = Calendar.getInstance();
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss" );
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
     private Thread parent;
     private StackTraceElement[] tracker;
     private String[] messages;
@@ -139,17 +138,27 @@ public class Tracking {
 
     public void print() {
         int limit = getTrackLimit();
-        PrintUtil.info(TRACKER, "--Hyacinth Tracking: ");
+        TRACKER.info("--Hyacinth Tracking: ");
         for (String message : getMessages()) {
-            TRACKER.debug("      " + message);
+            TRACKER.info("      " + message);
         }
-        PrintUtil.info(TRACKER, "      --Hyacinth Tracking(Thread Traces): ");
+        TRACKER.info("      --Hyacinth Tracking(Thread Traces): ");
         for (int i = getStartFrom(), trackerLength = getTracker().length; i < trackerLength; i++) {
-            StackTraceElement elements = getTracker()[i];
+            StackTraceElement element = getTracker()[i];
             if (limit-- == 0) {
                 break;
             }
-            TRACKER.debug("         " + elements);
+            TRACKER.info("         " + element);
+        }
+        if (! (parent == null)) {
+            TRACKER.info("      --Hyacinth Tracking(Parent Traces): ");
+            for (int i = getStartFrom(), trackerLength = getParentTracker().length; i < trackerLength; i++) {
+                StackTraceElement element = getParentTracker()[i];
+                if (limit-- == 0) {
+                    break;
+                }
+                TRACKER.info("         " + element);
+            }
         }
     }
 
@@ -164,9 +173,8 @@ public class Tracking {
     public String shortPrint() {
         StringBuilder builder = new StringBuilder();
         int limit = getTrackLimit();
-        TRACKER.info("--Hyacinth Tracking: ");
         for (String message : getMessages()) {
-            TRACKER.info("    " + message);
+            TRACKER.info("    -" + message);
             builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append(" ").append(message).append("\n");
         }
         for (int i = getStartFrom(), trackerLength = getTracker().length; i < trackerLength; i++) {
@@ -176,13 +184,15 @@ public class Tracking {
             }
             builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append("     ").append(elements.toString()).append("\n");
         }
-        builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append(" ").append("Cause by: ").append("\n");
-        for (int i = getStartFrom(), trackerLength = getParentTracker().length; i < trackerLength; i++) {
-            StackTraceElement elements = getParentTracker()[i];
-            if (limit-- == 0) {
-                break;
+        if (!(parent == null)) {
+            builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append(" ").append("Parent: ").append("\n");
+            for (int i = 0, trackerLength = getParentTracker().length; i < getParentTracker().length; i++) {
+                StackTraceElement element = getParentTracker()[i];
+                if (limit-- == 0) {
+                    break;
+                }
+                builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append("     ").append(element.toString()).append("\n");
             }
-            builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append("     ").append(elements.toString()).append("\n");
         }
         return builder.toString();
     }
