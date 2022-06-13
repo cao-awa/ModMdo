@@ -9,12 +9,13 @@ import net.minecraft.network.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.util.*;
-import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.*;
 import org.spongepowered.asm.mixin.*;
 
 import java.net.*;
 import java.util.*;
+
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerNetworkIo.class)
 public class ServerNetworkIoMixin {
@@ -30,8 +31,6 @@ public class ServerNetworkIoMixin {
     @Shadow @Final
     List<ClientConnection> connections;
 
-    @Shadow @Final private static Logger LOGGER;
-
     /**
      * @author 草awa
      * @reason
@@ -44,11 +43,11 @@ public class ServerNetworkIoMixin {
             if (Epoll.isAvailable() && this.server.isUsingNativeTransport()) {
                 clazz = EpollServerSocketChannel.class;
                 lazy = EPOLL_CHANNEL;
-                LOGGER.info("Using epoll channel type");
+                TRACKER.info("Using epoll channel type");
             } else {
                 clazz = NioServerSocketChannel.class;
                 lazy = DEFAULT_CHANNEL;
-                LOGGER.info("Using default channel type");
+                TRACKER.info("Using default channel type");
             }
 
             this.channels.add((new ServerBootstrap()).channel(clazz).childHandler(new ChannelInitializer<>() {
