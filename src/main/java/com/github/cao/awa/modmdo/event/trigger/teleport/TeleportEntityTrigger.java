@@ -6,23 +6,25 @@ import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.trigger.selector.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
 import com.github.cao.awa.modmdo.simple.vec.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.collection.list.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import it.unimi.dsi.fastutil.objects.*;
 import org.json.*;
+
+import java.util.*;
+
+import static com.github.cao.awa.modmdo.event.trigger.selector.entity.EntitySelectorType.*;
 
 @Auto
 public class TeleportEntityTrigger<T extends EntityTargetedEvent<?>> extends TargetedTrigger<T> {
-    private EntitySelectorType selector = EntitySelectorType.SELF;
+    private EntitySelector selector;
     private XYZ xyz;
 
     @Override
     public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
         setMeta(metadata);
         setTarget(event.getTargeted());
-        setServer(getTarget().get(0).getServer());
+        setServer(event.getServer());
         setTrace(trace);
-        selector = EntitySelectorType.of(metadata.getString("selector"));
+        selector = new EntitySelector(metadata.getJSONObject("selector"), this);
         xyz = new XYZ(metadata.getJSONObject("pos"));
         return this;
     }
@@ -30,25 +32,35 @@ public class TeleportEntityTrigger<T extends EntityTargetedEvent<?>> extends Tar
     @Override
     public void action() {
         EntrustExecution.tryTemporary(() -> {
-            switch (selector) {
-                case SELF -> {
-                    if (getTarget().size() > 1) {
-                        err("Cannot use \"SELF\" selector in targeted more than one", new IllegalArgumentException("Unable to process \"SELF\" selector for entities, it need appoint an entity"));
-                        return;
-                    }
-                    getTarget().get(0).teleport(xyz.getX(), xyz.getY(),xyz.getZ());
+            selector.prepare(SELF, target -> {
+                if (getTarget().size() > 1) {
+                    err("Cannot use \"SELF\" selector in targeted more than one", new IllegalArgumentException("Unable to process \"SELF\" selector for entities, it need appoint an entity"));
+                    return;
                 }
-                case WORLD -> EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.iterateEntities().forEach(entity -> entity.teleport(xyz.getX(), xyz.getY(),xyz.getZ())));
-                case ALL -> getServer().getWorlds().forEach(world -> world.iterateEntities().forEach(entity -> entity.teleport(xyz.getX(), xyz.getY(),xyz.getZ())));
-                case APPOINT -> EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), entity -> entity.teleport(xyz.getX(), xyz.getY(),xyz.getZ()));
-            }
-        }, Throwable::printStackTrace);
+                getTarget().get(0).teleport(xyz.getX(), xyz.getY(), xyz.getZ());
+            });
+            selector.prepare(WORLD, target -> {
+                EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.iterateEntities().forEach(entity -> selector.filter(entity, e -> e.teleport(xyz.getX(), xyz.getY(), xyz.getZ()))));
+            });
+            selector.prepare(ALL, target -> {
+                getServer().getWorlds().forEach(world -> world.iterateEntities().forEach(entity -> selector.filter(entity, e -> e.teleport(xyz.getX(), xyz.getY(), xyz.getZ()))));
+            });
+            selector.prepare(APPOINT, target -> {
+                EntrustExecution.tryTemporary(() -> {
+                    UUID id = UUID.fromString(target);
+                    getServer().getWorlds().forEach(world -> {
+                        EntrustExecution.notNull(world.getEntity(id), e -> e.teleport(xyz.getX(), xyz.getY(), xyz.getZ()));
+                    });
+                }, () -> {
+                    EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(target), player -> player.teleport(xyz.getX(), xyz.getY(), xyz.getZ()));
+                });
+            });
+            selector.action();
+        });
     }
 
     @Override
-    public UnmodifiableListReceptacle<String> supported() {
-        return new UnmodifiableListReceptacle<>(EntrustParser.operation(new ObjectArrayList<>(), list -> {
-            list.addAll(ModMdoTriggerBuilder.classMap.values());
-        }));
+    public boolean supported(String targeted) {
+        return ModMdoTriggerBuilder.classMap.containsKey(targeted);
     }
 }

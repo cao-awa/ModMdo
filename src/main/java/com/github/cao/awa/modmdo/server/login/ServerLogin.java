@@ -32,7 +32,7 @@ public class ServerLogin {
             }
         } else {
             EntrustExecution.tryTemporary(() -> {
-                tracker.submit("Login player: " + name);
+                TRACKER.info("Login player: " + name);
                 SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setLanguage(language == null ? getLanguage() : Language.ofs(language)));
             });
         }
@@ -67,7 +67,7 @@ public class ServerLogin {
             if (SharedVariables.whitelist.getFromId(identifier) == null || ! temporaryInvite.containsName(name)) {
                 SharedVariables.rejectUsers.put(new User(name, uuid, - 1, identifier, version));
             } else {
-                tracker.submit("Login player using id login: " + name);
+                TRACKER.info("Login player using id login: " + name);
                 SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setMessage(message.get() == null ? null : message.get().text()));
             }
         }
@@ -103,7 +103,7 @@ public class ServerLogin {
             if (EntrustParser.trying(() -> ! SharedVariables.whitelist.get(name).getIdentifier().equals(identifier), () -> ! temporaryInvite.containsName(name))) {
                 reject(name, uuid, identifier, null);
             } else {
-                tracker.submit("Login player using strict login: " + name);
+                TRACKER.info("Login player using strict login: " + name);
                 SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setMessage(message.get() == null ? null : message.get().text()));
             }
         }
@@ -144,16 +144,17 @@ public class ServerLogin {
         if (! uuid.equals(SharedVariables.whitelist.get(name).getRecorde().uuid().toString()) && ! temporaryInvite.containsName(name)) {
             SharedVariables.rejectUsers.put(new User(name, uuid, - 1, "", 0));
         } else {
-            tracker.submit("Login player using ygg login: " + name);
+            TRACKER.info("Login player using ygg login: " + name);
             SharedVariables.loginUsers.put(new User(name, uuid, - 1, "", 0).setMessage(message.get() == null ? null : message.get().text()));
         }
     }
 
     public void logout(ServerPlayerEntity player) {
-        tracker.submit("Logout player: " + EntityUtil.getName(player));
+        TRACKER.info("Logout player: " + EntityUtil.getName(player));
         EntrustExecution.tryTemporary(() -> {
             SharedVariables.loginUsers.removeUser(player);
             if (temporaryInvite.containsName(EntityUtil.getName(player))) {
+                TRACKER.info("Invite expired for player: " + EntityUtil.getName(player));
                 temporaryInvite.remove(EntityUtil.getName(player));
             }
         });

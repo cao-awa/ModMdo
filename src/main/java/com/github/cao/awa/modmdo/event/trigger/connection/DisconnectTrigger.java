@@ -16,6 +16,7 @@ import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import org.json.*;
 
+import static com.github.cao.awa.modmdo.event.trigger.selector.entity.EntitySelectorType.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Auto
@@ -26,7 +27,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
     private final ObjectArrayList<Receptacle<String>> args = new ObjectArrayList<>();
     private boolean active = true;
     private String key = "";
-    private EntitySelectorType selector = EntitySelectorType.SELF;
+    private EntitySelector selector;
 
     @Override
     public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
@@ -40,8 +41,8 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
             }
         });
         setTarget(event.getTargeted());
-        selector = EntitySelectorType.of(metadata.getString("selector"));
-        setServer(getTarget().get(0).getServer());
+        selector = new EntitySelector(metadata.getJSONObject("selector"), this);
+        setServer(event.getServer());
         setTrace(trace);
         return this;
     }
@@ -53,27 +54,30 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
 
     public void disconnect(Text reason) {
         if (active) {
-            switch (selector) {
-                case SELF -> {
-                    if (getTarget().size() > 1) {
-                        err("Cannot use \"SELF\" selector in targeted more than one", new IllegalArgumentException("Unable to process \"SELF\" selector for entities, it need appoint an entity"));
-                        return;
-                    }
-                    Entity target = getTarget().get(0);
-                    if (target instanceof ServerPlayerEntity player) {
-                        player.networkHandler.disconnect(reason);
-                    }
+            selector.prepare(SELF, target -> {
+                if (getTarget().size() > 1) {
+                    err("Cannot use \"SELF\" selector in targeted more than one", new IllegalArgumentException("Unable to process \"SELF\" selector for entities, it need appoint an entity"));
+                    return;
                 }
-                case WORLD -> EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
+                Entity targeted = getTarget().get(0);
+                if (targeted instanceof ServerPlayerEntity player) {
+                    player.networkHandler.disconnect(reason);
+                }
+            });
+            selector.prepare(WORLD, target -> {
+                EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
                     player.networkHandler.disconnect(reason);
                 }));
-                case ALL -> {
-                    EntrustExecution.tryFor(server.getPlayerManager().getPlayerList(), player -> {
-                        player.networkHandler.disconnect(reason);
-                    });
-                }
-                case APPOINT -> EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), target -> target.networkHandler.disconnect(reason));
-            }
+            });
+            selector.prepare(ALL, target -> {
+                EntrustExecution.tryFor(server.getPlayerManager().getPlayerList(), player -> {
+                    player.networkHandler.disconnect(reason);
+                });
+            });
+            selector.prepare(APPOINT, target -> {
+                EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), targeted -> targeted.networkHandler.disconnect(reason));
+            });
+            selector.action();
         }
     }
 
@@ -121,7 +125,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
         return minecraftTextFormat.format(user, key, objs);
     }
 
-    public UnmodifiableListReceptacle<String> supported() {
-        return supported;
+    public boolean supported(String target) {
+        return supported.contains(target);
     }
 }

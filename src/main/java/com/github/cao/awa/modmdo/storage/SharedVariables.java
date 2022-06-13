@@ -1,7 +1,6 @@
 package com.github.cao.awa.modmdo.storage;
 
 import com.github.cao.awa.hyacinth.logging.*;
-import com.github.cao.awa.modmdo.cavas.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.event.*;
@@ -61,12 +60,11 @@ public class SharedVariables {
     public static final Identifier TOKEN_CHANNEL = new Identifier("modmdo:token");
     public static final Identifier SUFFIX_CHANNEL = new Identifier("modmdo:suffix");
     public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> variables = new Object2ObjectOpenHashMap<>();
-    public static final GlobalTracker tracker = new GlobalTracker();
+    public static final GlobalTracker TRACKER = new GlobalTracker();
     public static String identifier;
     public static String entrust = "ModMdo";
     public static boolean enableRanking = false;
     public static boolean enableHereCommand = true;
-    public static boolean enableCava = true;
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
     public static boolean cancelEntitiesTick = false;
@@ -77,7 +75,6 @@ public class SharedVariables {
     public static UserUtil loginUsers;
     public static DiskObjectConfigUtil config;
     public static DiskObjectConfigUtil staticConfig;
-    public static CavaUtil cavas;
     public static MinecraftServer server;
     public static ModMdoType modMdoType = ModMdoType.NONE;
     public static int itemDespawnAge = 6000;
@@ -102,7 +99,7 @@ public class SharedVariables {
     public static ArrayList<ModMdoExtra<?>> extrasWaitingForRegister = new ArrayList<>();
     public static ModMdoExtraLoader extras;
     public static boolean loaded = false;
-    public static boolean testing = false;
+    public static boolean debug = true;
     public static ModMdoCommandRegister commandRegister;
     public static ModMdoEventTracer event;
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
@@ -125,17 +122,19 @@ public class SharedVariables {
 
         enableRanking = false;
         enableHereCommand = true;
-        enableCava = true;
         enableSecureEnchant = true;
         enableRejectReconnect = true;
         cancelEntitiesTick = false;
         timeActive = true;
         rejectUsers = new UserUtil();
         loginUsers = new UserUtil();
-        cavas = new CavaUtil();
         itemDespawnAge = 6000;
 
         enchantLevelController.setNoVanillaDefaultMaxLevel((short) 5);
+
+        temporaryInvite.clear();
+
+        force.clear();
 
         initEnchantmentMaxLevel();
     }
@@ -150,9 +149,9 @@ public class SharedVariables {
     }
 
     public static void initWhiteList() {
-        temporaryStation = new Certificates<>();
-        whitelist = new Certificates<>();
-        modmdoConnectionWhitelist = new Certificates<>();
+        temporaryStation.clear();
+        whitelist.clear();
+        modmdoConnectionWhitelist.clear();
 
         EntrustExecution.tryTemporary(() -> {
             JSONObject json = config.getConfigJSONObject("whitelist");
@@ -172,7 +171,7 @@ public class SharedVariables {
     }
 
     public static void initBan() {
-        banned = new Certificates<>();
+        banned.clear();
 
         EntrustExecution.tryTemporary(() -> {
             JSONObject json = config.getConfigJSONObject("banned");
@@ -286,7 +285,6 @@ public class SharedVariables {
 
     public static void saveVariables() {
         config.set("here_command", enableHereCommand);
-        config.set("cava", enableCava);
         config.set("secure_enchant", enableSecureEnchant);
         config.set("reject_reconnect", enableRejectReconnect);
         config.set("time_active", timeActive);
@@ -320,10 +318,6 @@ public class SharedVariables {
                 config.set("banned", json);
             });
         }
-    }
-
-    public static void updateCavas() {
-        config.set("cavas", cavas.toJSONObject());
     }
 
     public static Language getLanguage() {
@@ -494,12 +488,14 @@ public class SharedVariables {
             }
             switch (whitelist.get(EntityUtil.getName(player)).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (whitelist.get(EntityUtil.getName(player)).getRecorde().modmdoUniqueId().equals("")) {
-                        return false;
-                    }
+                     return whitelist.get(EntityUtil.getName(player)).getRecorde().modmdoUniqueId().equals(loginUsers.getUser(player).getIdentifier());
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(whitelist.get(EntityUtil.getName(player)).getRecorde().uuid())) {
+                    if (Objects.requireNonNull(player.getServer()).isOnlineMode()) {
+                        if (! player.getUuid().equals(whitelist.get(EntityUtil.getName(player)).getRecorde().uuid())) {
+                            return false;
+                        }
+                    } else {
                         return false;
                     }
                 }

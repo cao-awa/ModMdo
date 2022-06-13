@@ -29,8 +29,8 @@ public class UserUtil {
     }
 
     public void put(User user) {
-        users.put(user.getID(), user);
-        userNameIdMap.put(user.getName(), user.getID());
+        users.put(user.getUuid().toString(), user);
+        userNameIdMap.put(user.getName(), user.getUuid().toString());
     }
 
     public JSONObject getJSONObject(Object target) {

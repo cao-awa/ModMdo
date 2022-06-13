@@ -25,7 +25,7 @@ public class ServerTickListener {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             PlayerManager players = server.getPlayerManager();
 
-            EntrustExecution.tryTemporary(() -> eachPlayer(players));
+            EntrustExecution.tryTemporary(() -> eachPlayer(players), Throwable::printStackTrace);
 
             for (ModMdoDataProcessor processor : modmdoConnections) {
                 processor.tick(server);

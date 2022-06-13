@@ -61,7 +61,6 @@ public class ModMdoDataProcessor {
     }
 
     public void process(CustomPayloadC2SPacket packet) {
-//        trafficInRecord.add(packet.getData().readableBytes());
         process(packet.getChannel(), packet.getData());
     }
 
@@ -303,9 +302,6 @@ public class ModMdoDataProcessor {
 
     public void disconnect() {
         disconnected = true;
-        if (getSetting().isTesting()) {
-            send(builder.getBuilder().buildTraffic(trafficInRecord, packetsRecord));
-        }
         send(builder.getBuilder().buildDisconnect("modmdo.connection.target.disconnect.initiative"));
         onDisconnect("modmdo.connection.target.disconnect.initiative");
         modMdoConnection.disconnect(TextUtil.translatable("modmdo.connection.target.disconnect.initiative").text());
@@ -322,9 +318,6 @@ public class ModMdoDataProcessor {
         EntrustExecution.notNull(modMdoConnection.getConnection(), connection -> connection.disconnect(TextUtil.translatable(message).text()));
         SharedVariables.updateModMdoConnectionsNames(server);
         SharedVariables.LOGGER.info(SharedVariables.consoleTextFormat.format(message, getAddress()));
-        if (SharedVariables.testing) {
-            traffic();
-        }
     }
 
     public void traffic() {

@@ -10,6 +10,7 @@ import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
@@ -30,10 +31,14 @@ public class TemporaryCommand extends SimpleCommand {
             return ban(ban, ModMdoWhitelistArgumentType.getWhiteList(ban, "target").name, 60);
         })))).then(literal("remove").then(argument("target", ModMdoTemporaryBanArgumentType.banned()).executes(remove -> {
             Certificate certificate = ModMdoTemporaryBanArgumentType.getCertificate(remove, "target");
-            banned.remove(certificate.getName());
-            saveVariables();
-            sendFeedback(getPlayer(remove), TextUtil.translatable("modmdo.ban.pardon", certificate.getName()));
-            return 0;
+            if (banned.containsName(certificate.getName())) {
+                banned.remove(certificate.getName());
+                saveVariables();
+                sendFeedback(getPlayer(remove), TextUtil.translatable("modmdo.ban.pardon", certificate.getName()));
+                return 0;
+            }
+            sendFeedback(getPlayer(remove), TextUtil.translatable("arguments.banned.not.registered", certificate.getName()));
+            return - 1;
         }))).then(literal("list").executes(list -> {
             showTemporaryBan(list);
             updateTemporaryBanNames(getServer(list), true);
@@ -59,13 +64,22 @@ public class TemporaryCommand extends SimpleCommand {
             return invite(invite, name, 5);
         })))).then(literal("remove").then(argument("target", ModMdoInviteArgumentType.invite()).executes(remove -> {
             Certificate certificate = ModMdoInviteArgumentType.getInvite(remove, "target");
+            Receptacle<Boolean> success = new Receptacle<>(false);
             EntrustExecution.notNull(temporaryStation.get(certificate.getName()), c -> {
                 if (c.getType().equals("invite")) {
                     temporaryStation.remove(c.getName());
+                    success.set(true);
                 }
             });
-            EntrustExecution.notNull(temporaryInvite.get(certificate.getName()), invite -> invite.setMillions(- 1));
-            sendFeedback(getPlayer(remove), TextUtil.translatable("modmdo.invite.cancel", certificate.getName()));
+            EntrustExecution.notNull(temporaryInvite.get(certificate.getName()), invite -> {
+                invite.setMillions(- 1);
+                success.set(true);
+            });
+            if (success.get()) {
+                sendFeedback(remove, TextUtil.translatable("modmdo.invite.cancel", certificate.getName()));
+            } else {
+                sendError(remove, TextUtil.translatable("arguments.invite.not.registered", EntityUtil.getName(getPlayer(remove))));
+            }
             return 0;
         }))).then(literal("list").executes(list -> {
             showTemporaryInvite(list);
@@ -76,7 +90,7 @@ public class TemporaryCommand extends SimpleCommand {
             if (temporaryInvite.containsName(name)) {
                 int minute = IntegerArgumentType.getInteger(invite, "minutes");
                 return invite(invite, name, - minute);
-            }  else {
+            } else {
                 sendError(invite, TextUtil.translatable("arguments.invite.not.registered", name));
             }
             return - 1;

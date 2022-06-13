@@ -38,7 +38,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         defaultConfig();
 
         try {
-            initModMdoVariables();
+            initModMdoVariables(modMdoType);
         } catch (Exception e) {
 
         }
@@ -87,7 +87,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                     LOGGER.warn("Failed register event: " + file.getPath(), ex);
                 });
             });
-        }, Throwable::printStackTrace);
+        });
 
         variables.clear();
         variableBuilder = new ModMdoVariableBuilder();

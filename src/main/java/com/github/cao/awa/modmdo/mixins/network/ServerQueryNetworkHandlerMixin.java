@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.event;
-import static com.github.cao.awa.modmdo.storage.SharedVariables.tracker;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
 
 @Mixin(ServerQueryNetworkHandler.class)
 public class ServerQueryNetworkHandlerMixin {
@@ -30,7 +30,7 @@ public class ServerQueryNetworkHandlerMixin {
      */
     @Overwrite
     public void onRequest(QueryRequestC2SPacket packet) {
-        tracker.submit("Handle request(query)");
+        TRACKER.submit("Handle request(query)");
         if (this.responseSent) {
             this.connection.disconnect(REQUEST_HANDLED);
         } else {
@@ -43,6 +43,6 @@ public class ServerQueryNetworkHandlerMixin {
 
     @Inject(method = "onPing", at = @At("HEAD"))
     public void onPing(QueryPingC2SPacket packet, CallbackInfo ci) {
-        tracker.submit("Handle ping(query)");
+        TRACKER.submit("Handle ping(query)");
     }
 }
