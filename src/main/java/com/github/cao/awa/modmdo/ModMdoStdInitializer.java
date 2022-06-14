@@ -105,7 +105,7 @@ public class ModMdoStdInitializer implements ModInitializer {
         new ServerTickListener().listener();
 
         Resource<String> enchant = new Resource<>();
-        enchant.set("enchantment_level", "/assets/modmdo/format/enchantment_level.json");
+        enchant.set("enchantment_level", "assets/modmdo/format/enchantment_level.json");
         SharedVariables.enchantLevelController = new EnchantLevelController(enchant);
 
         TRACKER.info("Registering for ModMdo major");
