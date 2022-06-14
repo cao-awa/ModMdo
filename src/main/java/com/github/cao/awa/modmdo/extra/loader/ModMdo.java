@@ -102,8 +102,8 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         });
 
         Resource<String> resource = new Resource<>();
-        resource.set(Language.ZH_CN.getName(), "/assets/modmdo/lang/zh_cn.json");
-        resource.set(Language.EN_US.getName(), "/assets/modmdo/lang/en_us.json");
+        resource.set(Language.ZH_CN.getName(), "assets/modmdo/lang/zh_cn.json");
+        resource.set(Language.EN_US.getName(), "assets/modmdo/lang/en_us.json");
 
         EntrustExecution.tryTemporary(() -> {
             new File(getServerLevelPath(getServer())  + "/modmdo/resources/lang/").mkdirs();

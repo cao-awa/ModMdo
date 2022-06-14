@@ -18,6 +18,8 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import it.unimi.dsi.fastutil.objects.*;
 
+import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
+
 public class ModMdoEventTracer {
     public final EntityDeathEvent entityDeath = EntityDeathEvent.snap();
     public final BlockDestroyEvent blockDestroy = BlockDestroyEvent.snap();
@@ -65,7 +67,9 @@ public class ModMdoEventTracer {
     });
 
     public void build() {
-        ModMdoEventCenter.callingBuilding.forEach((id, extra) -> extra.initEvent());
+        ModMdoEventCenter.callingBuilding.forEach((id, extra) -> {
+            EntrustExecution.tryTemporary(extra::initEvent, ex -> TRACKER.submit("Extra " + id + " init failed", ex));
+        });
     }
 
     public int registered() {

@@ -99,7 +99,7 @@ public class SharedVariables {
     public static ArrayList<ModMdoExtra<?>> extrasWaitingForRegister = new ArrayList<>();
     public static ModMdoExtraLoader extras;
     public static boolean loaded = false;
-    public static boolean debug = true;
+    public static boolean debug = false;
     public static ModMdoCommandRegister commandRegister;
     public static ModMdoEventTracer event;
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
