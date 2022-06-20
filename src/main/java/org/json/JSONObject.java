@@ -115,7 +115,7 @@ public class JSONObject {
          * @return NULL.
          */
         @Override
-        protected final Object clone() {
+        protected Object clone() {
             return this;
         }
 
@@ -1122,8 +1122,8 @@ public class JSONObject {
         if (NULL.equals(val)) {
             return defaultValue;
         }
-        if (val instanceof Boolean){
-            return ((Boolean) val).booleanValue();
+        if (val instanceof Boolean b){
+            return b;
         }
         try {
             // we'll use the get anyway because it does string conversion.
@@ -1222,7 +1222,7 @@ public class JSONObject {
             if (!numberIsFinite((Number)val)) {
                 return defaultValue;
             }
-            return new BigDecimal(((Number) val).doubleValue()).toBigInteger();
+            return BigDecimal.valueOf(((Number) val).doubleValue()).toBigInteger();
         }
         if (val instanceof Long || val instanceof Integer
                 || val instanceof Short || val instanceof Byte){
@@ -1604,10 +1604,7 @@ public class JSONObject {
             try {
                 Method im = i.getMethod(m.getName(), m.getParameterTypes());
                 return getAnnotation(im, annotationClass);
-            } catch (final SecurityException ex) {
-                continue;
-            } catch (final NoSuchMethodException ex) {
-                continue;
+            } catch (final SecurityException | NoSuchMethodException ex) {
             }
         }
 
@@ -1615,9 +1612,7 @@ public class JSONObject {
             return getAnnotation(
                     c.getSuperclass().getMethod(m.getName(), m.getParameterTypes()),
                     annotationClass);
-        } catch (final SecurityException ex) {
-            return null;
-        } catch (final NoSuchMethodException ex) {
+        } catch (final SecurityException | NoSuchMethodException ex) {
             return null;
         }
     }
@@ -1658,10 +1653,7 @@ public class JSONObject {
                     // since the annotation was on the interface, add 1
                     return d + 1;
                 }
-            } catch (final SecurityException ex) {
-                continue;
-            } catch (final NoSuchMethodException ex) {
-                continue;
+            } catch (final SecurityException | NoSuchMethodException ex) {
             }
         }
 
@@ -1674,9 +1666,7 @@ public class JSONObject {
                 return d + 1;
             }
             return -1;
-        } catch (final SecurityException ex) {
-            return -1;
-        } catch (final NoSuchMethodException ex) {
+        } catch (final SecurityException | NoSuchMethodException ex) {
             return -1;
         }
     }
@@ -2167,7 +2157,7 @@ public class JSONObject {
                 try {
                     BigDecimal bd = new BigDecimal(val);
                     if(initial == '-' && BigDecimal.ZERO.compareTo(bd)==0) {
-                        return Double.valueOf(-0.0);
+                        return - 0.0;
                     }
                     return bd;
                 } catch (NumberFormatException retryAsDouble) {
@@ -2482,8 +2472,7 @@ public class JSONObject {
         } else if (value instanceof Map) {
             Map<?, ?> map = (Map<?, ?>) value;
             new JSONObject(map).write(writer, indentFactor, indent);
-        } else if (value instanceof Collection) {
-            Collection<?> coll = (Collection<?>) value;
+        } else if (value instanceof Collection<?> coll) {
             new JSONArray(coll).write(writer, indentFactor, indent);
         } else if (value.getClass().isArray()) {
             new JSONArray(value).write(writer, indentFactor, indent);
@@ -2493,7 +2482,7 @@ public class JSONObject {
         return writer;
     }
 
-    static final void indent(Writer writer, int indent) throws IOException {
+    static void indent(Writer writer, int indent) throws IOException {
         for (int i = 0; i < indent; i += 1) {
             writer.write(' ');
         }

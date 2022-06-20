@@ -23,11 +23,9 @@ public class ServerStartListener {
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            if (SharedVariables.isActive()) {
-                tps.init(server, - 1);
-                if (event != null) {
-                    event.submit(new ServerStartedEvent(server));
-                }
+            tps.init(server, - 1);
+            if (event != null) {
+                event.submit(new ServerStartedEvent(server));
             }
         });
 

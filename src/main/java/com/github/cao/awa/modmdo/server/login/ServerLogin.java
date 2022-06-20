@@ -64,7 +64,7 @@ public class ServerLogin {
         try {
             SharedVariables.loginUsers.getUser(uuid).setIdentifier(identifier).setVersion(version);
         } catch (Exception e) {
-            if (SharedVariables.whitelist.getFromId(identifier) == null || ! temporaryInvite.containsName(name)) {
+            if (SharedVariables.whitelist.getFromId(identifier) == null && ! temporaryInvite.containsName(name)) {
                 SharedVariables.rejectUsers.put(new User(name, uuid, - 1, identifier, version));
             } else {
                 TRACKER.info("Login player using id login: " + name);
@@ -87,7 +87,6 @@ public class ServerLogin {
                     case "invite" -> {
                         if (SharedVariables.temporaryInvite.get(name) == null) {
                             SharedVariables.temporaryInvite.put(name, e.getSpare());
-                            System.out.println(e.getPass());
                             EntrustExecution.notNull(e.getPass(), pass -> {
                                 message.set(TextUtil.translatable("modmdo.invite.using", pass.getOrganizer(), pass.formatRemaining()));
                             });

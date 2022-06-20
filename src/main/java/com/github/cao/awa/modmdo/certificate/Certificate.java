@@ -1,10 +1,11 @@
 package com.github.cao.awa.modmdo.certificate;
 
 import com.github.cao.awa.modmdo.server.login.*;
+import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
 
-public abstract class Certificate {
+public abstract class Certificate extends Storable {
     public final String name;
     public final LoginRecorde recorde;
     public String lastLanguage = "en_us";
