@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(World.class)
-public abstract class WorldMixin {
+public abstract class WorldMixin implements WorldAccess {
     @Shadow @Nullable public abstract MinecraftServer getServer();
 
     @Shadow public abstract RegistryKey<World> getRegistryKey();
