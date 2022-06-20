@@ -1,8 +1,9 @@
 package com.github.cao.awa.modmdo.utils.enchant;
 
+import com.github.cao.awa.modmdo.storage.*;
 import org.json.JSONObject;
 
-public class EnchantmentLevel {
+public class EnchantmentLevel extends Storable {
     private final short defaultMax;
     private short max;
 

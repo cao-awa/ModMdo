@@ -9,7 +9,7 @@ import org.json.*;
 
 import java.util.*;
 
-public class User {
+public class User extends Storable {
     private final long loginTime = TimeUtil.millions();
     private String name;
     private UUID uuid;

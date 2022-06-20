@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.event.variable;
 
 import com.github.cao.awa.modmdo.annotations.*;
+import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.file.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
@@ -8,7 +9,7 @@ import org.json.*;
 import java.io.*;
 
 @Auto
-public abstract class ModMdoPersistent<T> {
+public abstract class ModMdoPersistent<T> extends Storable {
     public File file;
     public String name;
     public JSONObject meta;

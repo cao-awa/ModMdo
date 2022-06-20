@@ -13,6 +13,7 @@ import com.github.cao.awa.modmdo.lang.Language;
 import com.github.cao.awa.modmdo.mixins.*;
 import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.ranking.*;
+import com.github.cao.awa.modmdo.security.key.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.subscribable.*;
 import com.github.cao.awa.modmdo.type.*;
@@ -35,6 +36,7 @@ import net.minecraft.text.*;
 import net.minecraft.util.*;
 import org.apache.logging.log4j.*;
 import org.json.*;
+import org.reflections.*;
 
 import java.text.*;
 import java.util.*;
@@ -105,7 +107,9 @@ public class SharedVariables {
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
     public static TickPerSecondAnalyzer tps = new TickPerSecondAnalyzer();
-    public static ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
+    public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
+    public static final SecureKeys SECURE_KEYS = new SecureKeys();
+    public static final Reflections REFLECTIONS = new Reflections();
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
@@ -290,7 +294,6 @@ public class SharedVariables {
         config.set("time_active", timeActive);
         config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
         config.set("reject_no_fall_chest", rejectNoFallCheat);
-        config.set("whitelist_only_id", false);
         config.set("modmdo_whitelist", modmdoWhitelist);
 
         if (modMdoType == ModMdoType.SERVER) {
@@ -485,6 +488,9 @@ public class SharedVariables {
                     player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.expired").text());
                 }
                 return true;
+            }
+            if (config.getConfigBoolean("whitelist_only_id")) {
+                return whitelist.getFromId(loginUsers.getUser(player).getIdentifier()) != null;
             }
             switch (whitelist.get(EntityUtil.getName(player)).getRecorde().type()) {
                 case IDENTIFIER -> {
