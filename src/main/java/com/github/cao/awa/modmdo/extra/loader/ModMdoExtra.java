@@ -6,9 +6,18 @@ import com.github.cao.awa.modmdo.extra.loader.parameter.*;
 import java.util.*;
 
 public abstract class ModMdoExtra<T> {
+    private boolean signAuto = false;
     private UncertainParameter args = new UncertainParameter();
     private String name = "ModMdoExtra(Ab.)";
     private UUID id = UUID.randomUUID();
+
+    protected void signAuto() {
+        signAuto = true;
+    }
+
+    public boolean isSignAuto() {
+        return signAuto;
+    }
 
     public void auto() {
         auto(true);
@@ -23,6 +32,10 @@ public abstract class ModMdoExtra<T> {
         }
     }
 
+    public void prepare() {
+
+    }
+
     public abstract void init();
 
     public abstract void initCommand();
@@ -30,8 +43,6 @@ public abstract class ModMdoExtra<T> {
     public abstract void initStaticCommand();
 
     public abstract void initEvent();
-
-    public abstract boolean needEnsure();
 
     public String getName() {
         return name;

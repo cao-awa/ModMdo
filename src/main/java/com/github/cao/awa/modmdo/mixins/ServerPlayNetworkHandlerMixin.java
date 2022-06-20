@@ -76,14 +76,20 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
 
                     if (TOKEN_CHANNEL.equals(channel)) {
-                        LOGGER.debug("Client are sent obsoleted login data");
+                        TRACKER.debug("Client are sent obsoleted login data");
                         serverLogin.reject(data1, oldLogin, "", TextUtil.literal("obsolete login type").text());
                         return;
                     }
 
                     if (channel.equals(CLIENT_CHANNEL)) {
-                        LOGGER.debug("Client are sent login data");
+                        TRACKER.debug("Client are sent login data");
                         if (informationSign.equals(LOGIN_CHANNEL)) {
+                            TRACKER.submit("Login data1: " + data1);
+                            TRACKER.submit("Login data2: " + data2);
+                            TRACKER.submit("Login data3: " + data3);
+                            TRACKER.submit("Login data4: " + data4);
+                            TRACKER.submit("Login data5: " + data5);
+
                             if (modMdoType == ModMdoType.SERVER) {
                                 serverLogin.login(data1, data2, data3, data4, data5);
                             }
@@ -92,6 +98,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
                     if (channel.equals(SUFFIX_CHANNEL)) {
                         LOGGER.debug("Client are sent suffix data: " + data1);
+                        TRACKER.submit("Suffix data1: " + data1);
                         if (loginUsers.hasUser(player)) {
                             serverLogin.suffix(loginUsers.getUser(player), data1);
                         }

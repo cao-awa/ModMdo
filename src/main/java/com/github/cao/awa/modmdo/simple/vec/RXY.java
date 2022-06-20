@@ -4,7 +4,7 @@ import com.github.cao.awa.modmdo.storage.*;
 import net.minecraft.util.math.Vec2f;
 import org.json.JSONObject;
 
-public class RXY {
+public class RXY extends Storable {
     public double x;
     public double y;
 

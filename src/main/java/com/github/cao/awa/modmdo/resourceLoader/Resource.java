@@ -1,6 +1,6 @@
 package com.github.cao.awa.modmdo.resourceLoader;
 
-import com.github.cao.awa.modmdo.reads.FileReads;
+import com.github.cao.awa.modmdo.utils.file.reads.FileReads;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 

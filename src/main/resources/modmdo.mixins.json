@@ -17,6 +17,8 @@
         "ServerLoginNetworkHandlerMixin",
         "ServerPlayNetworkHandlerMixin",
         "block.BlockMixin",
+        "client.ClientLoginNetworkHandlerMixin",
+        "client.ServerInfoMixin",
         "command.CommandManagerMixin",
         "command.block.CommandBlockMixin",
         "entity.LivingEntityMixin",

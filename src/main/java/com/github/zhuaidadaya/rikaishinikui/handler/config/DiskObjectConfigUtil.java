@@ -1,7 +1,7 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.config;
 
-import com.github.cao.awa.modmdo.reads.*;
 import com.github.cao.awa.modmdo.utils.file.*;
+import com.github.cao.awa.modmdo.utils.file.reads.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
 
@@ -14,7 +14,7 @@ public record DiskObjectConfigUtil(String entrust, String path, String suffix, b
         if (new File(getConfigPath(key)).isFile()) {
             return;
         }
-        set(key, value.toString());
+        set(key, value == null ? "null" : value.toString());
     }
 
     public void set(String key, Object value) {

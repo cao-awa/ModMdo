@@ -6,8 +6,8 @@ import java.util.function.*;
 public class UnmodifiableListReceptacle<T> {
     private final List<T> list;
 
-    public UnmodifiableListReceptacle(List<T> set) {
-        this.list = set;
+    public UnmodifiableListReceptacle(List<T> list) {
+        this.list = list;
     }
 
     public T get(int index) {

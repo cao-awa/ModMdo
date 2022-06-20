@@ -6,7 +6,7 @@ import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.Vec3i;
 import org.json.JSONObject;
 
-public class XYZ {
+public class XYZ extends Storable {
     public double x;
     public double y;
     public double z;

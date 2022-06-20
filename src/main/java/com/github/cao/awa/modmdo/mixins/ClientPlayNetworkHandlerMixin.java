@@ -1,9 +1,11 @@
 package com.github.cao.awa.modmdo.mixins;
 
 import com.github.cao.awa.modmdo.commands.argument.*;
+import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
 import net.minecraft.client.*;
@@ -54,8 +56,30 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                 Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
 
                 if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
+                    SECURE_KEYS.load(staticConfig.getConfigJSONObject("private_key"));
+                    Receptacle<String> serverId = new Receptacle<>(null);
+                    if (informationSign.equals(CHECKING_CHANNEL)) {
+                        EntrustExecution.tryTemporary(() -> serverId.set(data.readString()));
+                    }
                     TRACKER.submit("Server are requesting login data", () -> {
-                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(EntrustParser.getNotNull(staticConfig.getConfigString("identifier"), "")).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
+                        EntrustExecution.notNull(staticConfig.get("secure_level"), level -> {
+                            SECURE_KEYS.setLevel(SecureLevel.of(level));
+                            TRACKER.submit("Changed config secure_level as " + level);
+                        });
+                        String address = EntrustParser.tryCreate(() -> {
+                            String addr = connection.getAddress().toString();
+                            return addr.substring(addr.indexOf("/") + 1);
+                        }, connection.getAddress().toString());
+                        String key = serverId.get() == null ? SECURE_KEYS.use(address, address) : SECURE_KEYS.use(serverId.get(), address);
+                        if (serverId.get() != null && key != null) {
+                            if (SECURE_KEYS.has(address) && ! SECURE_KEYS.has(serverId.get())) {
+                                EntrustExecution.notNull(SECURE_KEYS.get(address), k -> k.setServerId(serverId.get()));
+                                SECURE_KEYS.set(SECURE_KEYS.get(address).getServerId(), SECURE_KEYS.get(address));
+                            }
+                            SECURE_KEYS.removeAddress(address);
+                            SECURE_KEYS.save();
+                        }
+                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(key).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
                     });
                 }
 

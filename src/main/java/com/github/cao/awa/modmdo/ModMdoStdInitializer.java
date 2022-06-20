@@ -2,13 +2,14 @@ package com.github.cao.awa.modmdo;
 
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.extra.loader.*;
-import com.github.cao.awa.modmdo.identifier.*;
 import com.github.cao.awa.modmdo.listeners.*;
-import com.github.cao.awa.modmdo.reads.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
+import com.github.cao.awa.modmdo.security.*;
+import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.utils.enchant.*;
+import com.github.cao.awa.modmdo.utils.file.reads.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -73,6 +74,14 @@ public class ModMdoStdInitializer implements ModInitializer {
             TRACKER.submit("Init config modmdo_whitelist as " + whitelist);
         });
 
+
+        if (type == ModMdoType.CLIENT) {
+            EntrustExecution.notNull(config.get("secure_level"), level -> {
+                SECURE_KEYS.setLevel(SecureLevel.of(level));
+                TRACKER.submit("Init config secure_level as " + level);
+            });
+        }
+
         if (type == ModMdoType.SERVER) {
             SharedVariables.initWhiteList();
             SharedVariables.initBan();
@@ -109,7 +118,7 @@ public class ModMdoStdInitializer implements ModInitializer {
         SharedVariables.enchantLevelController = new EnchantLevelController(enchant);
 
         TRACKER.info("Registering for ModMdo major");
-        SharedVariables.extras = new ModMdoExtraLoader(new ModMdo().setName("ModMdo").setId(SharedVariables.EXTRA_ID), RandomIdentifier.randomIdentifier());
+        SharedVariables.extras = new ModMdoExtraLoader(new ModMdo().setName("ModMdo").setId(SharedVariables.EXTRA_ID));
 
         TRACKER.info("Registering for ModMdo extra");
         for (ModMdoExtra<?> extra : SharedVariables.extrasWaitingForRegister) {

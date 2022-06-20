@@ -30,14 +30,12 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     @Shadow
     @Final
     public ClientConnection connection;
-
-    boolean authing = false;
-    boolean preReject = false;
-
     @Shadow
     @Final
     MinecraftServer server;
-
+    private boolean authing = false;
+    private boolean preReject = false;
+    private boolean ready = false;
     @Shadow
     @Nullable GameProfile profile;
 
@@ -55,16 +53,14 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 return;
 
             if (server.isOnlineMode()) {
-                if (profile == null || profile.getId() == null && preReject) {
-                    return;
-                }
-
-                if (config.getConfigBoolean("compatible_online_mode")) {
-                    EntrustExecution.tryTemporary(() -> {
-                        serverLogin.loginUsingYgg(EntityUtil.getName(player), profile.getId().toString());
-                    }, () -> {
-                        serverLogin.reject(EntityUtil.getName(player), profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
-                    });
+                if (! (profile == null || profile.getId() == null)) {
+                    if (config.getConfigBoolean("compatible_online_mode")) {
+                        EntrustExecution.tryTemporary(() -> {
+                            serverLogin.loginUsingYgg(EntityUtil.getName(player), profile.getId().toString());
+                        }, ex -> {
+                            serverLogin.reject(EntityUtil.getName(player), profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
+                        });
+                    }
                 }
             }
 
@@ -87,7 +83,11 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
                         });
                         TRACKER.submit("Server send login packet: modmdo login", () -> {
-                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL)));
+                            if (modmdoWhitelist) {
+                                handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL).writeString(staticConfig.get("identifier"))));
+                            } else {
+                                handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL)));
+                            }
                         });
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -192,6 +192,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
     @Inject(method = "onKey", at = @At("HEAD"))
     public void onKey(LoginKeyC2SPacket packet, CallbackInfo ci) {
+        System.out.println("???");
         authing = true;
     }
 
@@ -199,7 +200,14 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     public void disconnect(Text reason, CallbackInfo ci) {
         if (authing && config.getConfigBoolean("compatible_online_mode")) {
             preReject = true;
+            ready = true;
             ci.cancel();
         }
     }
+
+    @Shadow
+    public abstract void acceptPlayer();
+
+    @Shadow
+    protected abstract GameProfile toOfflineProfile(GameProfile profile);
 }

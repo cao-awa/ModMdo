@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
+import com.github.cao.awa.modmdo.annotations.extra.*;
 import com.github.cao.awa.modmdo.extra.loader.parameter.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.activity.*;
@@ -15,40 +16,19 @@ public class ModMdoExtraLoader {
     private final Object2ObjectRBTreeMap<UUID, ActivityObject<ModMdoExtra<?>>> extras = new Object2ObjectRBTreeMap<>();
     private final ExtraLoading loading;
     private final ModMdoExtra<?> major;
-    private boolean forcedMajor = false;
+    private final boolean forcedMajor = false;
     private ModMdoExtra<?> loadingExtra = null;
     private UUID loadingId = null;
 
-    public ModMdoExtraLoader(ModMdoExtra<ModMdo> major, String ensure) {
+    public ModMdoExtraLoader(ModMdoExtra<ModMdo> major) {
         loading = new ExtraLoading(major);
         this.major = major;
-        extras.put(major.getId(), new ActivityObject<>(major, ensure));
+        extras.put(major.getId(), new ActivityObject<>(major));
         LOGGER.info("Registered major: " + major.getId() + "(" + major.getName() + ")");
-    }
-
-    public void register(UUID id, ModMdoExtra<?> extra) {
-        EntrustExecution.executeNull(extras.get(id), ActivityObject::active, asNull -> {
-            extras.put(id, new ActivityObject<>(extra));
-            loading.then(extra);
-            LOGGER.info("Registered extra: " + id + "(" + extra.getName() + ")");
-        });
-    }
-
-    public void register(UUID id, ModMdoExtra<?> extra, String ensure) {
-        EntrustExecution.executeNull(extras.get(id), ActivityObject::active, asNull -> {
-            extras.put(id, new ActivityObject<>(extra, ensure));
-            loading.then(extra);
-            LOGGER.info("Registered extra: " + id + "(" + extra.getName() + ")");
-        });
     }
 
     public void unregister(UUID id) {
         ModMdoExtra<?> extra = extras.get(id).invalid().get();
-        LOGGER.info("Unregistered extra: " + id + "(" + extra.getName() + ")");
-    }
-
-    public void unregister(UUID id, String ensureKey) {
-        ModMdoExtra<?> extra = extras.get(id).invalid(ensureKey).get();
         LOGGER.info("Unregistered extra: " + id + "(" + extra.getName() + ")");
     }
 
@@ -81,6 +61,26 @@ public class ModMdoExtraLoader {
     }
 
     public void load() {
+        extras.forEach((k, v) -> {
+            if (v.get().isSignAuto()) {
+                extras.remove(k);
+            }
+        });
+
+        for (Class<?> clazz : REFLECTIONS.getTypesAnnotatedWith(ModMdoAutoExtra.class)) {
+            EntrustExecution.tryTemporary(() -> {
+                TRACKER.info("Registering for auto extra: " + clazz.getName());
+                ModMdoExtra<?> extra = (ModMdoExtra<?>) clazz.getDeclaredConstructor().newInstance();
+                extra.prepare();
+                extra.signAuto();
+                register(extra.getId(), extra);
+            }, ex -> {
+                TRACKER.submit("Failed to register auto extra: " + clazz.getName(), ex);
+            });
+        }
+
+        TRACKER.info("Loading ModMdo extras");
+
         AtomicBoolean loaded = new AtomicBoolean(false);
         AtomicLong start = new AtomicLong(TimeUtil.millions());
         new Thread(() -> {
@@ -88,7 +88,7 @@ public class ModMdoExtraLoader {
                 long time = TimeUtil.processMillion(start.get());
                 if ((time - 320) % 1000 == 0) {
                     if (loadingExtra != null) {
-                        LOGGER.warn("Extra: " + loadingId + "(" + loadingExtra.getName() + ") loading time has " + time / 1000 + " seconds longer than expected");
+                        TRACKER.warn("Extra: " + loadingId + "(" + loadingExtra.getName() + ") loading time has " + time / 1000 + " seconds longer than expected");
                     }
                 }
 
@@ -97,16 +97,19 @@ public class ModMdoExtraLoader {
         }).start();
 
         loading.load(extra -> {
+            if (!extra.isSignAuto()) {
+                extra.prepare();
+            }
             boolean active = extras.get(extra.getId()).isActive();
             long startLoad = TimeUtil.millions();
             loadingId = extra.getId();
             loadingExtra = extra;
-            LOGGER.info("Loading extra: " + loadingId + "(" + loadingExtra.getName() + ")");
+            TRACKER.info("Loading extra: " + loadingId + "(" + loadingExtra.getName() + ")");
             loadingExtra.auto(forcedMajor || active);
-            LOGGER.info("Loaded extra: " + loadingId + "(" + loadingExtra.getName() + ") in " + TimeUtil.processMillion(startLoad) + "ms");
+            TRACKER.info("Loaded extra: " + loadingId + "(" + loadingExtra.getName() + ") in " + TimeUtil.processMillion(startLoad) + "ms");
             start.set(TimeUtil.millions());
         }, failed -> {
-            LOGGER.info("Failed to load extra: " + loadingId + "(" + loadingExtra.getName() + ")");
+            TRACKER.submit("Failed to load extra: " + failed.getId() + "(" + failed.getName() + ")");
             start.set(TimeUtil.millions());
         });
 
@@ -116,7 +119,11 @@ public class ModMdoExtraLoader {
         loaded.set(true);
     }
 
-    public void force() {
-        forcedMajor = true;
+    public void register(UUID id, ModMdoExtra<?> extra) {
+        EntrustExecution.executeNull(extras.get(id), ActivityObject::active, asNull -> {
+            extras.put(id, new ActivityObject<>(extra));
+            loading.then(extra);
+            TRACKER.info("Registered extra: " + id + "(" + extra.getName() + ")");
+        });
     }
 }
