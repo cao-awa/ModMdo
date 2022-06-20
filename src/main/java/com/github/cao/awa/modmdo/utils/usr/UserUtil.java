@@ -1,12 +1,13 @@
 package com.github.cao.awa.modmdo.utils.usr;
 
+import com.github.cao.awa.modmdo.storage.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.server.network.*;
 import org.json.*;
 
 import java.util.*;
 
-public class UserUtil {
+public class UserUtil extends Storable {
     private final Object2ObjectRBTreeMap<String, User> users = new Object2ObjectRBTreeMap<>();
     private final Object2ObjectRBTreeMap<String, String> userNameIdMap = new Object2ObjectRBTreeMap<>();
 

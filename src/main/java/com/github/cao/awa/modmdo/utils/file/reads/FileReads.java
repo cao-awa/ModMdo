@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.reads;
+package com.github.cao.awa.modmdo.utils.file.reads;
 
 import java.io.*;
 

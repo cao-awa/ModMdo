@@ -16,12 +16,15 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(World.class)
 public abstract class WorldMixin implements WorldAccess {
-    @Shadow @Nullable public abstract MinecraftServer getServer();
-
-    @Shadow public abstract RegistryKey<World> getRegistryKey();
-
     @Inject(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;II)Z", at = @At("HEAD"))
     public void setBlockState(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, CallbackInfoReturnable<Boolean> cir) {
-       event.submit(new BlockStateSetEvent(state, pos, flags, maxUpdateDepth, EntrustParser.trying(() -> getServer().getWorld(getRegistryKey())) , getServer()));
+        event.submit(new BlockStateSetEvent(state, pos, flags, maxUpdateDepth, EntrustParser.trying(() -> getServer().getWorld(getRegistryKey())), getServer()));
     }
+
+    @Shadow
+    @Nullable
+    public abstract MinecraftServer getServer();
+
+    @Shadow
+    public abstract RegistryKey<World> getRegistryKey();
 }

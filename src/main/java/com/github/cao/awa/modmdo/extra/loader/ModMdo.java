@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
+import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.commands.argument.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
@@ -7,14 +8,18 @@ import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.format.console.*;
 import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.*;
-import com.github.cao.awa.modmdo.reads.*;
+import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
+import com.github.cao.awa.modmdo.utils.file.reads.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
+import net.minecraft.server.network.*;
 import org.json.*;
 
 import java.io.*;
@@ -138,6 +143,36 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             }
         }, this);
 
+        event.gameTickStart.register(event -> {
+            PlayerManager players = server.getPlayerManager();
+
+            EntrustExecution.tryTemporary(() -> {
+                for (ServerPlayerEntity player : players.getPlayerList()) {
+                    if (modmdoWhitelist) {
+                        if (!hasWhitelist(player)) {
+                            player.networkHandler.connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text()));
+                            player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
+                        }
+                        if (hasBan(player)) {
+                            Certificate ban = banned.get(EntityUtil.getName(player));
+                            if (ban instanceof TemporaryCertificate temporary) {
+                                String remaining = temporary.formatRemaining();
+                                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
+                                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
+                            } else {
+                                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
+                                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
+                            }
+                        }
+                    }
+                }
+            }, Throwable::printStackTrace);
+
+            for (ModMdoDataProcessor processor : modmdoConnections) {
+                processor.tick(server);
+            }
+        }, this);
+
 //        event.events.forEach((k, v) -> {
 //            if (v.getClass().getName().equals("com.github.cao.awa.modmdo.event.server.tick.GameTickStartEvent")) {
 //                return;
@@ -148,7 +183,4 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 //        });
     }
 
-    public boolean needEnsure() {
-        return true;
-    }
 }

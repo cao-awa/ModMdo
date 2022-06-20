@@ -1,13 +1,10 @@
 package org.json;
 
-import static java.lang.String.format;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import static java.lang.String.*;
 
 /*
 Copyright (c) 2002 JSON.org
@@ -188,7 +185,7 @@ public class JSONPointer {
     }
 
     /**
-     * @see https://tools.ietf.org/html/rfc6901#section-3
+     * @see <a href="https://tools.ietf.org/html/rfc6901#section-3">...</a>
      */
     private static String unescape(String token) {
         return token.replace("~1", "/").replace("~0", "~");
@@ -268,7 +265,7 @@ public class JSONPointer {
      * @param token the JSONPointer segment value to be escaped
      * @return the escaped value for the token
      * 
-     * @see https://tools.ietf.org/html/rfc6901#section-3
+     * @see <a href="https://tools.ietf.org/html/rfc6901#section-3">...</a>
      */
     private static String escape(String token) {
         return token.replace("~", "~0")

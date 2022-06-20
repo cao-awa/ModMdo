@@ -3,8 +3,7 @@ package com.github.zhuaidadaya.rikaishinikui.handler.config.encryption;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
+import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 

@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.identifier;
+package com.github.cao.awa.modmdo.security;
 
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -15,25 +15,31 @@ public class RandomIdentifier {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public static String randomIdentifier() {
-        return randomIdentifier(256);
+        return randomIdentifier(256, false);
     }
 
-    public static String randomIdentifier(int size) {
+    public static String randomIdentifier(int size, boolean noNano) {
         StringBuilder builder = new StringBuilder();
         StringBuilder nano = new StringBuilder(String.valueOf(TimeUtil.nano()));
         for (int i = 0; i < size; i++) {
-            if (i % (size / nano.length()) == 0 && i > 1) {
-                builder.append('-');
-                EntrustExecution.tryTemporary(() -> {
-                    builder.insert(RANDOM.nextInt(builder.length()), nano.charAt(0));
-                    nano.delete(0, 1);
-                });
-            } else {
+            if (noNano) {
                 builder.append(CHARS[RANDOM.nextInt(CHARS.length)]);
+            } else {
+                if (i % (size / nano.length()) == 0 && i > 1) {
+                    builder.append('-');
+                    EntrustExecution.tryTemporary(() -> {
+                        builder.insert(RANDOM.nextInt(builder.length()), nano.charAt(0));
+                        nano.delete(0, 1);
+                    });
+                } else {
+                    builder.append(CHARS[RANDOM.nextInt(CHARS.length)]);
+                }
             }
         }
 
-        builder.append(nano);
+        if (!noNano) {
+            builder.append(nano);
+        }
 
         return builder.toString();
     }

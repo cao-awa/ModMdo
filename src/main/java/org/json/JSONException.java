@@ -24,6 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
+import java.io.*;
+
 /**
  * The JSONException is thrown by the JSON.org classes when things are amiss.
  *
@@ -32,6 +34,7 @@ SOFTWARE.
  */
 public class JSONException extends RuntimeException {
     /** Serialization ID */
+    @Serial
     private static final long serialVersionUID = 0;
 
     /**
