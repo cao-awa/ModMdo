@@ -32,8 +32,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
     private Dictionary dictionary = null;
 
     @Override
-    public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
-        setMeta(metadata);
+    public ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace trace) {
         JSONObject message = metadata.getJSONObject("message");
         key = message.getString("key");
         JSONArray array = message.getJSONArray("args");
@@ -48,7 +47,6 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         if (message.has("dictionary")) {
             dictionary = new Dictionary(message.getString("dictionary"));
         }
-        setTrace(trace);
         return this;
     }
 

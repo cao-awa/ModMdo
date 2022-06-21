@@ -17,7 +17,7 @@ public class PersistentModifyTrigger<T extends ModMdoEvent<?>> extends ModMdoEve
     private final ObjectArrayList<Receptacle<JSONObject>> vars = new ObjectArrayList<>();
 
     @Override
-    public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
+    public ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace trace) {
         JSONArray variables = metadata.getJSONArray("variables");
         EntrustParser.operation(vars, list -> {
             for (OperationalInteger i = new OperationalInteger(); i.get() < variables.length(); i.add()) {
@@ -28,7 +28,6 @@ public class PersistentModifyTrigger<T extends ModMdoEvent<?>> extends ModMdoEve
                 });
             }
         });
-        setTrace(trace);
         return this;
     }
 

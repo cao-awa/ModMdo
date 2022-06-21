@@ -50,7 +50,6 @@ public abstract class PlayerManagerMixin {
                             SimpleCommandOperation.sendMessage(player, TextUtil.translatable("login.dump.rejected"), false);
                         }
                         cir.setReturnValue(null);
-                        cir.cancel();
                     }
                 }
             }
@@ -67,9 +66,11 @@ public abstract class PlayerManagerMixin {
 
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;savePlayerData(Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
     public void remove(PlayerManager instance, ServerPlayerEntity player) {
-        if (loginUsers.hasUser(player) && !banned.containsIdentifier(loginUsers.getUser(player.getUuid()).getIdentifier()) || force.contains(player)) {
-            force.remove(player);
-            savePlayerData(player);
-        }
+        EntrustExecution.tryTemporary(() -> {
+            if (loginUsers.hasUser(player) && !banned.containsIdentifier(loginUsers.getUser(player.getUuid()).getIdentifier()) || force.contains(player) || player.networkHandler.getConnection().getAddress() == null) {
+                force.remove(player);
+                savePlayerData(player);
+            }
+        }, Throwable::printStackTrace);
     }
 }
