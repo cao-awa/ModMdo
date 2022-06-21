@@ -23,6 +23,7 @@ import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import com.mojang.brigadier.context.*;
 import io.netty.buffer.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -32,21 +33,23 @@ import net.minecraft.scoreboard.*;
 import net.minecraft.server.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
+import net.minecraft.server.world.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
 import org.apache.logging.log4j.*;
 import org.json.*;
 import org.reflections.*;
 
+import java.lang.reflect.*;
 import java.text.*;
 import java.util.*;
 
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static final String VERSION_ID = "1.0.37";
-    public static final String SUFFIX = "-ES";
+    public static final String SUFFIX = "-Debug";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
-    public static final String RELEASE_TIME = "2022.6.20";
+    public static final String RELEASE_TIME = "2022.6.21";
     public static final int MODMDO_VERSION = 31;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
@@ -63,6 +66,23 @@ public class SharedVariables {
     public static final Identifier SUFFIX_CHANNEL = new Identifier("modmdo:suffix");
     public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> variables = new Object2ObjectOpenHashMap<>();
     public static final GlobalTracker TRACKER = new GlobalTracker();
+    public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
+    public static final SecureKeys SECURE_KEYS = new SecureKeys();
+    public static final Reflections REFLECTIONS = new Reflections();
+    public static final Object2ObjectOpenHashMap<String, Method> tickMethods = new Object2ObjectOpenHashMap<>();
+    public static final TaskOrder<ServerWorld> tickBlockEntitiesTask = new TaskOrder<>(w -> {
+        EntrustExecution.notNull(w, world -> {
+            EntrustExecution.tryTemporary(() -> {
+                Method method = tickMethods.get("tickBlockEntities");
+                if (method == null) {
+                    method = world.getClass().getMethod("tickBlockEntities");
+                    method.setAccessible(true);
+                    tickMethods.put("tickBlockEntities", method);
+                }
+                method.invoke(world);
+            });
+        });
+    }, "tickBlockEntities");
     public static String identifier;
     public static String entrust = "ModMdo";
     public static boolean enableRanking = false;
@@ -102,14 +122,12 @@ public class SharedVariables {
     public static ModMdoExtraLoader extras;
     public static boolean loaded = false;
     public static boolean debug = false;
+    public static boolean testing = false;
     public static ModMdoCommandRegister commandRegister;
     public static ModMdoEventTracer event;
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
     public static TickPerSecondAnalyzer tps = new TickPerSecondAnalyzer();
-    public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
-    public static final SecureKeys SECURE_KEYS = new SecureKeys();
-    public static final Reflections REFLECTIONS = new Reflections();
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
@@ -476,7 +494,7 @@ public class SharedVariables {
     public static boolean hasWhitelist(ServerPlayerEntity player) {
         try {
             if (temporaryInvite.containsName(EntityUtil.getName(player))) {
-                if (temporaryInvite.get(EntityUtil.getName(player)).getMillions() == -1) {
+                if (temporaryInvite.get(EntityUtil.getName(player)).getMillions() == - 1) {
                     temporaryInvite.remove(EntityUtil.getName(player));
                     player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled").text()));
                     player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled").text());
@@ -494,7 +512,7 @@ public class SharedVariables {
             }
             switch (whitelist.get(EntityUtil.getName(player)).getRecorde().type()) {
                 case IDENTIFIER -> {
-                     return whitelist.get(EntityUtil.getName(player)).getRecorde().modmdoUniqueId().equals(loginUsers.getUser(player).getIdentifier());
+                    return whitelist.get(EntityUtil.getName(player)).getRecorde().modmdoUniqueId().equals(loginUsers.getUser(player).getIdentifier());
                 }
                 case UUID -> {
                     if (Objects.requireNonNull(player.getServer()).isOnlineMode()) {

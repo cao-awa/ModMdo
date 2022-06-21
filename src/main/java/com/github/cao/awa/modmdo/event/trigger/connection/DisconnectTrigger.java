@@ -30,8 +30,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
     private EntitySelector selector;
 
     @Override
-    public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
-        setMeta(metadata);
+    public ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace trace) {
         JSONObject message = metadata.getJSONObject("reason");
         key = message.getString("key");
         JSONArray array = message.getJSONArray("args");
@@ -43,7 +42,6 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
         setTarget(event.getTargeted());
         selector = new EntitySelector(metadata.getJSONObject("selector"), this);
         setServer(event.getServer());
-        setTrace(trace);
         return this;
     }
 

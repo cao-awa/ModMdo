@@ -24,8 +24,7 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
     private String favicon = null;
 
     @Override
-    public ModMdoEventTrigger<ServerQueryEvent> build(ServerQueryEvent event, JSONObject metadata, TriggerTrace trace) {
-        setMeta(metadata);
+    public ModMdoEventTrigger<ServerQueryEvent> prepare(ServerQueryEvent event, JSONObject metadata, TriggerTrace trace) {
         JSONObject motd = metadata.getJSONObject("motd");
         key = motd.getString("key");
         JSONArray array = motd.getJSONArray("args");
@@ -41,7 +40,6 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
         if (motd.has("favicon")) {
             favicon = motd.getString("favicon");
         }
-        setTrace(trace);
         return this;
     }
 

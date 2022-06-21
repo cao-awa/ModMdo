@@ -8,15 +8,13 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.event;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
     }
-
-    @Shadow public abstract DamageTracker getDamageTracker();
 
     @Inject(method = "onDeath", at = @At("HEAD"))
     public void onDeath(DamageSource source, CallbackInfo ci) {
@@ -25,4 +23,7 @@ public abstract class LivingEntityMixin extends Entity {
             event.submit(new EntityDeathEvent(entity, getDamageTracker().getBiggestAttacker(), getPos(), getServer()));
         }
     }
+
+    @Shadow
+    public abstract DamageTracker getDamageTracker();
 }

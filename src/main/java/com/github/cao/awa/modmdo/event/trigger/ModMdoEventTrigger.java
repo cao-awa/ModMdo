@@ -50,7 +50,13 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
         this.server = server;
     }
 
-    public abstract ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace triggerTrace);
+    public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace triggerTrace) {
+        setMeta(metadata);
+        setTrace(triggerTrace);
+        return prepare(event, metadata, triggerTrace);
+    }
+
+    public abstract ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace triggerTrace);
 
     public abstract void action();
 

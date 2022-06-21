@@ -16,11 +16,9 @@ public class KillEntityTrigger<T extends EntityTargetedEvent<?>> extends Targete
     private EntitySelector selector;
 
     @Override
-    public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
-        setMeta(metadata);
+    public ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace trace) {
         setTarget(event.getTargeted());
         setServer(event.getServer());
-        setTrace(trace);
         selector = new EntitySelector(metadata.getJSONObject("selector"), this);
         return this;
     }

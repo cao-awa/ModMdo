@@ -16,7 +16,9 @@ public class TaskOrder<T> {
     private final boolean disposable;
     private final String register;
     private boolean usable = true;
-    private @NotNull Thread thread = new Thread(() -> {
+    private boolean noDelay;
+    private boolean reuse;
+    private @NotNull ReusableThread thread = new ReusableThread(() -> {
     });
 
     public TaskOrder(Consumer<T> action, String register) {
@@ -27,6 +29,23 @@ public class TaskOrder<T> {
         this.action = new TargetCountBoolean<>(action, true, true);
         this.disposable = disposable;
         this.register = register;
+    }
+
+    public boolean isReuse() {
+        return reuse;
+    }
+
+    public void setReuse(boolean reuse) {
+        this.reuse = reuse;
+    }
+
+    public boolean isNoDelay() {
+        return noDelay;
+    }
+
+    public TaskOrder<T> setNoDelay(boolean noDelay) {
+        this.noDelay = noDelay;
+        return this;
     }
 
     public String getRegister() {
@@ -50,11 +69,13 @@ public class TaskOrder<T> {
             if (enforce) {
                 action(target);
             } else {
-                call(EntrustParser.thread(() -> action(target)));
+                thread.execute(() -> {
+                    action(target);
+                    action.reverse();
+                });
             }
-            action.reverse();
         } else {
-            if (usable) {
+            if (usable && ! noDelay) {
                 delay.add(target);
             }
         }
@@ -73,19 +94,18 @@ public class TaskOrder<T> {
     }
 
     @NotNull
-    public Thread getThread() {
+    public ReusableThread getThread() {
         return thread;
     }
 
-    private void call(Thread thread) {
-        this.thread = thread;
-        thread.start();
+    public boolean isRunning() {
+        return thread.isAlive();
     }
 
     private void resolve() {
         for (T target : delay) {
             delay.remove(target);
-            call(target);
+            enforce(target);
         }
     }
 }
