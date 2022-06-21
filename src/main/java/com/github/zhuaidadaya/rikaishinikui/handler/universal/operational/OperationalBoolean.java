@@ -3,29 +3,29 @@ package com.github.zhuaidadaya.rikaishinikui.handler.universal.operational;
 import java.util.function.*;
 
 public class OperationalBoolean extends Operational<Boolean> {
-    private Boolean BooleanValue;
+    private Boolean booleanValue;
     private Consumer<Boolean> callback;
 
     public OperationalBoolean(Boolean base) {
-        BooleanValue = base;
+        booleanValue = base;
     }
 
     public OperationalBoolean() {
-        BooleanValue = false;
+        booleanValue = false;
     }
 
     public Boolean get() {
-        return BooleanValue;
+        return booleanValue;
     }
 
     public Boolean reverse() {
-        callback(! BooleanValue);
-        return BooleanValue;
+        callback(! booleanValue);
+        return booleanValue;
     }
 
     public Boolean set(Boolean value) {
-        BooleanValue = value;
-        callback(BooleanValue);
+        booleanValue = value;
+        callback(booleanValue);
         return value;
     }
 

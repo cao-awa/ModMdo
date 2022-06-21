@@ -13,6 +13,10 @@ public class TestCommand extends SimpleCommand {
             SharedVariables.debug = ! SharedVariables.debug;
             SimpleCommandOperation.sendFeedback(e, TextUtil.translatable("debug: " + SharedVariables.debug));
             return 0;
+        })).then(literal("develop").executes(e -> {
+            SharedVariables.testing = !SharedVariables.testing;
+            SimpleCommandOperation.sendFeedback(e, TextUtil.translatable("develop: " + SharedVariables.testing));
+            return 0;
         })));
         return this;
     }

@@ -18,9 +18,11 @@ public abstract class ServerPlayerEntityMixin {
 
     @Inject(method = "onDeath", at = @At("HEAD"))
     public void onDeath(DamageSource source, CallbackInfo ci) {
+        Entity camera = cameraEntity;
         cameraEntity = null;
         if (getCameraEntity() instanceof ServerPlayerEntity entity) {
             event.submit(new EntityDeathEvent(entity, entity.getDamageTracker().getBiggestAttacker(), entity.getPos(), entity.getServer()));
         }
+        cameraEntity = camera;
     }
 }

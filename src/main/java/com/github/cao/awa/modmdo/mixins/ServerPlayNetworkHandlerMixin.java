@@ -124,7 +124,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onDisconnected", at = @At("HEAD"), cancellable = true)
     public void onDisconnected0(Text reason, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            if (! loginUsers.hasUser(player)) {
+            if (! loginUsers.hasUser(player) && !(player.networkHandler.connection.getAddress() == null)) {
                 ci.cancel();
             }
         }
