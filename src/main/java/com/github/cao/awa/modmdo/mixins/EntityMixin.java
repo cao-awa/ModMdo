@@ -22,7 +22,7 @@ public abstract class EntityMixin {
     @Inject(method = "fall", at = @At("HEAD"), cancellable = true)
     private void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            if (rejectNoFallCheat & world.getBlockState(getBlockPos().down(1)).toString().equals("Block{minecraft:air}")) {
+            if (rejectNoFallCheat && world.getBlockState(getBlockPos().down(1)).toString().equals("Block{minecraft:air}")) {
                 this.fallDistance = (float) ((double) this.fallDistance - heightDifference);
                 ci.cancel();
             }

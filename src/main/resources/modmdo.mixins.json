@@ -26,7 +26,11 @@
         "explosion.ExplosionMixin",
         "network.ServerNetworkIoMixin",
         "network.ServerQueryNetworkHandlerMixin",
+        "oshi.FileUtilMixin",
         "server.MinecraftServerMixin",
+        "server.chunk.ServerChunkManagerMixin",
+        "server.chunk.WorldChunkMixin",
+        "server.world.ServerWorldMixin",
         "tracker.DamageTrackerMixin",
         "world.WorldMixin"
     ],

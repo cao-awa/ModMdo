@@ -27,9 +27,7 @@ public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<
     private int count;
 
     @Override
-    public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace trace) {
-        setMeta(metadata);
-        setTrace(trace);
+    public ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace trace) {
         setServer(event.getServer());
         this.id = metadata.getString("identifier");
         JSONObject position = metadata.getJSONObject("pos");
