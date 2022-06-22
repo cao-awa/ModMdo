@@ -7,6 +7,7 @@ import net.minecraft.server.world.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 
+import java.util.concurrent.*;
 import java.util.function.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
@@ -23,17 +24,17 @@ public abstract class MinecraftServerMixin {
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;tickWorlds(Ljava/util/function/BooleanSupplier;)V"))
     public void tick(MinecraftServer instance, BooleanSupplier shouldKeepTicking) {
         instance.tickWorlds(shouldKeepTicking);
-        while (running()) {
-            EntrustExecution.tryTemporary(() -> {
-                Thread.sleep(0, 5000);
-            });
+        if (testing) {
+            while (running()) {
+                EntrustExecution.tryTemporary(() -> {
+                    Thread.yield();
+                    TimeUnit.NANOSECONDS.sleep(5000);
+                });
+            }
         }
     }
 
     public boolean running() {
-        if (!testing) {
-            return false;
-        }
         return EntrustParser.trying(() -> {
             for (TaskOrder<ServerWorld> task : blockEntitiesTasks.values()) {
                 if (task.isRunning()) {

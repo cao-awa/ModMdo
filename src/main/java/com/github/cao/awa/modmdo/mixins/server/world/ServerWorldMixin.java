@@ -5,6 +5,7 @@ import com.github.cao.awa.modmdo.utils.dimension.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import net.minecraft.entity.*;
+import net.minecraft.server.*;
 import net.minecraft.server.world.*;
 import net.minecraft.util.profiler.*;
 import net.minecraft.util.registry.*;
@@ -20,6 +21,8 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World {
+    @Shadow @Final private MinecraftServer server;
+    @Shadow private boolean inBlockTick;
     @Shadow
     @Final
     private ServerEntityManager<Entity> entityManager;
@@ -41,7 +44,7 @@ public abstract class ServerWorldMixin extends World {
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void earlyTickBlockE(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-        tickBlockE(((ServerWorld) (WorldInterface) this));
+        tickBlockE(getThis());
     }
 
     public void tickBlockE(ServerWorld instance) {
@@ -60,6 +63,10 @@ public abstract class ServerWorldMixin extends World {
 
             task.call(instance);
         }
+    }
+
+    public ServerWorld getThis() {
+        return (ServerWorld) (WorldInterface) this;
     }
 
     //    TODO: 2022/6/22 实体无法使用和方块实体类似的多线程方案
