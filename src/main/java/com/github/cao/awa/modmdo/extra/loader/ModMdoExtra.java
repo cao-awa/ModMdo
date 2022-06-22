@@ -8,7 +8,7 @@ import java.util.*;
 public abstract class ModMdoExtra<T> {
     private boolean signAuto = false;
     private UncertainParameter args = new UncertainParameter();
-    private String name = "ModMdoExtra(Ab.)";
+    private String name = "ModMdoExtra<Ab.>";
     private UUID id = UUID.randomUUID();
 
     protected void signAuto() {
