@@ -60,7 +60,7 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
 
     public abstract void action();
 
-    public void err(String message, Exception exception) {
+    public void err(String message, Throwable exception) {
         LOGGER.warn(message + at(), exception);
     }
 

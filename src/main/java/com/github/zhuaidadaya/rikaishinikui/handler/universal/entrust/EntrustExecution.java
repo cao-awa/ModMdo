@@ -67,7 +67,7 @@ public class EntrustExecution {
     public static <T> void trying(ExceptingConsumer<T> action) {
         try {
             action.accept((T) o);
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
         }
     }
@@ -75,7 +75,7 @@ public class EntrustExecution {
     public static <T> void trying(ExceptingConsumer<T> action, Consumer<T> actionWhenException) {
         try {
             action.accept((T) o);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             actionWhenException.accept((T) o);
         }
     }
@@ -83,7 +83,7 @@ public class EntrustExecution {
     public static <T> void trying(T target, ExceptingConsumer<T> action) {
         try {
             action.accept(target);
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
         }
     }
@@ -91,7 +91,7 @@ public class EntrustExecution {
     public static <T> void trying(T target, ExceptingConsumer<T> action, Consumer<T> actionWhenException) {
         try {
             action.accept(target);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             actionWhenException.accept(target);
         }
     }
@@ -105,7 +105,7 @@ public class EntrustExecution {
             for (T target : targets) {
                 try {
                     action.accept(target);
-                } catch (Exception e) {
+                } catch (Throwable e) {
 
                 }
             }
@@ -118,11 +118,11 @@ public class EntrustExecution {
                 for (T target : targets.get()) {
                     try {
                         action.accept(target);
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
 
                     }
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
 
             }
         }
@@ -133,7 +133,7 @@ public class EntrustExecution {
             for (T target : targets) {
                 try {
                     action.accept(target);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     whenException.accept(target);
                 }
             }
@@ -145,7 +145,7 @@ public class EntrustExecution {
             for (T target : targets) {
                 try {
                     action.accept(target);
-                } catch (Exception e) {
+                } catch (Throwable e) {
 
                 }
             }
@@ -157,7 +157,7 @@ public class EntrustExecution {
             for (T target : targets) {
                 try {
                     action.accept(target);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     whenException.accept(target);
                 }
             }
@@ -179,15 +179,15 @@ public class EntrustExecution {
     public static <T> void tryTemporary(ExceptingTemporary action, Temporary whenException) {
         try {
             action.apply();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             whenException.apply();
         }
     }
 
-    public static <T> void tryTemporary(ExceptingTemporary action, Consumer<Exception> whenException) {
+    public static <T> void tryTemporary(ExceptingTemporary action, Consumer<Throwable> whenException) {
         try {
             action.apply();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             whenException.accept(e);
         }
     }
@@ -195,7 +195,7 @@ public class EntrustExecution {
     public static <T> void tryTemporary(ExceptingTemporary action) {
         try {
             action.apply();
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
         }
     }
@@ -205,7 +205,7 @@ public class EntrustExecution {
             if (target != null) {
                 action.accept(target);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
         }
     }
@@ -215,7 +215,7 @@ public class EntrustExecution {
             if (target != null) {
                 action.accept(target);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             whenException.accept(target);
         }
     }
@@ -227,7 +227,7 @@ public class EntrustExecution {
             } else {
                 asNull.accept(null);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
         }
     }
@@ -239,7 +239,7 @@ public class EntrustExecution {
             } else {
                 asNull.accept(null);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             whenException.accept(target);
         }
     }
