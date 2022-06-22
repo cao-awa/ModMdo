@@ -25,7 +25,6 @@ public class ServerHandshakeNetworkHandlerMixin {
 
     /**
      * @author 草awa
-     *
      * @reason
      */
     @Overwrite
