@@ -5,20 +5,22 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.item.*;
 import net.minecraft.nbt.*;
 import net.minecraft.text.*;
+import org.apache.logging.log4j.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
-import static net.minecraft.util.registry.DynamicRegistryManager.*;
-
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
+    @Shadow
+    @Final
+    private static Logger LOGGER;
     @Shadow
     private NbtCompound nbt;
 
     @Shadow
     public abstract Text getName();
-
+//
     @Inject(method = "setNbt", at = @At("RETURN"))
     public void setNbt(NbtCompound nbt, CallbackInfo ci) {
         filterLevel();

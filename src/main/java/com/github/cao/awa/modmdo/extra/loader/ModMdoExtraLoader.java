@@ -67,7 +67,7 @@ public class ModMdoExtraLoader {
             }
         });
 
-        for (Class<?> clazz : REFLECTIONS.getTypesAnnotatedWith(ModMdoAutoExtra.class)) {
+        for (Class<?> clazz : EXTRAS_AUTO.getTypesAnnotatedWith(ModMdoAutoExtra.class)) {
             EntrustExecution.tryTemporary(() -> {
                 TRACKER.info("Registering for auto extra: " + clazz.getName());
                 ModMdoExtra<?> extra = (ModMdoExtra<?>) clazz.getDeclaredConstructor().newInstance();
