@@ -25,6 +25,7 @@ public class ServerHandshakeNetworkHandlerMixin {
 
     /**
      * @author 草awa
+     * @reason
      */
     @Overwrite
     public void onHandshake(HandshakeC2SPacket packet) {

@@ -37,7 +37,7 @@ public abstract class EntityListMixin {
 //            }
 //        });
 //        willProcess.clear();
-//
+
 //        lock.lock();
 
         if (this.iterating != null) {
