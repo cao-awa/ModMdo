@@ -11,8 +11,8 @@ public class TestExtra extends ModMdoExtra<TestExtra> {
 
     @Override
     public void prepare() {
-        //setId(id);
-        //setName("TestModMdo");
+        setId(id);
+        setName("TestModMdo");
     }
 
     @Override

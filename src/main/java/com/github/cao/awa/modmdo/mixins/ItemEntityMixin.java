@@ -5,9 +5,6 @@ import net.minecraft.entity.*;
 import net.minecraft.world.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.*;
-
-import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin extends Entity {
@@ -20,26 +17,13 @@ public abstract class ItemEntityMixin extends Entity {
 
 
     /**
-     * 草二号机取消了重写, 重做了方法
+     * 修改item的age限制
      *
      * @author 草awa
      * @author 草二号机
-     *
      */
-    @Inject(method = "tick",at = @At("RETURN"))
-    public void tick(CallbackInfo ci) {
-        if (SharedVariables.isActive()) {
-            if (age == - 1) {
-                age = itemAge;
-            }
-            age++;
-            if (itemAge % 5999 == 0) {
-                itemAge = 0;
-            }
-            if (age > itemDespawnAge) {
-                discard();
-                age = - 1;
-            }
-        }
+    @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000))
+    public int tick(int constant) {
+        return SharedVariables.itemDespawnAge;
     }
 }

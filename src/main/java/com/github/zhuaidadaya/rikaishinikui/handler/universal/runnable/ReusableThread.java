@@ -3,6 +3,8 @@ package com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
 
+import java.util.concurrent.*;
+
 public class ReusableThread {
     private final Thread executor;
     private Temporary action;
@@ -19,10 +21,10 @@ public class ReusableThread {
         while (running) {
             if (wait) {
                 EntrustExecution.tryTemporary(() -> {
-                    Thread.sleep(1);
+                    TimeUnit.NANOSECONDS.sleep(5000);
                 }, ex -> finish());
             } else {
-                this.action.apply();
+                EntrustExecution.tryTemporary(() -> this.action.apply());
 
                 wait = true;
             }
@@ -57,5 +59,9 @@ public class ReusableThread {
             }
         }
         return false;
+    }
+
+    public void setName(String name) {
+        executor.setName(name);
     }
 }

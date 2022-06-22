@@ -3,6 +3,7 @@ package com.github.cao.awa.modmdo.mixins.world;
 import com.github.cao.awa.modmdo.event.block.state.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.block.*;
+import net.minecraft.block.entity.*;
 import net.minecraft.server.*;
 import net.minecraft.util.math.*;
 import net.minecraft.util.profiler.*;
@@ -20,6 +21,9 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(World.class)
 public abstract class WorldMixin implements WorldAccess {
+    @Shadow public abstract WorldChunk getWorldChunk(BlockPos pos);
+
+    @Shadow @Final public boolean isClient;
     @Shadow
     @Final
     protected List<BlockEntityTickInvoker> blockEntityTickers;
@@ -43,7 +47,6 @@ public abstract class WorldMixin implements WorldAccess {
 
     /**
      * @author 草二号机
-     * @reason
      */
     @Overwrite
     public void tickBlockEntities() {
@@ -68,6 +71,15 @@ public abstract class WorldMixin implements WorldAccess {
 
         this.iteratingTickingBlockEntities = false;
         profiler.pop();
+    }
+
+    @Inject(method = "getBlockEntity", at = @At("HEAD"), cancellable = true)
+    public void getBlockEntity(BlockPos pos, CallbackInfoReturnable<BlockEntity> cir) {
+        if (this.isOutOfHeightLimit(pos)) {
+            cir.setReturnValue(null);
+        } else {
+            cir.setReturnValue(this.getWorldChunk(pos).getBlockEntity(pos, WorldChunk.CreationType.IMMEDIATE));
+        }
     }
 
     @Shadow

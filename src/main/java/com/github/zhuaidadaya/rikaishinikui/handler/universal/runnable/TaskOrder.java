@@ -18,7 +18,7 @@ public class TaskOrder<T> {
     private boolean usable = true;
     private boolean noDelay;
     private boolean reuse;
-    private @NotNull ReusableThread thread = new ReusableThread(() -> {
+    private final @NotNull ReusableThread thread = new ReusableThread(() -> {
     });
 
     public TaskOrder(Consumer<T> action, String register) {
@@ -29,6 +29,7 @@ public class TaskOrder<T> {
         this.action = new TargetCountBoolean<>(action, true, true);
         this.disposable = disposable;
         this.register = register;
+        thread.setName(register);
     }
 
     public boolean isReuse() {
@@ -68,6 +69,7 @@ public class TaskOrder<T> {
             action.reverse();
             if (enforce) {
                 action(target);
+                action.reverse();
             } else {
                 thread.execute(() -> {
                     action(target);

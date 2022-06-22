@@ -3,6 +3,7 @@ package com.github.cao.awa.modmdo.storage;
 import com.github.cao.awa.hyacinth.logging.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
+import com.github.cao.awa.modmdo.develop.clazz.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
@@ -36,11 +37,10 @@ import net.minecraft.server.network.*;
 import net.minecraft.server.world.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
+import net.minecraft.world.*;
 import org.apache.logging.log4j.*;
 import org.json.*;
-import org.reflections.*;
 
-import java.lang.reflect.*;
 import java.text.*;
 import java.util.*;
 
@@ -68,21 +68,8 @@ public class SharedVariables {
     public static final GlobalTracker TRACKER = new GlobalTracker();
     public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
     public static final SecureKeys SECURE_KEYS = new SecureKeys();
-    public static final Reflections REFLECTIONS = new Reflections();
-    public static final Object2ObjectOpenHashMap<String, Method> tickMethods = new Object2ObjectOpenHashMap<>();
-    public static final TaskOrder<ServerWorld> tickBlockEntitiesTask = new TaskOrder<>(w -> {
-        EntrustExecution.notNull(w, world -> {
-            EntrustExecution.tryTemporary(() -> {
-                Method method = tickMethods.get("tickBlockEntities");
-                if (method == null) {
-                    method = world.getClass().getMethod("tickBlockEntities");
-                    method.setAccessible(true);
-                    tickMethods.put("tickBlockEntities", method);
-                }
-                method.invoke(world);
-            });
-        });
-    }, "tickBlockEntities");
+    public static final Object2ObjectOpenHashMap<EntityList, TaskOrder<EntityList>> entitiesTasks = new Object2ObjectOpenHashMap<>();
+    public static final Object2ObjectOpenHashMap<ServerWorld, TaskOrder<ServerWorld>> blockEntitiesTasks = new Object2ObjectOpenHashMap<>();
     public static String identifier;
     public static String entrust = "ModMdo";
     public static boolean enableRanking = false;
@@ -128,6 +115,8 @@ public class SharedVariables {
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
     public static TickPerSecondAnalyzer tps = new TickPerSecondAnalyzer();
+
+    public static ClazzScanner EXTRAS_AUTO = new ClazzScanner(ModMdoExtra.class);
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
