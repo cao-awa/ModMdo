@@ -37,7 +37,6 @@ import net.minecraft.server.network.*;
 import net.minecraft.server.world.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
-import net.minecraft.world.*;
 import org.apache.logging.log4j.*;
 import org.json.*;
 
@@ -68,8 +67,8 @@ public class SharedVariables {
     public static final GlobalTracker TRACKER = new GlobalTracker();
     public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
     public static final SecureKeys SECURE_KEYS = new SecureKeys();
-    public static final Object2ObjectOpenHashMap<EntityList, TaskOrder<EntityList>> entitiesTasks = new Object2ObjectOpenHashMap<>();
-    public static final Object2ObjectOpenHashMap<ServerWorld, TaskOrder<ServerWorld>> blockEntitiesTasks = new Object2ObjectOpenHashMap<>();
+    public static final Object2ObjectArrayMap<ServerChunkManager, TaskOrder<ServerChunkManager>> chunkTasks = new Object2ObjectArrayMap<>();
+    public static final Object2ObjectArrayMap<ServerWorld, TaskOrder<ServerWorld>> blockEntitiesTasks = new Object2ObjectArrayMap<>();
     public static String identifier;
     public static String entrust = "ModMdo";
     public static boolean enableRanking = false;
