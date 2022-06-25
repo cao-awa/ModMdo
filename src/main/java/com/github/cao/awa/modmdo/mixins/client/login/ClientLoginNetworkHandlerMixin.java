@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins.client.login;
 
+import com.github.cao.awa.modmdo.develop.text.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
 import net.minecraft.client.util.*;
@@ -16,7 +17,7 @@ import java.math.*;
 import java.security.*;
 import java.util.function.*;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ClientLoginNetworkHandler.class)
 public abstract class ClientLoginNetworkHandlerMixin {
@@ -49,7 +50,7 @@ public abstract class ClientLoginNetworkHandlerMixin {
             throw new IllegalStateException("Protocol error", var8);
         }
 
-        this.statusConsumer.accept(new TranslatableText("connect.authorizing"));
+        this.statusConsumer.accept(Translatable.translatable("connect.authorizing").text());
         NetworkUtils.EXECUTOR.submit(() -> {
             if (!isModMdo) {
                 Text text = this.joinServerSession(string);
@@ -63,7 +64,7 @@ public abstract class ClientLoginNetworkHandlerMixin {
                 }
             }
 
-            this.statusConsumer.accept(new TranslatableText("connect.encrypting"));
+            this.statusConsumer.accept(Translatable.translatable("connect.encrypting").text());
             this.connection.send(loginKeyC2SPacket, (future) -> {
                 this.connection.setupEncryption(cipher, cipher2);
             });
