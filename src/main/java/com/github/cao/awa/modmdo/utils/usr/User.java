@@ -16,11 +16,10 @@ public class User extends Storable {
     private int level = 1;
     private long onlineTime = 0;
     private String modmdoIdentifier = "";
-    private String suffix = null;
     private int modmdoVersion;
+    private String modmdoName;
     private Language language = SharedVariables.getLanguage();
     private Text message = null;
-
     public User() {
     }
     public User(String name) {
@@ -74,12 +73,13 @@ public class User extends Storable {
         modmdoIdentifier = EntrustParser.tryCreate(() -> json.getString("identifier"), "");
     }
 
-    public String getSuffix() {
-        return suffix;
+    public String getModmdoName() {
+        return modmdoName;
     }
 
-    public void setSuffix(String suffix) {
-        this.suffix = suffix;
+    public User setModmdoName(String modmdoName) {
+        this.modmdoName = modmdoName;
+        return this;
     }
 
     public long getLoginTime() {
@@ -130,18 +130,6 @@ public class User extends Storable {
         this.name = name;
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = UUID.fromString(uuid);
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
-
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
         json.put("onlineTime", onlineTime);
@@ -152,6 +140,18 @@ public class User extends Storable {
         json.put("identifier", modmdoIdentifier);
 
         return json;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = UUID.fromString(uuid);
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public int getLevel() {

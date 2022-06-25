@@ -133,15 +133,12 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
         event.clientSetting.register(event -> {
             loginUsers.getUser(event.getPlayer()).setLanguage(Language.ofs(event.getLanguage()));
-        }, this);
-
-        event.clientSetting.register(event -> {
             User user = loginUsers.getUser(event.getPlayer());
             if (user.getMessage() != null) {
                 event.getPlayer().sendMessage(minecraftTextFormat.format(new Dictionary(user.getLanguage().getName()), TextUtil.translatable(user.getMessage())).text(), false);
                 user.setMessage(null);
             }
-        }, this);
+        }, this,"SettingClient");
 
         event.gameTickStart.register(event -> {
             PlayerManager players = server.getPlayerManager();
@@ -171,16 +168,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             for (ModMdoDataProcessor processor : modmdoConnections) {
                 processor.tick(server);
             }
-        }, this);
-
-//        event.events.forEach((k, v) -> {
-//            if (v.getClass().getName().equals("com.github.cao.awa.modmdo.event.server.tick.GameTickStartEvent")) {
-//                return;
-//            }
-//            v.register(e -> {
-//                tracker.submit("Handle event: " + e.getClass().getName());
-//            });
-//        });
+        }, this, "HandlePlayers");
     }
 
 }

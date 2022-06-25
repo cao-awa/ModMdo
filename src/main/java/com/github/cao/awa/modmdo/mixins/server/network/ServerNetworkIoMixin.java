@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins.network;
+package com.github.cao.awa.modmdo.mixins.server.network;
 
 import io.netty.bootstrap.*;
 import io.netty.channel.*;

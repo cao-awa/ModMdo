@@ -99,13 +99,13 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                     break;
                 }
                 EntrustExecution.tryTemporary(() -> {
-                    BASE_FORMATTER.get("^{variable}").accept(this, s.setSub(name));
+                    BASE_FORMATTER.get("^{variable}").accept(s.setSub(name));
                 }, e -> {
                     err("Cannot find target variable: " + name, e);
                     active = false;
                 });
             } else {
-                EntrustExecution.tryTemporary(() -> BASE_FORMATTER.get(s.get()).accept(this, s), ex -> {
+                EntrustExecution.tryTemporary(() -> BASE_FORMATTER.get(s.get()).accept(s), ex -> {
                 });
             }
         }

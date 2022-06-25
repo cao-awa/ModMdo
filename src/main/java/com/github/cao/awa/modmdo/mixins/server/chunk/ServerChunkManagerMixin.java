@@ -43,16 +43,21 @@ public abstract class ServerChunkManagerMixin {
 //
 //            profiler.visit("getChunkCacheMiss");
 //            CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> future = this.getChunkFuture(x, z, leastStatus, create);
-//            Objects.requireNonNull(future);
-//            Chunk chunk = future.join().map((chunkx) -> chunkx, (unloaded) -> {
-//                if (create) {
-//                    throw Util.throwOrPause(new IllegalStateException("Chunk not there when requested: " + unloaded));
-//                } else {
-//                    return null;
-//                }
-//            });
-//            this.putInCache(pos, chunk, leastStatus);
-//            lock.unlock();
+//            Chunk chunk;
+//            if (future != null) {
+//                chunk = future.join().map((chunkx) -> chunkx, (unloaded) -> {
+//                    if (create) {
+//                        throw Util.throwOrPause(new IllegalStateException("Chunk not there when requested: " + unloaded));
+//                    } else {
+//                        return null;
+//                    }
+//                });
+//                this.putInCache(pos, chunk, leastStatus);
+//                lock.unlock();
+//            } else {
+//                lock.unlock();
+//                throw new NullPointerException();
+//            }
 //            cir.setReturnValue(chunk);
 //        }
 //    }
