@@ -18,15 +18,15 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Auto
 public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
-    public static final Object2ObjectArrayMap<String, BiConsumer<ModMdoEventTrigger<?>, Receptacle<String>>> BASE_FORMATTER = EntrustParser.operation(new Object2ObjectArrayMap<>(), map -> {
-        map.put("^{variable}", (trigger, str) -> {
+    public static final Object2ObjectArrayMap<String, Consumer<Receptacle<String>>> BASE_FORMATTER = EntrustParser.operation(new Object2ObjectArrayMap<>(), map -> {
+        map.put("^{variable}", (str) -> {
             ModMdoPersistent<?> v = SharedVariables.variables.get(str.getSub()).clone();
             EntrustExecution.tryTemporary(() -> {
                 v.handle(new JSONObject(str.get()));
             });
             str.set(v.get().toString());
         });
-        map.put("^{random}", (trigger, str) -> {
+        map.put("^{random}", (str) -> {
             str.set(String.valueOf(new SecureRandom().nextInt(101)));
         });
     });

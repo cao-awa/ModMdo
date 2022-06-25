@@ -2,7 +2,6 @@ package com.github.cao.awa.modmdo.server.login;
 
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.develop.text.*;
-import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
@@ -21,7 +20,7 @@ public class ServerLogin {
         login(name, uuid, identifier, modmdoVersion, null);
     }
 
-    public void login(String name, String uuid, String identifier, String modmdoVersion, String language) {
+    public void login(String name, String uuid, String identifier, String modmdoVersion, String modmdoName) {
         int version = EntrustParser.tryCreate(() -> Integer.valueOf(modmdoVersion), - 1);
 
         if (SharedVariables.config.getConfigBoolean("modmdo_whitelist")) {
@@ -33,7 +32,7 @@ public class ServerLogin {
         } else {
             EntrustExecution.tryTemporary(() -> {
                 TRACKER.info("Login player: " + name);
-                SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setLanguage(language == null ? getLanguage() : Language.ofs(language)));
+                SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setModmdoName(modmdoName));
             });
         }
     }
@@ -65,6 +64,7 @@ public class ServerLogin {
             SharedVariables.loginUsers.getUser(uuid).setIdentifier(identifier).setVersion(version);
         } catch (Exception e) {
             if (SharedVariables.whitelist.getFromId(identifier) == null && ! temporaryInvite.containsName(name)) {
+                TRACKER.info("Reject player using id login: " + name);
                 SharedVariables.rejectUsers.put(new User(name, uuid, - 1, identifier, version));
             } else {
                 TRACKER.info("Login player using id login: " + name);
@@ -100,6 +100,7 @@ public class ServerLogin {
             SharedVariables.loginUsers.getUser(uuid).setIdentifier(identifier).setVersion(version);
         } catch (Exception e) {
             if (EntrustParser.trying(() -> ! SharedVariables.whitelist.get(name).getIdentifier().equals(identifier), () -> ! temporaryInvite.containsName(name))) {
+                TRACKER.info("Reject player using strict login: " + name);
                 reject(name, uuid, identifier, null);
             } else {
                 TRACKER.info("Login player using strict login: " + name);
@@ -110,10 +111,6 @@ public class ServerLogin {
 
     public void reject(String name, String uuid, String identifier, Text reson) {
         SharedVariables.rejectUsers.put(new User(name, uuid, - 1, identifier, - 1).setMessage(reson));
-    }
-
-    public void suffix(User user, String suffix) {
-        user.setSuffix(suffix);
     }
 
     public void loginUsingYgg(String name, String uuid) {
@@ -141,6 +138,7 @@ public class ServerLogin {
             SharedVariables.temporaryStation.remove(name);
         });
         if (! uuid.equals(SharedVariables.whitelist.get(name).getRecorde().uuid().toString()) && ! temporaryInvite.containsName(name)) {
+            TRACKER.info("Reject player using ygg login: " + name);
             SharedVariables.rejectUsers.put(new User(name, uuid, - 1, "", 0));
         } else {
             TRACKER.info("Login player using ygg login: " + name);

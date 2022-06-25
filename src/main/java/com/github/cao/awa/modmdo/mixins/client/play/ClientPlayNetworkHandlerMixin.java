@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins;
+package com.github.cao.awa.modmdo.mixins.client.play;
 
 import com.github.cao.awa.modmdo.commands.argument.*;
 import com.github.cao.awa.modmdo.security.level.*;
@@ -77,13 +77,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             SECURE_KEYS.removeAddress(address);
                             SECURE_KEYS.save();
                         }
-                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(key).writeString(String.valueOf(MODMDO_VERSION)).writeString(client.getLanguageManager().getLanguage().getName())));
-                    });
-                }
-
-                if (informationSign.equals(SUFFIX_CHANNEL)) {
-                    TRACKER.submit("Server are requesting suffix data", () -> {
-                        connection.send(new CustomPayloadC2SPacket(SUFFIX_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(SUFFIX_CHANNEL.toString()).writeString(SUFFIX)));
+                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(key).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME)));
                     });
                 }
 
