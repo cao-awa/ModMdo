@@ -27,6 +27,7 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import com.mojang.brigadier.context.*;
 import io.netty.buffer.*;
+import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.s2c.play.*;
@@ -45,14 +46,14 @@ import java.util.*;
 
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.37";
-    public static final String SUFFIX = "-Debug";
+    public static final String VERSION_ID = "1.0.38";
+    public static final String SUFFIX = "-ES";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
-    public static final String RELEASE_TIME = "2022.6.22";
+    public static final String RELEASE_TIME = "2022.6.25";
     public static final int MODMDO_VERSION = 31;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
-    public static final Object2IntRBTreeMap<String> modMdoVersionToIdMap = new Object2IntRBTreeMap<>();
-    public static final Object2ObjectRBTreeMap<Integer, String> modMdoIdToVersionMap = new Object2ObjectRBTreeMap<>();
+    public static final Object2IntOpenHashMap<String> modMdoVersionToIdMap = new Object2IntOpenHashMap<>();
+    public static final Int2ObjectOpenHashMap<String> modMdoIdToVersionMap = new Int2ObjectOpenHashMap<>();
     public static final NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
     public static final NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();
     public static final NumberFormat fractionDigits0 = NumberFormat.getNumberInstance();
@@ -62,7 +63,6 @@ public class SharedVariables {
     public static final Identifier CLIENT_CHANNEL = new Identifier("modmdo:client");
     public static final Identifier DATA_CHANNEL = new Identifier("modmdo:data");
     public static final Identifier TOKEN_CHANNEL = new Identifier("modmdo:token");
-    public static final Identifier SUFFIX_CHANNEL = new Identifier("modmdo:suffix");
     public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> variables = new Object2ObjectOpenHashMap<>();
     public static final GlobalTracker TRACKER = new GlobalTracker();
     public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
@@ -251,6 +251,10 @@ public class SharedVariables {
 
     public static int getPlayerModMdoVersion(ServerPlayerEntity player) {
         return EntrustParser.tryCreate(() -> loginUsers.getUser(player).getVersion(), - 1);
+    }
+
+    public static String getPlayerModMdoName(ServerPlayerEntity player) {
+        return EntrustParser.trying(() -> loginUsers.getUser(player).getModmdoName());
     }
 
     public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, CommandContext<ServerCommandSource> source) {

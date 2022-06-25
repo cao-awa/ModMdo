@@ -176,7 +176,7 @@ public class ModMdoTriggerBuilder {
 
     public void prepareTargeted(JSONObject event, EntityTargetedEvent<?> targeted, File trace) {
         String instance = EntrustParser.trying(() -> event.getString("target-instanceof"));
-        if (targeted.getTargeted().size() > 1 || EntrustParser.trying(() -> classMap.getOrDefault(instance, instance).equals(targeted.getTargeted().get(0).getClass().getName()), () -> true)) {
+        if (targeted.getTargeted().size() > 1 || instance == null || instance.equals("") || EntrustParser.trying(() -> classMap.getOrDefault(instance, instance).equals(targeted.getTargeted().get(0).getClass().getName()), () -> true)) {
             TriggerSelector selector = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
             OperationalInteger i = new OperationalInteger();
             selector.select(event.getJSONObject("triggers"), (name, json) -> {
@@ -185,7 +185,6 @@ public class ModMdoTriggerBuilder {
                         TargetedTrigger<EntityTargetedEvent<?>> trigger = (TargetedTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                         return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
                     }, ex -> {
-                        ex.printStackTrace();
                         TRACKER.submit(Thread.currentThread(), "Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
                         return null;
                     }), ModMdoEventTrigger::action);

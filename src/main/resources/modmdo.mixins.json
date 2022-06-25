@@ -4,19 +4,20 @@
     "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
-        "ClientConnectionMixin",
+        "ArgumentTypesMixin",
+        "connection.ClientConnectionMixin",
         "EnchantmentHelperMixin",
         "EntityMixin",
         "ItemEntityMixin",
         "ItemStackMixin",
         "MinecraftServerSession",
         "PlayerManagerMixin",
-        "ServerHandshakeNetworkHandlerMixin",
-        "ServerLoginNetworkHandlerMixin",
-        "ServerPlayNetworkHandlerMixin",
+        "server.login.ServerHandshakeNetworkHandlerMixin",
+        "server.login.ServerLoginNetworkHandlerMixin",
+        "server.play.ServerPlayNetworkHandlerMixin",
         "block.BlockMixin",
         "block.entity.LootableContainerBlockEntityMixin",
-        "client.ClientLoginNetworkHandlerMixin",
+        "client.login.ClientLoginNetworkHandlerMixin",
         "client.ServerInfoMixin",
         "command.CommandManagerMixin",
         "command.block.CommandBlockMixin",
@@ -29,8 +30,8 @@
         "entity.player.ServerPlayerEntityMixin",
         "explosion.ExplosionMixin",
         "hopper.screen.HopperScreenHandlerMixin",
-        "network.ServerNetworkIoMixin",
-        "network.ServerQueryNetworkHandlerMixin",
+        "server.network.ServerNetworkIoMixin",
+        "server.network.ServerQueryNetworkHandlerMixin",
         "oshi.FileUtilMixin",
         "server.MinecraftServerMixin",
         "server.chunk.ServerChunkManagerMixin",
@@ -42,7 +43,7 @@
         "world.WorldMixin"
     ],
     "client": [
-        "ClientPlayNetworkHandlerMixin"
+        "client.play.ClientPlayNetworkHandlerMixin"
     ],
     "server": [
     ],

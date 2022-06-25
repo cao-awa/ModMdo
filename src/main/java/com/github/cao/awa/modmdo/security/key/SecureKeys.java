@@ -3,6 +3,7 @@ package com.github.cao.awa.modmdo.security.key;
 import com.github.cao.awa.modmdo.security.*;
 import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.config.encryption.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -96,7 +97,7 @@ public class SecureKeys extends Storable {
 
     private String use(SecureLevel level, String target) {
         return switch (level) {
-            case UNEQUAL_KEY -> keys.get(target).getPrivateKey();
+            case UNEQUAL_KEY -> EntrustParser.trying(() -> AES.aesEncryptToString(staticConfig.get("identifier").getBytes(), keys.get(target).getPrivateKey().getBytes()), ex -> staticConfig.get("identifier"));
             case UNEQUAL_ID -> keys.get(target).getId();
             default -> staticConfig.get("identifier");
         };

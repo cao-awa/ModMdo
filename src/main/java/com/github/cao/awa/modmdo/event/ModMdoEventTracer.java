@@ -22,7 +22,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
 
 public class ModMdoEventTracer {
     public final EntityDeathEvent entityDeath = EntityDeathEvent.snap();
-    public final BlockDestroyEvent blockDestroy = BlockDestroyEvent.snap();
+    public final BlockBreakEvent blockDestroy = BlockBreakEvent.snap();
     public final BlockPlaceEvent blockPlace = BlockPlaceEvent.snap();
     public final BlockStateSetEvent blockStateSet = BlockStateSetEvent.snap();
     public final BlockExplosionDestroyEvent blockExplosion = BlockExplosionDestroyEvent.snap();
@@ -30,6 +30,7 @@ public class ModMdoEventTracer {
     public final JoinServerEvent joinServer = JoinServerEvent.snap();
     public final QuitServerEvent quitServer = QuitServerEvent.snap();
     public final GameTickStartEvent gameTickStart = GameTickStartEvent.snap();
+    public final GameTickEndEvent gameTickEnd = GameTickEndEvent.snap();
     public final ServerStartedEvent serverStarted = ServerStartedEvent.snap();
     public final GameChatEvent gameChat = GameChatEvent.snap();
     public final ClientSettingEvent clientSetting = ClientSettingEvent.snap();
@@ -52,6 +53,7 @@ public class ModMdoEventTracer {
         map.put(serverQuery.clazz(), serverQuery);
         map.put(commandExecute.clazz(), commandExecute);
         map.put(commandBlockExecute.clazz(), commandBlockExecute);
+        map.put(gameTickEnd.clazz(), gameTickEnd);
     });
     public final Object2ObjectOpenHashMap<String, EntityTargetedEvent<?>> targeted = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
         map.put(entityDeath.clazz(), entityDeath);
@@ -62,6 +64,7 @@ public class ModMdoEventTracer {
         map.put(joinServer.clazz(), joinServer);
         map.put(quitServer.clazz(), quitServer);
         map.put(gameTickStart.clazz(), gameTickStart);
+        map.put(gameTickEnd.clazz(), gameTickEnd);
         map.put(gameChat.clazz(), gameChat);
         map.put(clientSetting.clazz(), clientSetting);
     });

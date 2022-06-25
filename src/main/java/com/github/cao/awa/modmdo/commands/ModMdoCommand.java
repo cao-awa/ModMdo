@@ -12,6 +12,7 @@ import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
@@ -237,20 +238,37 @@ public class ModMdoCommand extends SimpleCommand {
             SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("whitelist_only_id"));
             return 0;
         }))).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
-            Certificate wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
-            if (SharedVariables.whitelist.containsName(wl.getName())) {
-                SharedVariables.whitelist.remove(wl.getName());
-                SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.removed", wl.getName()));
-                SharedVariables.updateWhitelistNames(SimpleCommandOperation.getServer(remove), true);
-                SharedVariables.saveVariables();
-                return 0;
-            }
-            SimpleCommandOperation.sendError(remove, TextUtil.translatable("arguments.permanent.whitelist.not.registered"));
-            return - 1;
-        }))).then(literal("list").executes(showWhiteList -> {
-            showWhitelist(showWhiteList);
-            return 0;
-        }))).then(literal("compatibleOnlineMode").executes(getCompatible -> {
+                    Certificate wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
+                    if (SharedVariables.whitelist.containsName(wl.getName())) {
+                        SharedVariables.whitelist.remove(wl.getName());
+                        SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.removed", wl.getName()));
+                        SharedVariables.updateWhitelistNames(SimpleCommandOperation.getServer(remove), true);
+                        SharedVariables.saveVariables();
+                        return 0;
+                    }
+                    SimpleCommandOperation.sendError(remove, TextUtil.translatable("arguments.permanent.whitelist.not.registered"));
+                    return - 1;
+                }))).then(literal("list").executes(showWhiteList -> {
+                    showWhitelist(showWhiteList);
+                    return 0;
+                }))
+                //                        .then(literal("multiple").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
+                //            Certificate wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
+                //            if (temporaryStation.containsName(wl.getName())) {
+                //                SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.multiple.already", wl.getName()));
+                //                return -1;
+                //            }
+                //            if (SharedVariables.whitelist.containsName(wl.getName())) {
+                //                temporaryStation.put(wl.getName(), new TemporaryCertificate(wl.getName(), new LoginRecorde(null, null,LoginRecordeType.MULTIPLE), 0,0));
+                //                SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.multiple", wl.getName()));
+                //                SharedVariables.updateWhitelistNames(SimpleCommandOperation.getServer(remove), true);
+                //                SharedVariables.saveVariables();
+                //                return 0;
+                //            }
+                //            SimpleCommandOperation.sendError(remove, TextUtil.translatable("arguments.permanent.whitelist.not.registered"));
+                //            return - 1;
+                //        })))
+        ).then(literal("compatibleOnlineMode").executes(getCompatible -> {
             SimpleCommandOperation.sendFeedback(getCompatible, formatConfigReturnMessage("compatible_online_mode"));
             return 0;
         }).then(literal("enable").executes(enable -> {
@@ -388,12 +406,12 @@ public class ModMdoCommand extends SimpleCommand {
                     }
                 }
             });
-            builder.append(minecraftTextFormat.format(loginUsers.getUser(getPlayer(list)),"modmdo.event.total", event.registered()).getString());
+            builder.append(minecraftTextFormat.format(loginUsers.getUser(getPlayer(list)), "modmdo.event.total", event.registered()).getString());
             sendFeedback(list, TextUtil.translatable(builder.toString()));
             return 0;
         })).then(literal("reload").executes(e -> {
-            Pair<Integer, Integer> pair = ModMdoStdInitializer.loadEvent(true);
-            sendFeedback(e, TextUtil.translatable("modmdo.event.reload.success", pair.getLeft(), pair.getRight()));
+            Legacy<Integer, Integer> pair = ModMdoStdInitializer.loadEvent(true);
+            sendFeedback(e, TextUtil.translatable("modmdo.event.reload.success", pair.newly(), pair.stale()));
             return 0;
         }))));
         return this;
@@ -469,9 +487,9 @@ public class ModMdoCommand extends SimpleCommand {
 
     public Translatable formatModMdoDescription(ServerPlayerEntity player) {
         Translatable modmdoVersion;
-        if (SharedVariables.getPlayerModMdoVersion(player) > 0) {
-            String suffix = loginUsers.getUser(player).getSuffix();
-            modmdoVersion = TextUtil.translatable("modmdo.description.your.modmdo", SharedVariables.modMdoIdToVersionMap.get(SharedVariables.getPlayerModMdoVersion(player)) + (suffix == null ? "" : loginUsers.getUser(player).getSuffix()));
+        String name;
+        if (SharedVariables.getPlayerModMdoVersion(player) > 0 && (name = getPlayerModMdoName(player)) != null) {
+            modmdoVersion = TextUtil.translatable("modmdo.description.your.modmdo", name);
         } else {
             modmdoVersion = TextUtil.translatable("modmdo.description.you.do.not.have.modmdo");
         }
