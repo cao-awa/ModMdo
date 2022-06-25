@@ -8,7 +8,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 public class ServerTickListener {
     public void listener() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-
+            event.submit(new GameTickEndEvent(server));
         });
 
         ServerTickEvents.START_SERVER_TICK.register(server -> {

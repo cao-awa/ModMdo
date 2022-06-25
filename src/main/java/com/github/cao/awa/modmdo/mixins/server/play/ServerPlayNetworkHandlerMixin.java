@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins;
+package com.github.cao.awa.modmdo.mixins.server.play;
 
 import com.github.cao.awa.modmdo.event.client.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
@@ -93,14 +93,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
                             if (modMdoType == ModMdoType.SERVER) {
                                 serverLogin.login(data1, data2, data3, data4, data5);
                             }
-                        }
-                    }
-
-                    if (channel.equals(SUFFIX_CHANNEL)) {
-                        LOGGER.debug("Client are sent suffix data: " + data1);
-                        TRACKER.submit("Suffix data1: " + data1);
-                        if (loginUsers.hasUser(player)) {
-                            serverLogin.suffix(loginUsers.getUser(player), data1);
                         }
                     }
                 });

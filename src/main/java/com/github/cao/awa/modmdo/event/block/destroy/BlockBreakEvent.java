@@ -16,14 +16,14 @@ import net.minecraft.util.registry.*;
 import net.minecraft.world.*;
 
 @Auto
-public class BlockDestroyEvent extends EntityTargetedEvent<BlockDestroyEvent> {
+public class BlockBreakEvent extends EntityTargetedEvent<BlockBreakEvent> {
     private final PlayerEntity destroyBy;
     private final BlockState state;
     private final BlockPos pos;
     private final World world;
     private final MinecraftServer server;
 
-    public BlockDestroyEvent(PlayerEntity destroyBy, BlockState state, BlockPos pos, World world, MinecraftServer server) {
+    public BlockBreakEvent(PlayerEntity destroyBy, BlockState state, BlockPos pos, World world, MinecraftServer server) {
         this.destroyBy = destroyBy;
         this.state = state;
         this.pos = pos;
@@ -31,7 +31,7 @@ public class BlockDestroyEvent extends EntityTargetedEvent<BlockDestroyEvent> {
         this.server = server;
     }
 
-    private BlockDestroyEvent() {
+    private BlockBreakEvent() {
         this.destroyBy = null;
         this.state = null;
         this.pos = null;
@@ -39,8 +39,8 @@ public class BlockDestroyEvent extends EntityTargetedEvent<BlockDestroyEvent> {
         this.server = null;
     }
 
-    public static BlockDestroyEvent snap() {
-        return new BlockDestroyEvent();
+    public static BlockBreakEvent snap() {
+        return new BlockBreakEvent();
     }
 
     public World getWorld() {
@@ -63,7 +63,7 @@ public class BlockDestroyEvent extends EntityTargetedEvent<BlockDestroyEvent> {
         return server;
     }
 
-    public BlockDestroyEvent fuse(Previously<BlockDestroyEvent> previously, BlockDestroyEvent delay) {
+    public BlockBreakEvent fuse(Previously<BlockBreakEvent> previously, BlockBreakEvent delay) {
         return previously.target();
     }
 
@@ -94,7 +94,7 @@ public class BlockDestroyEvent extends EntityTargetedEvent<BlockDestroyEvent> {
         return list;
     }
 
-    public void adaptive(BlockDestroyEvent event) {
+    public void adaptive(BlockBreakEvent event) {
         if (isSubmitted()) {
             action();
         } else {

@@ -23,12 +23,11 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     private boolean submitted = false;
 
     public synchronized void register(Consumer<T> action, File register) {
-        actions.add(new TaskOrder<>(action, "File: \n  " +  register.getPath()));
+        actions.add(new TaskOrder<>(action, "F): " +  register.getPath()));
     }
 
-    public synchronized void register(Consumer<T> action, ModMdoExtra<?> register) {
-        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-        actions.add(new TaskOrder<>(action, "Mod \"" + register.getName() + "\": \n  " + trace[2]));
+    public synchronized void register(Consumer<T> action, ModMdoExtra<?> register, String name) {
+        actions.add(new TaskOrder<>(action, "\"" + register.getName() + "\": " + name));
     }
 
     public ObjectArrayList<String> getRegistered() {

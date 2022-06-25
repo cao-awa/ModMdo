@@ -5,6 +5,8 @@ import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
 
+import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
+
 public abstract class Certificate extends Storable {
     public final String name;
     public final LoginRecorde recorde;
@@ -25,7 +27,7 @@ public abstract class Certificate extends Storable {
                 return PermanentCertificate.build(json);
             }
         }, ex -> {
-            ex.printStackTrace();
+            TRACKER.submit("Failed build certificate", ex);
             return null;
         });
     }

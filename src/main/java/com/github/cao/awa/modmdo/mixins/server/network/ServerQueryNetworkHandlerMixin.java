@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins.network;
+package com.github.cao.awa.modmdo.mixins.server.network;
 
 import com.github.cao.awa.modmdo.event.server.query.*;
 import net.minecraft.network.*;

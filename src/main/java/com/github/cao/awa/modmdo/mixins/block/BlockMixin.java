@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.*;
 public class BlockMixin {
     @Inject(method = "onBreak", at = @At("HEAD"))
     public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player, CallbackInfo ci) {
-        SharedVariables.event.submit(new BlockDestroyEvent(player, state, pos, world, player.getServer()));
+        SharedVariables.event.submit(new BlockBreakEvent(player, state, pos, world, player.getServer()));
     }
 
     @Inject(method = "onPlaced", at = @At("HEAD"))

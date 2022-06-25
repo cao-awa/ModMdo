@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins;
+package com.github.cao.awa.modmdo.mixins.server.login;
 
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.lang.*;
@@ -33,27 +33,38 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     @Shadow
     @Final
     MinecraftServer server;
-    private boolean authing = false;
-    private boolean preReject = false;
-    private boolean ready = false;
     @Shadow
     @Nullable GameProfile profile;
 
+    private boolean preReject = false;
+    private boolean authing = false;
+    private boolean doCheckModMdo = false;
+
+    private GameProfile profileOld;
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    public void tick(CallbackInfo ci) {
+        if (doCheckModMdo) {
+            acceptPlayer();
+            doCheckModMdo = false;
+        }
+    }
+
+    @Shadow
+    public abstract void acceptPlayer();
+
     /**
-     * 如果玩家为null, 则拒绝将玩家添加进服务器
-     * (因为其他地方有cancel, 所以可能null)
-     *
      * @author 草awa
      * @author 草二号机
      */
     @Redirect(method = "addToServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
-    private void addToServer(PlayerManager manager, ClientConnection connection, ServerPlayerEntity player) {
+    private void onPlayerConnect(PlayerManager manager, ClientConnection connection, ServerPlayerEntity player) {
         if (SharedVariables.isActive()) {
             if (player == null)
                 return;
 
             if (server.isOnlineMode()) {
-                if (! (profile == null || profile.getId() == null)) {
+                if (! (profile == null || profile.getId() == null) && !preReject) {
                     if (config.getConfigBoolean("compatible_online_mode")) {
                         EntrustExecution.tryTemporary(() -> {
                             serverLogin.loginUsingYgg(EntityUtil.getName(player), profile.getId().toString());
@@ -145,10 +156,6 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                                 TRACKER.info("accepted nano: " + nano + " (" + EntityUtil.getName(player) + ")");
 
                                 if (loginUsers.hasUser(player)) {
-                                    TRACKER.submit("Server send test packet: modmdo version suffix test", () -> {
-                                        connection.send(new CustomPayloadS2CPacket(SUFFIX_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(SUFFIX_CHANNEL)));
-                                    });
-
                                     updateWhitelistNames(server, true);
                                     updateTemporaryWhitelistNames(server, true);
                                     updateModMdoConnectionsNames(server);
@@ -192,22 +199,22 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
     @Inject(method = "onKey", at = @At("HEAD"))
     public void onKey(LoginKeyC2SPacket packet, CallbackInfo ci) {
-        System.out.println("???");
+        profileOld = profile;
         authing = true;
     }
 
     @Inject(method = "disconnect", at = @At("HEAD"), cancellable = true)
     public void disconnect(Text reason, CallbackInfo ci) {
-        if (authing && config.getConfigBoolean("compatible_online_mode")) {
+        if (authing && config.getConfigBoolean("compatible_online_mode") && config.getConfigBoolean("modmdo_whitelist")) {
+            profile = profileOld;
             preReject = true;
-            ready = true;
+            doCheckModMdo = true;
             ci.cancel();
         }
     }
 
-    @Shadow
-    public abstract void acceptPlayer();
-
-    @Shadow
-    protected abstract GameProfile toOfflineProfile(GameProfile profile);
+    @ModifyConstant(method = "onHello", constant = @Constant(stringValue = ""))
+    public String helloModMdo(String constant) {
+        return constant + ":ModMdo";
+    }
 }

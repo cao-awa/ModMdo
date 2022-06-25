@@ -13,9 +13,9 @@ import com.github.cao.awa.modmdo.utils.file.reads.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import net.fabricmc.api.*;
 import net.minecraft.server.*;
-import net.minecraft.util.*;
 import org.json.*;
 
 import java.io.*;
@@ -32,7 +32,7 @@ public class ModMdoStdInitializer implements ModInitializer {
         loadEvent(false);
     }
 
-    public static Pair<Integer, Integer> loadEvent(boolean reload) {
+    public static Legacy<Integer, Integer> loadEvent(boolean reload) {
         TRACKER.submit(reload ? "ModMdo event reloading" : "ModMdo event loading");
         int old = 0;
         if (event != null) {
@@ -40,7 +40,7 @@ public class ModMdoStdInitializer implements ModInitializer {
         }
         event = new ModMdoEventTracer();
         event.build();
-        return new Pair<>(event.registered(), old);
+        return new Legacy<>(event.registered(), old);
     }
 
     public static void initModMdoVariables(ModMdoType type) {
@@ -130,7 +130,7 @@ public class ModMdoStdInitializer implements ModInitializer {
 
     public void parseMapFormat() {
         try {
-            JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("/assets/modmdo/versions/versions_map.json", getClass()), StandardCharsets.UTF_8))));
+            JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("assets/modmdo/versions/versions_map.json", getClass()), StandardCharsets.UTF_8))));
 
             for (String s : versionMap.keySet())
                 SharedVariables.modMdoIdToVersionMap.put(Integer.valueOf(s), versionMap.getString(s));
@@ -138,7 +138,7 @@ public class ModMdoStdInitializer implements ModInitializer {
             for (String s : versionMap.keySet())
                 SharedVariables.modMdoVersionToIdMap.put(versionMap.getString(s), Integer.valueOf(s).intValue());
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 }

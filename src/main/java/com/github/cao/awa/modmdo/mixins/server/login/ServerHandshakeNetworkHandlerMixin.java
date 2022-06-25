@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins;
+package com.github.cao.awa.modmdo.mixins.server.login;
 
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.network.forwarder.handler.*;
