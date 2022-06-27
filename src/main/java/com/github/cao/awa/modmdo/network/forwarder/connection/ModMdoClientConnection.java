@@ -32,7 +32,7 @@ public class ModMdoClientConnection {
     public ModMdoClientConnection(MinecraftServer server, InetSocketAddress address, JSONObject loginData) {
         this.server = server;
 
-        connection = EntrustParser.trying(() -> connection = connect(address, false));
+        connection = EntrustParser.trying(() -> connection = connect(address, server.isUsingNativeTransport()));
 
         new ModMdoClientDataNetworkHandler(server, address, connection);
 

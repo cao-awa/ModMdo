@@ -1,7 +1,9 @@
 package com.github.cao.awa.modmdo.certificate.pass;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.certificate.*;
 
+@Server
 public class TemporaryPass extends Pass {
     private String organizer;
     private long time;
