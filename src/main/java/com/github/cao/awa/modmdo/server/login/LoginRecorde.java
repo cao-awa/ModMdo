@@ -1,31 +1,35 @@
 package com.github.cao.awa.modmdo.server.login;
 
+import com.github.cao.awa.modmdo.certificate.identity.*;
 import com.github.cao.awa.modmdo.storage.*;
 import org.json.*;
 
 import java.util.*;
 
 public final class LoginRecorde extends Storable {
-    private final String modmdoUniqueId;
-    private final UUID uuid;
+    private final Identity identity;
     private final LoginRecordeType type;
 
-    public LoginRecorde(String modmdoUniqueId, UUID uuid, LoginRecordeType type) {
-        this.modmdoUniqueId = modmdoUniqueId;
-        this.uuid = uuid;
+    public LoginRecorde(String modmdoUniqueId, UUID uuid, String unidirectionalVerify, LoginRecordeType type) {
+        this.identity = new Identity(modmdoUniqueId, uuid, unidirectionalVerify);
+        this.type = type;
+    }
+
+    public LoginRecorde(Identity identity, LoginRecordeType type) {
+        this.identity = identity;
         this.type = type;
     }
 
     public static LoginRecorde build(JSONObject json) {
-        return new LoginRecorde(json.getString("unique_id"), UUID.fromString(json.getString("uuid")), LoginRecordeType.of(json.getString("type")));
+        return new LoginRecorde(Identity.build(json), LoginRecordeType.of(json.getString("type")));
     }
 
-    public String modmdoUniqueId() {
-        return modmdoUniqueId;
+    public String getUniqueId() {
+        return identity.getUniqueId();
     }
 
-    public UUID uuid() {
-        return uuid;
+    public UUID getUuid() {
+        return identity.getUuid();
     }
 
     public LoginRecordeType type() {
@@ -34,9 +38,12 @@ public final class LoginRecorde extends Storable {
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
+        json.put("identity", identity.toJSONObject());
         json.put("type", type);
-        json.put("unique_id", modmdoUniqueId);
-        json.put("uuid", uuid);
         return json;
+    }
+
+    public Identity getIdentity() {
+        return identity;
     }
 }

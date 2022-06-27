@@ -1,8 +1,6 @@
 package com.github.cao.awa.modmdo.network.forwarder.builder;
 
 import com.github.cao.awa.modmdo.network.forwarder.connection.setting.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
-import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.network.*;
 
 public abstract class PacketBuilder<T extends Packet<?>> {
@@ -13,6 +11,4 @@ public abstract class PacketBuilder<T extends Packet<?>> {
     public abstract T buildPlayerJoin(String name);
     public abstract T buildPlayerQuit(String name);
     public abstract T buildKeepAlive(long lastKeepAlive);
-    public abstract T buildTraffic(OperationalLong traffic, Object2ObjectRBTreeMap<String, OperationalLong> processed);
-    public abstract T buildTrafficResult(OperationalLong traffic, Object2ObjectRBTreeMap<String, OperationalLong> processed);
 }

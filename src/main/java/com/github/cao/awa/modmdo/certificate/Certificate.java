@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.certificate;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -7,6 +8,7 @@ import org.json.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
 
+@Server
 public abstract class Certificate extends Storable {
     public final String name;
     public final LoginRecorde recorde;
@@ -54,7 +56,7 @@ public abstract class Certificate extends Storable {
     }
 
     public String getIdentifier() {
-        return recorde.modmdoUniqueId();
+        return recorde.getUniqueId();
     }
 
     public abstract JSONObject toJSONObject();
