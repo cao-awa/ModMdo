@@ -1,28 +1,33 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.config.encryption;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.codec.binary.*;
 
 import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.SecureRandom;
+import javax.crypto.spec.*;
+import java.security.*;
+
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class AES {
-    public static String base64Encode(byte[] bytes) {
-        return Base64.encodeBase64String(bytes);
+    private static final byte[] KEY_VI = staticConfig.get("private_verify_key").getBytes();
+
+    static {
+        Security.setProperty("crypto.policy", "unlimited");
     }
 
-    public static String aesEncryptToString(byte[] content, byte[] encryptKey) throws Exception {
-        return StringUtils.newStringUsAscii(aesEncryptToBytes(content, encryptKey));
+    public static String aesEncryptToString(byte[] content, byte[] key) throws Exception {
+        return StringUtils.newStringUtf8(aesEncrypt(content, key));
     }
 
-    public static byte[] aesEncryptToBytes(byte[] content, byte[] encryptKey) throws Exception {
-        KeyGenerator kgen = KeyGenerator.getInstance("AES");
-        kgen.init(256);
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(encryptKey, "AES"));
+    public static String aesDecryptToString(byte[] content, byte[] key) throws Exception {
+        return StringUtils.newStringUtf8(aesDecrypt(content, key));
+    }
 
-        return cipher.doFinal(content);
+    public static byte[] aesDecrypt(byte[] content, byte[] key) throws Exception {
+        SecretKey secretKey = new SecretKeySpec(key, "AES");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(KEY_VI));
+        return cipher.doFinal(Base64.decodeBase64(content));
     }
 
     public String randomGet(int size) throws Exception {
@@ -31,8 +36,23 @@ public class AES {
         SecureRandom random = new SecureRandom();
         random.nextBytes(content);
         random.nextBytes(key);
-        byte[] result = aesEncryptToBytes(content, key);
+        byte[] result = aesEncrypt(content, key);
 
         return base64Encode(result);
     }
+
+    public static byte[] aesEncrypt(byte[] content, byte[] key) throws Exception {
+        SecretKey secretKey = new SecretKeySpec(key, "AES");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(KEY_VI));
+        return Base64.encodeBase64(cipher.doFinal(content));
+    }
+
+    public static String base64Encode(byte[] bytes) {
+        return Base64.encodeBase64String(bytes);
+    }
+}
+
+class AES256Util {
+
 }

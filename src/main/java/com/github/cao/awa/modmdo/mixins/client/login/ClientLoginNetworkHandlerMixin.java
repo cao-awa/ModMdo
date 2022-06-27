@@ -29,12 +29,15 @@ public abstract class ClientLoginNetworkHandlerMixin {
 
     @Shadow @Final private MinecraftClient client;
 
+    private boolean isModMdo;
+
     /**
      * @author 草awa
+     * @reason
      */
     @Overwrite
     public void onHello(LoginHelloS2CPacket packet) {
-        boolean isModMdo = packet.getServerId().endsWith(":ModMdo");
+        isModMdo = packet.getServerId().endsWith(":ModMdo");
         Cipher cipher;
         Cipher cipher2;
         String string;
@@ -42,7 +45,7 @@ public abstract class ClientLoginNetworkHandlerMixin {
         try {
             SecretKey secretKey = NetworkEncryptionUtils.generateKey();
             PublicKey publicKey = packet.getPublicKey();
-            string = (new BigInteger(NetworkEncryptionUtils.generateServerId(packet.getServerId(), publicKey, secretKey))).toString(16);
+            string = new BigInteger(NetworkEncryptionUtils.generateServerId(packet.getServerId(), publicKey, secretKey)).toString(16);
             cipher = NetworkEncryptionUtils.cipherFromKey(2, secretKey);
             cipher2 = NetworkEncryptionUtils.cipherFromKey(1, secretKey);
             loginKeyC2SPacket = new LoginKeyC2SPacket(secretKey, publicKey, packet.getNonce());
@@ -52,8 +55,8 @@ public abstract class ClientLoginNetworkHandlerMixin {
 
         this.statusConsumer.accept(Translatable.translatable("connect.authorizing").text());
         NetworkUtils.EXECUTOR.submit(() -> {
+            Text text = this.joinServerSession(string);
             if (!isModMdo) {
-                Text text = this.joinServerSession(string);
                 if (text != null) {
                     if (this.client.getCurrentServerEntry() == null || ! this.client.getCurrentServerEntry().isLocal()) {
                         this.connection.disconnect(text);

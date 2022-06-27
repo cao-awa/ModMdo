@@ -24,6 +24,7 @@ import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import com.mojang.brigadier.context.*;
 import io.netty.buffer.*;
@@ -297,6 +298,11 @@ public class SharedVariables {
         config.setIfNoExist("modmdo_connection_player_quit_accept", true);
     }
 
+    public static void saveVariables(Temporary action) {
+        action.apply();
+        saveVariables();
+    }
+
     public static void saveVariables() {
         config.set("here_command", enableHereCommand);
         config.set("secure_enchant", enableSecureEnchant);
@@ -504,11 +510,11 @@ public class SharedVariables {
             }
             switch (whitelist.get(EntityUtil.getName(player)).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    return whitelist.get(EntityUtil.getName(player)).getRecorde().modmdoUniqueId().equals(loginUsers.getUser(player).getIdentifier());
+                    return whitelist.get(EntityUtil.getName(player)).getRecorde().getUniqueId().equals(loginUsers.getUser(player).getIdentifier());
                 }
                 case UUID -> {
                     if (Objects.requireNonNull(player.getServer()).isOnlineMode()) {
-                        if (! player.getUuid().equals(whitelist.get(EntityUtil.getName(player)).getRecorde().uuid())) {
+                        if (! player.getUuid().equals(whitelist.get(EntityUtil.getName(player)).getRecorde().getUuid())) {
                             return false;
                         }
                     } else {
@@ -544,12 +550,12 @@ public class SharedVariables {
         try {
             switch (banned.get(EntityUtil.getName(player)).getRecorde().type()) {
                 case IDENTIFIER -> {
-                    if (banned.get(EntityUtil.getName(player)).getRecorde().modmdoUniqueId().equals("")) {
+                    if (banned.get(EntityUtil.getName(player)).getRecorde().getUniqueId().equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(banned.get(EntityUtil.getName(player)).getRecorde().uuid())) {
+                    if (! player.getUuid().equals(banned.get(EntityUtil.getName(player)).getRecorde().getUuid())) {
                         return false;
                     }
                 }

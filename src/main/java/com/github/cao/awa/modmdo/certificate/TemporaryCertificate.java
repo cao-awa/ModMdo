@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.certificate;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.certificate.pass.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.utils.times.*;
@@ -8,6 +9,7 @@ import org.json.*;
 
 import java.util.*;
 
+@Server
 public final class TemporaryCertificate extends Certificate {
     private final long recording;
     private long millions;
@@ -15,7 +17,7 @@ public final class TemporaryCertificate extends Certificate {
     private TemporaryPass pass;
 
     public TemporaryCertificate(String name, long recording, long millions) {
-        super(name, new LoginRecorde(name, null, LoginRecordeType.TEMPORARY));
+        super(name, new LoginRecorde(name, null,null, LoginRecordeType.TEMPORARY));
         this.recording = recording;
         this.millions = millions;
     }
@@ -31,7 +33,7 @@ public final class TemporaryCertificate extends Certificate {
         String uniqueId = EntrustParser.trying(() -> json.getString("unique_id"), () -> "");
         long recording = json.getLong("recording");
         long millions = json.getLong("millions");
-        return new TemporaryCertificate(json.getString("name"), new LoginRecorde(uniqueId, uuid, LoginRecordeType.TEMPORARY), recording, millions);
+        return new TemporaryCertificate(json.getString("name"), new LoginRecorde(uniqueId, uuid,null, LoginRecordeType.TEMPORARY), recording, millions);
     }
 
     public TemporaryPass getPass() {
@@ -103,8 +105,8 @@ public final class TemporaryCertificate extends Certificate {
         json.put("type", "temporary");
         json.put("recording", recording);
         json.put("millions", millions);
-        json.put("uuid", getRecorde().uuid());
-        json.put("unique_id", getRecorde().modmdoUniqueId());
+        json.put("uuid", getRecorde().getUuid());
+        json.put("unique_id", getRecorde().getUniqueId());
         json.put("name", getName());
         return json;
     }

@@ -299,16 +299,18 @@ public class ModMdoCommand extends SimpleCommand {
             return 0;
         })).then(literal("traffic").executes(test -> {
             Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(test, "name");
-            EntrustExecution.tryTemporary(pair.getRight()::sendTraffic, nullProcessor -> SimpleCommandOperation.sendError(test, TextUtil.translatable("modmdo.connection.not.found", pair.getLeft())));
+            sendFeedback(test, Translatable.translatable(pair.getRight().traffic()));
             return 0;
         })))).then(literal("connect").then(argument("ip", StringArgumentType.string()).then(argument("port", IntegerArgumentType.integer(0, 65565)).executes(connectTo -> {
-            if (config.getConfigString("server_name") != null) {
-                JSONObject loginData = new JSONObject();
-                loginData.put("name", config.getConfigString("server_name"));
-                loginData.put("identifier", config.getConfigString("identifier"));
-                loginData.put("version", SharedVariables.MODMDO_VERSION);
-                EntrustExecution.tryTemporary(() -> new ModMdoClientConnection(SharedVariables.server, new InetSocketAddress(StringArgumentType.getString(connectTo, "ip"), IntegerArgumentType.getInteger(connectTo, "port")), loginData));
-            }
+            EntrustExecution.tryTemporary(() -> {
+                if (config.getConfigString("server_name") != null) {
+                    JSONObject loginData = new JSONObject();
+                    loginData.put("name", config.getConfigString("server_name"));
+                    loginData.put("identifier", staticConfig.getConfigString("identifier"));
+                    loginData.put("version", SharedVariables.MODMDO_VERSION);
+                    EntrustExecution.tryTemporary(() -> new ModMdoClientConnection(SharedVariables.server, new InetSocketAddress(StringArgumentType.getString(connectTo, "ip"), IntegerArgumentType.getInteger(connectTo, "port")), loginData), Throwable::printStackTrace);
+                }
+            }, Throwable::printStackTrace);
             return 0;
         })))).then(literal("self").then(literal("name").then(argument("name", StringArgumentType.string()).executes(setName -> {
             config.set("server_name", StringArgumentType.getString(setName, "name"));
