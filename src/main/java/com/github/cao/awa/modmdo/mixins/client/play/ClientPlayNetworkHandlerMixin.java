@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.commands.argument.*;
 import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.entity.player.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.config.encryption.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.authlib.*;
@@ -70,8 +71,9 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             String addr = connection.getAddress().toString();
                             return addr.substring(addr.indexOf("/") + 1);
                         }, connection.getAddress().toString());
-                        String key = serverId.get() == null ? SECURE_KEYS.use(address, address) : SECURE_KEYS.use(serverId.get(), address);
-                        if (serverId.get() != null && key != null) {
+                        boolean hasServerId = serverId.get() != null;
+                        String loginId = hasServerId ? SECURE_KEYS.use(serverId.get(), address) : SECURE_KEYS.use(address, address);
+                        if (serverId.get() != null && loginId != null) {
                             if (SECURE_KEYS.has(address) && ! SECURE_KEYS.has(serverId.get())) {
                                 EntrustExecution.notNull(SECURE_KEYS.get(address), k -> k.setServerId(serverId.get()));
                                 SECURE_KEYS.set(SECURE_KEYS.get(address).getServerId(), SECURE_KEYS.get(address));
@@ -79,7 +81,20 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             SECURE_KEYS.removeAddress(address);
                             SECURE_KEYS.save();
                         }
-                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(key).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME)));
+                        String verifyKey = hasServerId ? SECURE_KEYS.get(serverId.get()).getVerifyKey() : null;
+                        if (verifyKey == null) {
+                            connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(loginId).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME)));
+                        } else {
+                            String sendingVerify;
+                            JSONObject json = new JSONObject();
+                            json.put("identifier", loginId);
+                            sendingVerify = EntrustParser.trying(() -> AES.aesEncryptToString(json.toString().getBytes(), verifyKey.getBytes()), ex -> {
+                                ex.printStackTrace();
+                                return "";
+                            });
+                            System.out.println(sendingVerify);
+                            connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(loginId).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME).writeString(sendingVerify).writeString(verifyKey)));
+                        }
                     });
                 }
 

@@ -1,8 +1,10 @@
 package com.github.cao.awa.modmdo.certificate;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 
+@Server
 public class Certificates<T extends Certificate> {
     private final Object2ObjectArrayMap<String, T> certificate = new Object2ObjectArrayMap<>();
     private final Object2ObjectArrayMap<String, String> idToName = new Object2ObjectArrayMap<>();

@@ -20,6 +20,8 @@ import org.json.*;
 
 import java.net.*;
 
+import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
+
 public class ModMdoDataProcessor {
     public static final int MINIMUM_COMPATIBILITY = SharedVariables.MODMDO_VERSION;
     public static final String DEFAULT_CHAT_FORMAT = "§7[%server]<%name> %msg";
@@ -38,7 +40,6 @@ public class ModMdoDataProcessor {
     private long logged;
     private long lastKeepAlive = 0;
     private long lastDataPacket = TimeUtil.millions();
-    private boolean trafficking = false;
 
     public ModMdoDataProcessor(MinecraftServer server, InetSocketAddress address, ClientConnection connection, NetworkSide side) {
         this.server = server;
@@ -48,7 +49,7 @@ public class ModMdoDataProcessor {
         EntrustExecution.tryTemporary(() -> modMdoConnection.setMaxLoginMillion(SharedVariables.config.getConfigLong("modmdo_connection_max_login_time")));
         if (side == NetworkSide.CLIENTBOUND) {
             modMdoConnection.setLogged(true);
-            modMdoConnection.setIdentifier(SharedVariables.config.getConfigString("identifier"));
+            modMdoConnection.setIdentifier(SharedVariables.staticConfig.getConfigString("identifier"));
             modMdoConnection.setName(SharedVariables.config.getConfigString("server_name"));
         } else {
             status = "connected-actively";
@@ -73,7 +74,7 @@ public class ModMdoDataProcessor {
                     JSONObject data = new JSONObject(packet.readString());
                     EntrustExecution.tryTemporary(() -> {
                         onLogin(data.getString("name"), data.getString("identifier"), data.getInt("version"));
-                    }, () -> {
+                    }, ex -> {
                         disconnect("modmdo.connection.server.internal.error");
                     });
                 } else if (modMdoConnection.isLogged() && SharedVariables.DATA_CHANNEL.equals(sign)) {
@@ -93,8 +94,6 @@ public class ModMdoDataProcessor {
                         case "login-success" -> onLoginSuccess();
                         case "player-join" -> onPlayerJoin(data);
                         case "player-quit" -> onPlayerQuit(data);
-                        case "traffic" -> onTraffic(new JSONObject(data));
-                        case "traffic-result" -> onTrafficResult(new JSONObject(data));
                     }
 
                     if (! "keepalive".equals(target)) {
@@ -104,7 +103,7 @@ public class ModMdoDataProcessor {
                 }
             }
         } catch (Exception e) {
-            SharedVariables.LOGGER.info("packet content is not in compliance, will not be process ");
+            TRACKER.submit("packet content is not in compliance, will not be process: ", e);
             while (packet.isReadable()) {
                 packet.readString();
             }
@@ -142,7 +141,7 @@ public class ModMdoDataProcessor {
     }
 
     private void onLogin(String name, String identifier, int version) {
-        try {
+        EntrustExecution.tryTemporary(() -> {
             String selfName = SharedVariables.config.getConfigString("server_name");
             if (selfName == null || "".equals(selfName)) {
                 Translatable rejectReason = TextUtil.translatable("modmdo.connection.not.ready");
@@ -151,7 +150,7 @@ public class ModMdoDataProcessor {
                 SharedVariables.modmdoConnections.remove(this);
                 return;
             }
-            if (identifier.equals(SharedVariables.config.getConfigString("identifier"))) {
+            if (identifier.equals(SharedVariables.staticConfig.getConfigString("identifier"))) {
                 Translatable rejectReason = TextUtil.translatable("modmdo.connection.cannot.connect.to.self", SharedVariables.config.get("server_name"));
                 modMdoConnection.send(builder.getBuilder().buildDisconnect(rejectReason.getKey()));
                 modMdoConnection.disconnect(rejectReason.text());
@@ -175,7 +174,7 @@ public class ModMdoDataProcessor {
                 } else {
                     if (SharedVariables.modmdoConnectionAccepting.isValid()) {
                         if (EntrustParser.trying(() -> ! SharedVariables.modmdoConnectionWhitelist.containsIdentifier(identifier), () -> true)) {
-                            SharedVariables.modmdoConnectionWhitelist.put(name, new PermanentCertificate(name, identifier, null));
+                            SharedVariables.modmdoConnectionWhitelist.put(name, new PermanentCertificate(name, identifier, null, null));
                             SharedVariables.saveVariables();
                             SharedVariables.modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
                         }
@@ -200,13 +199,11 @@ public class ModMdoDataProcessor {
                     onLoginReject(name, rejectReason);
                 }
             }
-        } catch (Exception e) {
-
-        }
+        });
     }
 
     public void onLoginReject(String name, Translatable reason) {
-        SharedVariables.LOGGER.warn("ModMdo Connection \"" + name + "\" failed to login");
+        TRACKER.warn("ModMdo Connection \"" + name + "\" failed to login");
         modMdoConnection.send(builder.getBuilder().buildDisconnect(reason.getKey()));
         modMdoConnection.disconnect(reason.text());
         SharedVariables.modmdoConnections.remove(this);
@@ -233,7 +230,6 @@ public class ModMdoDataProcessor {
     }
 
     public void process(CustomPayloadS2CPacket packet) {
-//        trafficInRecord.add(packet.getData().readableBytes());
         process(packet.getChannel(), packet.getData());
     }
 
@@ -308,6 +304,7 @@ public class ModMdoDataProcessor {
     }
 
     public void send(Packet<?> packet) {
+        EntrustExecution.executeNull(packetsRecord.get(packet.getClass().getName()), OperationalLong::add, asNull -> packetsRecord.put(packet.getClass().getName(), new OperationalLong(1)));
         modMdoConnection.send(packet);
     }
 
@@ -320,7 +317,7 @@ public class ModMdoDataProcessor {
         SharedVariables.LOGGER.info(SharedVariables.consoleTextFormat.format(message, getAddress()));
     }
 
-    public void traffic() {
+    public String traffic() {
         StringBuilder builder = new StringBuilder();
         long time = TimeUtil.millions() - connected;
         builder.append("----------Connection Testing----------").append("\n");
@@ -339,36 +336,11 @@ public class ModMdoDataProcessor {
         builder.append("Status: \n    ").append(status).append("\n");
         builder.append("Side: \n    ").append(this.builder.getSide().name());
         SharedVariables.LOGGER.info(builder.toString());
+        return builder.toString();
     }
 
     public InetSocketAddress getAddress() {
         return address;
-    }
-
-    public void onTraffic(JSONObject json) {
-        trafficOutRecord.set(json.getLong("traffic-in"));
-        JSONObject packets = json.getJSONObject("packets-processed");
-        for (String s : packets.keySet()) {
-            packetsOutRecord.put(s, new OperationalLong(packets.getLong(s)));
-        }
-        send(builder.getBuilder().buildTrafficResult(trafficInRecord, packetsRecord));
-    }
-
-    public void onTrafficResult(JSONObject json) {
-        trafficOutRecord.set(json.getLong("traffic-in"));
-        JSONObject packets = json.getJSONObject("packets-processed");
-        for (String s : packets.keySet()) {
-            packetsOutRecord.put(s, new OperationalLong(packets.getLong(s)));
-        }
-        if (trafficking) {
-            traffic();
-            trafficking = false;
-        }
-    }
-
-    public void sendTraffic() {
-        trafficking = true;
-        send(builder.getBuilder().buildTraffic(trafficInRecord, packetsRecord));
     }
 
     public void disconnect(String reason) {

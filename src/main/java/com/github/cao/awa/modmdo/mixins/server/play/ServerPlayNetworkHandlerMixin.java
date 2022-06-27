@@ -73,7 +73,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     String data3 = EntrustParser.tryCreate(buf::readString, "");
                     String data4 = EntrustParser.tryCreate(buf::readString, "");
                     String data5 = EntrustParser.tryCreate(buf::readString, "");
-
+                    String data6 = EntrustParser.tryCreate(buf::readString, "");
+                    String data7 = EntrustParser.tryCreate(buf::readString, "");
 
                     if (TOKEN_CHANNEL.equals(channel)) {
                         TRACKER.debug("Client are sent obsoleted login data");
@@ -89,9 +90,11 @@ public abstract class ServerPlayNetworkHandlerMixin {
                             TRACKER.submit("Login data3: " + data3);
                             TRACKER.submit("Login data4: " + data4);
                             TRACKER.submit("Login data5: " + data5);
+                            TRACKER.submit("Login data6: " + data6);
+                            TRACKER.submit("Login data6: " + data7);
 
                             if (modMdoType == ModMdoType.SERVER) {
-                                serverLogin.login(data1, data2, data3, data4, data5);
+                                serverLogin.login(data1, data2, data3, data4, data5, data6, data7);
                             }
                         }
                     }

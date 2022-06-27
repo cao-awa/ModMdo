@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins;
+package com.github.cao.awa.modmdo.mixins.server.play;
 
 import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.storage.*;
@@ -55,6 +55,10 @@ public abstract class PlayerManagerMixin {
             }
         }
     }
+
+    @Shadow @Final private Map<UUID, ServerPlayerEntity> playerMap;
+
+    @Shadow @Final private MinecraftServer server;
 
     @Inject(method = "onPlayerConnect", at = @At("RETURN"))
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {

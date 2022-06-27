@@ -256,12 +256,12 @@ public class TemporaryCommand extends SimpleCommand {
             }
         }
         if (millions == - 1) {
-            c = new PermanentCertificate(certificate.name, certificate.getIdentifier(), certificate.getRecorde().uuid());
+            c = new PermanentCertificate(certificate.name, certificate.getIdentifier(), certificate.getRecorde().getUuid(), null);
         } else {
             if (certificate.getIdentifier().equals("")) {
-                c = new TemporaryCertificate(certificate.name, new LoginRecorde(certificate.name, certificate.getRecorde().uuid(), LoginRecordeType.TEMPORARY), TimeUtil.millions(), millions);
+                c = new TemporaryCertificate(certificate.name, new LoginRecorde(certificate.name, certificate.getRecorde().getUuid(), null, LoginRecordeType.TEMPORARY), TimeUtil.millions(), millions);
             } else {
-                c = new TemporaryCertificate(certificate.name, new LoginRecorde(certificate.getRecorde().modmdoUniqueId(), null, LoginRecordeType.TEMPORARY), TimeUtil.millions(), millions);
+                c = new TemporaryCertificate(certificate.name, new LoginRecorde(certificate.getRecorde().getUniqueId(), null, null, LoginRecordeType.TEMPORARY), TimeUtil.millions(), millions);
             }
         }
         if (loginUsers.hasUser(player)) {
@@ -317,7 +317,7 @@ public class TemporaryCommand extends SimpleCommand {
             certificate = temporaryInvite.get(name);
             certificate.setMillions(millions);
         } else {
-            certificate = new TemporaryCertificate(name, new LoginRecorde(name, null, LoginRecordeType.TEMPORARY), TimeUtil.millions(), 1000L * 5 * 60);
+            certificate = new TemporaryCertificate(name, new LoginRecorde(name, null, null, LoginRecordeType.TEMPORARY), TimeUtil.millions(), 1000L * 5 * 60);
             certificate.setType("invite");
             certificate.setSpare(new TemporaryCertificate(name, - 1, millions));
             certificate.setPass(new TemporaryPass().setTime(millions).setOrganizer(organizer));

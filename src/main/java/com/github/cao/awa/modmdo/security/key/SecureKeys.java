@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.security.key;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.security.*;
 import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
@@ -12,6 +13,7 @@ import org.json.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
+@Client
 public class SecureKeys extends Storable {
     private final Object2ObjectOpenHashMap<String, SecureKey> keys = new Object2ObjectOpenHashMap<>();
     private SecureLevel level = SecureLevel.UNEQUAL_KEY;
@@ -40,9 +42,9 @@ public class SecureKeys extends Storable {
 
     public void keep(String target, String address) {
         if (level == SecureLevel.UNEQUAL_KEY) {
-            set(target, has(target) ? SECURE_KEYS.get(target) : new SecureKey(RandomIdentifier.randomIdentifier(16, true), address));
+            set(target, has(target) ? SECURE_KEYS.get(target) : new SecureKey(RandomIdentifier.randomIdentifier(32, true), RandomIdentifier.randomIdentifier(32, true), address));
         } else {
-            SecureKey key = has(target) ? SECURE_KEYS.get(target) : new SecureKey(RandomIdentifier.randomIdentifier(16, true), RandomIdentifier.randomIdentifier(), address);
+            SecureKey key = has(target) ? SECURE_KEYS.get(target) : new SecureKey(RandomIdentifier.randomIdentifier(32, true), RandomIdentifier.randomIdentifier(32, true), RandomIdentifier.randomIdentifier(), address);
             if (! key.hasId()) {
                 key.setId(RandomIdentifier.randomIdentifier());
             }
@@ -78,12 +80,20 @@ public class SecureKeys extends Storable {
         }
     }
 
+    public boolean has(String target) {
+        return keys.containsKey(target) && keys.get(target).hasAddress();
+    }
+
     public SecureKey get(String target) {
         return keys.get(target);
     }
 
-    public boolean has(String target) {
-        return keys.containsKey(target) && keys.get(target).hasAddress();
+    private String use(SecureLevel level, String target) {
+        return switch (level) {
+            case UNEQUAL_KEY -> EntrustParser.trying(() -> AES.aesEncryptToString(staticConfig.get("identifier").getBytes(), keys.get(target).getPrivateKey().getBytes()), ex -> staticConfig.get("identifier"));
+            case UNEQUAL_ID -> keys.get(target).getId();
+            default -> staticConfig.get("identifier");
+        };
     }
 
     public boolean hasAddress(@NotNull String address) {
@@ -95,12 +105,12 @@ public class SecureKeys extends Storable {
         return false;
     }
 
-    private String use(SecureLevel level, String target) {
-        return switch (level) {
-            case UNEQUAL_KEY -> EntrustParser.trying(() -> AES.aesEncryptToString(staticConfig.get("identifier").getBytes(), keys.get(target).getPrivateKey().getBytes()), ex -> staticConfig.get("identifier"));
-            case UNEQUAL_ID -> keys.get(target).getId();
-            default -> staticConfig.get("identifier");
-        };
+    public void removeAddress(String address) {
+        keys.remove(address);
+    }
+
+    public void save() {
+        staticConfig.set("private_key", SECURE_KEYS.toJSONObject().toString());
     }
 
     public JSONObject toJSONObject() {
@@ -109,14 +119,6 @@ public class SecureKeys extends Storable {
             json.put(target, keys.get(target).toJSONObject());
         }
         return json;
-    }
-
-    public void removeAddress(String address) {
-        keys.remove(address);
-    }
-
-    public void save() {
-        staticConfig.set("private_key", SECURE_KEYS.toJSONObject().toString());
     }
 
     public void load(JSONObject json) {
