@@ -47,10 +47,10 @@ import java.util.*;
 
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final String VERSION_ID = "1.0.38";
+    public static final String VERSION_ID = "1.0.39";
     public static final String SUFFIX = "-ES";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
-    public static final String RELEASE_TIME = "2022.6.25";
+    public static final String RELEASE_TIME = "2022.6.28";
     public static final int MODMDO_VERSION = 31;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntOpenHashMap<String> modMdoVersionToIdMap = new Object2IntOpenHashMap<>();

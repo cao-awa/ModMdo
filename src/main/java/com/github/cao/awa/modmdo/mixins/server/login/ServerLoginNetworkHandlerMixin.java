@@ -1,20 +1,16 @@
 package com.github.cao.awa.modmdo.mixins.server.login;
 
 import com.github.cao.awa.modmdo.certificate.*;
-import com.github.cao.awa.modmdo.lang.Dictionary;
+import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
-import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
-import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import com.google.common.collect.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
-import net.minecraft.entity.player.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.c2s.login.*;
@@ -26,8 +22,6 @@ import org.jetbrains.annotations.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
-
-import java.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -58,58 +52,6 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
     @Shadow
     public abstract void acceptPlayer();
-
-    @Redirect(method = "acceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;createPlayer(Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/server/network/ServerPlayerEntity;"))
-    public ServerPlayerEntity createPlayer(PlayerManager instance, GameProfile profile) {
-        if (SharedVariables.isActive()) {
-            if (SharedVariables.enableRejectReconnect) {
-                UUID uuid = PlayerUtil.getId(profile);
-                TRACKER.submit("createPlayer(GameProfile) probe(0) passed");
-                for (ServerPlayerEntity player : instance.getPlayerList()) {
-                    if (player.getUuid().equals(uuid)) {
-                        if (player.networkHandler.connection.getAddress() == null) {
-                            break;
-                        }
-                        if (loginUsers.hasUser(player)) {
-                            SimpleCommandOperation.sendMessage(player, TextUtil.translatable("login.dump.rejected"), false);
-                        }
-                        return null;
-                    }
-                }
-                TRACKER.submit("createPlayer(GameProfile) probe(1) passed");
-            }
-        }
-
-        TRACKER.submit("createPlayer(GameProfile) probe(2) passed");
-
-        UUID uUID = PlayerEntity.getUuidFromProfile(profile);
-        List<ServerPlayerEntity> list = Lists.newArrayList();
-
-        TRACKER.submit("createPlayer(GameProfile) probe(3) passed");
-
-        for (ServerPlayerEntity player : instance.getPlayerList()) {
-            if (player.getUuid().equals(uUID)) {
-                list.add(player);
-            }
-        }
-
-        TRACKER.submit("createPlayer(GameProfile) probe(4) passed");
-
-        ServerPlayerEntity serverPlayerEntity2 = instance.getPlayer(profile.getId());
-        if (serverPlayerEntity2 != null && ! list.contains(serverPlayerEntity2)) {
-            list.add(serverPlayerEntity2);
-        }
-
-        TRACKER.submit("createPlayer(GameProfile) probe(5) passed");
-
-        for (ServerPlayerEntity serverPlayerEntity3 : list) {
-            serverPlayerEntity3.networkHandler.disconnect(new TranslatableText("multiplayer.disconnect.duplicate_login"));
-        }
-
-        TRACKER.submit("createPlayer(GameProfile) probe(6) passed");
-
-        return new ServerPlayerEntity(this.server, this.server.getOverworld(), profile);
-    }
 
     /**
      * @author 草awa
