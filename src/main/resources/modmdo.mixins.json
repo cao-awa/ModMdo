@@ -4,7 +4,6 @@
     "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
-        "ArgumentTypesMixin",
         "EnchantmentHelperMixin",
         "EntityMixin",
         "ItemEntityMixin",
