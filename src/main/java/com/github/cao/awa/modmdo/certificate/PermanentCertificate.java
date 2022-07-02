@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.certificate;
 
 import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.server.login.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
 
 import java.util.*;
@@ -17,7 +18,12 @@ public class PermanentCertificate extends Certificate {
     }
 
     public static PermanentCertificate build(JSONObject json) {
-        return new PermanentCertificate(json.getString("name"), LoginRecorde.build(json.getJSONObject("recorder")));
+        return EntrustParser.trying(() -> {
+            return new PermanentCertificate(json.getString("name"), LoginRecorde.build(json.getJSONObject("recorder")));
+        }, ex -> {
+            ex.printStackTrace();
+            return null;
+        });
     }
 
     public JSONObject toJSONObject() {
