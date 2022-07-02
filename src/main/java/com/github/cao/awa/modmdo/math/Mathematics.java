@@ -4,7 +4,7 @@ import net.minecraft.util.math.*;
 
 import static java.lang.Math.*;
 
-public final class Mathematics {
+public final class Mathematics extends MathHelper {
     public static BlockPos center(BlockPos pos1, BlockPos pos2) {
         int xW = max(pos2.getX(), pos1.getX()) - min(pos2.getX(), pos1.getX());
         int yW = max(pos2.getY(), pos1.getY()) - min(pos2.getY(), pos1.getY());

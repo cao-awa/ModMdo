@@ -5,10 +5,11 @@ import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
+import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
-import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
@@ -88,24 +89,20 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
                     int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
 
-                    try {
-                        ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
-                        TRACKER.submit("Server send test packet: modmdo-connection", () -> {
-                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("modmdo-connection")));
-                        });
-                        TRACKER.submit("Server send test packet: old modmdo version test", () -> {
-                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
-                        });
-                        TRACKER.submit("Server send login packet: modmdo login", () -> {
-                            if (modmdoWhitelist) {
-                                handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL).writeString(staticConfig.get("identifier"))));
-                            } else {
-                                handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL)));
-                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
+                    TRACKER.submit("Server send test packet: modmdo-connection", () -> {
+                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("modmdo-connection")));
+                    });
+                    TRACKER.submit("Server send test packet: old modmdo version test", () -> {
+                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
+                    });
+                    TRACKER.submit("Server send login packet: modmdo login", () -> {
+                        if (modmdoWhitelist) {
+                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL).writeString(staticConfig.get("identifier"))));
+                        } else {
+                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL)));
+                        }
+                    });
 
                     if (modMdoType == ModMdoType.SERVER && modmdoWhitelist) {
                         while (! loginUsers.hasUser(player)) {
@@ -146,11 +143,11 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             String remaining = temporary.formatRemaining();
                             player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
                             player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
-                            TRACKER.info("Player " + player.getName().asString() + " has been banned form server");
+                            TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
                         } else {
                             player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
                             player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
-                            TRACKER.info("Player " + player.getName().asString() + " has been banned form server");
+                            TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
                         }
                     }
 
@@ -173,11 +170,11 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                         } catch (Exception e) {
                             TRACKER.submit("Exception in join server", e);
                             if (! server.isHost(player.getGameProfile())) {
-                                TRACKER.debug("player " + EntityUtil.getName(player) + " lost status synchronize");
+                                TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize");
 
                                 disc(TextUtil.literal("lost status synchronize, please connect again").text());
                             } else {
-                                TRACKER.debug("player " + EntityUtil.getName(player) + " lost status synchronize, but will not be process");
+                                TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize, but will not be process");
                             }
                         }
                     } catch (Exception e) {
@@ -185,7 +182,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     }
                 });
             } else {
-                serverLogin.login(player.getName().getString(), player.getUuid().toString(), staticConfig.getConfigString("identifier"), String.valueOf(MODMDO_VERSION), null, null);
+                serverLogin.login(PlayerUtil.getName(player), PlayerUtil.getUUID(player).toString(), staticConfig.getConfigString("identifier"), String.valueOf(MODMDO_VERSION), null, null);
 
                 manager.onPlayerConnect(connection, player);
             }

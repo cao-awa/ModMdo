@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.commands.argument.connection;
+package com.github.cao.awa.modmdo.commands.suggester.connection;
 
 import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.storage.*;

@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo;
 
+import com.github.cao.awa.modmdo.enchant.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.extra.loader.*;
 import com.github.cao.awa.modmdo.listeners.*;
@@ -8,9 +9,8 @@ import com.github.cao.awa.modmdo.security.*;
 import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
-import com.github.cao.awa.modmdo.utils.enchant.*;
+import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.file.reads.*;
-import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
@@ -102,8 +102,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         staticConfig = new DiskObjectConfigUtil("ModMdo", "config/modmdo", "modmdo", false);
 
         staticConfig.setIfNoExist("identifier", RandomIdentifier.randomIdentifier());
-
-        event = new ModMdoEventTracer();
 
         SharedVariables.loginUsers = new UserUtil();
         SharedVariables.rejectUsers = new UserUtil();

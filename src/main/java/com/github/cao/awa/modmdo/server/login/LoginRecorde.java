@@ -1,11 +1,13 @@
 package com.github.cao.awa.modmdo.server.login;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.certificate.identity.*;
 import com.github.cao.awa.modmdo.storage.*;
 import org.json.*;
 
 import java.util.*;
 
+@Server
 public final class LoginRecorde extends Storable {
     private final Identity identity;
     private final LoginRecordeType type;

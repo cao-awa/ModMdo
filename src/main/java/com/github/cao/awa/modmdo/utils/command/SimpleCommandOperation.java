@@ -11,6 +11,8 @@ import net.minecraft.server.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
 
+import java.util.*;
+
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class SimpleCommandOperation {
@@ -28,7 +30,7 @@ public class SimpleCommandOperation {
 
     public static void sendFeedback(ServerCommandSource source, Translatable message) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), false);
+            SharedVariables.sendMessage(Objects.requireNonNull(getPlayer(source)), minecraftTextFormat.format(loginUsers.getUser(Objects.requireNonNull(getPlayer(source))), message.getKey(), message.getArgs()).text(), false);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
@@ -125,7 +127,7 @@ public class SimpleCommandOperation {
 
     public static void sendError(ServerCommandSource source, Translatable message) {
         EntrustExecution.tryTemporary(() -> {
-            sendError(source, minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()));
+            sendError(source, minecraftTextFormat.format(loginUsers.getUser(Objects.requireNonNull(getPlayer(source))), message.getKey(), message.getArgs()));
         }, ex -> {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         });

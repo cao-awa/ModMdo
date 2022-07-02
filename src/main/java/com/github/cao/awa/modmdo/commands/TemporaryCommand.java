@@ -2,8 +2,8 @@ package com.github.cao.awa.modmdo.commands;
 
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.certificate.pass.*;
-import com.github.cao.awa.modmdo.commands.argument.ban.*;
-import com.github.cao.awa.modmdo.commands.argument.whitelist.*;
+import com.github.cao.awa.modmdo.commands.suggester.ban.*;
+import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.entity.*;

@@ -1,5 +1,8 @@
 package com.github.cao.awa.modmdo.server.login;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
+
+@Server
 public enum LoginRecordeType {
     IDENTIFIER, UUID, TEMPORARY, MULTIPLE;
 
