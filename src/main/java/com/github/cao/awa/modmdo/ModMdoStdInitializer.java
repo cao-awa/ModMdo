@@ -118,11 +118,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         TRACKER.info("Registering for ModMdo major");
         SharedVariables.extras = new ModMdoExtraLoader(new ModMdo().setName("ModMdo").setId(SharedVariables.EXTRA_ID));
 
-        TRACKER.info("Registering for ModMdo extra");
-        for (ModMdoExtra<?> extra : SharedVariables.extrasWaitingForRegister) {
-            SharedVariables.extras.register(extra.getId(), extra);
-        }
-
         SharedVariables.loaded = true;
     }
 
