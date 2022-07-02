@@ -9,7 +9,6 @@ import java.util.*;
 
 public class Tracking {
     public static final Logger TRACKER = LogManager.getLogger("Hyacinth:Tracker");
-    private static final Calendar calendar = Calendar.getInstance();
     private static final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
     private Thread parent;
     private StackTraceElement[] tracker;
@@ -171,6 +170,7 @@ public class Tracking {
     }
 
     public String shortPrint() {
+        Calendar calendar = Calendar.getInstance();
         StringBuilder builder = new StringBuilder();
         int limit = getTrackLimit();
         for (String message : getMessages()) {
@@ -186,7 +186,7 @@ public class Tracking {
         }
         if (!(parent == null)) {
             builder.append(String.format("[%s]", formatter.format(calendar.getTime()))).append(" ").append("Parent: ").append("\n");
-            for (int i = 0, trackerLength = getParentTracker().length; i < getParentTracker().length; i++) {
+            for (int i = 0, trackerLength = getParentTracker().length; i < trackerLength; i++) {
                 StackTraceElement element = getParentTracker()[i];
                 if (limit-- == 0) {
                     break;

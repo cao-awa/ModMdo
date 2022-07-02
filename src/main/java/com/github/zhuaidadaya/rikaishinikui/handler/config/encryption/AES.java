@@ -30,17 +30,6 @@ public class AES {
         return cipher.doFinal(Base64.decodeBase64(content));
     }
 
-    public String randomGet(int size) throws Exception {
-        byte[] content = new byte[size];
-        byte[] key = new byte[16];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(content);
-        random.nextBytes(key);
-        byte[] result = aesEncrypt(content, key);
-
-        return base64Encode(result);
-    }
-
     public static byte[] aesEncrypt(byte[] content, byte[] key) throws Exception {
         SecretKey secretKey = new SecretKeySpec(key, "AES");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -51,8 +40,4 @@ public class AES {
     public static String base64Encode(byte[] bytes) {
         return Base64.encodeBase64String(bytes);
     }
-}
-
-class AES256Util {
-
 }

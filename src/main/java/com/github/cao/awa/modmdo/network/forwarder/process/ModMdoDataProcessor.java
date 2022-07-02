@@ -211,7 +211,6 @@ public class ModMdoDataProcessor {
 
     public void updateSetting() {
         modMdoConnection.send(builder.getBuilder().buildSetting(ModMdoConnectionSetting.localSettings()));
-        SharedVariables.updateModMdoConnectionsNames(server);
     }
 
     public ModMdoClientConnection getModMdoConnection() {
@@ -313,7 +312,6 @@ public class ModMdoDataProcessor {
         disconnected = true;
         status = "disconnected";
         EntrustExecution.notNull(modMdoConnection.getConnection(), connection -> connection.disconnect(TextUtil.translatable(message).text()));
-        SharedVariables.updateModMdoConnectionsNames(server);
         SharedVariables.LOGGER.info(SharedVariables.consoleTextFormat.format(message, getAddress()));
     }
 

@@ -23,14 +23,14 @@ import static net.minecraft.server.command.CommandManager.*;
 public class TemporaryCommand extends SimpleCommand {
     @Override
     public TemporaryCommand register() {
-        commandRegister.register(literal("temporary").requires(e -> e.hasPermissionLevel(4)).then(literal("ban").then(literal("add").then(argument("target", ModMdoWhitelistArgumentType.whitelist()).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
-            return ban(ban, ModMdoWhitelistArgumentType.getWhiteList(ban, "target").name, IntegerArgumentType.getInteger(ban, "minutes"));
+        commandRegister.register(literal("temporary").requires(e -> e.hasPermissionLevel(4)).then(literal("ban").then(literal("add").then(argument("target", StringArgumentType.string()).suggests(ModMdoWhitelistSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
+            return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, IntegerArgumentType.getInteger(ban, "minutes"));
         })).then(literal("-1").executes(ban -> {
-            return ban(ban, ModMdoWhitelistArgumentType.getWhiteList(ban, "target").name, - 1);
+            return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, - 1);
         })).then(literal("60").executes(ban -> {
-            return ban(ban, ModMdoWhitelistArgumentType.getWhiteList(ban, "target").name, 60);
-        })))).then(literal("remove").then(argument("target", ModMdoTemporaryBanArgumentType.banned()).executes(remove -> {
-            Certificate certificate = ModMdoTemporaryBanArgumentType.getCertificate(remove, "target");
+            return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, 60);
+        })))).then(literal("remove").then(argument("target", StringArgumentType.string()).suggests(ModMdoBanSuggester::suggestions).executes(remove -> {
+            Certificate certificate = ModMdoBanSuggester.getCertificate(StringArgumentType.getString(remove, "target"));
             if (banned.containsName(certificate.getName())) {
                 banned.remove(certificate.getName());
                 saveVariables();
@@ -41,10 +41,9 @@ public class TemporaryCommand extends SimpleCommand {
             return - 1;
         }))).then(literal("list").executes(list -> {
             showTemporaryBan(list);
-            updateTemporaryBanNames(getServer(list), true);
             return 0;
-        })).then(literal("reduce").then(argument("target", ModMdoTemporaryBanArgumentType.banned()).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
-            String name = ModMdoTemporaryBanArgumentType.getCertificate(ban, "target").getName();
+        })).then(literal("reduce").then(argument("target", StringArgumentType.string()).suggests(ModMdoBanSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
+            String name = ModMdoBanSuggester.getCertificate(StringArgumentType.getString(ban, "target")).getName();
             if (banned.containsName(name)) {
                 int minute = IntegerArgumentType.getInteger(ban, "minutes");
                 return ban(ban, name, - minute);
@@ -62,8 +61,8 @@ public class TemporaryCommand extends SimpleCommand {
         })).then(literal("5").executes(invite -> {
             String name = StringArgumentType.getString(invite, "target");
             return invite(invite, name, 5);
-        })))).then(literal("remove").then(argument("target", ModMdoInviteArgumentType.invite()).executes(remove -> {
-            Certificate certificate = ModMdoInviteArgumentType.getInvite(remove, "target");
+        })))).then(literal("remove").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).executes(remove -> {
+            Certificate certificate = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(remove, "target"));
             Receptacle<Boolean> success = new Receptacle<>(false);
             EntrustExecution.notNull(temporaryStation.get(certificate.getName()), c -> {
                 if (c.getType().equals("invite")) {
@@ -83,10 +82,9 @@ public class TemporaryCommand extends SimpleCommand {
             return 0;
         }))).then(literal("list").executes(list -> {
             showTemporaryInvite(list);
-            updateTemporaryInviteNames(getServer(list), true);
             return 0;
-        })).then(literal("reduce").then(argument("target", ModMdoInviteArgumentType.invite()).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
-            String name = ModMdoInviteArgumentType.getInvite(invite, "target").getName();
+        })).then(literal("reduce").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
+            String name = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(invite, "target")).getName();
             if (temporaryInvite.containsName(name)) {
                 int minute = IntegerArgumentType.getInteger(invite, "minutes");
                 return invite(invite, name, - minute);
@@ -99,14 +97,12 @@ public class TemporaryCommand extends SimpleCommand {
             return 0;
         }))).then(literal("list").executes(showTemporary -> {
             showTemporaryWhitelist(showTemporary);
-            updateTemporaryWhitelistNames(getServer(showTemporary), true);
             return 0;
-        })).then(literal("remove").then(argument("name", ModMdoTemporaryWhitelistArgumentType.whitelist()).executes(remove -> {
-            TemporaryCertificate wl = ModMdoTemporaryWhitelistArgumentType.getWhiteList(remove, "name");
+        })).then(literal("remove").then(argument("name", StringArgumentType.string()).suggests(ModMdoStationSuggester::suggestions).executes(remove -> {
+            TemporaryCertificate wl = ModMdoStationSuggester.getStation(StringArgumentType.getString(remove, "name"));
             if (temporaryStation.containsName(wl.getName())) {
                 temporaryStation.remove(wl.getName());
                 sendFeedback(remove, TextUtil.translatable("temporary.station.removed", wl.getName()));
-                updateTemporaryWhitelistNames(getServer(remove), true);
                 return 0;
             }
             sendError(remove, TextUtil.translatable("arguments.temporary.station.not.registered", wl.getName()));
@@ -144,7 +140,7 @@ public class TemporaryCommand extends SimpleCommand {
     }
 
     public void showTemporaryWhitelist(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
-        SharedVariables.flushTemporaryWhitelist();
+        SharedVariables.handleTemporaryWhitelist();
         ServerPlayerEntity player = getPlayer(source);
         if (SharedVariables.temporaryStation.size() > 0) {
             StringBuilder builder = new StringBuilder();
@@ -172,7 +168,6 @@ public class TemporaryCommand extends SimpleCommand {
         }
         temporaryWhitelist(name, 1000 * 60 * 5);
         sendFeedback(source, TextUtil.translatable("temporary.station.add.default", name));
-        SharedVariables.updateTemporaryWhitelistNames(getServer(source), true);
         return 0;
     }
 
@@ -182,7 +177,7 @@ public class TemporaryCommand extends SimpleCommand {
 
     public void showTemporaryBan(CommandContext<ServerCommandSource> source) {
         try {
-            SharedVariables.flushTemporaryBan();
+            SharedVariables.handleTemporaryBan();
             ServerPlayerEntity player = getPlayer(source);
             if (banned.size() > 0) {
                 StringBuilder builder = new StringBuilder();
@@ -210,7 +205,7 @@ public class TemporaryCommand extends SimpleCommand {
     public int ban(CommandContext<ServerCommandSource> ban, String name, int minutes) {
         ServerPlayerEntity player = getServer(ban).getPlayerManager().getPlayer(name);
         force.add(player);
-        Certificate certificate = ModMdoWhitelistArgumentType.getWhiteList(ban, "target");
+        Certificate certificate = ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target"));
         Certificate banned = SharedVariables.banned.get(name);
         boolean already = false;
         if (banned == null) {
@@ -243,7 +238,6 @@ public class TemporaryCommand extends SimpleCommand {
             }
         }
         saveVariables();
-        SharedVariables.updateTemporaryBanNames(getServer(ban), true);
         return 0;
     }
 
@@ -299,7 +293,6 @@ public class TemporaryCommand extends SimpleCommand {
             } else {
                 sendFeedback(invite, TextUtil.translatable("temporary.station.add.default", name));
             }
-            SharedVariables.updateTemporaryInviteNames(getServer(invite), true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -327,7 +320,7 @@ public class TemporaryCommand extends SimpleCommand {
 
     public void showTemporaryInvite(CommandContext<ServerCommandSource> source) {
         try {
-            SharedVariables.flushTemporaryBan();
+            SharedVariables.handleTemporaryBan();
             ServerPlayerEntity player = getPlayer(source);
             int count = 0;
             StringBuilder builder = new StringBuilder();

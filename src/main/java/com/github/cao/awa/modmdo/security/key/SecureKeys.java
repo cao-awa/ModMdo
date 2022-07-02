@@ -29,12 +29,6 @@ public class SecureKeys extends Storable {
     public String use(String target, String address) {
         if (keys.containsKey(target)) {
             return use(level, target);
-        } else {
-            for (String s : keys.keySet()) {
-                if (keys.get(s) != null) {
-                    return use(level, s);
-                }
-            }
         }
         keep(target, address);
         return use(level, target);
