@@ -27,10 +27,8 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import com.mojang.brigadier.context.*;
-import io.netty.buffer.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.network.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.scoreboard.*;
 import net.minecraft.server.*;
@@ -343,40 +341,6 @@ public class SharedVariables {
         return Language.ofs(config.getConfigString("default_language"));
     }
 
-    public static void updateWhitelistNames(MinecraftServer server, boolean force) {
-        if (! force) {
-            if (whitelist.hashCode() != whitelistHash) {
-                return;
-            }
-        }
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("whitelist_names").writeString(getWhiteListNamesJSONObject().toString())));
-        }
-        whitelistHash = whitelist.hashCode();
-    }
-
-    public static JSONObject getWhiteListNamesJSONObject() {
-        JSONObject json = new JSONObject();
-        JSONArray array = new JSONArray();
-        for (String s : whitelist.keySet()) {
-            array.put(s);
-        }
-        json.put("names", array);
-        return json;
-    }
-
-    public static void updateTemporaryWhitelistNames(MinecraftServer server, boolean force) {
-        if (! force) {
-            if (temporaryStation.hashCode() == temporaryWhitelistHash) {
-                return;
-            }
-        }
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("temporary_whitelist_names").writeString(getTemporaryWhitelistNamesJSONObject().toString())));
-        }
-        temporaryWhitelistHash = temporaryStation.hashCode();
-    }
-
     public static JSONObject getTemporaryWhitelistNamesJSONObject() {
         JSONObject json = new JSONObject();
         JSONArray array = new JSONArray();
@@ -389,72 +353,7 @@ public class SharedVariables {
         return json;
     }
 
-    public static void updateTemporaryBanNames(MinecraftServer server, boolean force) {
-        if (! force) {
-            if (banned.hashCode() == temporaryBanHash) {
-                return;
-            }
-        }
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("ban_names").writeString(getBannedNamesJSONObject().toString())));
-        }
-        temporaryBanHash = banned.hashCode();
-    }
-
-    public static JSONObject getBannedNamesJSONObject() {
-        JSONObject json = new JSONObject();
-        JSONArray array = new JSONArray();
-        for (String s : banned.keySet()) {
-            array.put(s);
-        }
-        json.put("names", array);
-        return json;
-    }
-
-    public static void updateTemporaryInviteNames(MinecraftServer server, boolean force) {
-        if (! force) {
-            if (temporaryInvite.hashCode() == temporaryInviteHash) {
-                return;
-            }
-        }
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("temporary_invite").writeString(getInviteNamesJSONObject().toString())));
-        }
-        temporaryInviteHash = temporaryInvite.hashCode();
-    }
-
-    public static JSONObject getInviteNamesJSONObject() {
-        JSONObject json = new JSONObject();
-        JSONArray array = new JSONArray();
-        for (String s : temporaryInvite.keySet()) {
-            array.put(s);
-        }
-        for (TemporaryCertificate certificate : temporaryStation.values()) {
-            if (certificate.getType().equals("invite")) {
-                array.put(certificate.name);
-            }
-        }
-        json.put("names", array);
-        return json;
-    }
-
-    public static void updateModMdoConnectionsNames(MinecraftServer server) {
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.networkHandler.connection.send(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("connections").writeString(getModMdoConnectionsNamesJSONObject().toString())));
-        }
-    }
-
-    public static JSONObject getModMdoConnectionsNamesJSONObject() {
-        JSONObject json = new JSONObject();
-        JSONArray array = new JSONArray();
-        for (ModMdoDataProcessor processor : modmdoConnections) {
-            array.put(processor.getModMdoConnection().getName());
-        }
-        json.put("names", array);
-        return json;
-    }
-
-    public static void flushTemporaryWhitelist() {
+    public static void handleTemporaryWhitelist() {
         for (TemporaryCertificate wl : temporaryStation.values()) {
             if (! wl.isValid()) {
                 temporaryStation.remove(wl.getName());
@@ -462,7 +361,7 @@ public class SharedVariables {
         }
     }
 
-    public static void flushTemporaryBan() {
+    public static void handleTemporaryBan() {
         for (String name : banned.keySet()) {
             Certificate ban = banned.get(name);
             if (ban == null) {

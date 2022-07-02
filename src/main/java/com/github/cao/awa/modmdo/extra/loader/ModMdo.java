@@ -2,7 +2,6 @@ package com.github.cao.awa.modmdo.extra.loader;
 
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
-import com.github.cao.awa.modmdo.commands.argument.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.format.console.*;
@@ -66,8 +65,6 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             new TestCommand().register();
             new TemporaryCommand().register();
             new ModMdoCommand().register();
-
-            ArgumentInit.init();
         } catch (Exception e) {
 
         }
@@ -163,7 +160,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                         }
                     }
                 }
-            }, Throwable::printStackTrace);
+            });
 
             for (ModMdoDataProcessor processor : modmdoConnections) {
                 processor.tick(server);

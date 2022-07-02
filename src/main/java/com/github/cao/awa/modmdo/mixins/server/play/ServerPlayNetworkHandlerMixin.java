@@ -19,6 +19,8 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
+import java.util.*;
+
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerPlayNetworkHandler.class)
@@ -91,7 +93,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                             TRACKER.submit("Login data4: " + data4);
                             TRACKER.submit("Login data5: " + data5);
                             TRACKER.submit("Login data6: " + data6);
-                            TRACKER.submit("Login data6: " + data7);
+                            TRACKER.submit("Login data7: " + data7);
 
                             if (modMdoType == ModMdoType.SERVER) {
                                 serverLogin.login(data1, data2, data3, data4, data5, data6, data7);
@@ -116,12 +118,14 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(method = "onDisconnected", at = @At("HEAD"), cancellable = true)
-    public void onDisconnected0(Text reason, CallbackInfo ci) {
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
+    public void onDisconnected0(PlayerManager instance, Text message, MessageType type, UUID sender) {
         if (SharedVariables.isActive()) {
-            if (! loginUsers.hasUser(player) && !(player.networkHandler.connection.getAddress() == null)) {
-                ci.cancel();
+            if (loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
+                instance.broadcastChatMessage(message, type, sender);
             }
+        } else {
+            instance.broadcastChatMessage(message, type, sender);
         }
     }
 

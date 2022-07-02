@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.mixins.client.play;
 
-import com.github.cao.awa.modmdo.commands.argument.*;
 import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.entity.player.*;
@@ -33,7 +32,19 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     @Final
     private GameProfile profile;
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow
+    @Final
+    private MinecraftClient client;
+
+    @Inject(method = "onGameJoin", at = @At("HEAD"))
+    public void onGameJoin(GameJoinS2CPacket packet, CallbackInfo ci) {
+        System.out.println("???");
+    }
+
+    @Inject(method = "onGameJoin", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;createPlayer(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/stat/StatHandler;Lnet/minecraft/client/recipebook/ClientRecipeBook;)Lnet/minecraft/client/network/ClientPlayerEntity;"))
+    public void createPlayer(GameJoinS2CPacket packet, CallbackInfo ci) {
+        System.out.println("az???");
+    }
 
     /**
      * 与服务端进行自定义通信
@@ -43,7 +54,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      * @param ci
      *         callback
      * @author 草二号机
-     * @author 草
+     * @author 草awa
      * @author zhuaidadaya
      */
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
@@ -51,7 +62,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
         if (SharedVariables.isActive()) {
             PacketByteBuf data = packet.getData();
 
-            try {
+            EntrustExecution.tryTemporary(() -> {
                 Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
 
                 if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
@@ -75,6 +86,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             if (SECURE_KEYS.has(address) && ! SECURE_KEYS.has(serverId.get())) {
                                 EntrustExecution.notNull(SECURE_KEYS.get(address), k -> k.setServerId(serverId.get()));
                                 SECURE_KEYS.set(SECURE_KEYS.get(address).getServerId(), SECURE_KEYS.get(address));
+                                TRACKER.submit("Changed server address " + address + " to id: " + serverId.get());
                             }
                             SECURE_KEYS.removeAddress(address);
                             SECURE_KEYS.save();
@@ -86,64 +98,14 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             String sendingVerify;
                             JSONObject json = new JSONObject();
                             json.put("identifier", loginId);
-                            sendingVerify = EntrustParser.trying(() -> AES.aesEncryptToString(json.toString().getBytes(), verifyKey.getBytes()), ex -> {
-                                ex.printStackTrace();
-                                return "";
-                            });
-                            System.out.println(sendingVerify);
+                            sendingVerify = EntrustParser.trying(() -> AES.aesEncryptToString(json.toString().getBytes(), verifyKey.getBytes()), ex -> "");
                             connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(loginId).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME).writeString(sendingVerify).writeString(verifyKey)));
                         }
                     });
                 }
-
-                if (informationSign.equals(DATA_CHANNEL)) {
-                    String data1 = EntrustParser.tryCreate(data::readString, "");
-                    String data2 = EntrustParser.tryCreate(data::readString, "");
-
-                    TRACKER.submit(String.format("Server are requesting client process data: type={%s} | information={%s}", data1, data2));
-
-                    switch (data1) {
-                        case "whitelist_names" -> {
-                            whitelist.clear();
-                            JSONObject json = new JSONObject(data2);
-                            for (Object o : json.getJSONArray("names")) {
-                                whitelist.put(o.toString(), null);
-                            }
-                        }
-                        case "temporary_whitelist_names" -> {
-                            temporaryStation.clear();
-                            JSONObject json = new JSONObject(data2);
-                            for (Object o : json.getJSONArray("names")) {
-                                temporaryStation.put(o.toString(), null);
-                            }
-                        }
-                        case "connections" -> EntrustExecution.tryTemporary(() -> {
-                            modmdoConnectionNames.clear();
-                            JSONObject json = new JSONObject(data2);
-                            for (Object o : json.getJSONArray("names")) {
-                                modmdoConnectionNames.add(o.toString());
-                            }
-                        });
-                        case "ban_names" -> {
-                            banned.clear();
-                            JSONObject json = new JSONObject(data2);
-                            for (Object o : json.getJSONArray("names")) {
-                                banned.put(o.toString(), null);
-                            }
-                        }
-                        case "temporary_invite" -> {
-                            temporaryInvite.clear();
-                            JSONObject json = new JSONObject(data2);
-                            for (Object o : json.getJSONArray("names")) {
-                                temporaryInvite.put(o.toString(), null);
-                            }
-                        }
-                    }
-                    ArgumentInit.init();
-                }
-            } catch (Exception e) {
-                TRACKER.err("Error in connecting ModMdo server", e);
-            }
+            }, ex -> {
+                TRACKER.err("Error in connecting ModMdo server", ex);
+            });
             ci.cancel();
         }
     }
