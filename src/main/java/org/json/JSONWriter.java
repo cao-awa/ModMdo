@@ -322,7 +322,7 @@ public class JSONWriter {
      *             If the value is or contains an invalid number.
      */
     public static String valueToString(Object value) throws JSONException {
-        if (value == null || value.equals(null)) {
+        if (value == null) {
             return "null";
         }
         if (value instanceof JSONString) {
@@ -352,12 +352,10 @@ public class JSONWriter {
                 || value instanceof JSONArray) {
             return value.toString();
         }
-        if (value instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) value;
+        if (value instanceof Map<?, ?> map) {
             return new JSONObject(map).toString();
         }
-        if (value instanceof Collection) {
-            Collection<?> coll = (Collection<?>) value;
+        if (value instanceof Collection<?> coll) {
             return new JSONArray(coll).toString();
         }
         if (value.getClass().isArray()) {

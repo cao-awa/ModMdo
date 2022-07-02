@@ -4,6 +4,7 @@ import com.github.cao.awa.hyacinth.logging.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.develop.clazz.*;
+import com.github.cao.awa.modmdo.enchant.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
@@ -16,12 +17,10 @@ import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.ranking.*;
 import com.github.cao.awa.modmdo.security.key.*;
 import com.github.cao.awa.modmdo.server.login.*;
-import com.github.cao.awa.modmdo.subscribable.*;
 import com.github.cao.awa.modmdo.type.*;
+import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.command.*;
-import com.github.cao.awa.modmdo.utils.enchant.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
-import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
@@ -89,7 +88,6 @@ public class SharedVariables {
     public static boolean clearEnchantIfLevelTooHigh = false;
     public static ServerLogin serverLogin = new ServerLogin();
     public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
-    public static ObjectArrayList<String> modmdoConnectionNames = new ObjectArrayList<>();
     public static ObjectArrayList<ModMdoDataProcessor> modmdoConnections = new ObjectArrayList<>();
     public static TemporaryCertificate modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
     public static Certificates<PermanentCertificate> modmdoConnectionWhitelist = new Certificates<>();
@@ -97,22 +95,16 @@ public class SharedVariables {
     public static Certificates<TemporaryCertificate> temporaryStation = new Certificates<>();
     public static Certificates<TemporaryCertificate> temporaryInvite = new Certificates<>();
     public static Certificates<Certificate> banned = new Certificates<>();
-    public static int whitelistHash = whitelist.hashCode();
-    public static int temporaryWhitelistHash = temporaryStation.hashCode();
-    public static int temporaryBanHash = banned.hashCode();
-    public static int temporaryInviteHash = temporaryInvite.hashCode();
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
-    public static ArrayList<ModMdoExtra<?>> extrasWaitingForRegister = new ArrayList<>();
     public static ModMdoExtraLoader extras;
     public static boolean loaded = false;
     public static boolean debug = false;
     public static boolean testing = false;
     public static ModMdoCommandRegister commandRegister;
-    public static ModMdoEventTracer event;
+    public static ModMdoEventTracer event = new ModMdoEventTracer();
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
-    public static TickPerSecondAnalyzer tps = new TickPerSecondAnalyzer();
 
     public static ClazzScanner EXTRAS_AUTO = new ClazzScanner(ModMdoExtra.class);
 
@@ -216,7 +208,7 @@ public class SharedVariables {
     }
 
     public static String getServerLevelNamePath(MinecraftServer server) {
-        return ((MinecraftServerSession) server).getSession().getDirectoryName() + "/";
+        return ((MinecraftServerInterface) server).getSession().getDirectoryName() + "/";
     }
 
     public static String getApply(CommandContext<ServerCommandSource> source) {
@@ -224,7 +216,7 @@ public class SharedVariables {
     }
 
     public static String getApply(MinecraftServer server) {
-        return ((MinecraftServerSession) server).getSession().getDirectoryName() + "/";
+        return ((MinecraftServerInterface) server).getSession().getDirectoryName() + "/";
     }
 
     public static String getApply() {
@@ -287,7 +279,7 @@ public class SharedVariables {
         config.setIfNoExist("compatible_online_mode", true);
         config.setIfNoExist("modmdo_connecting", true);
         config.setIfNoExist("modmdo_connecting_whitelist", new JSONObject());
-        config.setIfNoExist("modmdo_connection_chatting_format", ModMdoDataProcessor.CONSOLE_CHAT_FORMAT);
+        config.setIfNoExist("modmdo_connection_chatting_format", ModMdoDataProcessor.DEFAULT_CHAT_FORMAT);
         config.setIfNoExist("modmdo_connection_chatting_forward", true);
         config.setIfNoExist("modmdo_connection_chatting_accept", true);
         config.setIfNoExist("modmdo_connection_player_join_forward", true);
@@ -341,18 +333,6 @@ public class SharedVariables {
         return Language.ofs(config.getConfigString("default_language"));
     }
 
-    public static JSONObject getTemporaryWhitelistNamesJSONObject() {
-        JSONObject json = new JSONObject();
-        JSONArray array = new JSONArray();
-        for (TemporaryCertificate certificate : temporaryStation.values()) {
-            if (certificate.getType().equals("whitelist")) {
-                array.put(certificate.name);
-            }
-        }
-        json.put("names", array);
-        return json;
-    }
-
     public static void handleTemporaryWhitelist() {
         for (TemporaryCertificate wl : temporaryStation.values()) {
             if (! wl.isValid()) {
@@ -373,14 +353,6 @@ public class SharedVariables {
                     banned.remove(name);
                 }
             }
-        }
-    }
-
-    public static void registerExtra(ModMdoExtra<?> extra) {
-        if (extras == null) {
-            extrasWaitingForRegister.add(extra);
-        } else {
-            extras.register(extra.getId(), extra);
         }
     }
 

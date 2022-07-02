@@ -1,6 +1,8 @@
 package com.github.cao.awa.modmdo.utils.entity.player;
 
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.cao.awa.modmdo.utils.entity.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import net.minecraft.server.network.*;
 import org.json.*;
@@ -8,7 +10,7 @@ import org.json.*;
 import java.io.*;
 import java.util.*;
 
-public class PlayerUtil {
+public class PlayerUtil extends EntityUtil {
     public static long getPlayTime(ServerPlayerEntity player) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(SharedVariables.getServerLevelPath(SharedVariables.server) + "stats/" + player.getUuid().toString() + ".json"));
@@ -26,32 +28,21 @@ public class PlayerUtil {
 
             return getCustomStat("minecraft:play_time", stat);
         } catch (Exception e) {
-            e.printStackTrace();
             return 0;
         }
     }
 
     public static long getCustomStat(String object, JSONObject stat) {
         long count = 0;
-        try {
+        EntrustParser.trying(() -> {
             JSONObject custom = stat.getJSONObject("minecraft:custom");
+            return EntrustParser.trying(() -> custom.getLong(object));
+        });
 
-            try {
-                count = custom.getLong(object);
-            } catch (Exception e) {
-
-            }
-        } catch (Exception e) {
-
-        }
         return count;
     }
 
-    public static UUID getId(ServerPlayerEntity player) {
-        return getId(player.getGameProfile());
-    }
-
-    public static UUID getId(GameProfile profile) {
+    public static UUID getUUID(GameProfile profile) {
         return profile.getId();
     }
 }

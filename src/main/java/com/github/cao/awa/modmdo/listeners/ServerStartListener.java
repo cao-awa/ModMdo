@@ -23,7 +23,6 @@ public class ServerStartListener {
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            tps.init(server, - 1);
             if (event != null) {
                 event.submit(new ServerStartedEvent(server));
             }
@@ -31,7 +30,6 @@ public class ServerStartListener {
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::disconnect);
-            tps.stop();
         });
     }
 }

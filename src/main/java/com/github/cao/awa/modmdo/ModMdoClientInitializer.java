@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.security.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
@@ -7,6 +8,7 @@ import net.fabricmc.api.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
+@Client
 public class ModMdoClientInitializer implements ClientModInitializer {
     @Override
     public void onInitializeClient() {

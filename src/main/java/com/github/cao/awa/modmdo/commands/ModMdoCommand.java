@@ -2,8 +2,8 @@ package com.github.cao.awa.modmdo.commands;
 
 import com.github.cao.awa.modmdo.*;
 import com.github.cao.awa.modmdo.certificate.*;
-import com.github.cao.awa.modmdo.commands.argument.connection.*;
-import com.github.cao.awa.modmdo.commands.argument.whitelist.*;
+import com.github.cao.awa.modmdo.commands.suggester.connection.*;
+import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.Language;
 import com.github.cao.awa.modmdo.network.forwarder.connection.*;

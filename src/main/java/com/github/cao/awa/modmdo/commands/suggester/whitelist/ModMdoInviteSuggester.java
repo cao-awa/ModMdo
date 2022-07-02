@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.commands.argument.whitelist;
+package com.github.cao.awa.modmdo.commands.suggester.whitelist;
 
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;

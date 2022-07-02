@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.utils.usr;
+package com.github.cao.awa.modmdo.usr;
 
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;

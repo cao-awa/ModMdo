@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.commands.argument.ban;
+package com.github.cao.awa.modmdo.commands.suggester.ban;
 
 import com.github.cao.awa.modmdo.certificate.*;
 import com.mojang.brigadier.context.*;
