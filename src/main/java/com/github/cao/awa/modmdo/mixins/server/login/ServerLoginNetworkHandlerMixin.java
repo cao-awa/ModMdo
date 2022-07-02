@@ -24,6 +24,8 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
+import java.util.concurrent.*;
+
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerLoginNetworkHandler.class)
@@ -77,7 +79,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
             }
 
             if (! server.isHost(player.getGameProfile()) || modMdoType == ModMdoType.SERVER) {
-                new Thread(() -> {
+                CompletableFuture.runAsync(() -> {
                     Thread.currentThread().setName("ModMdo accepting");
                     long nano = System.nanoTime();
                     TRACKER.info("nano " + nano + " (" + EntityUtil.getName(player) + ") trying join server");
@@ -181,7 +183,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     } catch (Exception e) {
                         TRACKER.submit("Exception in handle status sync lost", e);
                     }
-                }).start();
+                });
             } else {
                 serverLogin.login(player.getName().getString(), player.getUuid().toString(), staticConfig.getConfigString("identifier"), String.valueOf(MODMDO_VERSION), null, null);
 
