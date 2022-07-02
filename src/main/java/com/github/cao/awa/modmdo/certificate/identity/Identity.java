@@ -1,10 +1,12 @@
 package com.github.cao.awa.modmdo.certificate.identity;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.storage.*;
 import org.json.*;
 
 import java.util.*;
 
+@Server
 public class Identity extends Storable {
     private final UUID uuid;
     private String uniqueId;

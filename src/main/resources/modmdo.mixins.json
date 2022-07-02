@@ -8,7 +8,7 @@
         "EntityMixin",
         "ItemEntityMixin",
         "ItemStackMixin",
-        "MinecraftServerSession",
+        "MinecraftServerInterface",
         "block.BlockMixin",
         "block.entity.LootableContainerBlockEntityMixin",
         "client.ServerInfoMixin",
