@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.security;
 
-import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 
 import java.security.*;
@@ -20,7 +19,7 @@ public class RandomIdentifier {
 
     public static String randomIdentifier(int size, boolean noNano) {
         StringBuilder builder = new StringBuilder();
-        StringBuilder nano = new StringBuilder(String.valueOf(TimeUtil.nano()));
+        StringBuilder nano = new StringBuilder(String.valueOf(System.nanoTime()));
         for (int i = 0; i < size; i++) {
             if (noNano) {
                 builder.append(CHARS[RANDOM.nextInt(CHARS.length)]);

@@ -11,8 +11,8 @@
     "zhuaidadaya"
   ],
   "contact": {
-    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
-    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
+    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/auth",
+    "sources": "https://github.com/zhuaidadaya/modMdo/tree/auth",
     "issues": "https://github.com/zhuaidadaya/ModMdo/issues"
   },
 
@@ -26,9 +26,6 @@
     ],
     "client": [
         "com.github.cao.awa.modmdo.ModMdoClientInitializer"
-    ],
-    "server": [
-        "com.github.cao.awa.modmdo.ModMdoServerInitializer"
     ]
   },
   "mixins": [
@@ -38,8 +35,8 @@
   "depends": {
     "fabricloader": ">=0.12.6",
     "fabric": "*",
-    "minecraft": "1.18.x",
-    "java": ">=17"
+    "minecraft": "*",
+    "java": ">=8"
   },
   "suggests": {
     "another-mod": "*"

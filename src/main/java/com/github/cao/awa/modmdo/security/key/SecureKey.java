@@ -1,11 +1,9 @@
 package com.github.cao.awa.modmdo.security.key;
 
-import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.storage.*;
 import org.jetbrains.annotations.*;
 import org.json.*;
 
-@Client
 public class SecureKey extends Storable {
     private @NotNull String privateKey;
     private @NotNull String verifyKey;

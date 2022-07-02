@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.security.key;
 
-import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.security.*;
 import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
@@ -13,7 +12,6 @@ import org.json.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
-@Client
 public class SecureKeys extends Storable {
     private final Object2ObjectOpenHashMap<String, SecureKey> keys = new Object2ObjectOpenHashMap<>();
     private SecureLevel level = SecureLevel.UNEQUAL_KEY;
