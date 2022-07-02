@@ -237,12 +237,11 @@ public class ModMdoCommand extends SimpleCommand {
             config.set("whitelist_only_id", false);
             SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("whitelist_only_id"));
             return 0;
-        }))).then(literal("whitelist").then(literal("remove").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
-                    Certificate wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
+        }))).then(literal("whitelist").then(literal("remove").then(argument("name", StringArgumentType.string()).suggests(ModMdoWhitelistSuggester::suggestions).executes(remove -> {
+                    Certificate wl = ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(remove, "name"));
                     if (SharedVariables.whitelist.containsName(wl.getName())) {
                         SharedVariables.whitelist.remove(wl.getName());
                         SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.removed", wl.getName()));
-                        SharedVariables.updateWhitelistNames(SimpleCommandOperation.getServer(remove), true);
                         SharedVariables.saveVariables();
                         return 0;
                     }
@@ -290,15 +289,15 @@ public class ModMdoCommand extends SimpleCommand {
             config.set("modmdo_connecting", false);
             SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("modmdo_connecting"));
             return 0;
-        }))).then(literal("connection").then(literal("connections").then(argument("name", ModMdoConnectionArgumentType.connection()).executes(getConnectInfo -> {
+        }))).then(literal("connection").then(literal("connections").then(argument("name", StringArgumentType.string()).suggests(ModMdoConnectionSuggester::suggestions).executes(getConnectInfo -> {
             // TODO: 2022/5/10
             return 0;
         }).then(literal("disconnect").executes(disconnect -> {
-            Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(disconnect, "name");
+            Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionSuggester.getConnection(StringArgumentType.getString(disconnect, "name"));
             EntrustExecution.tryTemporary(pair.getRight()::disconnect, nullProcessor -> SimpleCommandOperation.sendError(disconnect, TextUtil.translatable("modmdo.connection.not.found", pair.getLeft())));
             return 0;
         })).then(literal("traffic").executes(test -> {
-            Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionArgumentType.getConnection(test, "name");
+            Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionSuggester.getConnection(StringArgumentType.getString(test, "name"));
             sendFeedback(test, Translatable.translatable(pair.getRight().traffic()));
             return 0;
         })))).then(literal("connect").then(argument("ip", StringArgumentType.string()).then(argument("port", IntegerArgumentType.integer(0, 65565)).executes(connectTo -> {
@@ -420,7 +419,7 @@ public class ModMdoCommand extends SimpleCommand {
     }
 
     public void showWhitelist(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
-        SharedVariables.flushTemporaryWhitelist();
+        SharedVariables.handleTemporaryWhitelist();
         ServerPlayerEntity player = SimpleCommandOperation.getPlayer(source);
         if (SharedVariables.whitelist.size() > 0) {
             StringBuilder builder = new StringBuilder();

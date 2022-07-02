@@ -1,11 +1,11 @@
 package com.github.cao.awa.modmdo.mixins.server.play;
 
+import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.entity.player.*;
-import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
 import net.minecraft.network.*;
@@ -46,7 +46,7 @@ public abstract class PlayerManagerMixin {
                         break;
                     if (player.getUuid().equals(uuid)) {
                         if (loginUsers.hasUser(player)) {
-                            SimpleCommandOperation.sendMessage(player, TextUtil.translatable("login.dump.rejected"), false);
+                            SimpleCommandOperation.sendMessage(player, Translatable.translatable("login.dump.rejected"), false);
                         }
                         cir.setReturnValue(null);
                     }
