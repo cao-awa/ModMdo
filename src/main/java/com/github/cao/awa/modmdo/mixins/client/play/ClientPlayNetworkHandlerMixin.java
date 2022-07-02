@@ -36,16 +36,6 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     @Final
     private MinecraftClient client;
 
-    @Inject(method = "onGameJoin", at = @At("HEAD"))
-    public void onGameJoin(GameJoinS2CPacket packet, CallbackInfo ci) {
-        System.out.println("???");
-    }
-
-    @Inject(method = "onGameJoin", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;createPlayer(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/stat/StatHandler;Lnet/minecraft/client/recipebook/ClientRecipeBook;)Lnet/minecraft/client/network/ClientPlayerEntity;"))
-    public void createPlayer(GameJoinS2CPacket packet, CallbackInfo ci) {
-        System.out.println("az???");
-    }
-
     /**
      * 与服务端进行自定义通信
      *
