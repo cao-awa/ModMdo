@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.commands.argument.extra;
+package com.github.cao.awa.modmdo.commands.suggester.extra;
 
 import com.github.cao.awa.modmdo.extra.loader.*;
 import com.github.cao.awa.modmdo.storage.*;

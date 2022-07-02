@@ -1,11 +1,12 @@
 package com.github.cao.awa.modmdo.server.login;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
-import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.encryption.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
@@ -17,6 +18,7 @@ import java.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
+@Server
 public class ServerLogin {
     public void login(String name, String uuid, String identifier, String modmdoVersion, String unidirectionalVerify, String verifyKey) {
         login(name, uuid, identifier, modmdoVersion, null, unidirectionalVerify, verifyKey);

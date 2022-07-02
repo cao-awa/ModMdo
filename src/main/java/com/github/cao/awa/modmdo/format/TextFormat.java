@@ -4,7 +4,7 @@ import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.Dictionary;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
-import com.github.cao.awa.modmdo.utils.usr.*;
+import com.github.cao.awa.modmdo.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -22,20 +22,16 @@ public abstract class TextFormat<T> {
     }
 
     public void set(Resource<String> resource) {
-        for (String lang : resource.getNames()) {
-            try {
-                Object2ObjectLinkedOpenHashMap<String, String> map = new Object2ObjectLinkedOpenHashMap<>();
-                for (String res : resource.read(lang)) {
-                    JSONObject json = new JSONObject(res);
-                    for (String s : json.keySet()) {
-                        map.put(s, json.getString(s));
-                    }
+        EntrustExecution.tryFor(resource.getNames(), lang -> {
+            Object2ObjectLinkedOpenHashMap<String, String> map = new Object2ObjectLinkedOpenHashMap<>();
+            for (String res : resource.read(lang)) {
+                JSONObject json = new JSONObject(res);
+                for (String s : json.keySet()) {
+                    map.put(s, json.getString(s));
                 }
-                EntrustExecution.executeNull(format.get(lang), m -> m.putAll(map), nu -> format.put(lang, map));
-            } catch (Exception e) {
-
             }
-        }
+            EntrustExecution.executeNull(format.get(lang), m -> m.putAll(map), nu -> format.put(lang, map));
+        });
     }
 
     public Set<String> supported() {

@@ -415,5 +415,4 @@ public class StringUtils {
     public static String newStringUtf8(final byte[] bytes) {
         return newString(bytes, StandardCharsets.UTF_8);
     }
-
 }

@@ -40,7 +40,7 @@ public abstract class PlayerManagerMixin {
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         if (SharedVariables.isActive()) {
             if (SharedVariables.enableRejectReconnect) {
-                UUID uuid = PlayerUtil.getId(profile);
+                UUID uuid = PlayerUtil.getUUID(profile);
                 for (ServerPlayerEntity player : this.players) {
                     if (player.networkHandler.connection.getAddress() == null)
                         break;

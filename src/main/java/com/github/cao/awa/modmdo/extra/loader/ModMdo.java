@@ -10,10 +10,10 @@ import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.file.reads.*;
 import com.github.cao.awa.modmdo.utils.text.*;
-import com.github.cao.awa.modmdo.utils.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.packet.s2c.play.*;
@@ -41,11 +41,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         allDefault();
         defaultConfig();
 
-        try {
-            initModMdoVariables(modMdoType);
-        } catch (Exception e) {
-
-        }
+        EntrustExecution.tryTemporary(() -> initModMdoVariables(modMdoType));
 
         saveVariables();
     }
@@ -59,15 +55,13 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
     }
 
     public void initCommand() {
-        try {
+        EntrustExecution.tryTemporary(() -> {
             new HereCommand().register();
             new DimensionHereCommand().register();
             new TestCommand().register();
             new TemporaryCommand().register();
             new ModMdoCommand().register();
-        } catch (Exception e) {
-
-        }
+        }, ex -> TRACKER.submit("Failed load ModMdo commands"));
     }
 
     public void initStaticCommand() {

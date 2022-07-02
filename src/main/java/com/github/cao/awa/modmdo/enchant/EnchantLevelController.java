@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.utils.enchant;
+package com.github.cao.awa.modmdo.enchant;
 
 import com.github.cao.awa.modmdo.resourceLoader.Resource;
 import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
