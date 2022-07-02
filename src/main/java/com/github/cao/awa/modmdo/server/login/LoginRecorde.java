@@ -23,7 +23,7 @@ public final class LoginRecorde extends Storable {
     }
 
     public static LoginRecorde build(JSONObject json) {
-        return new LoginRecorde(Identity.build(json), LoginRecordeType.of(json.getString("type")));
+        return new LoginRecorde(Identity.build(json.getJSONObject("identity")), LoginRecordeType.of(json.getString("type")));
     }
 
     public String getUniqueId() {
