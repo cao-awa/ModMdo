@@ -411,8 +411,8 @@ public class ModMdoCommand extends SimpleCommand {
             sendFeedback(list, TextUtil.translatable(builder.toString()));
             return 0;
         })).then(literal("reload").executes(e -> {
-            Legacy<Integer, Integer> pair = ModMdoStdInitializer.loadEvent(true);
-            sendFeedback(e, TextUtil.translatable("modmdo.event.reload.success", pair.newly(), pair.stale()));
+            Legacy<Integer, Integer> legacy = ModMdoStdInitializer.loadEvent(true);
+            sendFeedback(e, TextUtil.translatable("modmdo.event.reload.success", legacy.newly(), legacy.stale()));
             return 0;
         }))));
         return this;

@@ -6,10 +6,8 @@ import javax.crypto.*;
 import javax.crypto.spec.*;
 import java.security.*;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
-
 public class AES {
-    private static final byte[] KEY_VI = staticConfig.get("private_verify_key").getBytes();
+    private static final byte[] KEY_VI = "0000000000000000".getBytes();
 
     static {
         Security.setProperty("crypto.policy", "unlimited");

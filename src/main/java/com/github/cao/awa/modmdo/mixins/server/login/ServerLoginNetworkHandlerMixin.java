@@ -98,9 +98,9 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     });
                     TRACKER.submit("Server send login packet: modmdo login", () -> {
                         if (modmdoWhitelist) {
-                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL).writeString(staticConfig.get("identifier"))));
+                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(CHECKING_CHANNEL).writeString(staticConfig.get("identifier"))));
                         } else {
-                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(modmdoWhitelist ? CHECKING_CHANNEL : LOGIN_CHANNEL)));
+                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(LOGIN_CHANNEL)));
                         }
                     });
 
