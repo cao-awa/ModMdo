@@ -76,68 +76,72 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
             TRACKER.info("player " + name + " trying join server");
 
-            Receptacle<Boolean> isDoneOnlineMode = new Receptacle<>(false);
+            if (config.getConfigBoolean("modmdo_whitelist")) {
+                Receptacle<Boolean> isDoneOnlineMode = new Receptacle<>(false);
 
-            if (server.isHost(player.getGameProfile())) {
-                serverLogin.login(name, PlayerUtil.getUUID(player).toString(), staticConfig.getConfigString("identifier"), String.valueOf(MODMDO_VERSION), null, null);
+                if (server.isHost(player.getGameProfile())) {
+                    serverLogin.login(name, PlayerUtil.getUUID(player).toString(), staticConfig.getConfigString("identifier"), String.valueOf(MODMDO_VERSION), null, null);
 
-                manager.onPlayerConnect(connection, player);
-            } else {
-                int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
+                    manager.onPlayerConnect(connection, player);
+                } else {
+                    int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
 
-                loginTimedOut.put(name, TimeUtil.millions() + loginCheckTimeLimit);
+                    loginTimedOut.put(name, TimeUtil.millions() + loginCheckTimeLimit);
 
-                if (server.isOnlineMode()) {
-                    if (! (profile == null || profile.getId() == null) && ! preReject) {
-                        if (config.getConfigBoolean("compatible_online_mode")) {
-                            EntrustExecution.tryTemporary(() -> {
-                                serverLogin.loginUsingYgg(name, profile.getId().toString());
-                                manager.onPlayerConnect(connection, player);
-                                isDoneOnlineMode.set(true);
-                            }, ex -> {
-                                serverLogin.reject(name, profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
-                            });
+                    if (server.isOnlineMode()) {
+                        if (! (profile == null || profile.getId() == null) && ! preReject) {
+                            if (config.getConfigBoolean("compatible_online_mode")) {
+                                EntrustExecution.tryTemporary(() -> {
+                                    serverLogin.loginUsingYgg(name, profile.getId().toString());
+                                    manager.onPlayerConnect(connection, player);
+                                    isDoneOnlineMode.set(true);
+                                }, ex -> {
+                                    serverLogin.reject(name, profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
+                                });
+                            }
                         }
                     }
-                }
 
-                ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
-                TRACKER.submit("Server send test packet: modmdo-connection", () -> {
-                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("modmdo-connection")));
-                });
-                TRACKER.submit("Server send test packet: old modmdo version test", () -> {
-                    handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
-                });
-
-                if (!isDoneOnlineMode.get()) {
-                    TRACKER.info("Player " + name + " are not done online mode, will check again using modmdo");
-                    TRACKER.submit("Server send login packet: modmdo login", () -> {
-                        if (modmdoWhitelist) {
-                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(CHECKING_CHANNEL).writeString(staticConfig.get("identifier"))));
-                        } else {
-                            handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(LOGIN_CHANNEL)));
-                        }
+                    ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(server, connection, player);
+                    TRACKER.submit("Server send test packet: modmdo-connection", () -> {
+                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(DATA_CHANNEL).writeString("modmdo-connection")));
+                    });
+                    TRACKER.submit("Server send test packet: old modmdo version test", () -> {
+                        handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)));
                     });
 
-                    CompletableFuture.runAsync(() -> {
-                        while (TimeUtil.millions() < loginTimedOut.get(name)) {
-                            TimeUtil.coma(10);
-                        }
-                        if (loginTimedOut.containsKey(name) && (connection.isOpen() || ! loginUsers.hasUser(name))) {
-                            if (rejectUsers.hasUser(name)) {
-                                disc(rejectUsers.getUser(name).getMessage());
-
-                                rejectUsers.removeUser(name);
+                    if (! isDoneOnlineMode.get()) {
+                        TRACKER.info("Player " + name + " are not done online mode, will check again using modmdo");
+                        TRACKER.submit("Server send login packet: modmdo login", () -> {
+                            if (modmdoWhitelist) {
+                                handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(CHECKING_CHANNEL).writeString(staticConfig.get("identifier"))));
                             } else {
-                                disc(TextUtil.literal("You are failed login because too long did not received login request").text());
+                                handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(LOGIN_CHANNEL)));
                             }
-                        } else {
-                            loginTimedOut.remove(name);
-                        }
-                    });
-                } else {
-                    TRACKER.info("Player " + name + " are done online mode, will not check again using modmdo");
+                        });
+
+                        CompletableFuture.runAsync(() -> {
+                            while (TimeUtil.millions() < loginTimedOut.get(name)) {
+                                TimeUtil.coma(10);
+                            }
+                            if (loginTimedOut.containsKey(name) && (connection.isOpen() || ! loginUsers.hasUser(name))) {
+                                if (rejectUsers.hasUser(name)) {
+                                    disc(rejectUsers.getUser(name).getMessage());
+
+                                    rejectUsers.removeUser(name);
+                                } else {
+                                    disc(TextUtil.literal("You are failed login because too long did not received login request").text());
+                                }
+                            } else {
+                                loginTimedOut.remove(name);
+                            }
+                        });
+                    } else {
+                        TRACKER.info("Player " + name + " are done online mode, will not check again using modmdo");
+                    }
                 }
+            } else {
+                manager.onPlayerConnect(connection, player);
             }
         } else {
             manager.onPlayerConnect(connection, player);
