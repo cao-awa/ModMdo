@@ -118,14 +118,14 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
     public void onDisconnected0(PlayerManager instance, Text message, MessageType type, UUID sender) {
         if (SharedVariables.isActive()) {
             if (loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
-                instance.broadcastChatMessage(message, type, sender);
+                instance.broadcast(message, type, sender);
             }
         } else {
-            instance.broadcastChatMessage(message, type, sender);
+            instance.broadcast(message, type, sender);
         }
     }
 
