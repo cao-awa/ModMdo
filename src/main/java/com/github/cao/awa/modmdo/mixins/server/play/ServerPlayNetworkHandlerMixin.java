@@ -10,16 +10,16 @@ import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
+import net.minecraft.network.message.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
+import net.minecraft.util.registry.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
-
-import java.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -118,14 +118,14 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
-    public void onDisconnected0(PlayerManager instance, Text message, MessageType type, UUID sender) {
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Lnet/minecraft/util/registry/RegistryKey;)V"))
+    public void onDisconnected0(PlayerManager instance, Text message, RegistryKey<MessageType> typeKey) {
         if (SharedVariables.isActive()) {
             if (loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
-                instance.broadcastChatMessage(message, type, sender);
+                instance.broadcast(message, typeKey);
             }
         } else {
-            instance.broadcastChatMessage(message, type, sender);
+            instance.broadcast(message, typeKey);
         }
     }
 
