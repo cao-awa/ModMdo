@@ -2,6 +2,7 @@ package org.json;
 
 import com.github.zhuaidadaya.rikaishinikui.handler.conductor.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
 
 import java.io.Closeable;
@@ -110,7 +111,16 @@ public class JSONObject {
      * output to guarantee that we are always writing valid JSON.
      */
     static final Pattern NUMBER_PATTERN = Pattern.compile("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?");
-
+    private static final Int2ObjectArrayMap<String> indents = EntrustParser.operation(new Int2ObjectArrayMap<>(), map -> {
+        map.put(1, " ");
+        map.put(2, "  ");
+        map.put(3, "   ");
+        map.put(4, "    ");
+        map.put(5, "     ");
+        map.put(6, "      ");
+        map.put(7, "       ");
+        map.put(8, "        ");
+    });
     /**
      * The map where the JSONObject's properties are kept.
      */
@@ -140,7 +150,7 @@ public class JSONObject {
      *         initial capacity of the internal map.
      */
     protected JSONObject(int initialCapacity) {
-        this.map = new HashMap<String, Object>(initialCapacity);
+        this.map = new Object2ObjectOpenHashMap<>(initialCapacity);
     }
 
     /**
@@ -510,7 +520,7 @@ public class JSONObject {
         // implementations to rearrange their items for a faster element
         // retrieval based on associative access.
         // Therefore, an implementation mustn't rely on the order of the item.
-        this.map = new HashMap<String, Object>();
+        this.map = new Object2ObjectOpenHashMap<>();
     }
 
     /**
@@ -659,7 +669,7 @@ public class JSONObject {
             return null;
         }
         String[] names = new String[length];
-        for (int i = 0; i < length; i += 1) {
+        for (int i = 0; i < length; i++) {
             names[i] = fields[i].getName();
         }
         return names;
@@ -1078,9 +1088,8 @@ public class JSONObject {
     }
 
     static void indent(Writer writer, int indent) throws IOException {
-        for (int i = 0; i < indent; i += 1) {
-            writer.write(' ');
-        }
+        String ind = indents.get(indent);
+        writer.write(ind == null ? " ".repeat(indent) : ind);
     }
 
     /**
@@ -1215,7 +1224,7 @@ public class JSONObject {
         int len = string.length();
 
         w.write('"');
-        for (i = 0; i < len; i += 1) {
+        for (i = 0; i < len; i++) {
             b = c;
             c = string.charAt(i);
             switch (c) {
@@ -1572,15 +1581,15 @@ public class JSONObject {
         if (value == null) {
             this.put(key, 1);
         } else if (value instanceof Integer) {
-            this.put(key, ((Integer) value).intValue() + 1);
+            this.put(key, (Integer) value + 1);
         } else if (value instanceof Long) {
-            this.put(key, ((Long) value).longValue() + 1L);
+            this.put(key, (Long) value + 1L);
         } else if (value instanceof BigInteger) {
             this.put(key, ((BigInteger) value).add(BigInteger.ONE));
         } else if (value instanceof Float) {
-            this.put(key, ((Float) value).floatValue() + 1.0f);
+            this.put(key, (Float) value + 1.0f);
         } else if (value instanceof Double) {
-            this.put(key, ((Double) value).doubleValue() + 1.0d);
+            this.put(key, (Double) value + 1.0d);
         } else if (value instanceof BigDecimal) {
             this.put(key, ((BigDecimal) value).add(BigDecimal.ONE));
         } else {
@@ -2348,16 +2357,16 @@ public class JSONObject {
                 if (valueThis == null) {
                     return false;
                 }
-                if (valueThis instanceof JSONObject) {
-                    if (! ((JSONObject) valueThis).similar(valueOther)) {
+                if (valueThis instanceof JSONObject jsonObject) {
+                    if (! jsonObject.similar(valueOther)) {
                         return false;
                     }
-                } else if (valueThis instanceof JSONArray) {
-                    if (! ((JSONArray) valueThis).similar(valueOther)) {
+                } else if (valueThis instanceof JSONArray jsonArray) {
+                    if (! jsonArray.similar(valueOther)) {
                         return false;
                     }
-                } else if (valueThis instanceof Number && valueOther instanceof Number) {
-                    return isNumberSimilar((Number) valueThis, (Number) valueOther);
+                } else if (valueThis instanceof Number thisNum && valueOther instanceof Number otherNum) {
+                    return isNumberSimilar(thisNum, otherNum);
                 } else if (! valueThis.equals(valueOther)) {
                     return false;
                 }
@@ -2385,7 +2394,7 @@ public class JSONObject {
             return null;
         }
         JSONArray ja = new JSONArray();
-        for (int i = 0; i < names.length(); i += 1) {
+        for (int i = 0; i < names.length(); i++) {
             ja.put(this.opt(names.getString(i)));
         }
         return ja;
@@ -2558,7 +2567,7 @@ public class JSONObject {
      * @return a java.util.Map containing the entries of this object
      */
     public Map<String, Object> toMap() {
-        Map<String, Object> results = new HashMap<String, Object>();
+        Map<String, Object> results = new Object2ObjectOpenHashMap<>();
         for (Entry<String, Object> entry : this.entrySet()) {
             Object value;
             if (entry.getValue() == null || NULL.equals(entry.getValue())) {

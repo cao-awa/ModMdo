@@ -47,7 +47,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      * @author 草awa
      * @author zhuaidadaya
      */
-    @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onCustomPayload", at = @At("HEAD"))
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             PacketByteBuf data = packet.getData();
@@ -93,10 +93,6 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getUUID(profile).toString()).writeString(loginId).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME).writeString(sendingVerify).writeString(verifyKey)));
                         }
                     });
-                }
-
-                if (SERVER_CHANNEL.equals(packet.getChannel())) {
-                    ci.cancel();
                 }
             }, ex -> {
                 TRACKER.err("Error in connecting ModMdo server", ex);

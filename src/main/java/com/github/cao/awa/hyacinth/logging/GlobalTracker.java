@@ -76,7 +76,7 @@ public class GlobalTracker {
 
     public void submit(String message, Throwable throwable) {
         if (SharedVariables.debug) {
-            String data = tacker(throwable.getStackTrace(), - 1, 2, message).shortPrint();
+            String data = tacker(Thread.currentThread(), throwable, - 1, 2, message).shortPrint();
             EntrustExecution.tryTemporary(() -> {
                 if (writer != null) {
                     writer.write(data);
@@ -106,6 +106,10 @@ public class GlobalTracker {
     }
 
     public static Tracking tacker(Thread parent, StackTraceElement[] tracker, int trackLimit, int startFrom, String... messages) {
+        return new Tracking(parent, tracker, trackLimit, startFrom, messages);
+    }
+
+    public static Tracking tacker(Thread parent, Throwable tracker, int trackLimit, int startFrom, String... messages) {
         return new Tracking(parent, tracker, trackLimit, startFrom, messages);
     }
 

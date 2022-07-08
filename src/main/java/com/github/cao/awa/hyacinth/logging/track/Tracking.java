@@ -12,6 +12,7 @@ public class Tracking {
     private static final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
     private Thread parent;
     private StackTraceElement[] tracker;
+    private StackTraceElement[] excepting;
     private String[] messages;
     private int startFrom;
     private int trackLimit;
@@ -74,6 +75,14 @@ public class Tracking {
         this.parent = parent;
     }
 
+    public Tracking(Thread parent, Throwable tracker, int trackLimit, int startFrom, String... messages) {
+        this.excepting = tracker.getStackTrace();
+        this.messages = messages;
+        this.trackLimit = trackLimit;
+        this.startFrom = startFrom;
+        this.parent = parent;
+    }
+
     public long getPause() {
         return pause;
     }
@@ -84,7 +93,7 @@ public class Tracking {
     }
 
     public StackTraceElement[] getTracker() {
-        return tracker;
+        return tracker == null ? excepting : tracker;
     }
 
     public Tracking setTracker(StackTraceElement[] tracker) {
