@@ -120,85 +120,87 @@ public abstract class ServerPlayNetworkHandlerMixin {
     }
 
     public void beforeLogin() {
-        String name = EntityUtil.getName(player);
-        if (loginUsers.hasUser(name)) {
-            disc(Translatable.translatable("login.dump.rejected").text());
-            return;
-        }
-        if (modMdoType == ModMdoType.SERVER && modmdoWhitelist) {
-            if (rejectUsers.hasUser(player)) {
-                User rejected = rejectUsers.getUser(player.getUuid());
-                if (rejected.getMessage() == null) {
-                    TRACKER.warn("ModMdo reject a login request, player \"" + name + "\", because player are not white-listed");
-                } else {
-                    TRACKER.warn("ModMdo reject a login request, player \"" + name + "\"");
-                }
-                disc(rejected.getMessage() == null ? TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text() : rejected.getMessage());
-
-                rejectUsers.removeUser(player);
-
-                TRACKER.info("Rejected player: " + name);
+        if (config.getConfigBoolean("modmdo_whitelist")) {
+            String name = EntityUtil.getName(player);
+            if (loginUsers.hasUser(name) || server.getPlayerManager().getPlayer(name) != null) {
+                disc(Translatable.translatable("login.dump.rejected").text());
                 return;
-            } else {
-                if (loginTimedOut.containsKey(name)) {
-                    if (loginTimedOut.get(name) < TimeUtil.millions()) {
-                        disc(TextUtil.literal("You are failed login because too long did not received login request").text());
-                        TRACKER.warn("ModMdo reject a login request, player \"" + name + "\", because player not sent login request");
-
-                        TRACKER.info("Rejected player: " + name);
-                        return;
+            }
+            if (modMdoType == ModMdoType.SERVER && modmdoWhitelist) {
+                if (rejectUsers.hasUser(player)) {
+                    User rejected = rejectUsers.getUser(player.getUuid());
+                    if (rejected.getMessage() == null) {
+                        TRACKER.warn("ModMdo reject a login request, player \"" + name + "\", because player are not white-listed");
+                    } else {
+                        TRACKER.warn("ModMdo reject a login request, player \"" + name + "\"");
                     }
-                }
-            }
+                    disc(rejected.getMessage() == null ? TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text() : rejected.getMessage());
 
-            if (! connection.isOpen()) {
-                return;
-            }
-        }
+                    rejectUsers.removeUser(player);
 
-        if (handleBanned(player)) {
-            Certificate ban = banned.get(EntityUtil.getName(player));
-            if (ban instanceof TemporaryCertificate temporary) {
-                String remaining = temporary.formatRemaining();
-                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
-                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
-                TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
-            } else {
-                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
-                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
-                TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
-            }
-        }
+                    TRACKER.info("Rejected player: " + name);
+                    return;
+                } else {
+                    if (loginTimedOut.containsKey(name)) {
+                        if (loginTimedOut.get(name) < TimeUtil.millions()) {
+                            disc(TextUtil.literal("You are failed login because too long did not received login request").text());
+                            TRACKER.warn("ModMdo reject a login request, player \"" + name + "\", because player not sent login request");
 
-        EntrustExecution.tryTemporary(() -> {
-            EntrustExecution.tryTemporary(() -> {
-                if (connection.isOpen()) {
-                    if (! loginUsers.hasUser(player)) {
-                        if (! config.getConfigBoolean("modmdo_whitelist")) {
-                            serverLogin.login(player.getName().getString(), player.getUuid().toString(), "", "", null, null);
-                        } else {
-                            disc(Translatable.translatable("multiplayer.disconnect.not_whitelisted").text());
+                            TRACKER.info("Rejected player: " + name);
+                            return;
                         }
                     }
-
-                    server.getPlayerManager().onPlayerConnect(connection, player);
-                    TRACKER.info("Accepted player: " + EntityUtil.getName(player));
-
-                    loginTimedOut.remove(EntityUtil.getName(player));
-                } else {
-                    TRACKER.info("Expired nano: " + EntityUtil.getName(player));
                 }
-            }, e -> {
-                TRACKER.submit("Exception in join server", e);
-                if (! server.isHost(player.getGameProfile())) {
-                    TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize");
 
-                    disc(TextUtil.literal("lost status synchronize, please connect again").text());
-                } else {
-                    TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize, but will not be process");
+                if (! connection.isOpen()) {
+                    return;
                 }
-            });
-        }, e -> TRACKER.submit("Exception in handle status sync lost", e));
+            }
+
+            if (handleBanned(player)) {
+                Certificate ban = banned.get(EntityUtil.getName(player));
+                if (ban instanceof TemporaryCertificate temporary) {
+                    String remaining = temporary.formatRemaining();
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
+                    TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
+                } else {
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
+                    TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
+                }
+            }
+
+            EntrustExecution.tryTemporary(() -> {
+                EntrustExecution.tryTemporary(() -> {
+                    if (connection.isOpen()) {
+                        if (! loginUsers.hasUser(player)) {
+                            if (! config.getConfigBoolean("modmdo_whitelist")) {
+                                serverLogin.login(player.getName().getString(), player.getUuid().toString(), "", "", null, null);
+                            } else {
+                                disc(Translatable.translatable("multiplayer.disconnect.not_whitelisted").text());
+                            }
+                        }
+
+                        server.getPlayerManager().onPlayerConnect(connection, player);
+                        TRACKER.info("Accepted player: " + EntityUtil.getName(player));
+
+                        loginTimedOut.remove(EntityUtil.getName(player));
+                    } else {
+                        TRACKER.info("Expired nano: " + EntityUtil.getName(player));
+                    }
+                }, e -> {
+                    TRACKER.submit("Exception in join server", e);
+                    if (! server.isHost(player.getGameProfile())) {
+                        TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize");
+
+                        disc(TextUtil.literal("lost status synchronize, please connect again").text());
+                    } else {
+                        TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize, but will not be process");
+                    }
+                });
+            }, e -> TRACKER.submit("Exception in handle status sync lost", e));
+        }
     }
 
     public void disc(Text reason) {
