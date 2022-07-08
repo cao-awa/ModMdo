@@ -41,6 +41,14 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     private boolean doCheckModMdo = false;
     private GameProfile profileOld;
 
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void init(MinecraftServer server, ClientConnection connection, CallbackInfo ci) {
+        int radix = 4;
+        for (byte b : this.nonce) {
+            NONCE[NONCE.length - radix--] = b;
+        }
+    }
+
     @Inject(method = "tick", at = @At("HEAD"))
     public void tick(CallbackInfo ci) {
         if (doCheckModMdo) {
@@ -51,6 +59,8 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
     @Shadow
     public abstract void acceptPlayer();
+
+    @Shadow @Final private byte[] nonce;
 
     /**
      * @author 草awa
