@@ -11,8 +11,6 @@
         "MinecraftServerInterface",
         "block.BlockMixin",
         "block.entity.LootableContainerBlockEntityMixin",
-        "client.ServerInfoMixin",
-        "client.login.ClientLoginNetworkHandlerMixin",
         "command.CommandManagerMixin",
         "command.block.CommandBlockMixin",
         "connection.ClientConnectionInterface",
@@ -43,7 +41,9 @@
         "world.WorldMixin"
     ],
     "client": [
-        "client.play.ClientPlayNetworkHandlerMixin"
+        "client.play.ClientPlayNetworkHandlerMixin",
+        "client.ServerInfoMixin",
+        "client.login.ClientLoginNetworkHandlerMixin"
     ],
     "server": [
     ],

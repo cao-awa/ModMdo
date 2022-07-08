@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.mixins.client.login;
 
 import com.github.cao.awa.modmdo.develop.text.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
 import net.minecraft.client.util.*;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.*;
 import javax.crypto.*;
 import java.math.*;
 import java.security.*;
+import java.util.*;
 import java.util.function.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
@@ -29,20 +31,23 @@ public abstract class ClientLoginNetworkHandlerMixin {
 
     @Shadow @Final private MinecraftClient client;
 
+    private boolean isModMdo;
+
     /**
      * @author 草awa
+     * @reason
      */
     @Overwrite
     public void onHello(LoginHelloS2CPacket packet) {
-        boolean isModMdo = packet.getServerId().endsWith(":ModMdo");
+        isModMdo = EntrustParser.tryCreate(() -> Arrays.equals(NONCE, packet.getNonce()), false);
         Cipher cipher;
         Cipher cipher2;
         String string;
         LoginKeyC2SPacket loginKeyC2SPacket;
         try {
-            SecretKey secretKey = NetworkEncryptionUtils.generateSecretKey();
+            SecretKey secretKey = NetworkEncryptionUtils.generateKey();
             PublicKey publicKey = packet.getPublicKey();
-            string = (new BigInteger(NetworkEncryptionUtils.computeServerId(packet.getServerId(), publicKey, secretKey))).toString(16);
+            string = new BigInteger(NetworkEncryptionUtils.generateServerId(packet.getServerId(), publicKey, secretKey)).toString(16);
             cipher = NetworkEncryptionUtils.cipherFromKey(2, secretKey);
             cipher2 = NetworkEncryptionUtils.cipherFromKey(1, secretKey);
             loginKeyC2SPacket = new LoginKeyC2SPacket(secretKey, publicKey, packet.getNonce());
@@ -52,8 +57,8 @@ public abstract class ClientLoginNetworkHandlerMixin {
 
         this.statusConsumer.accept(Translatable.translatable("connect.authorizing").text());
         NetworkUtils.EXECUTOR.submit(() -> {
+            Text text = this.joinServerSession(string);
             if (!isModMdo) {
-                Text text = this.joinServerSession(string);
                 if (text != null) {
                     if (this.client.getCurrentServerEntry() == null || ! this.client.getCurrentServerEntry().isLocal()) {
                         this.connection.disconnect(text);
