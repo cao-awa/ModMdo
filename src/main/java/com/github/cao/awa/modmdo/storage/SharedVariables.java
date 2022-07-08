@@ -44,7 +44,7 @@ import java.util.*;
 
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final byte[] NONCE = "MODMDO:SERVER_NONCE_!+".getBytes();
+    public static final byte[] NONCE = "MODMDO:SERVER_NONCE_!+[RD]".getBytes();
     public static final String VERSION_ID = "1.0.40";
     public static final String SUFFIX = "-ES";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
