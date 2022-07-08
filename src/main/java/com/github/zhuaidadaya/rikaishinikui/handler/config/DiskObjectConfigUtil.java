@@ -29,6 +29,9 @@ public record DiskObjectConfigUtil(String entrust, String path, String suffix, b
         if (str == null || str.length() == 0) {
             return str;
         }
+        if (strategy == -1) {
+            strategy = Deflater.DEFAULT_STRATEGY;
+        }
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
             deflater.setStrategy(strategy);

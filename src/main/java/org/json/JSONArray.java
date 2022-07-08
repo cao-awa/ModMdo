@@ -26,17 +26,10 @@ package org.json;
 
 import it.unimi.dsi.fastutil.objects.*;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.lang.reflect.*;
+import java.math.*;
+import java.util.*;
 
 
 /**
@@ -309,11 +302,11 @@ public class JSONArray implements Iterable<Object> {
             int length = Array.getLength(array);
             this.myArrayList.ensureCapacity(this.myArrayList.size() + length);
             if (wrap) {
-                for (int i = 0; i < length; i += 1) {
+                for (int i = 0; i < length; i ++) {
                     this.put(JSONObject.wrap(Array.get(array, i)));
                 }
             } else {
-                for (int i = 0; i < length; i += 1) {
+                for (int i = 0; i < length; i ++) {
                     this.put(Array.get(array, i));
                 }
             }
@@ -832,11 +825,7 @@ public class JSONArray implements Iterable<Object> {
         if (val == null) {
             return defaultValue;
         }
-        final double doubleValue = val.doubleValue();
-        // if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
-        // return defaultValue;
-        // }
-        return doubleValue;
+        return val.doubleValue();
     }
 
     /**
@@ -899,9 +888,6 @@ public class JSONArray implements Iterable<Object> {
         if (val == null) {
             return defaultValue;
         }
-        // if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
-        // return floatValue;
-        // }
         return val.floatValue();
     }
 
@@ -949,8 +935,7 @@ public class JSONArray implements Iterable<Object> {
      * @return The value.
      */
     public BigInteger optBigInteger(int index, BigInteger defaultValue) {
-        Object val = this.opt(index);
-        return JSONObject.objectToBigInteger(val, defaultValue);
+        return JSONObject.objectToBigInteger(this.opt(index), defaultValue);
     }
 
     /**
@@ -1500,7 +1485,7 @@ public class JSONArray implements Iterable<Object> {
         if (len != ((JSONArray) other).length()) {
             return false;
         }
-        for (int i = 0; i < len; i += 1) {
+        for (int i = 0; i < len; i++) {
             Object valueThis = this.myArrayList.get(i);
             Object valueOther = ((JSONArray) other).myArrayList.get(i);
             if (valueThis == valueOther) {
@@ -1509,16 +1494,16 @@ public class JSONArray implements Iterable<Object> {
             if (valueThis == null) {
                 return false;
             }
-            if (valueThis instanceof JSONObject) {
-                if (! ((JSONObject) valueThis).similar(valueOther)) {
+            if (valueThis instanceof JSONObject jsonObject) {
+                if (! jsonObject.similar(valueOther)) {
                     return false;
                 }
-            } else if (valueThis instanceof JSONArray) {
-                if (! ((JSONArray) valueThis).similar(valueOther)) {
+            } else if (valueThis instanceof JSONArray jsonArray) {
+                if (! jsonArray.similar(valueOther)) {
                     return false;
                 }
-            } else if (valueThis instanceof Number && valueOther instanceof Number) {
-                return JSONObject.isNumberSimilar((Number) valueThis, (Number) valueOther);
+            } else if (valueThis instanceof Number thisNum && valueOther instanceof Number otherNum) {
+                return JSONObject.isNumberSimilar(thisNum, otherNum);
             } else if (! valueThis.equals(valueOther)) {
                 return false;
             }
@@ -1544,7 +1529,7 @@ public class JSONArray implements Iterable<Object> {
             return null;
         }
         JSONObject jo = new JSONObject(names.length());
-        for (int i = 0; i < names.length(); i += 1) {
+        for (int i = 0; i < names.length(); i ++) {
             jo.put(names.getString(i), this.opt(i));
         }
         return jo;
@@ -1567,7 +1552,7 @@ public class JSONArray implements Iterable<Object> {
         try {
             return this.toString(0);
         } catch (Exception e) {
-            return null;
+            return "[]";
         }
     }
 
@@ -1652,7 +1637,7 @@ public class JSONArray implements Iterable<Object> {
             } else if (length != 0) {
                 final int newIndent = indent + indentFactor;
 
-                for (int i = 0; i < length; i += 1) {
+                for (int i = 0; i < length; i ++) {
                     if (needsComma) {
                         writer.write(',');
                     }
@@ -1707,14 +1692,14 @@ public class JSONArray implements Iterable<Object> {
      * @return a java.util.List containing the elements of this array
      */
     public List<Object> toList() {
-        List<Object> results = new ArrayList<Object>(this.myArrayList.size());
+        List<Object> results = new ObjectArrayList<>(this.myArrayList.size());
         for (Object element : this.myArrayList) {
             if (element == null || JSONObject.NULL.equals(element)) {
                 results.add(null);
-            } else if (element instanceof JSONArray) {
-                results.add(((JSONArray) element).toList());
-            } else if (element instanceof JSONObject) {
-                results.add(((JSONObject) element).toMap());
+            } else if (element instanceof JSONArray jsonArray) {
+                results.add(jsonArray.toList());
+            } else if (element instanceof JSONObject jsonObject) {
+                results.add(jsonObject.toMap());
             } else {
                 results.add(element);
             }

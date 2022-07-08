@@ -7,15 +7,15 @@ import org.json.*;
 
 import java.util.*;
 
-public class UserUtil extends Storable {
+public class Users extends Storable {
     private final Object2ObjectRBTreeMap<String, User> users = new Object2ObjectRBTreeMap<>();
     private final Object2ObjectRBTreeMap<String, String> userNameIdMap = new Object2ObjectRBTreeMap<>();
 
-    public UserUtil() {
+    public Users() {
 
     }
 
-    public UserUtil(JSONObject json) {
+    public Users(JSONObject json) {
         for (String o : json.keySet())
             users.put(o, new User(json.getJSONObject(o)));
     }

@@ -92,7 +92,7 @@ public class ModMdoExtraLoader {
                     }
                 }
 
-                EntrustExecution.tryTemporary(() -> TimeUtil.barricade(10));
+                EntrustExecution.tryTemporary(() -> TimeUtil.coma(10));
             }
         }).start();
 

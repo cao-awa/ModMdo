@@ -18,7 +18,7 @@ public class Identity extends Storable {
     }
 
     public static Identity build(JSONObject json) {
-        return new Identity(json.getString("unique_id"), UUID.fromString(json.getString("uuid")), json.getString("unidirectional_verify"));
+        return new Identity(json.getString("unique_id"), UUID.fromString(json.getString("uuid")), json.has("unidirectional_verify") ? json.getString("unidirectional_verify") : "");
     }
 
     public String getVerify() {

@@ -17,6 +17,8 @@
 
 package org.apache.commons.codec;
 
+import java.io.*;
+
 /**
  * Thrown when there is a failure condition during the decoding process. This exception is thrown when a {@link Decoder}
  * encounters a decoding specific exception such as invalid data, or characters outside of the expected range.
@@ -29,6 +31,7 @@ public class DecoderException extends Exception {
      *
      * @see <a href="http://c2.com/cgi/wiki?AlwaysDeclareSerialVersionUid">Always Declare Serial Version Uid</a>
      */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

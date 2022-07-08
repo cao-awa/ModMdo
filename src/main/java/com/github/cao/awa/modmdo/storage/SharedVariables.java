@@ -44,6 +44,7 @@ import java.util.*;
 
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
+    public static final byte[] NONCE = "MODMDO:SERVER_NONCE_!+".getBytes();
     public static final String VERSION_ID = "1.0.39";
     public static final String SUFFIX = "-Debug";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
@@ -77,8 +78,9 @@ public class SharedVariables {
     public static boolean timeActive = true;
     public static boolean rejectNoFallCheat = true;
     public static boolean modmdoWhitelist = false;
-    public static UserUtil rejectUsers;
-    public static UserUtil loginUsers;
+    public static Object2ObjectOpenHashMap<String, Long> loginTimedOut = new Object2ObjectOpenHashMap<>();
+    public static Users rejectUsers;
+    public static Users loginUsers;
     public static DiskObjectConfigUtil config;
     public static DiskObjectConfigUtil staticConfig;
     public static MinecraftServer server;
@@ -127,8 +129,8 @@ public class SharedVariables {
         enableRejectReconnect = true;
         cancelEntitiesTick = false;
         timeActive = true;
-        rejectUsers = new UserUtil();
-        loginUsers = new UserUtil();
+        rejectUsers = new Users();
+        loginUsers = new Users();
         itemDespawnAge = 6000;
 
         enchantLevelController.setNoVanillaDefaultMaxLevel((short) 5);

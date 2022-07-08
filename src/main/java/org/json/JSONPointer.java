@@ -159,7 +159,7 @@ public class JSONPointer {
         }
         this.refTokens = new ObjectArrayList<>();
         int slashIdx = -1;
-        int prevSlashIdx = 0;
+        int prevSlashIdx;
         do {
             prevSlashIdx = slashIdx + 1;
             slashIdx = refs.indexOf('/', prevSlashIdx);
@@ -183,7 +183,7 @@ public class JSONPointer {
     }
 
     public JSONPointer(List<String> refTokens) {
-        this.refTokens = new ArrayList<String>(refTokens);
+        this.refTokens = new ObjectArrayList<>(refTokens);
     }
 
     /**

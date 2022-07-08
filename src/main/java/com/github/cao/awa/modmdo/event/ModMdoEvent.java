@@ -102,7 +102,7 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
                 EntrustExecution.tryTemporary(() -> {
                     OperationalInteger integer = new OperationalInteger(wait);
                     while (integer.get() > 0) {
-                        TimeUtil.barricade(10);
+                        TimeUtil.coma(10);
                         integer.reduce(10);
                         if (await.get(order).isInterrupted()) {
                             return;

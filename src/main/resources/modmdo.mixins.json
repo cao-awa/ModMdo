@@ -4,7 +4,6 @@
     "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
-        "ArgumentTypesMixin",
         "EnchantmentHelperMixin",
         "EntityMixin",
         "ItemEntityMixin",
@@ -12,8 +11,6 @@
         "MinecraftServerInterface",
         "block.BlockMixin",
         "block.entity.LootableContainerBlockEntityMixin",
-        "client.ServerInfoMixin",
-        "client.login.ClientLoginNetworkHandlerMixin",
         "command.CommandManagerMixin",
         "command.block.CommandBlockMixin",
         "connection.ClientConnectionInterface",
@@ -44,7 +41,9 @@
         "world.WorldMixin"
     ],
     "client": [
-        "client.play.ClientPlayNetworkHandlerMixin"
+        "client.play.ClientPlayNetworkHandlerMixin",
+        "client.ServerInfoMixin",
+        "client.login.ClientLoginNetworkHandlerMixin"
     ],
     "server": [
     ],

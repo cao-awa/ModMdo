@@ -103,8 +103,8 @@ public class ModMdoStdInitializer implements ModInitializer {
 
         staticConfig.setIfNoExist("identifier", RandomIdentifier.randomIdentifier());
 
-        SharedVariables.loginUsers = new UserUtil();
-        SharedVariables.rejectUsers = new UserUtil();
+        SharedVariables.loginUsers = new Users();
+        SharedVariables.rejectUsers = new Users();
 
         parseMapFormat();
 

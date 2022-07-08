@@ -17,6 +17,8 @@
 
 package org.apache.commons.codec;
 
+import java.io.*;
+
 /**
  * Thrown when there is a failure condition during the encoding process. This exception is thrown when an
  * {@link Encoder} encounters a encoding specific exception such as invalid data, inability to calculate a checksum,
@@ -30,6 +32,7 @@ public class EncoderException extends Exception {
      *
      * @see <a href="http://c2.com/cgi/wiki?AlwaysDeclareSerialVersionUid">Always Declare Serial Version Uid</a>
      */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
