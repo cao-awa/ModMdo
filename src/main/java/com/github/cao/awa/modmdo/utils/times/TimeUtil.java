@@ -1,5 +1,7 @@
 package com.github.cao.awa.modmdo.utils.times;
 
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+
 public class TimeUtil {
     public static long processRemainingSeconds(long million) {
         long onlineSeconds = million / 1000;
@@ -114,7 +116,9 @@ public class TimeUtil {
         Thread.sleep(millions);
     }
 
-    public static void barricade(long millions) throws InterruptedException {
-        Thread.sleep(millions);
+    public static void coma(long millions) {
+        EntrustExecution.tryTemporary(() -> {
+            Thread.sleep(millions);
+        });
     }
 }

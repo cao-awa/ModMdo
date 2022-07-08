@@ -21,7 +21,7 @@ public class ReusableThread {
         while (running) {
             if (wait) {
                 EntrustExecution.tryTemporary(() -> {
-                    TimeUnit.NANOSECONDS.sleep(2000);
+                    TimeUnit.MILLISECONDS.sleep(1);
                 }, ex -> finish());
             } else {
                 EntrustExecution.tryTemporary(() -> this.action.apply());
