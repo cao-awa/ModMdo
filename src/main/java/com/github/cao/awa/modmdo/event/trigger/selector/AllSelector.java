@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.event.trigger.selector;
 
 import com.github.cao.awa.modmdo.annotations.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
 
 import java.util.function.*;
@@ -9,9 +10,7 @@ import java.util.function.*;
 public class AllSelector extends TriggerSelector {
     @Override
     public void select(JSONObject json, BiConsumer<String, JSONObject> operation) {
-        for (String name : json.keySet()) {
-            getTargets().put(name, json.getJSONObject(name));
-        }
+        EntrustExecution.parallelTryFor(json.keySet(), name -> getTargets().put(name, json.getJSONObject(name)));
         accept(operation);
     }
 }

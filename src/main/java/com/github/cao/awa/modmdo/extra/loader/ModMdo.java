@@ -7,7 +7,6 @@ import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.format.console.*;
 import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.*;
-import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.usr.*;
@@ -57,7 +56,6 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
     public void initCommand() {
         EntrustExecution.tryTemporary(() -> {
             new HereCommand().register();
-            new DimensionHereCommand().register();
             new TestCommand().register();
             new TemporaryCommand().register();
             new ModMdoCommand().register();
@@ -155,10 +153,6 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                     }
                 }
             });
-
-            for (ModMdoDataProcessor processor : modmdoConnections) {
-                processor.tick(server);
-            }
         }, this, "HandlePlayers");
     }
 

@@ -8,4 +8,8 @@ public abstract class Storable {
     }
 
     public abstract JSONObject toJSONObject();
+
+    public void revert(JSONObject json) {
+
+    }
 }

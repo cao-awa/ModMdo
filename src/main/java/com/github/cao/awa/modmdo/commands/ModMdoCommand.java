@@ -2,16 +2,12 @@ package com.github.cao.awa.modmdo.commands;
 
 import com.github.cao.awa.modmdo.*;
 import com.github.cao.awa.modmdo.certificate.*;
-import com.github.cao.awa.modmdo.commands.suggester.connection.*;
 import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.Language;
-import com.github.cao.awa.modmdo.network.forwarder.connection.*;
-import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.text.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
@@ -22,9 +18,6 @@ import net.minecraft.enchantment.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
 import net.minecraft.util.*;
-import org.json.*;
-
-import java.net.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
@@ -289,114 +282,7 @@ public class ModMdoCommand extends SimpleCommand {
             config.set("modmdo_connecting", false);
             SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("modmdo_connecting"));
             return 0;
-        }))).then(literal("connection").then(literal("connections").then(argument("name", StringArgumentType.string()).suggests(ModMdoConnectionSuggester::suggestions).executes(getConnectInfo -> {
-            // TODO: 2022/5/10
-            return 0;
-        }).then(literal("disconnect").executes(disconnect -> {
-            Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionSuggester.getConnection(StringArgumentType.getString(disconnect, "name"));
-            EntrustExecution.tryTemporary(pair.getRight()::disconnect, nullProcessor -> SimpleCommandOperation.sendError(disconnect, TextUtil.translatable("modmdo.connection.not.found", pair.getLeft())));
-            return 0;
-        })).then(literal("traffic").executes(test -> {
-            Pair<String, ModMdoDataProcessor> pair = ModMdoConnectionSuggester.getConnection(StringArgumentType.getString(test, "name"));
-            sendFeedback(test, Translatable.translatable(pair.getRight().traffic()));
-            return 0;
-        })))).then(literal("connect").then(argument("ip", StringArgumentType.string()).then(argument("port", IntegerArgumentType.integer(0, 65565)).executes(connectTo -> {
-            EntrustExecution.tryTemporary(() -> {
-                if (config.getConfigString("server_name") != null) {
-                    JSONObject loginData = new JSONObject();
-                    loginData.put("name", config.getConfigString("server_name"));
-                    loginData.put("identifier", staticConfig.getConfigString("identifier"));
-                    loginData.put("version", SharedVariables.MODMDO_VERSION);
-                    EntrustExecution.tryTemporary(() -> new ModMdoClientConnection(SharedVariables.server, new InetSocketAddress(StringArgumentType.getString(connectTo, "ip"), IntegerArgumentType.getInteger(connectTo, "port")), loginData), Throwable::printStackTrace);
-                }
-            }, Throwable::printStackTrace);
-            return 0;
-        })))).then(literal("self").then(literal("name").then(argument("name", StringArgumentType.string()).executes(setName -> {
-            config.set("server_name", StringArgumentType.getString(setName, "name"));
-            return 0;
-        }))).then(literal("config").then(literal("chatting").then(literal("format").then(argument("format", StringArgumentType.string()).executes(format -> {
-            String formatting = StringArgumentType.getString(format, "format");
-            config.set("modmdo_connection_chatting_format", formatting);
-            SimpleCommandOperation.sendFeedback(format, TextUtil.translatable("modmdo.connection.chatting.format", formatting.replace("%server", "TestServer").replace("%name", "PlayerName233").replace("%msg", "Hi!")));
-            return 0;
-        }))).then(literal("accept").executes(getAccept -> {
-            SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"));
-            return 0;
-        }).then(literal("enable").executes(enable -> {
-            config.set("modmdo_connection_chatting_accept", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        })).then(literal("disable").executes(disable -> {
-            config.set("modmdo_connection_chatting_accept", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_chatting_accept"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        }))).then(literal("forward").executes(getForward -> {
-            SimpleCommandOperation.sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"));
-            return 0;
-        }).then(literal("enable").executes(enable -> {
-            config.set("modmdo_connection_chatting_forward", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        })).then(literal("disable").executes(disable -> {
-            config.set("modmdo_connection_chatting_forward", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_chatting_forward"));
-            return 0;
-        })))).then(literal("gameMessage").then(literal("playerJoin").then(literal("forward").executes(getForward -> {
-            SimpleCommandOperation.sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"));
-            return 0;
-        }).then(literal("enable").executes(enable -> {
-            config.set("modmdo_connection_player_join_forward", false);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        })).then(literal("disable").executes(disable -> {
-            config.set("modmdo_connection_player_join_forward", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_join_forward"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        }))).then(literal("accept").executes(getAccept -> {
-            SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"));
-            return 0;
-        })).then(literal("enable").executes(enable -> {
-            config.set("modmdo_connection_player_join_accept", false);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        })).then(literal("disable").executes(disable -> {
-            config.set("modmdo_connection_player_join_accept", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_join_accept"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        }))).then(literal("playerQuit").then(literal("forward").executes(getForward -> {
-            SimpleCommandOperation.sendFeedback(getForward, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"));
-            return 0;
-        }).then(literal("enable").executes(enable -> {
-            config.set("modmdo_connection_player_quit_forward", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        })).then(literal("disable").executes(disable -> {
-            config.set("modmdo_connection_player_quit_forward", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_forward"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        }))).then(literal("accept").executes(getAccept -> {
-            SimpleCommandOperation.sendFeedback(getAccept, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"));
-            return 0;
-        }).then(literal("enable").executes(enable -> {
-            config.set("modmdo_connection_player_quit_accept", true);
-            SimpleCommandOperation.sendFeedback(enable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        })).then(literal("disable").executes(disable -> {
-            config.set("modmdo_connection_player_quit_accept", false);
-            SimpleCommandOperation.sendFeedback(disable, formatConfigCachedReturnMessage("modmdo_connection_player_quit_accept"));
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, ModMdoDataProcessor::updateSetting);
-            return 0;
-        })))))))).then(literal("event").then(literal("list").executes(list -> {
+        }))).then(literal("event").then(literal("list").executes(list -> {
             StringBuilder builder = new StringBuilder();
             event.events.forEach((k, v) -> {
                 if (v.registered() > 0) {

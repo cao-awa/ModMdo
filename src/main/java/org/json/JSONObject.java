@@ -1,6 +1,6 @@
 package org.json;
 
-import com.github.zhuaidadaya.rikaishinikui.handler.conductor.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.conductor.string.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
