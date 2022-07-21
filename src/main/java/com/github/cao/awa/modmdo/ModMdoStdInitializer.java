@@ -3,6 +3,7 @@ package com.github.cao.awa.modmdo;
 import com.github.cao.awa.modmdo.enchant.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.extra.loader.*;
+import com.github.cao.awa.modmdo.extra.modmdo.*;
 import com.github.cao.awa.modmdo.listeners.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.security.*;

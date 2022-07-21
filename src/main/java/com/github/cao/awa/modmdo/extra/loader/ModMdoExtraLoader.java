@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.extra.loader;
 
 import com.github.cao.awa.modmdo.annotations.extra.*;
 import com.github.cao.awa.modmdo.extra.loader.parameter.*;
+import com.github.cao.awa.modmdo.extra.modmdo.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.activity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -32,7 +33,11 @@ public class ModMdoExtraLoader {
         LOGGER.info("Unregistered extra: " + id + "(" + extra.getName() + ")");
     }
 
-    public ModMdoExtra<?> getExtra(UUID id) {
+    public Object2ObjectRBTreeMap<UUID, ActivityObject<ModMdoExtra<?>>> getExtras() {
+        return extras;
+    }
+
+        public ModMdoExtra<?> getExtra(UUID id) {
         return extras.get(id).get();
     }
 
