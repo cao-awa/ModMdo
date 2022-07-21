@@ -13,12 +13,12 @@ public class TextUtil {
     }
 
     public static Translatable translatable(Text text) {
-        if (text instanceof TranslatableTextContent translatable)
+        if (text instanceof TranslatableText translatable)
             return new Translatable(translatable);
         return Translatable.translatable(text.getString());
     }
 
     public static Literal literal(String str) {
-        return new Literal(new LiteralTextContent(str));
+        return new Literal(str);
     }
 }

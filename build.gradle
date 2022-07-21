@@ -1,6 +1,7 @@
 plugins {
 	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'maven-publish'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.10'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -21,7 +22,6 @@ repositories {
 }
 
 dependencies {
-	implementation 'it.unimi.dsi:fastutil:8.5.8'
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -29,6 +29,7 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 processResources {
@@ -76,4 +77,14 @@ publishing {
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
 	}
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }

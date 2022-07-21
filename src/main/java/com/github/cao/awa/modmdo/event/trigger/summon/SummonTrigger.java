@@ -55,7 +55,7 @@ public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<
                 } else {
                     world = World.END;
                 }
-                Registry.ENTITY_TYPE.get(new Identifier(id)).spawn(getServer().getWorld(world), null, name == null ? null : TextUtil.literal(name).text(), null, pos, SpawnReason.EVENT, alignPosition, invertY);
+                Registry.ENTITY_TYPE.get(new Identifier(id)).spawn(getServer().getWorld(world), null, name == null ? null : TextUtil.literal(name), null, pos, SpawnReason.EVENT, alignPosition, invertY);
             }
         });
     }

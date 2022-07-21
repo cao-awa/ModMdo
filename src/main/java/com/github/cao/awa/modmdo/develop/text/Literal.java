@@ -2,16 +2,16 @@ package com.github.cao.awa.modmdo.develop.text;
 
 import net.minecraft.text.*;
 
-public record Literal(LiteralTextContent literal) {
-    public static Literal literal(String string) {
-        return new Literal(new LiteralTextContent(string));
+public final class Literal extends LiteralText {
+    public Literal(String text) {
+        super(text);
     }
 
-    public MutableText text() {
-        return MutableText.of(literal);
+    public static Literal literal(String string) {
+        return new Literal(string);
     }
 
     public String getString() {
-        return literal.string();
+        return this.asString();
     }
 }

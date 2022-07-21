@@ -2,20 +2,24 @@ package com.github.cao.awa.modmdo.develop.text;
 
 import net.minecraft.text.*;
 
-public record Translatable(TranslatableTextContent translatable) {
-    public static Translatable translatable(String key, Object... args) {
-        return new Translatable(new TranslatableTextContent(key, args));
+public final class Translatable extends TranslatableText{
+    public Translatable(String key, Object... args) {
+        super(key, args);
     }
 
-    public MutableText text() {
-        return MutableText.of(translatable);
+    public Translatable(TranslatableText text) {
+        super(text.getKey(), text.getArgs());
+    }
+
+    public static Translatable translatable(String key, Object... args) {
+        return new Translatable(key, args);
     }
 
     public String getKey() {
-        return translatable.getKey();
+        return super.getKey();
     }
 
     public Object[] getArgs() {
-        return translatable.getArgs();
+        return super.getArgs();
     }
 }

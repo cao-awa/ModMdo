@@ -178,17 +178,17 @@ public class ModMdoTriggerBuilder {
         String instance = EntrustParser.trying(() -> event.getString("target-instanceof"));
         if (targeted.getTargeted().size() > 1 || instance == null || instance.equals("") || EntrustParser.trying(() -> classMap.getOrDefault(instance, instance).equals(targeted.getTargeted().get(0).getClass().getName()), () -> true)) {
             TriggerSelector selector = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
-            OperationalInteger i = new OperationalInteger();
+            OperationalInteger integer = new OperationalInteger();
             selector.select(event.getJSONObject("triggers"), (name, json) -> {
                 Temporary action = () -> {
                     EntrustExecution.notNull(EntrustParser.trying(() -> {
                         TargetedTrigger<EntityTargetedEvent<?>> trigger = (TargetedTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
-                        return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
+                        return trigger.build(targeted, json, new TriggerTrace(trace, integer.get(), name));
                     }, ex -> {
-                        TRACKER.submit(Thread.currentThread(), "Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
+                        TRACKER.submit(Thread.currentThread(), "Failed build event: " + new TriggerTrace(trace, integer.get(), name).at(), ex);
                         return null;
                     }), ModMdoEventTrigger::action);
-                    i.add();
+                    integer.add();
                 };
 
                 EntrustExecution.tryTemporary(() -> {
@@ -202,17 +202,17 @@ public class ModMdoTriggerBuilder {
 
     public void prepare(JSONObject event, ModMdoEvent<?> targeted, File trace) {
         TriggerSelector selector = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
-        OperationalInteger i = new OperationalInteger();
+        OperationalInteger integer = new OperationalInteger();
         selector.select(event.getJSONObject("triggers"), (name, json) -> {
             Temporary action = () -> {
                 EntrustExecution.notNull(EntrustParser.trying(() -> {
                     ModMdoEventTrigger<ModMdoEvent<?>> trigger = (ModMdoEventTrigger<ModMdoEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
-                    return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
+                    return trigger.build(targeted, json, new TriggerTrace(trace, integer.get(), name));
                 }, ex -> {
-                    TRACKER.submit("Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
+                    TRACKER.submit("Failed build event: " + new TriggerTrace(trace, integer.get(), name).at(), ex);
                     return null;
                 }), ModMdoEventTrigger::action);
-                i.add();
+                integer.add();
             };
 
             EntrustExecution.tryTemporary(() -> {
