@@ -44,7 +44,7 @@ public abstract class ServerWorldMixin extends World {
 //
 //    private ServerWorld self;
 //
-    protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DimensionType dimensionType, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed) {
+    protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, RegistryEntry<DimensionType> dimensionType, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed) {
         super(properties, registryRef, dimensionType, profiler, isClient, debugWorld, seed);
     }
 //
@@ -91,8 +91,8 @@ public abstract class ServerWorldMixin extends World {
         if (VoxelShapes.matchesAnywhere(voxelShape, voxelShape2, BooleanBiFunction.NOT_SAME)) {
             loadedMobs.stream().forEach(mobEntity -> {
                 EntityNavigation entityNavigation = mobEntity.getNavigation();
-                if (! entityNavigation.shouldRecalculatePath()) {
-                    entityNavigation.onBlockChanged(pos);
+                if (! entityNavigation.shouldRecalculatePath(pos)) {
+                    entityNavigation.recalculatePath();
                 }
             });
         }
