@@ -40,8 +40,8 @@ public class ServerHandshakeNetworkHandlerMixin {
                         text = TextUtil.translatable("multiplayer.disconnect.incompatible", SharedConstants.getGameVersion().getName());
                     }
 
-                    this.connection.send(new LoginDisconnectS2CPacket(text.text()));
-                    this.connection.disconnect(text.text());
+                    this.connection.send(new LoginDisconnectS2CPacket(text));
+                    this.connection.disconnect(text);
                 } else {
                     this.connection.setPacketListener(new ServerLoginNetworkHandler(this.server, this.connection));
                 }

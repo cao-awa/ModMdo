@@ -29,7 +29,7 @@ public class ServerStartListener {
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            EntrustExecution.tryFor(modmdoConnections, ModMdoDataProcessor::disconnect);
+            EntrustExecution.parallelTryFor(modmdoConnections, ModMdoDataProcessor::disconnect);
         });
     }
 }

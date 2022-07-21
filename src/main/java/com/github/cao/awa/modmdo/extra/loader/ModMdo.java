@@ -57,7 +57,6 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
     public void initCommand() {
         EntrustExecution.tryTemporary(() -> {
             new HereCommand().register();
-            new DimensionHereCommand().register();
             new TestCommand().register();
             new TemporaryCommand().register();
             new ModMdoCommand().register();
@@ -126,7 +125,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             loginUsers.getUser(event.getPlayer()).setLanguage(Language.ofs(event.getLanguage()));
             User user = loginUsers.getUser(event.getPlayer());
             if (user.getMessage() != null) {
-                event.getPlayer().sendMessage(minecraftTextFormat.format(new Dictionary(user.getLanguage().getName()), TextUtil.translatable(user.getMessage())).text(), false);
+                event.getPlayer().sendMessage(minecraftTextFormat.format(new Dictionary(user.getLanguage().getName()), TextUtil.translatable(user.getMessage())), false);
                 user.setMessage(null);
             }
         }, this,"SettingClient");
@@ -138,18 +137,18 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                 for (ServerPlayerEntity player : players.getPlayerList()) {
                     if (modmdoWhitelist) {
                         if (!hasWhitelist(player)) {
-                            player.networkHandler.connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text()));
-                            player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
+                            player.networkHandler.connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")));
+                            player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted"));
                         }
                         if (hasBan(player)) {
                             Certificate ban = banned.get(EntityUtil.getName(player));
                             if (ban instanceof TemporaryCertificate temporary) {
                                 String remaining = temporary.formatRemaining();
-                                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
-                                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
+                                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining)));
+                                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining));
                             } else {
-                                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
-                                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
+                                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite")));
+                                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite"));
                             }
                         }
                     }
