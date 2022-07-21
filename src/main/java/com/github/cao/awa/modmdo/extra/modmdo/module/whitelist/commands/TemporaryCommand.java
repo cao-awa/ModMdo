@@ -1,9 +1,11 @@
-package com.github.cao.awa.modmdo.commands;
+package com.github.cao.awa.modmdo.extra.modmdo.module.whitelist.commands;
 
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.certificate.pass.*;
+import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.commands.suggester.ban.*;
 import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
+import com.github.cao.awa.modmdo.module.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
@@ -14,129 +16,156 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
+import com.mojang.brigadier.tree.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
 
-public class TemporaryCommand extends SimpleCommand {
+public class TemporaryCommand extends ModuleCommand {
+    public final CommandNode<ServerCommandSource> builder = literal("temporary").requires(e -> e.hasPermissionLevel(4)).then(literal("ban").then(literal("add").then(argument("target", StringArgumentType.string()).suggests(ModMdoWhitelistSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
+        return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, IntegerArgumentType.getInteger(ban, "minutes"));
+    })).then(literal("-1").executes(ban -> {
+        return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, - 1);
+    })).then(literal("60").executes(ban -> {
+        return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, 60);
+    })))).then(literal("remove").then(argument("target", StringArgumentType.string()).suggests(ModMdoBanSuggester::suggestions).executes(remove -> {
+        Certificate certificate = ModMdoBanSuggester.getCertificate(StringArgumentType.getString(remove, "target"));
+        if (banned.containsName(certificate.getName())) {
+            banned.remove(certificate.getName());
+            saveVariables();
+            sendFeedback(getPlayer(remove), TextUtil.translatable("modmdo.ban.pardon", certificate.getName()));
+            return 0;
+        }
+        sendFeedback(getPlayer(remove), TextUtil.translatable("arguments.banned.not.registered", certificate.getName()));
+        return - 1;
+    }))).then(literal("list").executes(list -> {
+        showTemporaryBan(list);
+        return 0;
+    })).then(literal("reduce").then(argument("target", StringArgumentType.string()).suggests(ModMdoBanSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
+        String name = ModMdoBanSuggester.getCertificate(StringArgumentType.getString(ban, "target")).getName();
+        if (banned.containsName(name)) {
+            int minute = IntegerArgumentType.getInteger(ban, "minutes");
+            return ban(ban, name, - minute);
+        } else {
+            sendError(ban, TextUtil.translatable("arguments.banned.not.registered", name));
+        }
+        return - 1;
+    }))))).then(literal("invite").then(literal("add").then(argument("target", StringArgumentType.string()).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
+        String name = StringArgumentType.getString(invite, "target");
+        int minute = IntegerArgumentType.getInteger(invite, "minutes");
+        return invite(invite, name, minute);
+    })).then(literal("60").executes(invite -> {
+        String name = StringArgumentType.getString(invite, "target");
+        return invite(invite, name, 60);
+    })).then(literal("5").executes(invite -> {
+        String name = StringArgumentType.getString(invite, "target");
+        return invite(invite, name, 5);
+    })))).then(literal("remove").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).executes(remove -> {
+        Certificate certificate = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(remove, "target"));
+        Receptacle<Boolean> success = new Receptacle<>(false);
+        EntrustExecution.notNull(temporaryStation.get(certificate.getName()), c -> {
+            if (c.getType().equals("invite")) {
+                temporaryStation.remove(c.getName());
+                success.set(true);
+            }
+        });
+        EntrustExecution.notNull(temporaryInvite.get(certificate.getName()), invite -> {
+            invite.setMillions(- 1);
+            success.set(true);
+        });
+        if (success.get()) {
+            sendFeedback(remove, TextUtil.translatable("modmdo.invite.cancel", certificate.getName()));
+        } else {
+            sendError(remove, TextUtil.translatable("arguments.invite.not.registered", EntityUtil.getName(getPlayer(remove))));
+        }
+        return 0;
+    }))).then(literal("list").executes(list -> {
+        showTemporaryInvite(list);
+        return 0;
+    })).then(literal("reduce").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
+        String name = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(invite, "target")).getName();
+        if (temporaryInvite.containsName(name)) {
+            int minute = IntegerArgumentType.getInteger(invite, "minutes");
+            return invite(invite, name, - minute);
+        } else {
+            sendError(invite, TextUtil.translatable("arguments.invite.not.registered", name));
+        }
+        return - 1;
+    }))))).then(literal("whitelist").then(literal("add").then(argument("name", StringArgumentType.string()).executes(addDefault -> {
+        whitelist(addDefault);
+        return 0;
+    }))).then(literal("list").executes(showTemporary -> {
+        showTemporaryWhitelist(showTemporary);
+        return 0;
+    })).then(literal("remove").then(argument("name", StringArgumentType.string()).suggests(ModMdoStationSuggester::suggestions).executes(remove -> {
+        TemporaryCertificate wl = ModMdoStationSuggester.getStation(StringArgumentType.getString(remove, "name"));
+        if (temporaryStation.containsName(wl.getName())) {
+            temporaryStation.remove(wl.getName());
+            sendFeedback(remove, TextUtil.translatable("temporary.station.removed", wl.getName()));
+            return 0;
+        }
+        sendError(remove, TextUtil.translatable("arguments.temporary.station.not.registered", wl.getName()));
+        return - 1;
+    })))).then(literal("connection").then(literal("whitelist").executes(whitelist -> {
+        if (modmdoConnectionAccepting.isValid()) {
+            long million = modmdoConnectionAccepting.getMillions() - TimeUtil.processMillion(modmdoConnectionAccepting.getRecording());
+            long minute = TimeUtil.processRemainingMinutes(million);
+            long second = TimeUtil.processRemainingSeconds(million);
+            sendFeedback(whitelist, TextUtil.translatable("connection.whitelist.accepting", minute, second));
+        } else {
+            sendFeedback(whitelist, TextUtil.translatable("connection.whitelist.no.accepting"));
+        }
+        return 0;
+    }).then(literal("accept").then(literal("one").executes(acceptOne -> {
+        if (modmdoConnectionAccepting.isValid()) {
+            long million = modmdoConnectionAccepting.getMillions() - TimeUtil.processMillion(modmdoConnectionAccepting.getRecording());
+            long minute = TimeUtil.processRemainingMinutes(million);
+            long second = TimeUtil.processRemainingSeconds(million);
+            sendError(acceptOne, TextUtil.translatable("connection.whitelist.accepting", minute, second));
+        } else {
+            sendFeedback(acceptOne, TextUtil.translatable("connection.whitelist.accepting.one"));
+            modmdoConnectionAccepting = new TemporaryCertificate("", TimeUtil.millions(), 1000 * 60 * 5);
+        }
+        return 0;
+    }))).then(literal("cancel").executes(cancel -> {
+        if (modmdoConnectionAccepting.isValid()) {
+            modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
+        } else {
+            sendError(cancel, TextUtil.translatable("connection.whitelist.no.accepting"));
+        }
+        return 0;
+    })))).build();
+
+    public TemporaryCommand(ModMdoModule<?> module) {
+        super(module);
+    }
+
     @Override
     public TemporaryCommand register() {
-        commandRegister.register(literal("temporary").requires(e -> e.hasPermissionLevel(4)).then(literal("ban").then(literal("add").then(argument("target", StringArgumentType.string()).suggests(ModMdoWhitelistSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
-            return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, IntegerArgumentType.getInteger(ban, "minutes"));
-        })).then(literal("-1").executes(ban -> {
-            return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, - 1);
-        })).then(literal("60").executes(ban -> {
-            return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, 60);
-        })))).then(literal("remove").then(argument("target", StringArgumentType.string()).suggests(ModMdoBanSuggester::suggestions).executes(remove -> {
-            Certificate certificate = ModMdoBanSuggester.getCertificate(StringArgumentType.getString(remove, "target"));
-            if (banned.containsName(certificate.getName())) {
-                banned.remove(certificate.getName());
-                saveVariables();
-                sendFeedback(getPlayer(remove), TextUtil.translatable("modmdo.ban.pardon", certificate.getName()));
-                return 0;
-            }
-            sendFeedback(getPlayer(remove), TextUtil.translatable("arguments.banned.not.registered", certificate.getName()));
-            return - 1;
-        }))).then(literal("list").executes(list -> {
-            showTemporaryBan(list);
-            return 0;
-        })).then(literal("reduce").then(argument("target", StringArgumentType.string()).suggests(ModMdoBanSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
-            String name = ModMdoBanSuggester.getCertificate(StringArgumentType.getString(ban, "target")).getName();
-            if (banned.containsName(name)) {
-                int minute = IntegerArgumentType.getInteger(ban, "minutes");
-                return ban(ban, name, - minute);
-            } else {
-                sendError(ban, TextUtil.translatable("arguments.banned.not.registered", name));
-            }
-            return - 1;
-        }))))).then(literal("invite").then(literal("add").then(argument("target", StringArgumentType.string()).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
-            String name = StringArgumentType.getString(invite, "target");
-            int minute = IntegerArgumentType.getInteger(invite, "minutes");
-            return invite(invite, name, minute);
-        })).then(literal("60").executes(invite -> {
-            String name = StringArgumentType.getString(invite, "target");
-            return invite(invite, name, 60);
-        })).then(literal("5").executes(invite -> {
-            String name = StringArgumentType.getString(invite, "target");
-            return invite(invite, name, 5);
-        })))).then(literal("remove").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).executes(remove -> {
-            Certificate certificate = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(remove, "target"));
-            Receptacle<Boolean> success = new Receptacle<>(false);
-            EntrustExecution.notNull(temporaryStation.get(certificate.getName()), c -> {
-                if (c.getType().equals("invite")) {
-                    temporaryStation.remove(c.getName());
-                    success.set(true);
-                }
-            });
-            EntrustExecution.notNull(temporaryInvite.get(certificate.getName()), invite -> {
-                invite.setMillions(- 1);
-                success.set(true);
-            });
-            if (success.get()) {
-                sendFeedback(remove, TextUtil.translatable("modmdo.invite.cancel", certificate.getName()));
-            } else {
-                sendError(remove, TextUtil.translatable("arguments.invite.not.registered", EntityUtil.getName(getPlayer(remove))));
-            }
-            return 0;
-        }))).then(literal("list").executes(list -> {
-            showTemporaryInvite(list);
-            return 0;
-        })).then(literal("reduce").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
-            String name = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(invite, "target")).getName();
-            if (temporaryInvite.containsName(name)) {
-                int minute = IntegerArgumentType.getInteger(invite, "minutes");
-                return invite(invite, name, - minute);
-            } else {
-                sendError(invite, TextUtil.translatable("arguments.invite.not.registered", name));
-            }
-            return - 1;
-        }))))).then(literal("whitelist").then(literal("add").then(argument("name", StringArgumentType.string()).executes(addDefault -> {
-            whitelist(addDefault);
-            return 0;
-        }))).then(literal("list").executes(showTemporary -> {
-            showTemporaryWhitelist(showTemporary);
-            return 0;
-        })).then(literal("remove").then(argument("name", StringArgumentType.string()).suggests(ModMdoStationSuggester::suggestions).executes(remove -> {
-            TemporaryCertificate wl = ModMdoStationSuggester.getStation(StringArgumentType.getString(remove, "name"));
-            if (temporaryStation.containsName(wl.getName())) {
-                temporaryStation.remove(wl.getName());
-                sendFeedback(remove, TextUtil.translatable("temporary.station.removed", wl.getName()));
-                return 0;
-            }
-            sendError(remove, TextUtil.translatable("arguments.temporary.station.not.registered", wl.getName()));
-            return - 1;
-        })))).then(literal("connection").then(literal("whitelist").executes(whitelist -> {
-            if (modmdoConnectionAccepting.isValid()) {
-                long million = modmdoConnectionAccepting.getMillions() - TimeUtil.processMillion(modmdoConnectionAccepting.getRecording());
-                long minute = TimeUtil.processRemainingMinutes(million);
-                long second = TimeUtil.processRemainingSeconds(million);
-                sendFeedback(whitelist, TextUtil.translatable("connection.whitelist.accepting", minute, second));
-            } else {
-                sendFeedback(whitelist, TextUtil.translatable("connection.whitelist.no.accepting"));
-            }
-            return 0;
-        }).then(literal("accept").then(literal("one").executes(acceptOne -> {
-            if (modmdoConnectionAccepting.isValid()) {
-                long million = modmdoConnectionAccepting.getMillions() - TimeUtil.processMillion(modmdoConnectionAccepting.getRecording());
-                long minute = TimeUtil.processRemainingMinutes(million);
-                long second = TimeUtil.processRemainingSeconds(million);
-                sendError(acceptOne, TextUtil.translatable("connection.whitelist.accepting", minute, second));
-            } else {
-                sendFeedback(acceptOne, TextUtil.translatable("connection.whitelist.accepting.one"));
-                modmdoConnectionAccepting = new TemporaryCertificate("", TimeUtil.millions(), 1000 * 60 * 5);
-            }
-            return 0;
-        }))).then(literal("cancel").executes(cancel -> {
-            if (modmdoConnectionAccepting.isValid()) {
-                modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
-            } else {
-                sendError(cancel, TextUtil.translatable("connection.whitelist.no.accepting"));
-            }
-            return 0;
-        })))));
+        commandRegister.register(this, getModule());
         return this;
+    }
+
+    @Override
+    public void unregister() {
+        commandRegister.unregister(this, getModule());
+    }
+
+    @Override
+    public String path() {
+        return "modmdo/whitelist/temporary";
+    }
+
+    @Override
+    public CommandNode<ServerCommandSource> builder() {
+        return builder;
+    }
+
+    @Override
+    public String level() {
+        return "temporary";
     }
 
     public void showTemporaryWhitelist(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {

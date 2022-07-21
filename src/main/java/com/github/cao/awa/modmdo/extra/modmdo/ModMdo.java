@@ -1,9 +1,11 @@
-package com.github.cao.awa.modmdo.extra.loader;
+package com.github.cao.awa.modmdo.extra.modmdo;
 
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
+import com.github.cao.awa.modmdo.extra.loader.*;
+import com.github.cao.awa.modmdo.extra.modmdo.module.whitelist.*;
 import com.github.cao.awa.modmdo.format.console.*;
 import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.*;
@@ -27,6 +29,10 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdo extends ModMdoExtra<ModMdo> {
     private MinecraftServer server;
+
+    public void loadModules() {
+        loadModule(new WhitelistModule<>(this));
+    }
 
     public void init() {
         String path = getServerLevelPath(getServer()) + "modmdo/configs";
@@ -53,19 +59,19 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         this.server = server;
     }
 
-    public void initCommand() {
+    public void initCommands() {
         EntrustExecution.tryTemporary(() -> {
             new HereCommand().register();
             new TestCommand().register();
-            new TemporaryCommand().register();
-            new ModMdoCommand().register();
         }, ex -> TRACKER.submit("Failed load ModMdo commands"));
     }
 
-    public void initStaticCommand() {
+    public void initStaticCommands() {
+//        new ModMdoCommand().register();
+        new ModMdoModuleCommand().register();
     }
 
-    public void initEvent() {
+    public void initEvents() {
         triggerBuilder = new ModMdoTriggerBuilder();
 
         EntrustExecution.tryTemporary(() -> {
