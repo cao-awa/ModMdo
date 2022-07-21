@@ -71,7 +71,7 @@ public class ModMdoEventTracer {
 
     public void build() {
         ModMdoEventCenter.callingBuilding.forEach((id, extra) -> {
-            EntrustExecution.tryTemporary(extra::initEvent, ex -> TRACKER.submit("Extra " + id + " init failed", ex));
+            EntrustExecution.tryTemporary(extra::initEvents, ex -> TRACKER.submit("Extra " + id + " init failed", ex));
         });
     }
 
