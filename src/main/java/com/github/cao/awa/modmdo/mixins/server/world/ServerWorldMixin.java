@@ -43,11 +43,13 @@ public abstract class ServerWorldMixin extends World {
 //    private ServerEntityManager<Entity> entityManager;
 //
 //    private ServerWorld self;
-//
-    protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DimensionType dimensionType, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed) {
-        super(properties, registryRef, dimensionType, profiler, isClient, debugWorld, seed);
+
+    @Shadow private volatile boolean duringListenerUpdate;
+
+    protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, RegistryEntry<DimensionType> dimension, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates) {
+        super(properties, registryRef, dimension, profiler, isClient, debugWorld, seed, maxChainedNeighborUpdates);
     }
-//
+
 //    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickBlockEntities()V"))
 //    public void vanillaBlockEntityTick(ServerWorld instance) {
 //        self = instance;
@@ -89,12 +91,12 @@ public abstract class ServerWorldMixin extends World {
         VoxelShape voxelShape = oldState.getCollisionShape(this, pos);
         VoxelShape voxelShape2 = newState.getCollisionShape(this, pos);
         if (VoxelShapes.matchesAnywhere(voxelShape, voxelShape2, BooleanBiFunction.NOT_SAME)) {
-            loadedMobs.stream().forEach(mobEntity -> {
+            for (MobEntity mobEntity : this.loadedMobs) {
                 EntityNavigation entityNavigation = mobEntity.getNavigation();
-                if (! entityNavigation.shouldRecalculatePath()) {
-                    entityNavigation.onBlockChanged(pos);
+                if (entityNavigation.shouldRecalculatePath(pos)) {
+                    entityNavigation.recalculatePath();
                 }
-            });
+            }
         }
         ci.cancel();
     }
