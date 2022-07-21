@@ -13,7 +13,6 @@ import com.github.cao.awa.modmdo.format.console.*;
 import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.Language;
 import com.github.cao.awa.modmdo.mixins.server.*;
-import com.github.cao.awa.modmdo.network.forwarder.process.*;
 import com.github.cao.awa.modmdo.ranking.*;
 import com.github.cao.awa.modmdo.security.key.*;
 import com.github.cao.awa.modmdo.server.login.*;
@@ -92,7 +91,6 @@ public class SharedVariables {
     public static EnchantLevelController enchantLevelController;
     public static boolean clearEnchantIfLevelTooHigh = false;
     public static ServerLogin serverLogin = new ServerLogin();
-    public static ObjectArrayList<ModMdoDataProcessor> modmdoConnections = new ObjectArrayList<>();
     public static TemporaryCertificate modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
     public static Certificates<PermanentCertificate> modmdoConnectionWhitelist = new Certificates<>();
     public static Certificates<PermanentCertificate> whitelist = new Certificates<>();
@@ -283,15 +281,6 @@ public class SharedVariables {
         config.setIfNoExist("reject_no_fall_chest", true);
         config.setIfNoExist("whitelist_only_id", false);
         config.setIfNoExist("compatible_online_mode", true);
-        config.setIfNoExist("modmdo_connecting", true);
-        config.setIfNoExist("modmdo_connecting_whitelist", new JSONObject());
-        config.setIfNoExist("modmdo_connection_chatting_format", ModMdoDataProcessor.DEFAULT_CHAT_FORMAT);
-        config.setIfNoExist("modmdo_connection_chatting_forward", true);
-        config.setIfNoExist("modmdo_connection_chatting_accept", true);
-        config.setIfNoExist("modmdo_connection_player_join_forward", true);
-        config.setIfNoExist("modmdo_connection_player_quit_forward", true);
-        config.setIfNoExist("modmdo_connection_player_join_accept", true);
-        config.setIfNoExist("modmdo_connection_player_quit_accept", true);
     }
 
     public static void saveVariables(Temporary action) {
@@ -361,14 +350,14 @@ public class SharedVariables {
             if (temporaryInvite.containsName(EntityUtil.getName(player))) {
                 if (temporaryInvite.get(EntityUtil.getName(player)).getMillions() == - 1) {
                     temporaryInvite.remove(EntityUtil.getName(player));
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled")));
-                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled"));
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled").text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled").text());
                     return true;
                 }
                 if (! temporaryInvite.get(EntityUtil.getName(player)).isValid()) {
                     temporaryInvite.remove(EntityUtil.getName(player));
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.expired")));
-                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.expired"));
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.expired").text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.expired").text());
                 }
                 return true;
             }

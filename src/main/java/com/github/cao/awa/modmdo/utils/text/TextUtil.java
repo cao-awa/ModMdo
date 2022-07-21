@@ -19,6 +19,6 @@ public class TextUtil {
     }
 
     public static Literal literal(String str) {
-        return new Literal(str);
+        return new Literal(new LiteralText(str));
     }
 }

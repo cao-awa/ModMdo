@@ -55,7 +55,7 @@ public abstract class ClientLoginNetworkHandlerMixin {
             throw new IllegalStateException("Protocol error", var8);
         }
 
-        this.statusConsumer.accept(Translatable.translatable("connect.authorizing"));
+        this.statusConsumer.accept(Translatable.translatable("connect.authorizing").text());
         NetworkUtils.EXECUTOR.submit(() -> {
             Text text = this.joinServerSession(string);
             if (!isModMdo) {
@@ -69,7 +69,7 @@ public abstract class ClientLoginNetworkHandlerMixin {
                 }
             }
 
-            this.statusConsumer.accept(Translatable.translatable("connect.encrypting"));
+            this.statusConsumer.accept(Translatable.translatable("connect.encrypting").text());
             this.connection.send(loginKeyC2SPacket, (future) -> {
                 this.connection.setupEncryption(cipher, cipher2);
             });

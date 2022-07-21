@@ -4,7 +4,6 @@ import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.client.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
-import com.github.cao.awa.modmdo.event.server.chat.*;
 import com.github.cao.awa.modmdo.lang.Dictionary;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
@@ -14,17 +13,17 @@ import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
-import net.minecraft.network.message.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
-import net.minecraft.util.registry.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
+
+import java.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -88,7 +87,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
                     if (TOKEN_CHANNEL.equals(channel)) {
                         TRACKER.debug("Client are sent obsoleted login data");
-                        serverLogin.reject(data1, oldLogin, "", TextUtil.literal("obsolete login type"));
+                        serverLogin.reject(data1, oldLogin, "", TextUtil.literal("obsolete login type").text());
                         return;
                     }
 
@@ -122,7 +121,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         if (config.getConfigBoolean("modmdo_whitelist") && !server.isHost(player.getGameProfile())) {
             String name = EntityUtil.getName(player);
             if (loginUsers.hasUser(name) || server.getPlayerManager().getPlayer(name) != null) {
-                disc(Translatable.translatable("login.dump.rejected"));
+                disc(Translatable.translatable("login.dump.rejected").text());
                 return;
             }
             if (modMdoType == ModMdoType.SERVER && modmdoWhitelist) {
@@ -133,7 +132,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     } else {
                         TRACKER.warn("ModMdo reject a login request, player \"" + name + "\"");
                     }
-                    disc(rejected.getMessage() == null ? TextUtil.translatable("multiplayer.disconnect.not_whitelisted") : rejected.getMessage());
+                    disc(rejected.getMessage() == null ? TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text() : rejected.getMessage());
 
                     rejectUsers.removeUser(player);
 
@@ -142,7 +141,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                 } else {
                     if (loginTimedOut.containsKey(name)) {
                         if (loginTimedOut.get(name) < TimeUtil.millions()) {
-                            disc(TextUtil.literal("You are failed login because too long did not received login request"));
+                            disc(TextUtil.literal("You are failed login because too long did not received login request").text());
                             TRACKER.warn("ModMdo reject a login request, player \"" + name + "\", because player not sent login request");
 
                             TRACKER.info("Rejected player: " + name);
@@ -160,12 +159,12 @@ public abstract class ServerPlayNetworkHandlerMixin {
                 Certificate ban = banned.get(name);
                 if (ban instanceof TemporaryCertificate temporary) {
                     String remaining = temporary.formatRemaining();
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining)));
-                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining));
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
                     TRACKER.info("Player " + name + " has been banned form server");
                 } else {
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite")));
-                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite"));
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
                     TRACKER.info("Player " + name + " has been banned form server");
                 }
             }
@@ -177,7 +176,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                             if (! config.getConfigBoolean("modmdo_whitelist")) {
                                 serverLogin.login(player.getName().getString(), player.getUuid().toString(), "", "", null, null);
                             } else {
-                                disc(Translatable.translatable("multiplayer.disconnect.not_whitelisted"));
+                                disc(Translatable.translatable("multiplayer.disconnect.not_whitelisted").text());
                             }
                         }
 
@@ -196,7 +195,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     if (! server.isHost(player.getGameProfile())) {
                         TRACKER.debug("player " + name + " lost status synchronize");
 
-                        disc(TextUtil.literal("lost status synchronize, please connect again"));
+                        disc(TextUtil.literal("lost status synchronize, please connect again").text());
                     } else {
                         TRACKER.debug("player " + name + " lost status synchronize, but will not be process");
                     }
@@ -214,26 +213,25 @@ public abstract class ServerPlayNetworkHandlerMixin {
     public void onDisconnected(Text reason, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             serverLogin.logout(player);
-            EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendPlayerQuit(EntityUtil.getName(player)));
             event.submit(new QuitServerEvent(player, connection, player.getPos(), server));
         }
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Lnet/minecraft/util/registry/RegistryKey;)V"))
-    public void onDisconnected0(PlayerManager instance, Text message, RegistryKey<MessageType> typeKey) {
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
+    public void onDisconnected0(PlayerManager instance, Text message, MessageType type, UUID sender) {
         if (SharedVariables.isActive()) {
             if (loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
-                instance.broadcast(message, typeKey);
+                instance.broadcastChatMessage(message, type, sender);
             }
         } else {
-            instance.broadcast(message, typeKey);
+            instance.broadcastChatMessage(message, type, sender);
         }
     }
 
-    @Inject(method = "onCommandExecution", at = @At("HEAD"))
-    private void onCommandExecution(CommandExecutionC2SPacket packet, CallbackInfo ci) {
+    @Inject(method = "executeCommand", at = @At("HEAD"))
+    private void executeCommand(String input, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            LOGGER.info(EntityUtil.getName(player) + "(" + player.getUuid().toString() + ") run the command: " + packet.command());
+            LOGGER.info(EntityUtil.getName(player) + "(" + player.getUuid().toString() + ") run the command: " + input);
         }
     }
 
@@ -241,16 +239,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
     private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             event.submit(new ClientSettingEvent(player, packet, server));
-        }
-    }
-
-    @Inject(method = "onChatMessage", at = @At("HEAD"))
-    public void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
-        if (SharedVariables.isActive()) {
-            event.submit(new GameChatEvent(player, packet, server));
-            if (! packet.getChatMessage().startsWith("/")) {
-                EntrustExecution.tryFor(modmdoConnections, processor -> processor.sendChat(packet.getChatMessage(), EntityUtil.getName(player)));
-            }
         }
     }
 
