@@ -4,7 +4,6 @@ import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
-import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
@@ -43,7 +42,7 @@ public abstract class PlayerManagerMixin {
                 UUID uuid = PlayerUtil.getUUID(profile);
                 for (ServerPlayerEntity player : this.players) {
                     if (player.networkHandler.connection.getAddress() == null)
-                        break;
+                        continue;
                     if (player.getUuid().equals(uuid)) {
                         if (loginUsers.hasUser(player)) {
                             SimpleCommandOperation.sendMessage(player, Translatable.translatable("login.dump.rejected"), false);
@@ -61,19 +60,30 @@ public abstract class PlayerManagerMixin {
 
     @Inject(method = "onPlayerConnect", at = @At("RETURN"))
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
-            EntrustExecution.tryFor(SharedVariables.modmdoConnections, processor -> processor.sendPlayerJoin(EntityUtil.getName(player)));
+        if (SharedVariables.isActive()) {
             SharedVariables.event.submit(new JoinServerEvent(player, connection, player.getPos(), SharedVariables.server));
         }
     }
 
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;savePlayerData(Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
     public void remove(PlayerManager instance, ServerPlayerEntity player) {
-        EntrustExecution.tryTemporary(() -> {
-            if (loginUsers.hasUser(player) && !banned.containsIdentifier(loginUsers.getUser(player.getUuid()).getIdentifier()) || force.contains(player) || player.networkHandler.getConnection().getAddress() == null) {
-                force.remove(player);
-                savePlayerData(player);
-            }
-        }, Throwable::printStackTrace);
+        if (modmdoWhitelist) {
+            EntrustExecution.tryTemporary(() -> {
+                boolean hasUser = loginUsers.hasUser(player);
+                boolean notBan = ! banned.containsIdentifier(loginUsers.getUser(player.getUuid()).getIdentifier());
+                boolean forced = force.contains(player);
+                boolean dummy = player.networkHandler.getConnection().getAddress() == null;
+                TRACKER.info("Saving condition: hasUser: " + hasUser);
+                TRACKER.info("Saving condition: notBan: " + notBan);
+                TRACKER.info("Saving condition: forced: " + forced);
+                TRACKER.info("Saving condition: dummy: " + dummy);
+                if (hasUser && notBan || forced || dummy) {
+                    force.remove(player);
+                    savePlayerData(player);
+                }
+            }, Throwable::printStackTrace);
+        } else {
+            savePlayerData(player);
+        }
     }
 }

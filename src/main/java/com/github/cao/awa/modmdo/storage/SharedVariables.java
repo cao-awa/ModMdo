@@ -12,8 +12,7 @@ import com.github.cao.awa.modmdo.extra.loader.*;
 import com.github.cao.awa.modmdo.format.console.*;
 import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.Language;
-import com.github.cao.awa.modmdo.mixins.*;
-import com.github.cao.awa.modmdo.network.forwarder.process.*;
+import com.github.cao.awa.modmdo.mixins.server.*;
 import com.github.cao.awa.modmdo.ranking.*;
 import com.github.cao.awa.modmdo.security.key.*;
 import com.github.cao.awa.modmdo.server.login.*;
@@ -21,10 +20,12 @@ import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.conductor.thread.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.delay.*;
 import com.mojang.brigadier.context.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -41,6 +42,7 @@ import org.json.*;
 
 import java.text.*;
 import java.util.*;
+import java.util.concurrent.locks.*;
 
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
@@ -67,7 +69,7 @@ public class SharedVariables {
     public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
     public static final SecureKeys SECURE_KEYS = new SecureKeys();
     public static final Object2ObjectArrayMap<ServerChunkManager, TaskOrder<ServerChunkManager>> chunkTasks = new Object2ObjectArrayMap<>();
-    public static final Object2ObjectArrayMap<ServerWorld, TaskOrder<ServerWorld>> blockEntitiesTasks = new Object2ObjectArrayMap<>();
+    public static final MapCountDownConductor<ServerWorld, TaskOrder<ServerWorld>> blockEntitiesTasks = new MapCountDownConductor<>();
     public static String identifier;
     public static String entrust = "ModMdo";
     public static boolean enableRanking = false;
@@ -89,8 +91,6 @@ public class SharedVariables {
     public static EnchantLevelController enchantLevelController;
     public static boolean clearEnchantIfLevelTooHigh = false;
     public static ServerLogin serverLogin = new ServerLogin();
-    public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
-    public static ObjectArrayList<ModMdoDataProcessor> modmdoConnections = new ObjectArrayList<>();
     public static TemporaryCertificate modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
     public static Certificates<PermanentCertificate> modmdoConnectionWhitelist = new Certificates<>();
     public static Certificates<PermanentCertificate> whitelist = new Certificates<>();
@@ -103,12 +103,23 @@ public class SharedVariables {
     public static boolean loaded = false;
     public static boolean debug = false;
     public static boolean testing = false;
+    public static boolean testingShulker = false;
+    public static boolean testingParallel = false;
     public static ModMdoCommandRegister commandRegister;
     public static ModMdoEventTracer event = new ModMdoEventTracer();
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
 
-    public static ClazzScanner EXTRAS_AUTO = new ClazzScanner(ModMdoExtra.class);
+    public static ClazzScanner CLAZZ_SCANNER = new ClazzScanner(ModMdoExtra.class);
+
+    public static Object2ObjectOpenHashMap<String, Rank> ranking = new Object2ObjectOpenHashMap<>();
+
+    public static final DelayTaskSequence delayTasks = new DelayTaskSequence();
+    public static final InformTask informTask = new InformTask();
+
+    public static final ReentrantLock publicLock = new ReentrantLock(true);
+
+    //    public static ShareBackupLibrary backups = new ShareBackupLibrary();
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
@@ -159,17 +170,17 @@ public class SharedVariables {
         EntrustExecution.tryTemporary(() -> {
             JSONObject json = config.getConfigJSONObject("whitelist");
 
-            for (String s : json.keySet()) {
+            json.keySet().parallelStream().forEach(s -> {
                 whitelist.put(s, PermanentCertificate.build(json.getJSONObject(s)));
-            }
+            });
         });
 
         EntrustExecution.tryTemporary(() -> {
             JSONObject json = config.getConfigJSONObject("connection-whitelist");
 
-            for (String s : json.keySet()) {
+            json.keySet().parallelStream().forEach(s -> {
                 modmdoConnectionWhitelist.put(s, PermanentCertificate.build(json.getJSONObject(s)));
-            }
+            });
         });
     }
 
@@ -179,10 +190,10 @@ public class SharedVariables {
         EntrustExecution.tryTemporary(() -> {
             JSONObject json = config.getConfigJSONObject("banned");
 
-            for (String s : json.keySet()) {
+            json.keySet().parallelStream().forEach(s -> {
                 banned.put(s, Certificate.build(json.getJSONObject(s)));
-            }
-        }, Throwable::printStackTrace);
+            });
+        });
     }
 
     public static void saveEnchantmentMaxLevel() {
@@ -196,14 +207,6 @@ public class SharedVariables {
         }
         scoreboard.addObjective(id, ScoreboardCriterion.DUMMY, displayName, ScoreboardCriterion.DUMMY.getDefaultRenderType());
     }
-
-    public static boolean rankingIsStatObject(String ranking) {
-        if (supportedRankingObjects.get(ranking) == null) {
-            return false;
-        }
-        return supportedRankingObjects.get(ranking).isStat();
-    }
-
 
     public static String getServerLevelPath(MinecraftServer server) {
         return (server.isDedicated() ? "" : "saves/") + getServerLevelNamePath(server);
@@ -230,8 +233,7 @@ public class SharedVariables {
     }
 
     public static void sendMessageToAllPlayer(MinecraftServer server, Text message, boolean actionBar) {
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
-            sendMessage(player, message, actionBar);
+        EntrustExecution.parallelTryFor(server.getPlayerManager().getPlayerList(), player -> sendMessage(player, message, actionBar));
     }
 
     public static void sendMessage(ServerPlayerEntity player, Text message, boolean actionBar) {
@@ -279,15 +281,6 @@ public class SharedVariables {
         config.setIfNoExist("reject_no_fall_chest", true);
         config.setIfNoExist("whitelist_only_id", false);
         config.setIfNoExist("compatible_online_mode", true);
-        config.setIfNoExist("modmdo_connecting", true);
-        config.setIfNoExist("modmdo_connecting_whitelist", new JSONObject());
-        config.setIfNoExist("modmdo_connection_chatting_format", ModMdoDataProcessor.DEFAULT_CHAT_FORMAT);
-        config.setIfNoExist("modmdo_connection_chatting_forward", true);
-        config.setIfNoExist("modmdo_connection_chatting_accept", true);
-        config.setIfNoExist("modmdo_connection_player_join_forward", true);
-        config.setIfNoExist("modmdo_connection_player_quit_forward", true);
-        config.setIfNoExist("modmdo_connection_player_join_accept", true);
-        config.setIfNoExist("modmdo_connection_player_quit_accept", true);
     }
 
     public static void saveVariables(Temporary action) {
@@ -307,25 +300,19 @@ public class SharedVariables {
         if (modMdoType == ModMdoType.SERVER) {
             EntrustExecution.tryTemporary(() -> {
                 JSONObject json = new JSONObject();
-                for (String s : whitelist.keySet()) {
-                    json.put(s, whitelist.get(s).toJSONObject());
-                }
+                whitelist.keySet().parallelStream().forEach(s -> json.put(s, whitelist.get(s).toJSONObject()));
                 config.set("whitelist", json);
             });
 
             EntrustExecution.tryTemporary(() -> {
                 JSONObject json = new JSONObject();
-                for (String s : modmdoConnectionWhitelist.keySet()) {
-                    json.put(s, modmdoConnectionWhitelist.get(s).toJSONObject());
-                }
+                modmdoConnectionWhitelist.keySet().parallelStream().forEach(s -> json.put(s, modmdoConnectionWhitelist.get(s).toJSONObject()));
                 config.set("connection-whitelist", json);
             });
 
             EntrustExecution.tryTemporary(() -> {
                 JSONObject json = new JSONObject();
-                for (String s : banned.keySet()) {
-                    json.put(s, banned.get(s).toJSONObject());
-                }
+                banned.keySet().parallelStream().forEach(s -> json.put(s, banned.get(s).toJSONObject()));
                 config.set("banned", json);
             });
         }
@@ -336,26 +323,22 @@ public class SharedVariables {
     }
 
     public static void handleTemporaryWhitelist() {
-        for (TemporaryCertificate wl : temporaryStation.values()) {
-            if (! wl.isValid()) {
-                temporaryStation.remove(wl.getName());
-            }
-        }
+        temporaryStation.values().parallelStream().filter(TemporaryCertificate::notValid).forEach(wl -> temporaryStation.remove(wl.getName()));
     }
 
     public static void handleTemporaryBan() {
-        for (String name : banned.keySet()) {
+        banned.keySet().parallelStream().forEach(name -> {
             Certificate ban = banned.get(name);
             if (ban == null) {
                 banned.remove(name);
-                continue;
+                return;
             }
             if (ban instanceof TemporaryCertificate temp) {
-                if (! temp.isValid()) {
+                if (temp.notValid()) {
                     banned.remove(name);
                 }
             }
-        }
+        });
     }
 
     public static boolean isActive() {
