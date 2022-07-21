@@ -22,7 +22,7 @@ public class SimpleCommandOperation {
 
     public static void sendFeedback(CommandContext<ServerCommandSource> source, Translatable message) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), false);
+            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), false);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
@@ -30,7 +30,7 @@ public class SimpleCommandOperation {
 
     public static void sendFeedback(ServerCommandSource source, Translatable message) {
         try {
-            SharedVariables.sendMessage(Objects.requireNonNull(getPlayer(source)), minecraftTextFormat.format(loginUsers.getUser(Objects.requireNonNull(getPlayer(source))), message.getKey(), message.getArgs()), false);
+            SharedVariables.sendMessage(Objects.requireNonNull(getPlayer(source)), minecraftTextFormat.format(loginUsers.getUser(Objects.requireNonNull(getPlayer(source))), message.getKey(), message.getArgs()).text(), false);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
@@ -38,7 +38,7 @@ public class SimpleCommandOperation {
 
     public static void sendFeedback(ServerPlayerEntity player, Translatable message) {
         try {
-            SharedVariables.sendMessage(player, minecraftTextFormat.format(loginUsers.getUser(player), message.getKey(), message.getArgs()), false);
+            SharedVariables.sendMessage(player, minecraftTextFormat.format(loginUsers.getUser(player), message.getKey(), message.getArgs()).text(), false);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
@@ -46,7 +46,7 @@ public class SimpleCommandOperation {
 
     public static void sendMessage(CommandContext<ServerCommandSource> source, Translatable message, boolean actionbar) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), actionbar);
+            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), actionbar);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
@@ -54,7 +54,7 @@ public class SimpleCommandOperation {
 
     public static void sendMessage(ServerCommandSource source, Translatable message, boolean actionbar) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()), actionbar);
+            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), actionbar);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
@@ -62,7 +62,7 @@ public class SimpleCommandOperation {
 
     public static void sendMessage(ServerPlayerEntity source, Translatable message, boolean actionbar) {
         try {
-            SharedVariables.sendMessage(source, minecraftTextFormat.format(loginUsers.getUser(source), message.getKey(), message.getArgs()), actionbar);
+            SharedVariables.sendMessage(source, minecraftTextFormat.format(loginUsers.getUser(source), message.getKey(), message.getArgs()).text(), actionbar);
         } catch (Exception e) {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
         }
@@ -83,7 +83,7 @@ public class SimpleCommandOperation {
     public static void sendFeedbackAndInform(ServerCommandSource source, Literal message) {
         try {
             source.getPlayer();
-            source.sendFeedback(message, true);
+            source.sendFeedback(message.text(), true);
         } catch (Exception e) {
             LOGGER.info(message);
         }
@@ -91,7 +91,7 @@ public class SimpleCommandOperation {
 
     public static void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, Translatable message) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), TextUtil.literal(consoleTextFormat.format(message.getKey(), message.getArgs())), false);
+            SharedVariables.sendMessage(getPlayer(source), TextUtil.literal(consoleTextFormat.format(message.getKey(), message.getArgs())).text(), false);
         } catch (Exception e) {
 
         }
@@ -136,7 +136,7 @@ public class SimpleCommandOperation {
     public static void sendError(ServerCommandSource source, Literal message) {
         try {
             source.getPlayer();
-            source.sendError(message);
+            source.sendError(message.text());
         } catch (Exception e) {
             LOGGER.info(message.getString());
         }

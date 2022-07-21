@@ -49,7 +49,7 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
             if (favicon != null) {
                 packet.getServerMetadata().setFavicon(favicon);
             }
-            packet.getServerMetadata().setDescription(format());
+            packet.getServerMetadata().setDescription(format().text());
         });
     }
 

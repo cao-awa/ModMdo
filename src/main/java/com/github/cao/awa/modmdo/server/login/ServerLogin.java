@@ -102,7 +102,7 @@ public class ServerLogin {
                 SharedVariables.rejectUsers.put(new User(name, uuid, - 1, identifier, version));
             } else {
                 TRACKER.info("Login player using id login: " + name);
-                SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setMessage(message.get() == null ? null : message.get()));
+                SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setMessage(message.get() == null ? null : message.get().text()));
             }
         }
     }
@@ -156,7 +156,7 @@ public class ServerLogin {
                 reject(name, uuid, identifier, null);
             } else {
                 TRACKER.info("Login player using strict login: " + name);
-                SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setMessage(message.get() == null ? null : message.get()));
+                SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setMessage(message.get() == null ? null : message.get().text()));
             }
         }
     }
@@ -194,7 +194,7 @@ public class ServerLogin {
             SharedVariables.rejectUsers.put(new User(name, uuid, - 1, "", 0));
         } else {
             TRACKER.info("Login player using ygg login: " + name);
-            SharedVariables.loginUsers.put(new User(name, uuid, - 1, "", 0).setMessage(message.get() == null ? null : message.get()));
+            SharedVariables.loginUsers.put(new User(name, uuid, - 1, "", 0).setMessage(message.get() == null ? null : message.get().text()));
         }
     }
 
