@@ -47,7 +47,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> disconnect(format().text()));
+        EntrustExecution.tryTemporary(() -> disconnect(format()));
     }
 
     public void disconnect(Text reason) {

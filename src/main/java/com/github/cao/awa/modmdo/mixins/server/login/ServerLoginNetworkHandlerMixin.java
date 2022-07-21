@@ -103,7 +103,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                                     manager.onPlayerConnect(connection, player);
                                     isDoneOnlineMode.set(true);
                                 }, ex -> {
-                                    serverLogin.reject(name, profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
+                                    serverLogin.reject(name, profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted"));
                                 });
                             }
                         }
@@ -137,7 +137,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
                                     rejectUsers.removeUser(name);
                                 } else {
-                                    disc(TextUtil.literal("You are failed login because too long did not received login request").text());
+                                    disc(TextUtil.literal("You are failed login because too long did not received login request"));
                                 }
                             } else {
                                 loginTimedOut.remove(name);
