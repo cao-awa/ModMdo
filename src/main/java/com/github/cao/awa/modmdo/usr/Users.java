@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.usr;
 
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.server.network.*;
 import org.json.*;
@@ -8,8 +9,8 @@ import org.json.*;
 import java.util.*;
 
 public class Users extends Storable {
-    private final Object2ObjectRBTreeMap<String, User> users = new Object2ObjectRBTreeMap<>();
-    private final Object2ObjectRBTreeMap<String, String> userNameIdMap = new Object2ObjectRBTreeMap<>();
+    private final Object2ObjectOpenHashMap<String, User> users = new Object2ObjectOpenHashMap<>();
+    private final Object2ObjectOpenHashMap<String, String> userNameIdMap = new Object2ObjectOpenHashMap<>();
 
     public Users() {
 
@@ -45,20 +46,7 @@ public class Users extends Storable {
     }
 
     public JSONObject toJSONObject() {
-        JSONObject json = new JSONObject();
-        for (Object o : users.keySet())
-            json.put(o.toString(), users.get(o.toString()));
-        return json;
-    }
-
-    public User[] getUsers() {
-        User[] userList = new User[users.size()];
-        int i = 0;
-        for (Object o : users.keySet()) {
-            JSONObject userJSON = users.get(o.toString()).toJSONObject();
-            userList[i++] = new User(userJSON);
-        }
-        return userList;
+        return EntrustParser.operation(new JSONObject(), json -> EntrustExecution.parallelTryFor(users.keySet(), key -> json.put(key, users.get(key))));
     }
 
     public User getUser(ServerPlayerEntity player) {

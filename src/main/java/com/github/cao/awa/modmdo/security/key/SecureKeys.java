@@ -51,19 +51,15 @@ public class SecureKeys extends Storable {
         for (String s : keys.keySet()) {
             switch (level) {
                 case UNEQUAL_KEY -> {
-                    if (has(s)) {
-                        if (keys.get(s).getPrivateKey().equals(key.getPrivateKey())) {
-                            keys.remove(s);
-                        }
+                    if (has(s) && keys.get(s).getPrivateKey().equals(key.getPrivateKey())) {
+                        keys.remove(s);
                     }
                 }
-                case UNEQUAL_ID -> {
-                    EntrustExecution.notNull(keys.get(s).getId(), id -> {
-                        if (id.equals(key.getId())) {
-                            keys.remove(s);
-                        }
-                    });
-                }
+                case UNEQUAL_ID -> EntrustExecution.notNull(keys.get(s).getId(), id -> {
+                    if (id.equals(key.getId())) {
+                        keys.remove(s);
+                    }
+                });
                 default -> {
                     return;
                 }
@@ -91,12 +87,7 @@ public class SecureKeys extends Storable {
     }
 
     public boolean hasAddress(@NotNull String address) {
-        for (String s : keys.keySet()) {
-            if (address.equals(keys.get(s).getAddress())) {
-                return true;
-            }
-        }
-        return false;
+        return keys.keySet().parallelStream().anyMatch(s -> address.equals(keys.get(s).getAddress()));
     }
 
     public void removeAddress(String address) {
@@ -109,17 +100,11 @@ public class SecureKeys extends Storable {
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
-        for (String target : keys.keySet()) {
-            json.put(target, keys.get(target).toJSONObject());
-        }
+        EntrustExecution.parallelTryFor(keys.keySet(), target -> json.put(target, keys.get(target).toJSONObject()));
         return json;
     }
 
     public void load(JSONObject json) {
-        for (String s : json.keySet()) {
-            EntrustExecution.tryTemporary(() -> {
-                SECURE_KEYS.set(s, new SecureKey(json.getJSONObject(s)));
-            });
-        }
+        EntrustExecution.parallelTryFor(json.keySet(), s -> EntrustExecution.tryTemporary(() -> SECURE_KEYS.set(s, new SecureKey(json.getJSONObject(s)))));
     }
 }

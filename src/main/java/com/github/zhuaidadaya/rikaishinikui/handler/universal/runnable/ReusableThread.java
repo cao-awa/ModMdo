@@ -1,9 +1,8 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable;
 
+import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
-
-import java.util.concurrent.*;
 
 public class ReusableThread {
     private final Thread executor;
@@ -21,7 +20,7 @@ public class ReusableThread {
         while (running) {
             if (wait) {
                 EntrustExecution.tryTemporary(() -> {
-                    TimeUnit.MILLISECONDS.sleep(1);
+                    TimeUtil.coma(0, 5000);
                 }, ex -> finish());
             } else {
                 EntrustExecution.tryTemporary(() -> this.action.apply());

@@ -122,16 +122,13 @@ public class ModMdoStdInitializer implements ModInitializer {
     }
 
     public void parseMapFormat() {
-        try {
+        EntrustExecution.tryTemporary(() -> {
             JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("assets/modmdo/versions/versions_map.json", getClass()), StandardCharsets.UTF_8))));
 
-            for (String s : versionMap.keySet())
+            EntrustExecution.parallelTryFor(versionMap.keySet(), s -> {
                 SharedVariables.modMdoIdToVersionMap.put(Integer.valueOf(s), versionMap.getString(s));
-
-            for (String s : versionMap.keySet())
                 SharedVariables.modMdoVersionToIdMap.put(versionMap.getString(s), Integer.valueOf(s).intValue());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            });
+        });
     }
 }

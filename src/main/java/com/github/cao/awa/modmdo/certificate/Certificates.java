@@ -30,6 +30,14 @@ public class Certificates<T extends Certificate> {
         this.certificate.remove(name);
     }
 
+    public void remove(Certificate name) {
+        Certificate certificate;
+        if ((certificate = this.certificate.get(name.name)) != null) {
+            idToName.remove(certificate.getIdentifier());
+        }
+        this.certificate.remove(name.name);
+    }
+
     public void removeFromId(String id) {
         certificate.remove(idToName.get(id));
         idToName.remove(id);

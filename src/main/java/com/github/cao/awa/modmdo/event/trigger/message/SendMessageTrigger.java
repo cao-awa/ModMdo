@@ -52,7 +52,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> send(format().text()));
+        EntrustExecution.tryTemporary(() -> send(format()));
     }
 
     public void send(Text message) {

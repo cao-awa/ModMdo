@@ -1,5 +1,7 @@
 package com.github.cao.awa.modmdo.utils.file;
 
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+
 import java.io.*;
 import java.util.*;
 import java.util.zip.*;
@@ -166,5 +168,21 @@ public class FileUtil extends MessageDigger {
             return "";
         }
         return builder.delete(builder.length() - 1, builder.length()).toString();
+    }
+
+    public static void copy(File source, File to) {
+        EntrustExecution.tryTemporary(() -> {
+            to.getParentFile().mkdirs();
+            to.createNewFile();
+            BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(source));
+            BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(to));
+            int length;
+            byte[] bytes = new byte[4096];
+            while ((length = inputStream.read(bytes)) != - 1) {
+                outputStream.write(bytes, 0, length);
+            }
+            inputStream.close();
+            outputStream.close();
+        }, Throwable::printStackTrace);
     }
 }

@@ -12,7 +12,6 @@ import io.netty.buffer.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.c2s.login.*;
-import net.minecraft.network.packet.s2c.login.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
@@ -40,6 +39,9 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     private boolean authing = false;
     private boolean doCheckModMdo = false;
     private GameProfile profileOld;
+    @Shadow
+    @Final
+    private byte[] nonce;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(MinecraftServer server, ClientConnection connection, CallbackInfo ci) {
@@ -59,8 +61,6 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
     @Shadow
     public abstract void acceptPlayer();
-
-    @Shadow @Final private byte[] nonce;
 
     /**
      * @author 草awa
@@ -82,6 +82,10 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                 if (server.isHost(player.getGameProfile())) {
                     serverLogin.login(name, PlayerUtil.getUUID(player).toString(), staticConfig.getConfigString("identifier"), String.valueOf(MODMDO_VERSION), null, null);
 
+                    TRACKER.info("Player " + name + " join with host");
+
+                    TRACKER.debug("Call: onPlayerConnect:(PlayerManager/ServerLoginNetworkHandlerMixin) Tg1");
+
                     manager.onPlayerConnect(connection, player);
                 } else {
                     int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
@@ -93,10 +97,13 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             if (config.getConfigBoolean("compatible_online_mode")) {
                                 EntrustExecution.tryTemporary(() -> {
                                     serverLogin.loginUsingYgg(name, profile.getId().toString());
+
+                                    TRACKER.debug("Call: onPlayerConnect:(PlayerManager/ServerLoginNetworkHandlerMixin/Lambda Tg1) Tg2");
+
                                     manager.onPlayerConnect(connection, player);
                                     isDoneOnlineMode.set(true);
                                 }, ex -> {
-                                    serverLogin.reject(name, profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
+                                    serverLogin.reject(name, profile.getId().toString(), "", TextUtil.translatable("multiplayer.disconnect.not_whitelisted"));
                                 });
                             }
                         }
@@ -113,7 +120,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     if (! isDoneOnlineMode.get()) {
                         TRACKER.info("Player " + name + " are not done online mode, will check again using modmdo");
                         TRACKER.submit("Server send login packet: modmdo login", () -> {
-                            if (modmdoWhitelist) {
+                            if (config.getConfigBoolean("modmdo_whitelist")) {
                                 handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(CHECKING_CHANNEL).writeString(staticConfig.get("identifier"))));
                             } else {
                                 handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(LOGIN_CHANNEL)));
@@ -130,7 +137,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
                                     rejectUsers.removeUser(name);
                                 } else {
-                                    disc(TextUtil.literal("You are failed login because too long did not received login request").text());
+                                    disc(TextUtil.literal("You are failed login because too long did not received login request"));
                                 }
                             } else {
                                 loginTimedOut.remove(name);
@@ -141,9 +148,15 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     }
                 }
             } else {
+                serverLogin.login(name, EntityUtil.getUUID(player).toString(), "", "", "", "");
+
+                TRACKER.debug("Call: onPlayerConnect:(PlayerManager/ServerLoginNetworkHandlerMixin) Tg3");
+
                 manager.onPlayerConnect(connection, player);
             }
         } else {
+            TRACKER.debug("Call: onPlayerConnect:(PlayerManager/ServerLoginNetworkHandlerMixin) Tg4");
+
             manager.onPlayerConnect(connection, player);
         }
     }
@@ -169,13 +182,13 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
         }
     }
 
-    @Redirect(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;)V"))
-    public void helloModMdo(ClientConnection instance, Packet<?> packet) {
-        instance.send(new LoginHelloS2CPacket("", this.server.getKeyPair().getPublic().getEncoded(), SharedVariables.NONCE));
+    @Redirect(method = "onHello", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerLoginNetworkHandler;nonce:[B"))
+    public byte[] helloModMdo(ServerLoginNetworkHandler instance) {
+        return modmdoWhitelist ? NONCE : nonce;
     }
 
     @Redirect(method = "onKey", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerLoginNetworkHandler;nonce:[B"))
     public byte[] onKey(ServerLoginNetworkHandler instance) {
-        return SharedVariables.NONCE;
+        return modmdoWhitelist ? NONCE : nonce;
     }
 }

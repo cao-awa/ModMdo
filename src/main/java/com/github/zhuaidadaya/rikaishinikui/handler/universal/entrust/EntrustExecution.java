@@ -5,7 +5,7 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*
 import java.util.*;
 import java.util.function.*;
 
-public class EntrustExecution {
+public class EntrustExecution extends ParallelEntrustExecution {
     private static final Object o = new Object();
 
     public static <T> void notNull(T target, Consumer<T> action) {
