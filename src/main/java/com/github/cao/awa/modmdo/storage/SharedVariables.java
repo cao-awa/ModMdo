@@ -3,8 +3,6 @@ package com.github.cao.awa.modmdo.storage;
 import com.github.cao.awa.hyacinth.logging.*;
 import com.github.cao.awa.modmdo.security.key.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
-import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.server.network.*;
 import net.minecraft.util.*;
 import org.apache.logging.log4j.*;
 
@@ -19,7 +17,6 @@ public class SharedVariables {
     public static final Identifier LOGIN_CHANNEL = new Identifier("modmdo:login");
     public static final Identifier CLIENT_CHANNEL = new Identifier("modmdo:client");
     public static final GlobalTracker TRACKER = new GlobalTracker();
-    public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
     public static final SecureKeys SECURE_KEYS = new SecureKeys();
     public static String entrust = "ModMdo";
     public static boolean debug = false;
