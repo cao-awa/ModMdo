@@ -7,7 +7,6 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.authlib.*;
 import io.netty.buffer.*;
-import net.minecraft.client.*;
 import net.minecraft.client.network.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
@@ -30,10 +29,6 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     @Shadow
     @Final
     private GameProfile profile;
-
-    @Shadow
-    @Final
-    private MinecraftClient client;
 
     /**
      * 与服务端进行自定义通信

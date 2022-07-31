@@ -135,71 +135,6 @@ public class JSONWriter {
     }
 
     /**
-     * Begin appending a new array. All values until the balancing
-     * <code>endArray</code> will be appended to this array. The
-     * <code>endArray</code> method must be called to mark the array's end.
-     * @return this
-     * @throws JSONException If the nesting is too deep, or if the object is
-     * started in the wrong place (for example as a key or after the end of the
-     * outermost array or object).
-     */
-    public JSONWriter array() throws JSONException {
-        if (this.mode == 'i' || this.mode == 'o' || this.mode == 'a') {
-            this.push(null);
-            this.append("[");
-            this.comma = false;
-            return this;
-        }
-        throw new JSONException("Misplaced array.");
-    }
-
-    /**
-     * End something.
-     * @param m Mode
-     * @param c Closing character
-     * @return this
-     * @throws JSONException If unbalanced.
-     */
-    private JSONWriter end(char m, char c) throws JSONException {
-        if (this.mode != m) {
-            throw new JSONException(m == 'a'
-                ? "Misplaced endArray."
-                : "Misplaced endObject.");
-        }
-        this.pop(m);
-        try {
-            this.writer.append(c);
-        } catch (IOException e) {
-        	// Android as of API 25 does not support this exception constructor
-        	// however we won't worry about it. If an exception is happening here
-        	// it will just throw a "Method not found" exception instead.
-            throw new JSONException(e);
-        }
-        this.comma = true;
-        return this;
-    }
-
-    /**
-     * End an array. This method most be called to balance calls to
-     * <code>array</code>.
-     * @return this
-     * @throws JSONException If incorrectly nested.
-     */
-    public JSONWriter endArray() throws JSONException {
-        return this.end('a', ']');
-    }
-
-    /**
-     * End an object. This method most be called to balance calls to
-     * <code>object</code>.
-     * @return this
-     * @throws JSONException If incorrectly nested.
-     */
-    public JSONWriter endObject() throws JSONException {
-        return this.end('k', '}');
-    }
-
-    /**
      * Append a key. The key will be associated with the next value. In an
      * object, every value must be preceded by a key.
      * @param string A key string.
@@ -259,28 +194,6 @@ public class JSONWriter {
         }
         throw new JSONException("Misplaced object.");
 
-    }
-
-
-    /**
-     * Pop an array or object scope.
-     * @param c The scope to close.
-     * @throws JSONException If nesting is wrong.
-     */
-    private void pop(char c) throws JSONException {
-        if (this.top <= 0) {
-            throw new JSONException("Nesting error.");
-        }
-        char m = this.stack[this.top - 1] == null ? 'a' : 'k';
-        if (m != c) {
-            throw new JSONException("Nesting error.");
-        }
-        this.top -= 1;
-        this.mode = this.top == 0
-            ? 'd'
-            : this.stack[this.top - 1] == null
-            ? 'a'
-            : 'k';
     }
 
     /**

@@ -12,6 +12,7 @@ public class SharedVariables {
     public static final String SUFFIX = "-ES";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
     public static final String RELEASE_TIME = "2022.7.2";
+    public static final byte[] NONCE = "MODMDO:SERVER_NONCE_!+[RD]".getBytes();
     public static final int MODMDO_VERSION = 31;
     public static final Identifier CHECKING_CHANNEL = new Identifier("modmdo:check");
     public static final Identifier LOGIN_CHANNEL = new Identifier("modmdo:login");

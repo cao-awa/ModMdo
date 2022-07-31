@@ -98,11 +98,11 @@ public class SecureKeys extends Storable {
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
-        EntrustExecution.parallelTryFor(keys.keySet(), target -> json.put(target, keys.get(target).toJSONObject()));
+        EntrustExecution.tryFor(keys.keySet(), target -> json.put(target, keys.get(target).toJSONObject()));
         return json;
     }
 
     public void load(JSONObject json) {
-        EntrustExecution.parallelTryFor(json.keySet(), s -> EntrustExecution.tryTemporary(() -> SECURE_KEYS.set(s, new SecureKey(json.getJSONObject(s)))));
+        EntrustExecution.tryFor(json.keySet(), s -> EntrustExecution.tryTemporary(() -> SECURE_KEYS.set(s, new SecureKey(json.getJSONObject(s)))));
     }
 }

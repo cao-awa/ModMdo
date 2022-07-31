@@ -114,27 +114,6 @@ public class JSONTokener {
     }
 
     /**
-     * Get the hex value of a character (base16).
-     *
-     * @param c
-     *         A character between '0' and '9' or between 'A' and 'F' or
-     *         between 'a' and 'f'.
-     * @return An int between 0 and 15, or -1 if c was not a hex digit.
-     */
-    public static int dehexchar(char c) {
-        if (c >= '0' && c <= '9') {
-            return c - '0';
-        }
-        if (c >= 'A' && c <= 'F') {
-            return c - ('A' - 10);
-        }
-        if (c >= 'a' && c <= 'f') {
-            return c - ('a' - 10);
-        }
-        return - 1;
-    }
-
-    /**
      * Checks if the end of the input has been reached.
      *
      * @return true if at the end of the file and we didn't step back
@@ -173,28 +152,6 @@ public class JSONTokener {
             throw new JSONException("Unable to read the next character from the stream", e);
         }
         return true;
-    }
-
-    /**
-     * Consume the next character, and check that it matches a specified
-     * character.
-     *
-     * @param c
-     *         The character to match.
-     * @return The character.
-     *
-     * @throws JSONException
-     *         if the character does not match.
-     */
-    public char next(char c) throws JSONException {
-        char n = this.next();
-        if (n != c) {
-            if (n > 0) {
-                throw this.syntaxError("Expected '" + c + "' and instead saw '" + n + "'");
-            }
-            throw this.syntaxError("Expected '" + c + "' and instead saw ''");
-        }
-        return n;
     }
 
     /**
@@ -377,32 +334,6 @@ public class JSONTokener {
     }
 
     /**
-     * Get the text up but not including the specified character or the
-     * end of line, whichever comes first.
-     *
-     * @param delimiter
-     *         A delimiter character.
-     * @return A string.
-     *
-     * @throws JSONException
-     *         Thrown if there is an error while searching
-     *         for the delimiter
-     */
-    public String nextTo(char delimiter) throws JSONException {
-        StringBuilder sb = new StringBuilder();
-        for (; ; ) {
-            char c = this.next();
-            if (c == delimiter || c == 0 || c == '\n' || c == '\r') {
-                if (c != 0) {
-                    this.back();
-                }
-                return sb.toString().trim();
-            }
-            sb.append(c);
-        }
-    }
-
-    /**
      * Back up one character. This provides a sort of lookahead capability,
      * so that you can test for a digit or letter before attempting to parse
      * the next number or identifier.
@@ -430,33 +361,6 @@ public class JSONTokener {
             this.character = this.characterPreviousLine;
         } else if (this.character > 0) {
             this.character--;
-        }
-    }
-
-    /**
-     * Get the text up but not including one of the specified delimiter
-     * characters or the end of line, whichever comes first.
-     *
-     * @param delimiters
-     *         A set of delimiter characters.
-     * @return A string, trimmed.
-     *
-     * @throws JSONException
-     *         Thrown if there is an error while searching
-     *         for the delimiter
-     */
-    public String nextTo(String delimiters) throws JSONException {
-        char c;
-        StringBuilder sb = new StringBuilder();
-        for (; ; ) {
-            c = this.next();
-            if (delimiters.indexOf(c) >= 0 || c == 0 || c == '\n' || c == '\r') {
-                if (c != 0) {
-                    this.back();
-                }
-                return sb.toString().trim();
-            }
-            sb.append(c);
         }
     }
 
@@ -508,47 +412,6 @@ public class JSONTokener {
             throw this.syntaxError("Missing value");
         }
         return JSONObject.stringToValue(string);
-    }
-
-    /**
-     * Skip characters until the next character is the requested character.
-     * If the requested character is not found, no characters are skipped.
-     *
-     * @param to
-     *         A character to skip to.
-     * @return The requested character, or zero if the requested character
-     * is not found.
-     *
-     * @throws JSONException
-     *         Thrown if there is an error while searching
-     *         for the to character
-     */
-    public char skipTo(char to) throws JSONException {
-        char c;
-        try {
-            long startIndex = this.index;
-            long startCharacter = this.character;
-            long startLine = this.line;
-            this.reader.mark(1000000);
-            do {
-                c = this.next();
-                if (c == 0) {
-                    // in some readers, reset() may throw an exception if
-                    // the remaining portion of the input is greater than
-                    // the mark size (1,000,000 above).
-                    this.reader.reset();
-                    this.index = startIndex;
-                    this.character = startCharacter;
-                    this.line = startLine;
-                    return 0;
-                }
-            } while (c != to);
-            this.reader.mark(1);
-        } catch (IOException exception) {
-            throw new JSONException(exception);
-        }
-        this.back();
-        return c;
     }
 
     /**

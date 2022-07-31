@@ -21,9 +21,6 @@
 
   "environment": "*",
   "entrypoints": {
-    "main": [
-        "com.github.cao.awa.modmdo.ModMdoStdInitializer"
-    ],
     "client": [
         "com.github.cao.awa.modmdo.ModMdoClientInitializer"
     ]
