@@ -64,10 +64,6 @@ public final class TemporaryCertificate extends Certificate {
         return calculateMillions() < millions;
     }
 
-    public boolean notValid() {
-        return calculateMillions() > millions;
-    }
-
     public long calculateMillions() {
         return TimeUtil.processMillion(recording);
     }

@@ -16,23 +16,22 @@ public class TestExtra extends ModMdoExtra<TestExtra> {
     }
 
     @Override
-    public void loadModules() {
-
-    }
-
-    @Override
     public void init() {
         //System.out.println("My test extra");
     }
 
-
     @Override
-    public void initStaticCommands() {
+    public void initCommand() {
 
     }
 
     @Override
-    public void initEvents() {
+    public void initStaticCommand() {
+
+    }
+
+    @Override
+    public void initEvent() {
 
     }
 }

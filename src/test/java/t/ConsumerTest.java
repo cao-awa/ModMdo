@@ -1,9 +1,8 @@
 package t;
 
-import org.json.JSONObject;
+import org.json.*;
 
-import java.util.Collection;
-import java.util.function.Consumer;
+import java.util.function.*;
 
 public class ConsumerTest<T> {
     private JSONObject t;

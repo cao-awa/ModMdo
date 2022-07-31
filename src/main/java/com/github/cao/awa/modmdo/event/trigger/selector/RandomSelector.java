@@ -1,7 +1,7 @@
 package com.github.cao.awa.modmdo.event.trigger.selector;
 
 import com.github.cao.awa.modmdo.annotations.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.selector.algorithm.*;
+import com.github.cao.awa.modmdo.event.trigger.selector.algorithm.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.json.*;
 
@@ -13,7 +13,7 @@ public class RandomSelector extends TriggerSelector {
 
     @Override
     public void select(JSONObject json, BiConsumer<String, JSONObject> operation) {
-        EntrustExecution.parallelTryFor(json.keySet(), name -> getTargets().put(name, json.getJSONObject(name)));
+        EntrustExecution.tryFor(json.keySet(), name -> getTargets().put(name, json.getJSONObject(name)));
         selector.select(getTargets());
         accept(operation);
     }

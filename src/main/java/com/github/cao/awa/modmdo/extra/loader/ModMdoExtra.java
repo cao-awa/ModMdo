@@ -2,13 +2,10 @@ package com.github.cao.awa.modmdo.extra.loader;
 
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.extra.loader.parameter.*;
-import com.github.cao.awa.modmdo.module.*;
-import it.unimi.dsi.fastutil.objects.*;
 
 import java.util.*;
 
 public abstract class ModMdoExtra<T> {
-    private final Object2ObjectOpenHashMap<String, ModMdoModule<T>> modules = new Object2ObjectOpenHashMap<>();
     private boolean signAuto = false;
     private UncertainParameter args = new UncertainParameter();
     private String name = "ModMdoExtra<Ab.>";
@@ -27,10 +24,10 @@ public abstract class ModMdoExtra<T> {
     }
 
     public void auto(boolean active) {
-        initStaticCommands();
+        initStaticCommand();
         if (active) {
             init();
-            loadModules();
+            initCommand();
             ModMdoEventCenter.callingBuilding.put(id, this);
         }
     }
@@ -39,22 +36,13 @@ public abstract class ModMdoExtra<T> {
 
     }
 
-    public abstract void loadModules();
-
-    public void loadModule(ModMdoModule<T> module) {
-        modules.put(module.getName(), module);
-        module.load();
-    }
-
-    public Object2ObjectOpenHashMap<String, ModMdoModule<T>> getModules() {
-        return modules;
-    }
-
     public abstract void init();
 
-    public abstract void initStaticCommands();
+    public abstract void initCommand();
 
-    public abstract void initEvents();
+    public abstract void initStaticCommand();
+
+    public abstract void initEvent();
 
     public String getName() {
         return name;
