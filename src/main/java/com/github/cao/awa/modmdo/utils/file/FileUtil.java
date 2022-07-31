@@ -1,11 +1,12 @@
 package com.github.cao.awa.modmdo.utils.file;
 
-import java.io.*;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 
-public class FileUtil {
+import java.io.*;
+import java.util.*;
+import java.util.zip.*;
+
+public class FileUtil extends MessageDigger {
     public static void deleteFiles(String path) {
         File file = new File(path);
         for (File f : file.listFiles()) {
@@ -167,5 +168,21 @@ public class FileUtil {
             return "";
         }
         return builder.delete(builder.length() - 1, builder.length()).toString();
+    }
+
+    public static void copy(File source, File to) {
+        EntrustExecution.tryTemporary(() -> {
+            to.getParentFile().mkdirs();
+            to.createNewFile();
+            BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(source));
+            BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(to));
+            int length;
+            byte[] bytes = new byte[4096];
+            while ((length = inputStream.read(bytes)) != - 1) {
+                outputStream.write(bytes, 0, length);
+            }
+            inputStream.close();
+            outputStream.close();
+        }, Throwable::printStackTrace);
     }
 }

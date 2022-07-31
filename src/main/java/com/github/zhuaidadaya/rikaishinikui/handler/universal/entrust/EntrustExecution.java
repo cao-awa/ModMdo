@@ -5,7 +5,7 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*
 import java.util.*;
 import java.util.function.*;
 
-public class EntrustExecution {
+public class EntrustExecution extends ParallelEntrustExecution {
     private static final Object o = new Object();
 
     public static <T> void notNull(T target, Consumer<T> action) {
@@ -65,11 +65,9 @@ public class EntrustExecution {
     }
 
     public static <T> void trying(ExceptingConsumer<T> action) {
-        try {
+        EntrustExecution.tryTemporary(() -> {
             action.accept((T) o);
-        } catch (Throwable e) {
-
-        }
+        });
     }
 
     public static <T> void trying(ExceptingConsumer<T> action, Consumer<T> actionWhenException) {
@@ -81,11 +79,7 @@ public class EntrustExecution {
     }
 
     public static <T> void trying(T target, ExceptingConsumer<T> action) {
-        try {
-            action.accept(target);
-        } catch (Throwable e) {
-
-        }
+        EntrustExecution.tryTemporary(() -> action.accept(target));
     }
 
     public static <T> void trying(T target, ExceptingConsumer<T> action, Consumer<T> actionWhenException) {
@@ -101,30 +95,12 @@ public class EntrustExecution {
     }
 
     public static <T> void tryFor(Collection<T> targets, ExceptingConsumer<T> action) {
-        if (targets != null) {
-            for (T target : targets) {
-                try {
-                    action.accept(target);
-                } catch (Throwable e) {
-
-                }
-            }
-        }
+        tryFor(targets, action, ex -> {});
     }
 
     public static <T> void tryFor(ExceptingSupplier<Collection<T>> targets, ExceptingConsumer<T> action) {
         if (targets != null) {
-            try {
-                for (T target : targets.get()) {
-                    try {
-                        action.accept(target);
-                    } catch (Throwable e) {
-
-                    }
-                }
-            } catch (Throwable e) {
-
-            }
+            EntrustExecution.tryTemporary(() -> tryFor(targets.get(), action));
         }
     }
 
@@ -143,11 +119,7 @@ public class EntrustExecution {
     public static <T> void tryFor(T[] targets, ExceptingConsumer<T> action) {
         if (targets != null) {
             for (T target : targets) {
-                try {
-                    action.accept(target);
-                } catch (Throwable e) {
-
-                }
+                EntrustExecution.tryTemporary(() -> action.accept(target));
             }
         }
     }
@@ -201,13 +173,11 @@ public class EntrustExecution {
     }
 
     public static <T> void tryAssertNotNull(T target, ExceptingConsumer<T> action) {
-        try {
+        EntrustExecution.tryTemporary(() -> {
             if (target != null) {
                 action.accept(target);
             }
-        } catch (Throwable e) {
-
-        }
+        });
     }
 
     public static <T> void tryAssertNotNull(T target, ExceptingConsumer<T> action, Consumer<T> whenException) {
@@ -242,10 +212,6 @@ public class EntrustExecution {
         } catch (Throwable e) {
             whenException.accept(target);
         }
-    }
-
-    public static void main(String[] args) {
-
     }
 }
 
