@@ -105,8 +105,10 @@ public abstract class ServerPlayNetworkHandlerMixin {
                             TRACKER.submit("Login data7: " + data7);
 
                             if (modMdoType == ModMdoType.SERVER) {
-                                serverLogin.login(data1, data2, data3, data4, data5, data6, data7);
-                                beforeLogin();
+                                if (beforeLogin()) {
+                                    serverLogin.login(data1, data2, data3, data4, data5, data6, data7);
+                                    afterLogin();
+                                }
                             }
                         }
                     }
@@ -119,13 +121,26 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    public void beforeLogin() {
+    public boolean beforeLogin() {
+        String name = EntityUtil.getName(player);
+        if (server.getPlayerManager().getPlayer(name) != null) {
+            return false;
+        }
+        if (loginUsers.hasUser(name)) {
+            disc(Translatable.translatable("login.dump.rejected").text());
+            return false;
+        }
+        return true;
+    }
+
+    public void disc(Text reason) {
+        this.connection.send(new DisconnectS2CPacket(reason));
+        this.connection.disconnect(reason);
+    }
+
+    public void afterLogin() {
         if (config.getConfigBoolean("modmdo_whitelist")) {
             String name = EntityUtil.getName(player);
-            if (loginUsers.hasUser(name) || server.getPlayerManager().getPlayer(name) != null) {
-                disc(Translatable.translatable("login.dump.rejected").text());
-                return;
-            }
             if (modMdoType == ModMdoType.SERVER && modmdoWhitelist) {
                 if (rejectUsers.hasUser(player)) {
                     User rejected = rejectUsers.getUser(player.getUuid());
@@ -203,17 +218,10 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    public void disc(Text reason) {
-        this.connection.send(new DisconnectS2CPacket(reason));
-        this.connection.disconnect(reason);
-    }
-
     @Inject(method = "onDisconnected", at = @At("RETURN"))
     public void onDisconnected(Text reason, CallbackInfo ci) {
-        if (SharedVariables.isActive()) {
-            serverLogin.logout(player);
-            event.submit(new QuitServerEvent(player, connection, player.getPos(), server));
-        }
+        serverLogin.logout(player);
+        event.submit(new QuitServerEvent(player, connection, player.getPos(), server));
     }
 
     @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
@@ -248,18 +256,23 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Redirect(method = "onKeepAlive", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;disconnect(Lnet/minecraft/text/Text;)V"))
-    public void disconnect(ServerPlayNetworkHandler instance, Text reason) {
+    @Inject(method = "onKeepAlive", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;disconnect(Lnet/minecraft/text/Text;)V"), cancellable = true)
+    public void disconnect(KeepAliveC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
-            if (reason.getString().equals("disconnect.timeout")) {
+            if (loginUsers.hasUser(player)) {
                 if (TimeUtil.processMillion(loginUsers.getUser(player).getLoginTime()) > 10000) {
-                    instance.disconnect(reason);
+                    this.disc(TextUtil.translatable("disconnect.timeout").text());
                 } else {
                     waitingForKeepAlive = false;
                     lastKeepAliveTime = TimeUtil.millions();
                     keepAliveId = lastKeepAliveTime;
                 }
+
+                ci.cancel();
             }
         }
     }
+
+    @Shadow
+    protected abstract boolean isHost();
 }

@@ -1,13 +1,16 @@
-package com.github.cao.awa.modmdo.event.trigger.selector.algorithm;
+package com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.selector.algorithm;
 
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.selector.*;
 import it.unimi.dsi.fastutil.objects.*;
 
+import java.security.*;
 import java.util.*;
 
 @Disposable
 public final class ExcludeSelector<L, R> extends ObjectSelector<L, R> {
+    private static final SecureRandom random = new SecureRandom();
     private int exclude;
 
     public ExcludeSelector(int exclude) {
@@ -23,7 +26,6 @@ public final class ExcludeSelector<L, R> extends ObjectSelector<L, R> {
     public void select() {
         ensure();
         List<L> keys = new ArrayList<>(getTargets().keySet());
-        Random random = new Random();
         for (; exclude > 0 && keys.size() > 0; exclude--) {
             getTargets().remove(EntrustParser.desert(keys, random));
         }
