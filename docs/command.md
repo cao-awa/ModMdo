@@ -1,14 +1,3 @@
-## 连接相关
-### Modmdo 连接
-__服务器和服务器通信__
-```sh
-#连接服务器
-/modmdo connection connect <IP> <Port>
-#断开连接
-/modmdo connection connections <name> disconnect
-#显示流量传输
-/modmdo connection connections <name> traffic
-```
 ### 白名单
 __永久白名单__
 ```sh
