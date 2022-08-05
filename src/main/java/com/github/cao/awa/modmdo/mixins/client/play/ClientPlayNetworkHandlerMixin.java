@@ -45,9 +45,9 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
         PacketByteBuf data = packet.getData();
 
-        EntrustExecution.tryTemporary(() -> {
-            Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
+        Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
 
+        EntrustExecution.tryTemporary(() -> {
             if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
                 SECURE_KEYS.load(staticConfig.getConfigJSONObject("private_key"));
                 Receptacle<String> serverId = new Receptacle<>(null);
@@ -92,7 +92,8 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                                 .writeString(LOGIN_CHANNEL.toString())
                                 .writeString(profile.getName())
                                 .writeString(PlayerUtil.getUUID(profile).toString())
-                                .writeString(loginId).writeString(String.valueOf(MODMDO_VERSION))
+                                .writeString(loginId)
+                                .writeString(String.valueOf(MODMDO_VERSION))
                                 .writeString(MODMDO_VERSION_NAME)
                                 .writeString(sendingVerify)
                                 .writeString(verifyKey)));
@@ -100,5 +101,9 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                 });
             }
         }, ex -> TRACKER.err("Error in connecting ModMdo server", ex));
+
+        if (informationSign.equals(SERVER_CHANNEL)) {
+            ci.cancel();
+        }
     }
 }
