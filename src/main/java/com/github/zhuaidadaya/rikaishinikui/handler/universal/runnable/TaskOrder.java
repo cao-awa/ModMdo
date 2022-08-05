@@ -15,10 +15,10 @@ public class TaskOrder<T> {
     private final ObjectArrayList<T> delay = new ObjectArrayList<>();
     private final boolean disposable;
     private final String register;
-    private boolean reusable = true;
+    private boolean usable = true;
     private boolean noDelay;
     private boolean reuse;
-    private @NotNull Thread thread = new Thread(() -> {
+    private final @NotNull ReusableThread thread = new ReusableThread(() -> {
     });
 
     public TaskOrder(Consumer<T> action, String register) {
@@ -29,6 +29,7 @@ public class TaskOrder<T> {
         this.action = new TargetCountBoolean<>(action, true, true);
         this.disposable = disposable;
         this.register = register;
+        thread.setName(register);
     }
 
     public boolean isReuse() {
@@ -64,26 +65,25 @@ public class TaskOrder<T> {
 
     @AsyncDelay
     private void action(boolean enforce, T target) {
-        if (action.satisfy() && ! isRunning() && reusable) {
+        if (action.satisfy() && ! thread.isAlive() && usable) {
             action.reverse();
             if (enforce) {
                 action(target);
                 action.reverse();
             } else {
-                thread = new Thread(() -> {
+                thread.execute(() -> {
                     action(target);
                     action.reverse();
-                }, register);
-                thread.start();
+                });
             }
         } else {
-            if (reusable && ! noDelay) {
+            if (usable && ! noDelay) {
                 delay.add(target);
             }
         }
 
         if (disposable) {
-            reusable = false;
+            usable = false;
         }
     }
 
@@ -96,16 +96,12 @@ public class TaskOrder<T> {
     }
 
     @NotNull
-    public Thread getThread() {
+    public ReusableThread getThread() {
         return thread;
     }
 
     public boolean isRunning() {
         return thread.isAlive();
-    }
-
-    public void join() throws InterruptedException {
-        thread.join();
     }
 
     private void resolve() {

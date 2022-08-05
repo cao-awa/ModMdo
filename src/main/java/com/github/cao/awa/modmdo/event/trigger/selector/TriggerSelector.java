@@ -12,7 +12,7 @@ public abstract class TriggerSelector {
     public abstract void select(JSONObject json, BiConsumer<String, JSONObject> operation);
 
     public void accept(BiConsumer<String, JSONObject> operation) {
-        EntrustExecution.parallelTryFor(getTargets().keySet(), name -> operation.accept(name, getTargets().get(name)));
+        EntrustExecution.tryFor(getTargets().keySet(), name -> operation.accept(name, getTargets().get(name)));
     }
 
     public Object2ObjectOpenHashMap<String, JSONObject> getTargets() {

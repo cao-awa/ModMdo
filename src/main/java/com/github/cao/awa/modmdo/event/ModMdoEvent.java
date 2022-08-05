@@ -23,7 +23,7 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     private boolean submitted = false;
 
     public synchronized void register(Consumer<T> action, File register) {
-        actions.add(new TaskOrder<>(action, "F): " + register.getPath()));
+        actions.add(new TaskOrder<>(action, "F): " +  register.getPath()));
     }
 
     public synchronized void register(Consumer<T> action, ModMdoExtra<?> register, String name) {
@@ -31,74 +31,50 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     }
 
     public ObjectArrayList<String> getRegistered() {
-        return EntrustParser.operation(new ObjectArrayList<>(), list -> actions.parallelStream().forEach(task -> list.add(task.getRegister())));
+        return EntrustParser.operation(new ObjectArrayList<>(), list -> {
+            for (TaskOrder<T> task : actions) {
+                list.add(task.getRegister());
+            }
+        });
     }
 
     public boolean isSubmitted() {
         return submitted;
     }
 
-    public abstract String synopsis();
-
     @AsyncDelay
-    public void await(Temporary action, int orWait, File register) {
-        orWait(new TaskOrder<>(e -> action.apply(), true, "File: \n  " + register.getPath()), orWait);
-    }
-
-    public void orWait(TaskOrder<T> order, final int wait) {
-        await.put(order, EntrustParser.thread(() -> {
-            synchronized (await) {
-                EntrustExecution.tryTemporary(() -> {
-                    OperationalInteger integer = new OperationalInteger(wait);
-                    while (integer.get() > 0) {
-                        TimeUtil.coma(10);
-                        integer.reduce(10);
-                        if (await.get(order).isInterrupted()) {
-                            await.remove(order);
-                            return;
-                        }
-                    }
-                    order.call(null);
-                    await.remove(order);
-                });
-            }
-        }));
-        await.get(order).start();
-    }
-
-    public synchronized void skipDelay(T target) {
-        if (delay.size() > 0) {
-            return;
-        }
+    public synchronized void immediately(T target) {
         submit(target);
         action();
     }
 
-    public synchronized void action() {
-        action(false);
-    }
-
     @AsyncDelay
     public synchronized void action(boolean enforce) {
-        delay.parallelStream().forEach(target -> {
-            actions.parallelStream().forEach(enforce ? eventEnforce -> {
-                EntrustExecution.trying(target, eventEnforce::enforce);
-            } : eventCall -> {
-                EntrustExecution.trying(target, eventCall::call);
-            });
-            await.keySet().parallelStream().forEach(enforce ? eventEnforce -> {
-                await.get(eventEnforce).interrupt();
-                EntrustExecution.trying(target, eventEnforce::enforce);
-                await.remove(eventEnforce);
-            } : eventCall -> {
-                await.get(eventCall).interrupt();
-                EntrustExecution.trying(target, eventCall::call);
-                await.remove(eventCall);
-            });
+        for (T target : delay) {
+            for (TaskOrder<T> event : actions) {
+                if (enforce) {
+                    EntrustExecution.trying(target, event::enforce);
+                } else {
+                    EntrustExecution.trying(target, event::call);
+                }
+            }
+            for (TaskOrder<T> event : await.keySet()) {
+                await.get(event).interrupt();
+                if (enforce) {
+                    EntrustExecution.trying(target, event::enforce);
+                } else {
+                    EntrustExecution.trying(target, event::call);
+                }
+                await.remove(event);
+            }
             delay.remove(target);
-        });
+        }
 
         submitted = false;
+    }
+
+    public synchronized void action() {
+        action(false);
     }
 
     @AsyncDelay
@@ -112,6 +88,43 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     }
 
     public abstract T fuse(Previously<T> previously, T delay);
+
+    public abstract String synopsis();
+
+    @AsyncDelay
+    public void await(Temporary action, int orWait, File register) {
+        orWait(new TaskOrder<>(e -> action.apply(), true, "File: \n  " +  register.getPath()), orWait);
+    }
+
+    public void orWait(TaskOrder<T> order, final int wait) {
+        await.put(order, EntrustParser.thread(() -> {
+            synchronized (await) {
+                EntrustExecution.tryTemporary(() -> {
+                    OperationalInteger integer = new OperationalInteger(wait);
+                    while (integer.get() > 0) {
+                        TimeUtil.coma(10);
+                        integer.reduce(10);
+                        if (await.get(order).isInterrupted()) {
+                            return;
+                        }
+                    }
+                    if (await.containsKey(order)) {
+                        order.call(null);
+                        await.remove(order);
+                    }
+                });
+            }
+        }));
+        await.get(order).start();
+    }
+
+    public synchronized void skipDelay(T target) {
+        if (delay.size() > 0) {
+            return;
+        }
+        submit(target);
+        action();
+    }
 
     public int registered() {
         return actions.size();
@@ -142,25 +155,19 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
         action(true);
     }
 
-    public void auto(ModMdoEvent<?> target) {
-        if (target.clazz().equals(clazz())) {
-            adaptive((T) target);
-        }
-    }
-
     public void adaptive(T target) {
         immediately(target);
     }
 
-    @AsyncDelay
-    public synchronized void immediately(T target) {
-        submit(target);
-        action();
+    public void auto(ModMdoEvent<?> target) {
+        if (target.clazz().equals(clazz())) {
+            adaptive((T)target);
+        }
     }
 
-    public abstract String clazz();
-
     public abstract String abbreviate();
+
+    public abstract String clazz();
 
     public abstract MinecraftServer getServer();
 }

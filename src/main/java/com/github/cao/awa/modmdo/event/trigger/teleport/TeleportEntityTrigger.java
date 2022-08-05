@@ -5,8 +5,8 @@ import com.github.cao.awa.modmdo.event.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.trigger.selector.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
+import com.github.cao.awa.modmdo.simple.vec.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import net.minecraft.util.math.*;
 import org.json.*;
 
 import java.util.*;
@@ -16,15 +16,14 @@ import static com.github.cao.awa.modmdo.event.trigger.selector.entity.EntitySele
 @Auto
 public class TeleportEntityTrigger<T extends EntityTargetedEvent<?>> extends TargetedTrigger<T> {
     private EntitySelector selector;
-    private Vec3d xyz;
+    private XYZ xyz;
 
     @Override
     public ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace trace) {
         setTarget(event.getTargeted());
         setServer(event.getServer());
         selector = new EntitySelector(metadata.getJSONObject("selector"), this);
-        JSONObject pos = metadata.getJSONObject("pos");
-        xyz = new Vec3d(pos.getDouble("x"), pos.getDouble("y"),pos.getDouble("z"));
+        xyz = new XYZ(metadata.getJSONObject("pos"));
         return this;
     }
 

@@ -121,10 +121,4 @@ public class TimeUtil {
             Thread.sleep(millions);
         });
     }
-
-    public static void coma(long millions, int nanos) {
-        EntrustExecution.tryTemporary(() -> {
-            Thread.sleep(millions, nanos);
-        });
-    }
 }

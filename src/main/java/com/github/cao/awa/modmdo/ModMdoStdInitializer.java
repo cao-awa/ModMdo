@@ -3,7 +3,6 @@ package com.github.cao.awa.modmdo;
 import com.github.cao.awa.modmdo.enchant.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.extra.loader.*;
-import com.github.cao.awa.modmdo.extra.modmdo.*;
 import com.github.cao.awa.modmdo.listeners.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.security.*;
@@ -123,13 +122,16 @@ public class ModMdoStdInitializer implements ModInitializer {
     }
 
     public void parseMapFormat() {
-        EntrustExecution.tryTemporary(() -> {
+        try {
             JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(Resources.getResource("assets/modmdo/versions/versions_map.json", getClass()), StandardCharsets.UTF_8))));
 
-            EntrustExecution.parallelTryFor(versionMap.keySet(), s -> {
+            for (String s : versionMap.keySet())
                 SharedVariables.modMdoIdToVersionMap.put(Integer.valueOf(s), versionMap.getString(s));
+
+            for (String s : versionMap.keySet())
                 SharedVariables.modMdoVersionToIdMap.put(versionMap.getString(s), Integer.valueOf(s).intValue());
-            });
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
