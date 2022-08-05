@@ -41,7 +41,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      * @author 草awa
      * @author zhuaidadaya
      */
-    @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onCustomPayload", at = @At("HEAD"))
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
         PacketByteBuf data = packet.getData();
 
@@ -54,7 +54,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                 if (informationSign.equals(CHECKING_CHANNEL)) {
                     EntrustExecution.tryTemporary(() -> serverId.set(data.readString()));
                 }
-                TRACKER.submit("Server are requesting login data", () -> {
+                TRACKER.submit("Server are requesting login data, as: " + informationSign, () -> {
                     EntrustExecution.notNull(staticConfig.get("secure_level"), level -> {
                         SECURE_KEYS.setLevel(SecureLevel.of(level));
                         TRACKER.submit("Changed config secure_level as " + level);
@@ -76,19 +76,29 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                     }
                     String verifyKey = hasServerId ? SECURE_KEYS.get(serverId.get()).getVerifyKey() : null;
                     if (verifyKey == null) {
-                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(loginId).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME)));
+                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer()))
+                                .writeString(LOGIN_CHANNEL.toString())
+                                .writeString(profile.getName())
+                                .writeString(PlayerUtil.getUUID(profile).toString())
+                                .writeString(loginId)
+                                .writeString(String.valueOf(MODMDO_VERSION))
+                                .writeString(MODMDO_VERSION_NAME)));
                     } else {
                         String sendingVerify;
                         JSONObject json = new JSONObject();
                         json.put("identifier", loginId);
                         sendingVerify = EntrustParser.trying(() -> AES.aesEncryptToString(json.toString().getBytes(), verifyKey.getBytes()), ex -> "");
-                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getId(profile).toString()).writeString(loginId).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME).writeString(sendingVerify).writeString(verifyKey)));
+                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer()))
+                                .writeString(LOGIN_CHANNEL.toString())
+                                .writeString(profile.getName())
+                                .writeString(PlayerUtil.getUUID(profile).toString())
+                                .writeString(loginId).writeString(String.valueOf(MODMDO_VERSION))
+                                .writeString(MODMDO_VERSION_NAME)
+                                .writeString(sendingVerify)
+                                .writeString(verifyKey)));
                     }
                 });
             }
-        }, ex -> {
-            TRACKER.err("Error in connecting ModMdo server", ex);
-        });
-        ci.cancel();
+        }, ex -> TRACKER.err("Error in connecting ModMdo server", ex));
     }
 }

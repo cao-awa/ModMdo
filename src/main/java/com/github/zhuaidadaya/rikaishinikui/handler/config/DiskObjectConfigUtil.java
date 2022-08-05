@@ -61,10 +61,10 @@ public record DiskObjectConfigUtil(String entrust, String path, String suffix, b
     }
 
     public String get(String key) {
-        return EntrustParser.trying(() -> uncompress(FileReads.strictRead(new BufferedInputStream(new FileInputStream(getConfigPath(key))))));
+        return EntrustParser.trying(() -> decompress(FileReads.strictRead(new BufferedInputStream(new FileInputStream(getConfigPath(key))))));
     }
 
-    public static String uncompress(String str) {
+    public static String decompress(String str) {
         if (str == null || str.length() == 0) {
             return str;
         }
@@ -86,7 +86,7 @@ public record DiskObjectConfigUtil(String entrust, String path, String suffix, b
     }
 
     public boolean getConfigBoolean(String key) {
-        return EntrustParser.trying(() -> Boolean.parseBoolean(get(key)), () -> false);
+        return "true".equalsIgnoreCase(get(key));
     }
 
     public int getConfigInt(String key) {

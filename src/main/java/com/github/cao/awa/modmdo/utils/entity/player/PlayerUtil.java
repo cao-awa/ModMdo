@@ -5,7 +5,7 @@ import com.mojang.authlib.*;
 import java.util.*;
 
 public class PlayerUtil {
-    public static UUID getId(GameProfile profile) {
+    public static UUID getUUID(GameProfile profile) {
         return profile.getId();
     }
 }
