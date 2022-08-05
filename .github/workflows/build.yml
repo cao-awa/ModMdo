@@ -38,6 +38,6 @@ jobs:
         # Upload all artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Artifacts-${{runner.os}}-${{matrix.java}}
+          name: Artifacts
           path: build/libs/
 
