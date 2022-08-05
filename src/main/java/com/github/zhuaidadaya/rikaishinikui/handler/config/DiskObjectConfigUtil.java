@@ -18,18 +18,14 @@ public record DiskObjectConfigUtil(String entrust, String path, String suffix, b
     }
 
     public void set(String key, Object value) {
-        if (compress) {
-            FileUtil.write(new File(getConfigPath(key)), compress(value.toString(), Deflater.DEFAULT_STRATEGY));
-        } else {
-            FileUtil.write(new File(getConfigPath(key)), value.toString());
-        }
+        FileUtil.write(new File(getConfigPath(key)), compress ? compress(value.toString(), Deflater.DEFAULT_STRATEGY) : value.toString());
     }
 
     public static String compress(String str, int strategy) {
         if (str == null || str.length() == 0) {
             return str;
         }
-        if (strategy == -1) {
+        if (strategy == - 1) {
             strategy = Deflater.DEFAULT_STRATEGY;
         }
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -61,10 +57,10 @@ public record DiskObjectConfigUtil(String entrust, String path, String suffix, b
     }
 
     public String get(String key) {
-        return EntrustParser.trying(() -> uncompress(FileReads.strictRead(new BufferedInputStream(new FileInputStream(getConfigPath(key))))));
+        return EntrustParser.trying(() -> decompress(FileReads.strictRead(new BufferedInputStream(new FileInputStream(getConfigPath(key))))));
     }
 
-    public static String uncompress(String str) {
+    public static String decompress(String str) {
         if (str == null || str.length() == 0) {
             return str;
         }
@@ -86,7 +82,7 @@ public record DiskObjectConfigUtil(String entrust, String path, String suffix, b
     }
 
     public boolean getConfigBoolean(String key) {
-        return EntrustParser.trying(() -> Boolean.parseBoolean(get(key)), () -> false);
+        return "true".equalsIgnoreCase(get(key));
     }
 
     public int getConfigInt(String key) {

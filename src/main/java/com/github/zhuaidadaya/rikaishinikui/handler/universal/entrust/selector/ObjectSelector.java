@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.event.trigger.selector.algorithm;
+package com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.selector;
 
 import com.github.cao.awa.modmdo.annotations.*;
 import it.unimi.dsi.fastutil.objects.*;

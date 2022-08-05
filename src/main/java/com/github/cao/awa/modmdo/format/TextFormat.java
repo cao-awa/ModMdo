@@ -45,7 +45,7 @@ public abstract class TextFormat<T> {
     }
 
     public String formatted(User user, String key, Object... args) {
-        return formatted(user.getLanguage(), key, args);
+        return formatted(user == null ? getLanguage() : user.getLanguage(), key, args);
     }
 
     public String formatted(Language lang, String key, Object... args) {
