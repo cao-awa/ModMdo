@@ -144,5 +144,6 @@
     "command.note.added": "已添加新的备注: %s",
     "command.note.information": "§d备注 %s 的信息为: \n§a%s",
     "command.note.not.found": "未找到备注 %s",
+    "command.note.cannot.be.collect.because.already.is.arbitrary": "%s 无法作为整理器, 因为它已经是一个随意的备注了",
     "command.note.deleted": "已删除备注: %s"
 }
