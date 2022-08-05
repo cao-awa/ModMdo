@@ -26,8 +26,5 @@ public class ServerStartListener {
                 event.submit(new ServerStartedEvent(server));
             }
         });
-
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-        });
     }
 }

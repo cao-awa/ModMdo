@@ -1,101 +1,117 @@
 package com.github.cao.awa.modmdo.mixins.server.world;
 
-import net.minecraft.block.*;
-import net.minecraft.entity.ai.pathing.*;
-import net.minecraft.entity.mob.*;
 import net.minecraft.server.world.*;
-import net.minecraft.util.function.*;
-import net.minecraft.util.math.*;
 import net.minecraft.util.profiler.*;
 import net.minecraft.util.registry.*;
-import net.minecraft.util.shape.*;
 import net.minecraft.world.*;
 import net.minecraft.world.dimension.*;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.*;
 
-import java.util.*;
 import java.util.function.*;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World {
-    @Shadow public abstract ServerChunkManager getChunkManager();
-
-    @Shadow @Final private Set<MobEntity> loadedMobs;
-
-    //    private static final Method tickBlockEntities = EntrustParser.create(() -> {
-//        return EntrustParser.tryCreate(() -> {
-//            return World.class.getDeclaredMethod("tickBlockEntities");
-//        }, null);
-//    });
-//
-//    @Shadow
-//    @Final
-//    EntityList entityList;
-//    @Shadow
-//    @Final
-//    private MinecraftServer server;
-//    @Shadow
-//    private boolean inBlockTick;
-//    @Shadow
-//    @Final
-//    private ServerEntityManager<Entity> entityManager;
-//
-//    private ServerWorld self;
-//
-    protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, RegistryEntry<DimensionType> dimensionType, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed) {
-        super(properties, registryRef, dimensionType, profiler, isClient, debugWorld, seed);
+    //    @Shadow @Final private MinecraftServer server;
+    //    @Shadow private boolean inBlockTick;
+    //    @Shadow
+    //    @Final
+    //    private ServerEntityManager<Entity> entityManager;
+    //
+    //    @Shadow
+    //    @Final
+    //    private EntityList entityList;
+    //
+    protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, RegistryEntry<DimensionType> registryEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed) {
+        super(properties, registryRef, registryEntry, profiler, isClient, debugWorld, seed);
     }
-//
-//    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickBlockEntities()V"))
-//    public void vanillaBlockEntityTick(ServerWorld instance) {
-//        self = instance;
-//        // redirect this method for cancel vanilla tick, but vanilla still usable
-//        if (config.getConfigBoolean("vanilla_block_entity_ticker", true)) {
-//            EntrustExecution.tryTemporary(() -> tickBlockEntities.invoke(instance));
-//        }
-//    }
-//
-//    @Inject(method = "tick", at = @At("HEAD"))
-//    public void earlyTickBlockE(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-//        if (! config.getConfigBoolean("vanilla_block_entity_ticker", true)) {
-//            modmdoTickBlockEntity(self());
-//        }
-//    }
-//
-//    public synchronized void modmdoTickBlockEntity(ServerWorld instance) {
-//        if (testing) {
-//            if (blockEntitiesTasks.get(instance) == null) {
-//                blockEntitiesTasks.put(instance, new TaskOrder<>(world -> {
-//                    EntrustExecution.tryTemporary(() -> tickBlockEntities.invoke(world));
-//                    blockEntitiesTasks.done(world);
-//                }, "tile_ticker: " + DimensionUtil.getDimension(instance.getDimension())));
-//                blockEntitiesTasks.get(instance).setNoDelay(true);
-//            }
-//            blockEntitiesTasks.participate(instance, (world, task) -> task.call(world));
-//        } else {
-//            EntrustExecution.tryTemporary(() -> tickBlockEntities.invoke(instance));
-//        }
-//    }
-//
-//    public ServerWorld self() {
-//        return self;
-//    }
+    //
+    //    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickBlockEntities()V"))
+    //    public void cancelBlockE(ServerWorld instance) {
+    //        if (! testing) {
+    //            ((WorldInterface)instance).tickBlockEntities();
+    //        }
+    //    }
+    //
+    //    @Inject(method = "tick", at = @At("HEAD"))
+    //    public void earlyTickBlockE(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+    //        tickBlockE(getThis());
+    //    }
+    //
+    //    public void tickBlockE(ServerWorld instance) {
+    //        if (testing) {
+    //            if (blockEntitiesTasks.get(instance) == null) {
+    //                blockEntitiesTasks.put(instance, new TaskOrder<>(w -> {
+    //                    EntrustExecution.notNull(w, world -> {
+    //                        EntrustExecution.tryTemporary(() -> {
+    //                            ((WorldInterface) world).tickBlockEntities();
+    //                        });
+    //                    });
+    //                }, "tickBlockEntities-" + DimensionUtil.getDimension(instance.getDimension())));
+    //                blockEntitiesTasks.get(instance).setNoDelay(true);
+    //            }
+    //            TaskOrder<ServerWorld> task = blockEntitiesTasks.get(instance);
+    //
+    //            task.call(instance);
+    //        }
+    //    }
+    //
+    //    public ServerWorld getThis() {
+    //        return (ServerWorld) (WorldInterface) this;
+    //    }
 
-    @Inject(method = "updateListeners", at = @At("HEAD"), cancellable = true)
-    public void updateListeners(BlockPos pos, BlockState oldState, BlockState newState, int flags, CallbackInfo ci) {
-        this.getChunkManager().markForUpdate(pos);
-        VoxelShape voxelShape = oldState.getCollisionShape(this, pos);
-        VoxelShape voxelShape2 = newState.getCollisionShape(this, pos);
-        if (VoxelShapes.matchesAnywhere(voxelShape, voxelShape2, BooleanBiFunction.NOT_SAME)) {
-            loadedMobs.stream().forEach(mobEntity -> {
-                EntityNavigation entityNavigation = mobEntity.getNavigation();
-                if (! entityNavigation.shouldRecalculatePath(pos)) {
-                    entityNavigation.recalculatePath();
-                }
-            });
-        }
-        ci.cancel();
-    }
+    //    TODO: 2022/6/22 实体无法使用和方块实体类似的多线程方案
+    //    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/EntityList;forEach(Ljava/util/function/Consumer;)V"))
+    //    public void cancelE(EntityList instance, Consumer<Entity> action) {
+    //    }
+    //    public void tickE(EntityList instance, Consumer<Entity> action) {
+    //        if (entitiesTasks.get(instance) == null) {
+    //            entitiesTasks.put(instance, new TaskOrder<>(list -> {
+    //                EntrustExecution.notNull(list, entities -> {
+    //                    EntrustExecution.tryTemporary(() -> {
+    //                        entities.forEach(action);
+    //                    }, Throwable::printStackTrace);
+    //                });
+    //            }, "tickEntities-" + DimensionUtil.getDimension(getDimension())));
+    //            entitiesTasks.get(instance).setNoDelay(true);
+    //        }
+    //        TaskOrder<EntityList> task = entitiesTasks.get(instance);
+    //
+    //        if (testing) {
+    //            task.call(instance);
+    //        } else {
+    //            task.enforce(instance);
+    //        }
+    //    }
+    //    @Inject(method = "tick", at = @At("HEAD"))
+    //    public void earlyTickE(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+    //        tickE(entityList, (entity) -> {
+    //            if (! entity.isRemoved()) {
+    //                if (this.shouldCancelSpawn(entity)) {
+    //                    entity.discard();
+    //                } else {
+    //                    getProfiler().push("checkDespawn");
+    //                    entity.checkDespawn();
+    //                    getProfiler().pop();
+    //                    Entity entity2 = entity.getVehicle();
+    //                    if (entity2 != null) {
+    //                        if (! entity2.isRemoved() && entity2.hasPassenger(entity)) {
+    //                            return;
+    //                        }
+    //
+    //                        entity.stopRiding();
+    //                    }
+    //
+    //                    getProfiler().push("tick");
+    //                    this.tickEntity(this::tickEntity, entity);
+    //                    getProfiler().pop();
+    //                }
+    //            }
+    //        });
+    //    }
+
+    //    @Shadow
+    //    protected abstract boolean shouldCancelSpawn(Entity entity);
+    //
+    //    @Shadow
+    //    public abstract void tickEntity(Entity entity);
 }

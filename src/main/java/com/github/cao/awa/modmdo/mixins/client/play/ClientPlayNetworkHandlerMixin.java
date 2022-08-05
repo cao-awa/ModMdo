@@ -61,6 +61,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                     if (informationSign.equals(CHECKING_CHANNEL)) {
                         EntrustExecution.tryTemporary(() -> serverId.set(data.readString()));
                     }
+                    System.out.println(serverId.get());
                     TRACKER.submit("Server are requesting login data, as: " + informationSign, () -> {
                         EntrustExecution.notNull(staticConfig.get("secure_level"), level -> {
                             SECURE_KEYS.setLevel(SecureLevel.of(level));

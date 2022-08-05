@@ -59,7 +59,6 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
                 String name = EntrustParser.trying(() -> {
                     JSONObject json = new JSONObject(s.get());
                     return json.getString("name");
-
                 }, ex -> {
                     err("Cannot format variable", ex);
                     return null;

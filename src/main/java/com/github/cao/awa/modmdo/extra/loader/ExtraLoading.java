@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
-import com.github.cao.awa.modmdo.extra.modmdo.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
 import it.unimi.dsi.fastutil.objects.*;

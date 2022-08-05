@@ -18,7 +18,12 @@ public class PermanentCertificate extends Certificate {
     }
 
     public static PermanentCertificate build(JSONObject json) {
-        return EntrustParser.trying(() -> new PermanentCertificate(json.getString("name"), LoginRecorde.build(json.getJSONObject("recorder"))));
+        return EntrustParser.trying(() -> {
+            return new PermanentCertificate(json.getString("name"), LoginRecorde.build(json.getJSONObject("recorder")));
+        }, ex -> {
+            ex.printStackTrace();
+            return null;
+        });
     }
 
     public JSONObject toJSONObject() {

@@ -4,11 +4,13 @@ import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.client.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
+import com.github.cao.awa.modmdo.event.server.chat.*;
 import com.github.cao.awa.modmdo.lang.Dictionary;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
+import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -118,7 +120,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
     }
 
     public void beforeLogin() {
-        if (config.getConfigBoolean("modmdo_whitelist") && !server.isHost(player.getGameProfile())) {
+        if (config.getConfigBoolean("modmdo_whitelist")) {
             String name = EntityUtil.getName(player);
             if (loginUsers.hasUser(name) || server.getPlayerManager().getPlayer(name) != null) {
                 disc(Translatable.translatable("login.dump.rejected").text());
@@ -156,16 +158,16 @@ public abstract class ServerPlayNetworkHandlerMixin {
             }
 
             if (handleBanned(player)) {
-                Certificate ban = banned.get(name);
+                Certificate ban = banned.get(EntityUtil.getName(player));
                 if (ban instanceof TemporaryCertificate temporary) {
                     String remaining = temporary.formatRemaining();
                     player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
                     player.networkHandler.connection.disconnect(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
-                    TRACKER.info("Player " + name + " has been banned form server");
+                    TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
                 } else {
                     player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
                     player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
-                    TRACKER.info("Player " + name + " has been banned form server");
+                    TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
                 }
             }
 
@@ -180,24 +182,21 @@ public abstract class ServerPlayNetworkHandlerMixin {
                             }
                         }
 
-                        TRACKER.debug("Call: onPlayerConnect:(PlayerManager/ServerPlayNetworkHandlerMixin/Lambda Tg1) Tg1");
-
                         server.getPlayerManager().onPlayerConnect(connection, player);
+                        TRACKER.info("Accepted player: " + EntityUtil.getName(player));
 
-                        TRACKER.info("Accepted player: " + name);
-
-                        loginTimedOut.remove(name);
+                        loginTimedOut.remove(EntityUtil.getName(player));
                     } else {
-                        TRACKER.info("Expired nano: " + name);
+                        TRACKER.info("Expired nano: " + EntityUtil.getName(player));
                     }
                 }, e -> {
                     TRACKER.submit("Exception in join server", e);
                     if (! server.isHost(player.getGameProfile())) {
-                        TRACKER.debug("player " + name + " lost status synchronize");
+                        TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize");
 
                         disc(TextUtil.literal("lost status synchronize, please connect again").text());
                     } else {
-                        TRACKER.debug("player " + name + " lost status synchronize, but will not be process");
+                        TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize, but will not be process");
                     }
                 });
             }, e -> TRACKER.submit("Exception in handle status sync lost", e));
@@ -239,6 +238,13 @@ public abstract class ServerPlayNetworkHandlerMixin {
     private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
         if (SharedVariables.isActive()) {
             event.submit(new ClientSettingEvent(player, packet, server));
+        }
+    }
+
+    @Inject(method = "onGameMessage", at = @At("HEAD"))
+    public void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
+        if (SharedVariables.isActive()) {
+            event.submit(new GameChatEvent(player, packet, server));
         }
     }
 
