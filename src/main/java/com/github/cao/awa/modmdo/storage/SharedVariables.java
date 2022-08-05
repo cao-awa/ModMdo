@@ -13,7 +13,6 @@ import com.github.cao.awa.modmdo.format.console.*;
 import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.Language;
 import com.github.cao.awa.modmdo.mixins.*;
-import com.github.cao.awa.modmdo.ranking.*;
 import com.github.cao.awa.modmdo.security.key.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.type.*;
@@ -44,10 +43,10 @@ import java.util.*;
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
     public static final byte[] NONCE = "MODMDO:SERVER_NONCE_!+[RD]".getBytes();
-    public static final String VERSION_ID = "1.0.40";
-    public static final String SUFFIX = "-Debug";
+    public static final String VERSION_ID = "1.0.41";
+    public static final String SUFFIX = "-ES";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
-    public static final String RELEASE_TIME = "2022.7.8";
+    public static final String RELEASE_TIME = "UTC+8 2022.8.5";
     public static final int MODMDO_VERSION = 31;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final Object2IntOpenHashMap<String> modMdoVersionToIdMap = new Object2IntOpenHashMap<>();
@@ -73,7 +72,6 @@ public class SharedVariables {
     public static boolean enableHereCommand = true;
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
-    public static boolean cancelEntitiesTick = false;
     public static boolean timeActive = true;
     public static boolean rejectNoFallCheat = true;
     public static boolean modmdoWhitelist = false;
@@ -88,7 +86,6 @@ public class SharedVariables {
     public static EnchantLevelController enchantLevelController;
     public static boolean clearEnchantIfLevelTooHigh = false;
     public static ServerLogin serverLogin = new ServerLogin();
-    public static Object2ObjectArrayMap<String, Rank> supportedRankingObjects = new Object2ObjectArrayMap<>();
     public static TemporaryCertificate modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
     public static Certificates<PermanentCertificate> modmdoConnectionWhitelist = new Certificates<>();
     public static Certificates<PermanentCertificate> whitelist = new Certificates<>();
@@ -105,6 +102,8 @@ public class SharedVariables {
     public static ModMdoEventTracer event = new ModMdoEventTracer();
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
+
+    public static JSONObject notes = new JSONObject();
 
     public static ClazzScanner EXTRAS_AUTO = new ClazzScanner(ModMdoExtra.class);
 
@@ -125,7 +124,6 @@ public class SharedVariables {
         enableHereCommand = true;
         enableSecureEnchant = true;
         enableRejectReconnect = true;
-        cancelEntitiesTick = false;
         timeActive = true;
         rejectUsers = new Users();
         loginUsers = new Users();
@@ -171,6 +169,12 @@ public class SharedVariables {
         });
     }
 
+    public static void initNotes() {
+        notes = new JSONObject();
+
+        EntrustExecution.tryTemporary(() -> notes = config.getConfigJSONObject("notes"));
+    }
+
     public static void initBan() {
         banned.clear();
 
@@ -194,14 +198,6 @@ public class SharedVariables {
         }
         scoreboard.addObjective(id, ScoreboardCriterion.DUMMY, displayName, ScoreboardCriterion.DUMMY.getDefaultRenderType());
     }
-
-    public static boolean rankingIsStatObject(String ranking) {
-        if (supportedRankingObjects.get(ranking) == null) {
-            return false;
-        }
-        return supportedRankingObjects.get(ranking).isStat();
-    }
-
 
     public static String getServerLevelPath(MinecraftServer server) {
         return (server.isDedicated() ? "" : "saves/") + getServerLevelNamePath(server);
@@ -292,6 +288,7 @@ public class SharedVariables {
         config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
         config.set("reject_no_fall_chest", rejectNoFallCheat);
         config.set("modmdo_whitelist", modmdoWhitelist);
+        config.set("notes", notes);
 
         if (modMdoType == ModMdoType.SERVER) {
             EntrustExecution.tryTemporary(() -> {

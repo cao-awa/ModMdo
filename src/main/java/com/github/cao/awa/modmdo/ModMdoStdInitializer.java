@@ -86,6 +86,8 @@ public class ModMdoStdInitializer implements ModInitializer {
             SharedVariables.initWhiteList();
             SharedVariables.initBan();
         }
+
+        SharedVariables.initNotes();
     }
 
     @Override

@@ -98,19 +98,6 @@ public class ModMdoCommand extends SimpleCommand {
 
             SimpleCommandOperation.sendFeedbackAndInform(setTicksToDefault, formatItemDespawnTicks());
             return 2;
-        }))).then(literal("tickingEntities").executes(getTickingEntities -> {
-            SimpleCommandOperation.sendFeedbackAndInform(getTickingEntities, formatTickingEntitiesTick());
-            return 0;
-        }).then(literal("enable").executes(enableTickingEntities -> {
-            SharedVariables.cancelEntitiesTick = false;
-
-            SimpleCommandOperation.sendFeedbackAndInform(enableTickingEntities, formatTickingEntitiesTick());
-            return 1;
-        })).then(literal("disable").executes(disableTickingEntities -> {
-            SharedVariables.cancelEntitiesTick = true;
-
-            SimpleCommandOperation.sendFeedbackAndInform(disableTickingEntities, formatTickingEntitiesTick());
-            return 2;
         }))).then(literal("timeActive").executes(getTimeActive -> {
             SimpleCommandOperation.sendFeedback(getTimeActive, formatConfigReturnMessage("time_active"));
             return 0;
@@ -330,10 +317,6 @@ public class ModMdoCommand extends SimpleCommand {
 
     public Translatable formatCheckerTimeLimit() {
         return TextUtil.translatable("checker_time_limit.rule.format", config.getConfigInt("checker_time_limit"));
-    }
-
-    public Translatable formatTickingEntitiesTick() {
-        return TextUtil.translatable(SharedVariables.cancelEntitiesTick ? "ticking.entities.false.rule.format" : "ticking.entities.true.rule.format");
     }
 
     public Translatable formatItemDespawnTicks() {

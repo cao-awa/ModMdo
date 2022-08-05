@@ -60,6 +60,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             new TestCommand().register();
             new TemporaryCommand().register();
             new ModMdoCommand().register();
+            new NoteCommand().register();
         }, ex -> TRACKER.submit("Failed load ModMdo commands"));
     }
 

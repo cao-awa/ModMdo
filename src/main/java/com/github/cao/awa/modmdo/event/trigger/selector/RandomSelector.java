@@ -1,8 +1,9 @@
 package com.github.cao.awa.modmdo.event.trigger.selector;
 
 import com.github.cao.awa.modmdo.annotations.*;
-import com.github.cao.awa.modmdo.event.trigger.selector.algorithm.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.selector.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.selector.algorithm.*;
 import org.json.*;
 
 import java.util.function.*;

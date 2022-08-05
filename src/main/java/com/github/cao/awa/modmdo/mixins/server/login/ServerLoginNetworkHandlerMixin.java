@@ -111,7 +111,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     });
 
                     if (! isDoneOnlineMode.get()) {
-                        TRACKER.info("Player " + name + " are not done online mode, will check again using modmdo");
+                        TRACKER.info("Player " + name + " are not done in online mode, will check again using modmdo");
                         TRACKER.submit("Server send login packet: modmdo login", () -> {
                             if (modmdoWhitelist) {
                                 handler.sendPacket(new CustomPayloadS2CPacket(SERVER_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeIdentifier(CHECKING_CHANNEL).writeString(staticConfig.get("identifier"))));
@@ -137,7 +137,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             }
                         });
                     } else {
-                        TRACKER.info("Player " + name + " are done online mode, will not check again using modmdo");
+                        TRACKER.info("Player " + name + " are done in online mode, will not check again using modmdo");
                     }
                 }
             } else {

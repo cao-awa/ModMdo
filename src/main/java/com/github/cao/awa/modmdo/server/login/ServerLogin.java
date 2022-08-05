@@ -39,6 +39,9 @@ public class ServerLogin {
                 SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setModmdoName(modmdoName));
             });
         }
+        if (loginUsers.hasUser(uuid)) {
+            loginUsers.getUser(uuid).setModmdoName(modmdoName);
+        }
     }
 
     public void loginUsingId(String name, String uuid, String identifier, int version, String unidirectionalVerify, String verifyKey) {
