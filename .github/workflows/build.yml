@@ -38,6 +38,6 @@ jobs:
         # Upload all artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Artifacts-%{runneri.os-matrix.java}
+          name: Artifacts-${{runneri.os}}-${{matrix.java}}
           path: build/libs/
 
