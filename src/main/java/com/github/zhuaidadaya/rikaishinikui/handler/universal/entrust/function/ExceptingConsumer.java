@@ -1,5 +1,6 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function;
 
+import java.io.*;
 import java.util.*;
 
 /**
@@ -17,7 +18,7 @@ import java.util.*;
  * @since 1.8
  */
 @FunctionalInterface
-public interface ExceptingConsumer<T> {
+public interface ExceptingConsumer<T> extends Serializable {
 
     /**
      * Performs this operation on the given argument.
