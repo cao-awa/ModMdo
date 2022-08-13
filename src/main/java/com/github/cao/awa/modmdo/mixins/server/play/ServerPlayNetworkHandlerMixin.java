@@ -194,8 +194,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
                             }
                         }
 
-                        server.getPlayerManager().onPlayerConnect(connection, player);
                         TRACKER.info("Accepted player: " + EntityUtil.getName(player));
+                        server.getPlayerManager().onPlayerConnect(connection, player);
 
                         loginTimedOut.remove(EntityUtil.getName(player));
                     } else {
