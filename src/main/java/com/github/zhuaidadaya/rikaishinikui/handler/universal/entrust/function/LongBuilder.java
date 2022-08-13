@@ -1,5 +1,7 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function;
 
-public interface LongBuilder<T> {
+import java.io.*;
+
+public interface LongBuilder<T> extends Serializable {
     Long build(T target);
 }

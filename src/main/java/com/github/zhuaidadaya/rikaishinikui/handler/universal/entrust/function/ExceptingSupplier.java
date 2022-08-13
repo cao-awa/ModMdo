@@ -1,5 +1,7 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function;
 
+import java.io.*;
+
 /**
  * Represents a supplier of results.
  *
@@ -14,7 +16,7 @@ package com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function;
  * @param <T> the type of results supplied by this supplier
  */
 @FunctionalInterface
-public interface ExceptingSupplier<T> {
+public interface ExceptingSupplier<T> extends Serializable {
 
     /**
      * Gets a result.

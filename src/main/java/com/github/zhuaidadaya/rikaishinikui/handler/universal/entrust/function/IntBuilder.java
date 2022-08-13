@@ -1,5 +1,7 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function;
 
-public interface IntBuilder<T> {
+import java.io.*;
+
+public interface IntBuilder<T> extends Serializable {
     Integer build(T target);
 }
