@@ -41,11 +41,12 @@ public abstract class ClientLoginNetworkHandlerMixin {
     @Overwrite
     public void onHello(LoginHelloS2CPacket packet) {
         isModMdo = EntrustParser.tryCreate(() -> {
-            byte[] nonce = new byte[26];
+            byte[] nonce = new byte[22];
             Do.letForUp(22, 0, integer -> {
-                nonce[integer] = NONCE[integer];
+                byte[] packedNonce = packet.getNonce();
+                nonce[integer] = packedNonce[integer];
             });
-            return Arrays.equals(nonce, packet.getNonce());
+            return Arrays.equals(nonce, MODMDO_NONCE_HEAD);
         }, false);
 
         Cipher cipher;

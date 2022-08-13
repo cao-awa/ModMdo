@@ -49,7 +49,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     private void init(MinecraftServer server, ClientConnection connection, CallbackInfo ci) {
         int radix = 4;
         for (byte b : this.nonce) {
-            NONCE[NONCE.length - radix--] = b;
+            MODMDO_NONCE[MODMDO_NONCE.length - radix--] = b;
         }
     }
 
@@ -175,11 +175,11 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
     @Redirect(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;)V"))
     public void helloModMdo(ClientConnection instance, Packet<?> packet) {
-        instance.send(new LoginHelloS2CPacket("", this.server.getKeyPair().getPublic().getEncoded(), SharedVariables.NONCE));
+        instance.send(new LoginHelloS2CPacket("", this.server.getKeyPair().getPublic().getEncoded(), SharedVariables.MODMDO_NONCE));
     }
 
     @Redirect(method = "onKey", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerLoginNetworkHandler;nonce:[B"))
     public byte[] onKey(ServerLoginNetworkHandler instance) {
-        return SharedVariables.NONCE;
+        return SharedVariables.MODMDO_NONCE;
     }
 }
