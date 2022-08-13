@@ -1,7 +1,6 @@
 package com.github.cao.awa.modmdo.mixins.client.play;
 
 import com.github.cao.awa.modmdo.security.level.*;
-import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.encryption.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -49,64 +48,49 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      */
     @Inject(method = "onCustomPayload", at = @At("HEAD"))
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-        if (SharedVariables.isActive()) {
-            PacketByteBuf data = packet.getData();
+        PacketByteBuf data = packet.getData();
 
-            EntrustExecution.tryTemporary(() -> {
-                Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
+        EntrustExecution.tryTemporary(() -> {
+            Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
 
-                if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
-                    SECURE_KEYS.load(staticConfig.getConfigJSONObject("private_key"));
-                    Receptacle<String> serverId = new Receptacle<>(null);
-                    if (informationSign.equals(CHECKING_CHANNEL)) {
-                        EntrustExecution.tryTemporary(() -> serverId.set(data.readString()));
-                    }
-                    TRACKER.submit("Server are requesting login data, as: " + informationSign, () -> {
-                        EntrustExecution.notNull(staticConfig.get("secure_level"), level -> {
-                            SECURE_KEYS.setLevel(SecureLevel.of(level));
-                            TRACKER.submit("Changed config secure_level as " + level);
-                        });
-                        String address = EntrustParser.tryCreate(() -> {
-                            String addr = connection.getAddress().toString();
-                            return addr.substring(addr.indexOf("/") + 1);
-                        }, connection.getAddress().toString());
-                        boolean hasServerId = serverId.get() != null;
-                        String loginId = hasServerId ? SECURE_KEYS.use(serverId.get(), address) : SECURE_KEYS.use(address, address);
-                        if (serverId.get() != null && loginId != null) {
-                            if (SECURE_KEYS.has(address) && ! SECURE_KEYS.has(serverId.get())) {
-                                EntrustExecution.notNull(SECURE_KEYS.get(address), k -> k.setServerId(serverId.get()));
-                                SECURE_KEYS.set(SECURE_KEYS.get(address).getServerId(), SECURE_KEYS.get(address));
-                                TRACKER.submit("Changed server address " + address + " to id: " + serverId.get());
-                            }
-                            SECURE_KEYS.removeAddress(address);
-                            SECURE_KEYS.save();
-                        }
-                        String verifyKey = hasServerId ? SECURE_KEYS.get(serverId.get()).getVerifyKey() : null;
-                        if (verifyKey == null) {
-                            connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer()))
-                                            .writeString(LOGIN_CHANNEL.toString())
-                                            .writeString(profile.getName())
-                                            .writeString(PlayerUtil.getUUID(profile).toString())
-                                            .writeString(loginId)
-                                            .writeString(String.valueOf(MODMDO_VERSION))
-                                            .writeString(MODMDO_VERSION_NAME)));
-                        } else {
-                            String sendingVerify;
-                            JSONObject json = new JSONObject();
-                            json.put("identifier", loginId);
-                            sendingVerify = EntrustParser.trying(() -> AES.aesEncryptToString(json.toString().getBytes(), verifyKey.getBytes()), ex -> "");
-                            connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer()))
-                                            .writeString(LOGIN_CHANNEL.toString())
-                                            .writeString(profile.getName())
-                                            .writeString(PlayerUtil.getUUID(profile).toString())
-                                            .writeString(loginId).writeString(String.valueOf(MODMDO_VERSION))
-                                            .writeString(MODMDO_VERSION_NAME)
-                                            .writeString(sendingVerify)
-                                            .writeString(verifyKey)));
-                        }
-                    });
+            if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
+                SECURE_KEYS.load(staticConfig.getConfigJSONObject("private_key"));
+                Receptacle<String> serverId = new Receptacle<>(null);
+                if (informationSign.equals(CHECKING_CHANNEL)) {
+                    EntrustExecution.tryTemporary(() -> serverId.set(data.readString()));
                 }
-            }, ex -> TRACKER.err("Error in connecting ModMdo server", ex));
-        }
+                TRACKER.submit("Server are requesting login data, as: " + informationSign, () -> {
+                    EntrustExecution.notNull(staticConfig.get("secure_level"), level -> {
+                        SECURE_KEYS.setLevel(SecureLevel.of(level));
+                        TRACKER.submit("Changed config secure_level as " + level);
+                    });
+                    String address = EntrustParser.tryCreate(() -> {
+                        String addr = connection.getAddress().toString();
+                        return addr.substring(addr.indexOf("/") + 1);
+                    }, connection.getAddress().toString());
+                    boolean hasServerId = serverId.get() != null;
+                    String loginId = hasServerId ? SECURE_KEYS.use(serverId.get(), address) : SECURE_KEYS.use(address, address);
+                    if (serverId.get() != null && loginId != null) {
+                        if (SECURE_KEYS.has(address) && ! SECURE_KEYS.has(serverId.get())) {
+                            EntrustExecution.notNull(SECURE_KEYS.get(address), k -> k.setServerId(serverId.get()));
+                            SECURE_KEYS.set(SECURE_KEYS.get(address).getServerId(), SECURE_KEYS.get(address));
+                            TRACKER.submit("Changed server address " + address + " to id: " + serverId.get());
+                        }
+                        SECURE_KEYS.removeAddress(address);
+                        SECURE_KEYS.save();
+                    }
+                    String verifyKey = hasServerId ? SECURE_KEYS.get(serverId.get()).getVerifyKey() : null;
+                    if (verifyKey == null) {
+                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getUUID(profile).toString()).writeString(loginId).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME)));
+                    } else {
+                        String sendingVerify;
+                        JSONObject json = new JSONObject();
+                        json.put("identifier", loginId);
+                        sendingVerify = EntrustParser.trying(() -> AES.aesEncryptToString(json.toString().getBytes(), verifyKey.getBytes()), ex -> "");
+                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer())).writeString(LOGIN_CHANNEL.toString()).writeString(profile.getName()).writeString(PlayerUtil.getUUID(profile).toString()).writeString(loginId).writeString(String.valueOf(MODMDO_VERSION)).writeString(MODMDO_VERSION_NAME).writeString(sendingVerify).writeString(verifyKey)));
+                    }
+                });
+            }
+        }, ex -> TRACKER.err("Error in connecting ModMdo server", ex));
     }
 }

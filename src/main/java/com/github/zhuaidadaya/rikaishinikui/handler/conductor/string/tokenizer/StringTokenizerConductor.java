@@ -1,6 +1,6 @@
-package com.github.zhuaidadaya.rikaishinikui.handler.conductor;
+package com.github.zhuaidadaya.rikaishinikui.handler.conductor.string.tokenizer;
 
-import com.github.zhuaidadaya.rikaishinikui.handler.conductor.iterator.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.conductor.string.tokenizer.iterator.*;
 import org.jetbrains.annotations.*;
 
 import java.util.*;

@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins.entity.list;
+package com.github.cao.awa.modmdo.mixins.entity;
 
 import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.entity.*;

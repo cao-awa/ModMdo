@@ -20,6 +20,18 @@ public class User extends Storable {
     private String modmdoName;
     private Language language = SharedVariables.getLanguage();
     private Text message = null;
+
+    public boolean isLogged() {
+        return isLogged;
+    }
+
+    public User setLogged(boolean logged) {
+        isLogged = logged;
+        return this;
+    }
+
+    private boolean isLogged = true;
+
     public User() {
     }
     public User(String name) {

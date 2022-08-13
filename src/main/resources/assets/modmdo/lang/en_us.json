@@ -145,5 +145,16 @@
     "command.note.information": "§dThe Information of %s is: \n§a%s",
     "command.note.not.found": "Note %s not found",
     "command.note.cannot.be.collect.because.already.is.arbitrary": "The %s cannot be a collector, because it already is arbitrary",
-    "command.note.deleted": "Deleted note: %s"
+    "command.note.deleted": "Deleted note: %s",
+
+    "modmdo.archive.building": "The archive is building, you can continue all works, will not affect to archive",
+    "modmdo.archive.build.done": "Archive build done",
+    "modmdo.archive.build.canceled": "Archive build canceled",
+    "modmdo.archive.building.cancel.save": "Save has canceled by ModMdo, the archive is building!",
+    "modmdo.archive.information": "Information of archive %s: \n  - Algorithm: %s\n  - Size(MB): %s \n  - Files: %s",
+    "modmdo.archive.not_found": "Archive %s not found",
+    "modmdo.archive.restoring": "The archive is restoring, please wait for done",
+
+    "modmdo.archive.notify.create.database": "Creating database",
+    "modmdo.archive.notify.processing.file": "Processing file: %s"
 }

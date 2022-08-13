@@ -109,4 +109,8 @@ public class EntrustParser {
         }
         return threads;
     }
+
+    public static <T> T ifNull(T target, T other) {
+        return target == null ? other : target;
+    }
 }
