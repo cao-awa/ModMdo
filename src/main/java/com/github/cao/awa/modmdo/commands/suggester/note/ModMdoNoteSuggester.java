@@ -32,8 +32,8 @@ public class ModMdoNoteSuggester {
         ObjectArrayList<String> keys = new ObjectArrayList<>();
         notes.keySet().forEach(key -> {
             Object value = notes.get(key);
-            if (value instanceof JSONObject json) {
-                json.keySet().forEach(key2 -> keys.add("\"" + key + "/" + key2 + "\""));
+            if (value instanceof JSONObject) {
+                keys.add("\"" + key + "\"");
             }
         });
         return CommandSource.suggestMatching(keys, builder);

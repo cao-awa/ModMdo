@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins.entity.item;
+package com.github.cao.awa.modmdo.mixins.item;
 
 import com.github.cao.awa.modmdo.storage.*;
 import net.minecraft.entity.*;

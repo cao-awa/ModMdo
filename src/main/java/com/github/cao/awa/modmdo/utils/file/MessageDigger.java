@@ -1,30 +1,38 @@
 package com.github.cao.awa.modmdo.utils.file;
 
 import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
 import java.security.*;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class MessageDigger {
-    public static String fileSha(File file, Sha sha3) {
-        StringBuilder builder = new StringBuilder();
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            MessageDigest messageDigest = MessageDigest.getInstance(sha3.instanceName());
-            MappedByteBuffer mappedByteBuffer;
-            long bufferSize = 1024 * 128;
-            long fileLength = file.length();
-            long lastBuffer = fileLength % bufferSize;
-            long bufferCount = fileLength / bufferSize;
-            for (int b = 0; b < bufferCount; b++) {
-                mappedByteBuffer = fileInputStream.getChannel().map(FileChannel.MapMode.READ_ONLY, b * bufferSize, bufferSize);
-                messageDigest.update(mappedByteBuffer);
+    public static String fileSha(File file, Sha sha) {
+        try {
+            int buff = 16384;
+
+            RandomAccessFile accessFile = new RandomAccessFile(file, "r");
+
+            MessageDigest messageDigest = MessageDigest.getInstance(sha.instanceName());
+
+            byte[] buffer = new byte[buff];
+
+            long read = 0;
+
+            long offset = accessFile.length();
+            int unitsize;
+            while (read < offset) {
+                unitsize = (int) (((offset - read) < buff) ? (offset - read) : buff);
+                accessFile.read(buffer, 0, unitsize);
+
+                messageDigest.update(buffer, 0, unitsize);
+
+                read += unitsize;
             }
-            if (lastBuffer != 0) {
-                mappedByteBuffer = fileInputStream.getChannel().map(FileChannel.MapMode.READ_ONLY, bufferCount * bufferSize, lastBuffer);
-                messageDigest.update(mappedByteBuffer);
-            }
+
+            accessFile.close();
+
+            StringBuilder builder = new StringBuilder();
+
             String hexString;
             for (byte b : messageDigest.digest()) {
                 hexString = Integer.toHexString(b & 255);
@@ -33,10 +41,11 @@ public class MessageDigger {
                 }
                 builder.append(hexString);
             }
+
             return builder.toString();
         } catch (Exception e) {
             TRACKER.submit("Failed digest", e);
-            return null;
+            return "null";
         }
     }
 
