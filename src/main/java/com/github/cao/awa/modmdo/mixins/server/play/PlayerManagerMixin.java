@@ -39,7 +39,7 @@ public abstract class PlayerManagerMixin {
      *         callback
      * @author 草二号机
      */
-    @Inject(method = "createPlayer", at = @At("HEAD"))
+    @Inject(method = "createPlayer", at = @At("HEAD"), cancellable = true)
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         if (SharedVariables.enableRejectReconnect) {
             UUID uuid = PlayerUtil.getUUID(profile);
@@ -56,10 +56,14 @@ public abstract class PlayerManagerMixin {
         }
     }
 
-    @Inject(method = "onPlayerConnect", at = @At("RETURN"))
+    @Inject(method = "onPlayerConnect", at = @At("RETURN"), cancellable = true)
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
             SharedVariables.event.submit(new JoinServerEvent(player, connection, player.getPos(), SharedVariables.server));
+        }
+
+        if (!connection.isOpen()) {
+            ci.cancel();
         }
     }
 
