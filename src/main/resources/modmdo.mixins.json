@@ -5,8 +5,6 @@
     "compatibilityLevel": "JAVA_16",
     "mixins": [
         "EnchantmentHelperMixin",
-        "item.ItemStackMixin",
-        "item.ItemEntityMixin",
         "MinecraftServerInterface",
         "block.BlockMixin",
         "block.entity.LootableContainerBlockEntityMixin",
@@ -25,6 +23,9 @@
         "entity.player.ServerPlayerEntityMixin",
         "explosion.ExplosionMixin",
         "hopper.screen.HopperScreenHandlerMixin",
+        "item.ItemEntityMixin",
+        "item.ItemStackMixin",
+        "nbt.NbtTagSizeTrackerMixin",
         "oshi.FileUtilMixin",
         "server.MinecraftServerMixin",
         "server.ServerChunkManagerInterface",
