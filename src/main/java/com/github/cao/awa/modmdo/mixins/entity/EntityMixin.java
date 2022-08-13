@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.mixins.entity;
 
-import com.github.cao.awa.modmdo.storage.*;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.util.math.*;
@@ -13,19 +12,19 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow public World world;
-
-    @Shadow public abstract BlockPos getBlockPos();
-
-    @Shadow public float fallDistance;
+    @Shadow
+    public World world;
+    @Shadow
+    public float fallDistance;
 
     @Inject(method = "fall", at = @At("HEAD"), cancellable = true)
     private void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition, CallbackInfo ci) {
-        if (SharedVariables.isActive()) {
-            if (rejectNoFallCheat && world.getBlockState(getBlockPos().down(1)).toString().equals("Block{minecraft:air}")) {
-                this.fallDistance = (float) ((double) this.fallDistance - heightDifference);
-                ci.cancel();
-            }
+        if (rejectNoFallCheat && world.getBlockState(getBlockPos().down(1)).toString().equals("Block{minecraft:air}")) {
+            this.fallDistance = (float) ((double) this.fallDistance - heightDifference);
+            ci.cancel();
         }
     }
+
+    @Shadow
+    public abstract BlockPos getBlockPos();
 }

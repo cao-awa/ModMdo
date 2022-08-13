@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.rikaishinikui.handler.conductor.iterator;
+package com.github.zhuaidadaya.rikaishinikui.handler.conductor.string.tokenizer.iterator;
 
 import java.util.*;
 

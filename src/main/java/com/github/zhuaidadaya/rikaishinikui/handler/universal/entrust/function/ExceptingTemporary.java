@@ -1,5 +1,7 @@
 package com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function;
 
-public interface ExceptingTemporary {
+import java.io.*;
+
+public interface ExceptingTemporary extends Serializable {
     void apply() throws Exception;
 }

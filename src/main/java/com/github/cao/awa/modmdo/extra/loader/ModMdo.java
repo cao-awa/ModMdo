@@ -1,5 +1,7 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
+import com.esotericsoftware.kryo.*;
+import com.github.cao.awa.modmdo.backup.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
@@ -13,6 +15,7 @@ import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.file.reads.*;
 import com.github.cao.awa.modmdo.utils.text.*;
+import com.github.cao.awa.shilohrien.databse.increment.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.packet.s2c.play.*;
@@ -26,16 +29,20 @@ import static com.github.cao.awa.modmdo.ModMdoStdInitializer.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdo extends ModMdoExtra<ModMdo> {
+    public static final Kryo kryo = new Kryo();
     private MinecraftServer server;
 
     public void init() {
         String path = getServerLevelPath(getServer()) + "modmdo/configs";
         File file = new File(path + "/compress.txt");
-        if (!file.isFile()) {
+        if (! file.isFile()) {
             EntrustExecution.tryTemporary(file::createNewFile);
         }
         boolean compress = EntrustParser.trying(() -> Boolean.parseBoolean(FileReads.strictRead(new BufferedInputStream(new FileInputStream(path + "/compress.txt")))), () -> false);
         config = new DiskObjectConfigUtil(entrust, path, "modmdo", compress);
+
+        whitelist_test = IncrementDatabase.load("whitelist", path + "/whitelist.db", true);
+        backups = IncrementDatabase.load("backup", path + "backups.db", true);
 
         allDefault();
         defaultConfig();
@@ -61,6 +68,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             new TemporaryCommand().register();
             new ModMdoCommand().register();
             new NoteCommand().register();
+            //            new ArchiveCommand().register();
         }, ex -> TRACKER.submit("Failed load ModMdo commands"));
     }
 
@@ -102,9 +110,9 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         resource.set(Language.EN_US.getName(), "assets/modmdo/lang/en_us.json");
 
         EntrustExecution.tryTemporary(() -> {
-            new File(getServerLevelPath(getServer())  + "/modmdo/resources/lang/").mkdirs();
+            new File(getServerLevelPath(getServer()) + "/modmdo/resources/lang/").mkdirs();
 
-            EntrustExecution.tryFor(EntrustParser.getNotNull(new File(getServerLevelPath(getServer())  + "/modmdo/resources/lang/").listFiles(), new File[0]), file -> {
+            EntrustExecution.tryFor(EntrustParser.getNotNull(new File(getServerLevelPath(getServer()) + "/modmdo/resources/lang/").listFiles(), new File[0]), file -> {
                 if (file.getName().startsWith("dictionary_")) {
                     EntrustExecution.tryTemporary(() -> {
                         resource.set(file.getName().substring(11, file.getName().indexOf(".")), file.getAbsolutePath());
@@ -129,17 +137,18 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                 event.getPlayer().sendMessage(minecraftTextFormat.format(new Dictionary(user.getLanguage().getName()), TextUtil.translatable(user.getMessage())).text(), false);
                 user.setMessage(null);
             }
-        }, this,"SettingClient");
+        }, this, "SettingClient");
 
         event.gameTickStart.register(event -> {
             PlayerManager players = server.getPlayerManager();
 
             EntrustExecution.tryTemporary(() -> {
-                for (ServerPlayerEntity player : players.getPlayerList()) {
-                    if (modmdoWhitelist) {
-                        if (!hasWhitelist(player)) {
+                if (modmdoWhitelist) {
+                    for (ServerPlayerEntity player : players.getPlayerList()) {
+                        if (notWhitelist(player) || ! loginUsers.getUser(player).isLogged()) {
                             player.networkHandler.connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text()));
                             player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
+
                         }
                         if (hasBan(player)) {
                             Certificate ban = banned.get(EntityUtil.getName(player));
@@ -154,9 +163,16 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                         }
                     }
                 }
+
+                if (Archiver.restoring) {
+                    for (ServerPlayerEntity player : players.getPlayerList()) {
+                        player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.archive.restoring").text()));
+                    }
+                }
             });
         }, this, "HandlePlayers");
-    }
 
+        kryo.register(String.class);
+    }
 }
 

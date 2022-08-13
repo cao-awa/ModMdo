@@ -145,5 +145,16 @@
     "command.note.information": "§d备注 %s 的信息为: \n§a%s",
     "command.note.not.found": "未找到备注 %s",
     "command.note.cannot.be.collect.because.already.is.arbitrary": "%s 无法作为整理器, 因为它已经是一个随意的备注了",
-    "command.note.deleted": "已删除备注: %s"
+    "command.note.deleted": "已删除备注: %s",
+
+    "modmdo.archive.building": "存档正在构建中, 你可以继续所有工作, 这不会影响存档",
+    "modmdo.archive.build.done": "存档构建完成",
+    "modmdo.archive.build.canceled": "存档构建已取消",
+    "modmdo.archive.building.cancel.save": "保存已被 ModMdo 取消, 存档正在构建中!",
+    "modmdo.archive.information": "存档 %s 的信息:\n  - 算法: %s \n  - 大小(MB): %s \n  - 文件数量: %s",
+    "modmdo.archive.not_found": "未找到存档 %s",
+    "modmdo.archive.restoring": "存档正在恢复中, 请等待完成",
+
+    "modmdo.archive.notify.create.database": "创建数据库中",
+    "modmdo.archive.notify.processing.file": "正在处理文件: %s"
 }

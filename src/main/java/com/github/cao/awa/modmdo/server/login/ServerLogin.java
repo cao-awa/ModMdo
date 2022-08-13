@@ -36,7 +36,11 @@ public class ServerLogin {
         } else {
             EntrustExecution.tryTemporary(() -> {
                 TRACKER.info("Login player: " + name);
-                SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setModmdoName(modmdoName));
+                try {
+                    SharedVariables.loginUsers.getUser(uuid).setIdentifier(identifier).setVersion(version).setLogged(false);
+                } catch (Exception e) {
+                    SharedVariables.loginUsers.put(new User(name, uuid, - 1, identifier, version).setVersion(version).setLogged(false));
+                }
             });
         }
         if (loginUsers.hasUser(uuid)) {

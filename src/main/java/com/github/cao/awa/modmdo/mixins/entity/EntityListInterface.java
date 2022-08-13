@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins.entity.list;
+package com.github.cao.awa.modmdo.mixins.entity;
 
 import net.minecraft.world.*;
 import org.spongepowered.asm.mixin.*;

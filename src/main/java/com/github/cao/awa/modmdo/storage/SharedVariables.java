@@ -19,6 +19,7 @@ import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
+import com.github.cao.awa.shilohrien.databse.increment.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
@@ -42,7 +43,8 @@ import java.util.*;
 
 public class SharedVariables {
     public static final Logger LOGGER = LogManager.getLogger("ModMdo");
-    public static final byte[] NONCE = "MODMDO:SERVER_NONCE_!+[RD]".getBytes();
+    public static final byte[] MODMDO_NONCE = "MODMDO:SERVER_NONCE_!+[RD]".getBytes();
+    public static final byte[] MODMDO_NONCE_HEAD = "MODMDO:SERVER_NONCE_!+".getBytes();
     public static final String VERSION_ID = "1.0.41";
     public static final String SUFFIX = "-ES";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
@@ -91,6 +93,7 @@ public class SharedVariables {
     public static Certificates<PermanentCertificate> whitelist = new Certificates<>();
     public static Certificates<TemporaryCertificate> temporaryStation = new Certificates<>();
     public static Certificates<TemporaryCertificate> temporaryInvite = new Certificates<>();
+    public static IncrementDatabase<UUID> whitelist_test;
     public static Certificates<Certificate> banned = new Certificates<>();
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
@@ -105,7 +108,9 @@ public class SharedVariables {
 
     public static JSONObject notes = new JSONObject();
 
-    public static ClazzScanner EXTRAS_AUTO = new ClazzScanner(ModMdoExtra.class);
+    public static ClazzScanner EXTRA_AUTO = new ClazzScanner(ModMdoExtra.class);
+
+    public static IncrementDatabase<String> backups;
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
@@ -204,7 +209,11 @@ public class SharedVariables {
     }
 
     public static String getServerLevelNamePath(MinecraftServer server) {
-        return ((MinecraftServerInterface) server).getSession().getDirectoryName() + "/";
+        return getServerLevelName(server) + "/";
+    }
+
+    public static String getServerLevelName(MinecraftServer server) {
+        return ((MinecraftServerInterface) server).getSession().getDirectoryName();
     }
 
     public static String getApply(CommandContext<ServerCommandSource> source) {
@@ -346,6 +355,10 @@ public class SharedVariables {
 
     public static boolean isActive() {
         return EntrustParser.trying(() -> extras.isActive(EXTRA_ID), () -> false);
+    }
+
+    public static boolean notWhitelist(ServerPlayerEntity player) {
+        return ! hasWhitelist(player);
     }
 
     public static boolean hasWhitelist(ServerPlayerEntity player) {

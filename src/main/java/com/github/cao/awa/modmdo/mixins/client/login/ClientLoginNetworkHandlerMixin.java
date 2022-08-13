@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.mixins.client.login;
 
 import com.github.cao.awa.modmdo.develop.text.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.action.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
@@ -39,7 +40,15 @@ public abstract class ClientLoginNetworkHandlerMixin {
      */
     @Overwrite
     public void onHello(LoginHelloS2CPacket packet) {
-        isModMdo = EntrustParser.tryCreate(() -> Arrays.equals(NONCE, packet.getNonce()), false);
+        isModMdo = EntrustParser.tryCreate(() -> {
+            byte[] nonce = new byte[22];
+            Do.letForUp(22, 0, integer -> {
+                byte[] packedNonce = packet.getNonce();
+                nonce[integer] = packedNonce[integer];
+            });
+            return Arrays.equals(nonce, MODMDO_NONCE_HEAD);
+        }, false);
+
         Cipher cipher;
         Cipher cipher2;
         String string;
