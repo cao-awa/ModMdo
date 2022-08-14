@@ -26,6 +26,7 @@
         "item.ItemEntityMixin",
         "item.ItemStackMixin",
         "nbt.NbtTagSizeTrackerMixin",
+        "network.SizePrependerMixin",
         "oshi.FileUtilMixin",
         "server.MinecraftServerMixin",
         "server.ServerChunkManagerInterface",
