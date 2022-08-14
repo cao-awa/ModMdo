@@ -112,6 +112,8 @@ public class SharedVariables {
 
     public static IncrementDatabase<String> backups;
 
+    public static FutureTaskOrder futureTask = new FutureTaskOrder();
+
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
         fractionDigits0.setMinimumFractionDigits(0);
