@@ -143,8 +143,16 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             PlayerManager players = server.getPlayerManager();
 
             EntrustExecution.tryTemporary(() -> {
-                if (modmdoWhitelist) {
-                    for (ServerPlayerEntity player : players.getPlayerList()) {
+                for (ServerPlayerEntity player : players.getPlayerList()) {
+                    if (!player.networkHandler.connection.isOpen()) {
+                        // try remove
+                        server.getPlayerManager().remove(player);
+
+                        // force remove
+                        server.getPlayerManager().getPlayerList().remove(player);
+                    }
+
+                    if (modmdoWhitelist) {
                         if (notWhitelist(player) || ! loginUsers.getUser(player).isLogged()) {
                             player.networkHandler.connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text()));
                             player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
@@ -162,13 +170,12 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                             }
                         }
                     }
-                }
 
-                if (Archiver.restoring) {
-                    for (ServerPlayerEntity player : players.getPlayerList()) {
+                    if (Archiver.restoring) {
                         player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.archive.restoring").text()));
                     }
                 }
+
             });
         }, this, "HandlePlayers");
 
