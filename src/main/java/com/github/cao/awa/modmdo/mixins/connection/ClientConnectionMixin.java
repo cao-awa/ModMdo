@@ -48,6 +48,8 @@ public abstract class ClientConnectionMixin {
     @Shadow
     public abstract void disableAutoRead();
 
-    @Shadow
-    public abstract void send(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> callback);
+    @Inject(method = "send(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", at = @At("HEAD"))
+    public void send(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> callback, CallbackInfo ci) {
+        TRACKER.submit("Send packet: " + packet.getClass());
+    }
 }

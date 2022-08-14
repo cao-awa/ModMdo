@@ -79,4 +79,10 @@ public abstract class PlayerManagerMixin {
 
     @Shadow
     protected abstract void savePlayerData(ServerPlayerEntity player);
+
+    @Redirect(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V"))
+    public void sendPacket(ServerPlayNetworkHandler instance, Packet<?> packet) {
+        System.out.println("Send Packet: " + packet.getClass());
+        instance.sendPacket(packet);
+    }
 }
