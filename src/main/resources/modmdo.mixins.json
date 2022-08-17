@@ -4,6 +4,13 @@
     "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
+    ],
+    "client": [
+        "client.ServerInfoMixin",
+        "client.login.ClientLoginNetworkHandlerMixin",
+        "client.play.ClientPlayNetworkHandlerMixin"
+    ],
+    "server": [
         "EnchantmentHelperMixin",
         "MinecraftServerInterface",
         "block.BlockMixin",
@@ -45,13 +52,6 @@
         "tracker.DamageTrackerMixin",
         "world.WorldInterface",
         "world.WorldMixin"
-    ],
-    "client": [
-        "client.ServerInfoMixin",
-        "client.login.ClientLoginNetworkHandlerMixin",
-        "client.play.ClientPlayNetworkHandlerMixin"
-    ],
-    "server": [
     ],
     "injectors": {
         "defaultRequire": 1
