@@ -39,7 +39,7 @@ public abstract class PlayerManagerMixin {
      *         callback
      * @author 草二号机
      */
-    @Inject(method = "createPlayer", at = @At("HEAD"))
+    @Inject(method = "createPlayer", at = @At("HEAD"), cancellable = true)
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         if (SharedVariables.enableRejectReconnect) {
             UUID uuid = PlayerUtil.getUUID(profile);
@@ -56,10 +56,14 @@ public abstract class PlayerManagerMixin {
         }
     }
 
-    @Inject(method = "onPlayerConnect", at = @At("RETURN"))
+    @Inject(method = "onPlayerConnect", at = @At("RETURN"), cancellable = true)
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
             SharedVariables.event.submit(new JoinServerEvent(player, connection, player.getPos(), SharedVariables.server));
+        }
+
+        if (!connection.isOpen()) {
+            ci.cancel();
         }
     }
 
@@ -75,4 +79,10 @@ public abstract class PlayerManagerMixin {
 
     @Shadow
     protected abstract void savePlayerData(ServerPlayerEntity player);
+
+    @Redirect(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V"))
+    public void sendPacket(ServerPlayNetworkHandler instance, Packet<?> packet) {
+        System.out.println("Send Packet: " + packet.getClass());
+        instance.sendPacket(packet);
+    }
 }

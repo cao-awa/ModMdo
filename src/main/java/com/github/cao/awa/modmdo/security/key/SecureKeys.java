@@ -36,9 +36,21 @@ public class SecureKeys extends Storable {
 
     public void keep(String target, String address) {
         if (level == SecureLevel.UNEQUAL_KEY) {
-            set(target, has(target) ? SECURE_KEYS.get(target) : new SecureKey(RandomIdentifier.randomIdentifier(32, true), RandomIdentifier.randomIdentifier(32, true), address));
+            set(target,
+                    has(target) ?
+                            SECURE_KEYS.get(target) :
+                            new SecureKey(
+                                    RandomIdentifier.randomIdentifier(32, true),
+                                    RandomIdentifier.randomIdentifier(32, true),
+                                    address));
         } else {
-            SecureKey key = has(target) ? SECURE_KEYS.get(target) : new SecureKey(RandomIdentifier.randomIdentifier(32, true), RandomIdentifier.randomIdentifier(32, true), RandomIdentifier.randomIdentifier(), address);
+            SecureKey key = has(target) ?
+                    SECURE_KEYS.get(target) :
+                    new SecureKey(
+                            RandomIdentifier.randomIdentifier(32, true),
+                            RandomIdentifier.randomIdentifier(32, true),
+                            RandomIdentifier.randomIdentifier(),
+                            address);
             if (! key.hasId()) {
                 key.setId(RandomIdentifier.randomIdentifier());
             }

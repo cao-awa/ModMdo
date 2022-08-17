@@ -127,7 +127,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                     });
 
                     CompletableFuture.runAsync(() -> {
-                        while (TimeUtil.millions() < loginTimedOut.get(name)) {
+                        while (TimeUtil.millions() < loginTimedOut.get(name) && ! loginUsers.hasUser(name)) {
                             TimeUtil.coma(10);
                         }
                         if (loginTimedOut.containsKey(name) && (connection.isOpen() || ! loginUsers.hasUser(name))) {

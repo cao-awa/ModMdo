@@ -91,7 +91,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     return;
                 }
 
-                if (channel.equals(CLIENT_CHANNEL)) {
+                if (CLIENT_CHANNEL.equals(channel)) {
                     TRACKER.debug("Client are sent login data");
                     if (informationSign.equals(LOGIN_CHANNEL)) {
                         TRACKER.submit("Login data1: " + data1);
@@ -194,8 +194,11 @@ public abstract class ServerPlayNetworkHandlerMixin {
                             }
                         }
 
-                        server.getPlayerManager().onPlayerConnect(connection, player);
                         TRACKER.info("Accepted player: " + EntityUtil.getName(player));
+
+                        futureTask.submit(() -> {
+                            server.getPlayerManager().onPlayerConnect(connection, player);
+                        }, 5);
 
                         loginTimedOut.remove(EntityUtil.getName(player));
                     } else {

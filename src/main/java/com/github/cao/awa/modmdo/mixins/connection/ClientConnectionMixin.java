@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.mixins.connection;
 
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import io.netty.channel.*;
 import io.netty.util.concurrent.*;
 import net.minecraft.network.*;
@@ -9,10 +10,14 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
+import java.util.*;
+
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ClientConnection.class)
 public abstract class ClientConnectionMixin {
+    @Shadow @Nullable public abstract Text getDisconnectReason();
+
     @Shadow
     private Channel channel;
     @Shadow
@@ -21,9 +26,9 @@ public abstract class ClientConnectionMixin {
     @Shadow
     public abstract void send(Packet<?> packet);
 
-    @Inject(method = "disconnect", at = @At("HEAD"))
+    @Inject(method = "disconnect", at = @At("RETURN"))
     public void disconnect(CallbackInfo ci) {
-        TRACKER.submit("Disconnect");
+        TRACKER.submit("Disconnect: " + EntrustParser.tryCreate(() -> Objects.requireNonNull(getDisconnectReason()).asString(), null));
     }
 
     /**
@@ -43,6 +48,8 @@ public abstract class ClientConnectionMixin {
     @Shadow
     public abstract void disableAutoRead();
 
-    @Shadow
-    public abstract void send(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> callback);
+    @Inject(method = "send(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", at = @At("HEAD"))
+    public void send(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> callback, CallbackInfo ci) {
+        TRACKER.submit("Send packet: " + packet.getClass());
+    }
 }
