@@ -5,7 +5,7 @@ import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.client.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.event.server.chat.*;
-import com.github.cao.awa.modmdo.lang.Dictionary;
+import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
@@ -14,17 +14,17 @@ import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
+import net.minecraft.network.message.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
+import net.minecraft.util.registry.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
-
-import java.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -221,16 +221,16 @@ public abstract class ServerPlayNetworkHandlerMixin {
         event.submit(new QuitServerEvent(player, connection, player.getPos(), server));
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
-    public void onDisconnected0(PlayerManager instance, Text message, MessageType type, UUID sender) {
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Lnet/minecraft/util/registry/RegistryKey;)V"))
+    public void onDisconnected0(PlayerManager instance, Text message, RegistryKey<MessageType> typeKey) {
         if (loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
-            instance.broadcastChatMessage(message, type, sender);
+            instance.broadcast(message, typeKey);
         }
     }
 
-    @Inject(method = "executeCommand", at = @At("HEAD"))
-    private void executeCommand(String input, CallbackInfo ci) {
-        LOGGER.info(EntityUtil.getName(player) + "(" + player.getUuid().toString() + ") run the command: " + input);
+    @Inject(method = "onCommandExecution", at = @At("HEAD"))
+    private void onCommandExecution(CommandExecutionC2SPacket packet, CallbackInfo ci) {
+        LOGGER.info(EntityUtil.getName(player) + "(" + player.getUuid().toString() + ") run the command: " + packet.command());
     }
 
     @Inject(method = "onClientSettings", at = @At("HEAD"))
@@ -238,8 +238,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
         event.submit(new ClientSettingEvent(player, packet, server));
     }
 
-    @Inject(method = "onGameMessage", at = @At("HEAD"))
-    public void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
+    @Inject(method = "onChatMessage", at = @At("HEAD"))
+    public void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         event.submit(new GameChatEvent(player, packet, server));
     }
 
