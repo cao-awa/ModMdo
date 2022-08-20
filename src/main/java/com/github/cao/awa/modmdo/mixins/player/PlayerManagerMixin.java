@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins.server.play;
+package com.github.cao.awa.modmdo.mixins.player;
 
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;

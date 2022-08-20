@@ -4,6 +4,8 @@
     "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
+        "player.advancement.tracker.PlayerAdvancementTrackerInterface",
+        "player.advancement.tracker.PlayerAdvancementTrackerMixin"
     ],
     "client": [
         "client.ServerInfoMixin",
@@ -35,6 +37,7 @@
         "nbt.NbtTagSizeTrackerMixin",
         "network.SizePrependerMixin",
         "oshi.FileUtilMixin",
+        "player.PlayerManagerMixin",
         "server.MinecraftServerMixin",
         "server.ServerChunkManagerInterface",
         "server.chunk.ServerChunkManagerMixin",
@@ -45,7 +48,6 @@
         "server.login.ServerLoginNetworkHandlerMixin",
         "server.network.ServerNetworkIoMixin",
         "server.network.ServerQueryNetworkHandlerMixin",
-        "server.play.PlayerManagerMixin",
         "server.play.ServerPlayNetworkHandlerMixin",
         "server.world.ServerWorldMixin",
         "server.world.ThreadedAnvilChunkStorageMixin",
