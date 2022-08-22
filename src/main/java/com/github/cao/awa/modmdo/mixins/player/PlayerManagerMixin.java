@@ -7,6 +7,7 @@ import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.authlib.*;
+import net.minecraft.advancement.*;
 import net.minecraft.network.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
@@ -80,9 +81,15 @@ public abstract class PlayerManagerMixin {
     @Shadow
     protected abstract void savePlayerData(ServerPlayerEntity player);
 
+    @Shadow @Final private Map<UUID, PlayerAdvancementTracker> advancementTrackers;
+
     @Redirect(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V"))
     public void sendPacket(ServerPlayNetworkHandler instance, Packet<?> packet) {
-        System.out.println("Send Packet: " + packet.getClass());
         instance.sendPacket(packet);
+    }
+
+    @Inject(method = "getAdvancementTracker", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/PlayerAdvancementTracker;<init>(Lcom/mojang/datafixers/DataFixer;Lnet/minecraft/server/PlayerManager;Lnet/minecraft/server/ServerAdvancementLoader;Ljava/io/File;Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
+    public void optimizeAdvancementTracker(ServerPlayerEntity player, CallbackInfoReturnable<PlayerAdvancementTracker> cir) {
+        System.out.println(player.getUuid());
     }
 }

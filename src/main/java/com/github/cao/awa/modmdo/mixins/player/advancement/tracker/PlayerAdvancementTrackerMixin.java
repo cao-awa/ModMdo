@@ -14,6 +14,10 @@ public class PlayerAdvancementTrackerMixin {
     @Inject(method = "load", at = @At("HEAD"))
     public void startLoad(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
         time = TimeUtil.millions();
+        System.out.println("start load");
+        for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
+            System.out.println(stackTraceElement);
+        }
     }
 
     @Inject(method = "load", at = @At("RETURN"))
