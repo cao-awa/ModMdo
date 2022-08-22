@@ -8,27 +8,19 @@ import java.util.*;
 
 @Mixin(PlayerAdvancementTracker.class)
 public interface PlayerAdvancementTrackerInterface {
+    @Mutable
     @Accessor("advancementToProgress")
-    static void setAdvancementToProgress(Map<Advancement, AdvancementProgress> advancementToProgress) {
-        throw new AssertionError();
-    }
+    void setAdvancementToProgress(Map<Advancement, AdvancementProgress> advancementToProgress);
 
+    @Mutable
     @Accessor("visibleAdvancements")
-    static void setVisibleAdvancements(Set<Advancement> visibleAdvancements) {
-        throw new AssertionError();
-    }
+    void setVisibleAdvancements(Set<Advancement> visibleAdvancements);
 
+    @Mutable
     @Accessor("visibilityUpdates")
-    static void setVisibilityUpdates(Set<Advancement> visibilityUpdates) {
-        throw new AssertionError();
-    }
+    void setVisibilityUpdates(Set<Advancement> visibilityUpdates);
 
+    @Mutable
     @Accessor("progressUpdates")
-    static void setProgressUpdates(Set<Advancement> progressUpdates) {
-        throw new AssertionError();
-    }
-
-    default void transfer() {
-
-    }
+    void setProgressUpdates(Set<Advancement> progressUpdates);
 }

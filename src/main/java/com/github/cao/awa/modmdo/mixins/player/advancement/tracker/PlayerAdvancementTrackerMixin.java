@@ -5,6 +5,7 @@ import com.google.gson.*;
 import com.google.gson.internal.*;
 import com.google.gson.reflect.*;
 import com.google.gson.stream.*;
+import com.mojang.brigadier.*;
 import com.mojang.datafixers.*;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.*;
@@ -22,7 +23,6 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
-import java.io.*;
 import java.nio.charset.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -57,10 +57,10 @@ public abstract class PlayerAdvancementTrackerMixin {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void initAsync(DataFixer dataFixer, PlayerManager playerManager, ServerAdvancementLoader advancementLoader, File advancementFile, ServerPlayerEntity owner, CallbackInfo ci) {
-        PlayerAdvancementTrackerInterface.setAdvancementToProgress(Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>()));
-        PlayerAdvancementTrackerInterface.setVisibleAdvancements(ObjectSets.synchronize(new ObjectOpenHashSet<>()));
-        PlayerAdvancementTrackerInterface.setVisibilityUpdates(ObjectSets.synchronize(new ObjectOpenHashSet<>()));
-        PlayerAdvancementTrackerInterface.setProgressUpdates(ObjectSets.synchronize(new ObjectOpenHashSet<>()));
+        ((PlayerAdvancementTrackerInterface)this).setAdvancementToProgress(Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>()));
+        ((PlayerAdvancementTrackerInterface)this).setVisibleAdvancements(ObjectSets.synchronize(new ObjectOpenHashSet<>()));
+        ((PlayerAdvancementTrackerInterface)this).setVisibilityUpdates(ObjectSets.synchronize(new ObjectOpenHashSet<>()));
+        ((PlayerAdvancementTrackerInterface)this).setProgressUpdates(ObjectSets.synchronize(new ObjectOpenHashSet<>()));
     }
 
     @Inject(method = "load", at = @At("HEAD"))
@@ -150,7 +150,7 @@ public abstract class PlayerAdvancementTrackerMixin {
             if (! bl2 && advancementProgress.isDone()) {
                 advancement.getRewards().apply(this.owner);
                 if (advancement.getDisplay() != null && advancement.getDisplay().shouldAnnounceToChat() && this.owner.world.getGameRules().getBoolean(GameRules.ANNOUNCE_ADVANCEMENTS)) {
-                    this.playerManager.broadcastChatMessage(new TranslatableText("chat.type.advancement." + advancement.getDisplay().getFrame().getId(), this.owner.getDisplayName(), advancement.toHoverableText()), MessageType.SYSTEM, Util.NIL_UUID);
+                    this.playerManager.broadcast(new TranslatableText("chat.type.advancement." + advancement.getDisplay().getFrame().getId(), this.owner.getDisplayName(), advancement.toHoverableText()), MessageType.SYSTEM, Util.NIL_UUID);
                 }
             }
         }
