@@ -4,7 +4,7 @@
     "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
-        "player.advancement.tracker.PlayerAdvancementTrackerInterface",
+        "math.MathHelperMixin",
         "player.advancement.tracker.PlayerAdvancementTrackerMixin"
     ],
     "client": [
@@ -13,8 +13,6 @@
         "client.play.ClientPlayNetworkHandlerMixin"
     ],
     "server": [
-        "EnchantmentHelperMixin",
-        "MinecraftServerInterface",
         "block.BlockMixin",
         "block.entity.LootableContainerBlockEntityMixin",
         "command.CommandManagerMixin",
@@ -22,6 +20,7 @@
         "command.save.SaveAllCommandMixin",
         "connection.ClientConnectionInterface",
         "connection.ClientConnectionMixin",
+        "enchant.EnchantmentHelperMixin",
         "entity.EntityListInterface",
         "entity.EntityListMixin",
         "entity.EntityMixin",
@@ -38,8 +37,9 @@
         "network.SizePrependerMixin",
         "oshi.FileUtilMixin",
         "player.PlayerManagerMixin",
+        "server.MinecraftServerInterface",
         "server.MinecraftServerMixin",
-        "server.ServerChunkManagerInterface",
+        "server.chunk.ServerChunkManagerInterface",
         "server.chunk.ServerChunkManagerMixin",
         "server.chunk.ThreadedAnvilChunkStorageInterface",
         "server.chunk.WorldChunkMixin",

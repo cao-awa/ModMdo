@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins.server;
+package com.github.cao.awa.modmdo.mixins.server.chunk;
 
 import net.minecraft.server.world.*;
 import org.spongepowered.asm.mixin.*;

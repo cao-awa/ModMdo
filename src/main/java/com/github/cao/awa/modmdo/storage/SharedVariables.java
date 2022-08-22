@@ -12,7 +12,7 @@ import com.github.cao.awa.modmdo.extra.loader.*;
 import com.github.cao.awa.modmdo.format.console.*;
 import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.Language;
-import com.github.cao.awa.modmdo.mixins.*;
+import com.github.cao.awa.modmdo.mixins.server.*;
 import com.github.cao.awa.modmdo.security.key.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.type.*;
@@ -27,6 +27,7 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import com.mojang.brigadier.context.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.advancement.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.scoreboard.*;
 import net.minecraft.server.*;
@@ -113,6 +114,8 @@ public class SharedVariables {
     public static IncrementDatabase<String> backups;
 
     public static FutureTaskOrder futureTask = new FutureTaskOrder();
+
+    public static Object2ObjectOpenHashMap<String, PlayerAdvancementTracker> trackerCaches = new Object2ObjectOpenHashMap<>();
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);

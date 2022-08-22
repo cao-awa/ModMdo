@@ -37,7 +37,7 @@ public abstract class ServerWorldMixin extends World {
 //    }
 //
     @Inject(method = "tick", at = @At("HEAD"))
-    public void earlyTickBlockE(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+    public void tickHead(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         // tick tasks
         futureTask.tick();
 //        tickBlockE(getThis());
