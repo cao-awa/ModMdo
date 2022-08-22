@@ -287,18 +287,7 @@ public class ModMdoCommand extends SimpleCommand {
             Legacy<Integer, Integer> legacy = ModMdoStdInitializer.loadEvent(true);
             sendFeedback(e, TextUtil.translatable("modmdo.event.reload.success", legacy.newly(), legacy.stale()));
             return 0;
-        }))).then(literal("asyncPlayerAdvancementLoad").then(literal("enable").executes(enable -> {
-            saveVariables(() -> config.set("async_player_advancement_load", true));
-            return 0;
-        }).then(literal("disable").executes(disable -> {
-            saveVariables(() -> {
-                config.set("async_player_advancement_load", false);
-//                for (ServerPlayerEntity player : getServer(disable).getPlayerManager().getPlayerList()) {
-//                    PlayerAdvancementTracker tracker = getServer(disable).getPlayerManager().getAdvancementTracker(player);
-//                }
-            });
-            return 0;
-        })))));
+        }))));
         return this;
     }
 
