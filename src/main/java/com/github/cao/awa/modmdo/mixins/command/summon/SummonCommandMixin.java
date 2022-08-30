@@ -103,7 +103,6 @@ public class SummonCommandMixin {
                     if (counter != null) {
                         counter.add();
                     }
-                    source.sendFeedback(new TranslatableText("commands.summon.success", entity2.getDisplayName()), true);
                 } else {
                     throw FAILED_UUID_EXCEPTION.create();
                 }
