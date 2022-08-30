@@ -4,8 +4,11 @@
     "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
-        "math.MathHelperMixin",
-        "player.advancement.tracker.PlayerAdvancementTrackerMixin"
+        "voxel.shape.BitSetVoxelSetInterface",
+        "voxel.shape.BitSetVoxelSetMixin",
+        "voxel.shape.VoxelSetInterface",
+        "voxel.shape.VoxelSetMixin",
+        "voxel.shape.VoxelShapeMixin"
     ],
     "client": [
         "client.ServerInfoMixin",
@@ -18,6 +21,7 @@
         "command.CommandManagerMixin",
         "command.block.CommandBlockMixin",
         "command.save.SaveAllCommandMixin",
+        "command.summon.SummonCommandMixin",
         "connection.ClientConnectionInterface",
         "connection.ClientConnectionMixin",
         "enchant.EnchantmentHelperMixin",
@@ -33,10 +37,12 @@
         "hopper.screen.HopperScreenHandlerMixin",
         "item.ItemEntityMixin",
         "item.ItemStackMixin",
+        "math.MathHelperMixin",
         "nbt.NbtTagSizeTrackerMixin",
         "network.SizePrependerMixin",
         "oshi.FileUtilMixin",
         "player.PlayerManagerMixin",
+        "player.advancement.tracker.PlayerAdvancementTrackerMixin",
         "server.MinecraftServerInterface",
         "server.MinecraftServerMixin",
         "server.chunk.ServerChunkManagerInterface",
@@ -52,6 +58,8 @@
         "server.world.ServerWorldMixin",
         "server.world.ThreadedAnvilChunkStorageMixin",
         "tracker.DamageTrackerMixin",
+        "voxel.shape.VoxelShapeInterface",
+        "voxel.shape.VoxelShapesMixin",
         "world.WorldInterface",
         "world.WorldMixin"
     ],
