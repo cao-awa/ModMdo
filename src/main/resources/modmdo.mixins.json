@@ -5,7 +5,6 @@
     "compatibilityLevel": "JAVA_16",
     "mixins": [
         "math.MathHelperMixin",
-        "player.advancement.tracker.PlayerAdvancementTrackerMixin"
     ],
     "client": [
         "client.ServerInfoMixin",
