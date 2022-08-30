@@ -17,7 +17,7 @@ public class ChunkPosMixin {
         cir.setReturnValue(chunkX & 0xFFFFFFFFL | (long) chunkZ << 0x20);
     }
 
-    @Inject(method = "stream(Lnet/minecraft/util/math/ChunkPos;Lnet/minecraft/util/math/ChunkPos;)Ljava/util/stream/Stream;", at = @At("HEAD"))
+    @Inject(method = "stream(Lnet/minecraft/util/math/ChunkPos;Lnet/minecraft/util/math/ChunkPos;)Ljava/util/stream/Stream;", at = @At("HEAD"), cancellable = true)
     private static void stream(ChunkPos pos1, ChunkPos pos2, CallbackInfoReturnable<Stream<ChunkPos>> cir) {
         final int naX = pos1.x < pos2.x ? 1 : -1;
         final int naZ = pos1.z < pos2.z ? 1 : -1;
