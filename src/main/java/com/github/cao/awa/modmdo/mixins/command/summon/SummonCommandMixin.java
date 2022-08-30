@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.mixins.command.summon;
 
-import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import com.mojang.brigadier.*;
@@ -82,26 +81,30 @@ public class SummonCommandMixin {
         return 1;
     }
 
-    private static void execute(ServerCommandSource source, Identifier identifier, Vec3d pos, NbtCompound nbt, boolean initialize, OperationalInteger counter) throws CommandSyntaxException {
-        if (World.isValid(new BlockPos(pos))) {
+    private static void execute(ServerCommandSource source, Identifier entity, Vec3d pos, NbtCompound nbt, boolean initialize, OperationalInteger counter) throws CommandSyntaxException {
+        BlockPos blockPos = new BlockPos(pos);
+        if (World.isValid(blockPos)) {
             NbtCompound nbtCompound = nbt.copy();
-            nbtCompound.putString("id", identifier.toString());
+            nbtCompound.putString("id", entity.toString());
             ServerWorld serverWorld = source.getWorld();
-            Entity entity2 = EntityType.loadEntityWithPassengers(nbtCompound, serverWorld, (entity) -> EntityUtil.refreshPositionAndAngles(entity, pos.x, pos.y, pos.z, entity.getYaw(), entity.getPitch()));
+            Entity entity2 = EntityType.loadEntityWithPassengers(nbtCompound, serverWorld, (entityx) -> {
+                entityx.refreshPositionAndAngles(pos.x, pos.y, pos.z, entityx.getYaw(), entityx.getPitch());
+                return entityx;
+            });
             if (entity2 == null) {
                 throw FAILED_EXCEPTION.create();
             } else {
                 if (initialize && entity2 instanceof MobEntity mob) {
                     mob.initialize(source.getWorld(), source.getWorld().getLocalDifficulty(entity2.getBlockPos()), SpawnReason.COMMAND, null, null);
                 }
-                if (serverWorld.shouldCreateNewEntityWithPassenger(entity2)) {
+
+                if (serverWorld.spawnNewEntityAndPassengers(entity2)) {
                     if (counter != null) {
                         counter.add();
                     }
                 } else {
                     throw FAILED_UUID_EXCEPTION.create();
                 }
-
             }
         } else {
             throw INVALID_POSITION_EXCEPTION.create();

@@ -28,7 +28,7 @@ public abstract class ClientConnectionMixin {
 
     @Inject(method = "disconnect", at = @At("RETURN"))
     public void disconnect(CallbackInfo ci) {
-        TRACKER.submit("Disconnect: " + EntrustParser.tryCreate(() -> Objects.requireNonNull(getDisconnectReason()).asString(), null));
+        TRACKER.submit("Disconnect: " + EntrustParser.tryCreate(() -> Objects.requireNonNull(getDisconnectReason()).getString(), null));
     }
 
     /**
