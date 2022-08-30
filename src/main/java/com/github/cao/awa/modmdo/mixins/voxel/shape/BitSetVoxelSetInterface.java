@@ -36,6 +36,6 @@ public interface BitSetVoxelSetInterface extends VoxelSetInterface {
     @Accessor("maxZ")
     void setMaxZ(int maxZ);
 
-    @Invoker("method_31940")
+    @Invoker("set")
     void set(int x, int y, int z, boolean update);
 }
