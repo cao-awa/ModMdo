@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins;
+package com.github.cao.awa.modmdo.mixins.server;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelStorage;

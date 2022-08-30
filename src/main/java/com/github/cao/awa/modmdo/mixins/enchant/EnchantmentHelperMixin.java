@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.mixins;
+package com.github.cao.awa.modmdo.mixins.enchant;
 
 import com.github.cao.awa.modmdo.storage.*;
 import com.google.common.collect.*;

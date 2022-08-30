@@ -62,7 +62,7 @@ public abstract class PlayerManagerMixin {
             SharedVariables.event.submit(new JoinServerEvent(player, connection, player.getPos(), SharedVariables.server));
         }
 
-        if (!connection.isOpen()) {
+        if (! connection.isOpen()) {
             ci.cancel();
         }
     }
@@ -80,9 +80,42 @@ public abstract class PlayerManagerMixin {
     @Shadow
     protected abstract void savePlayerData(ServerPlayerEntity player);
 
+    @Shadow public abstract MinecraftServer getServer();
+
     @Redirect(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V"))
     public void sendPacket(ServerPlayNetworkHandler instance, Packet<?> packet) {
-        System.out.println("Send Packet: " + packet.getClass());
         instance.sendPacket(packet);
     }
+
+//    @Inject(method = "getAdvancementTracker", at = @At("HEAD"), cancellable = true)
+//    public void optimizeAdvancementTracker(ServerPlayerEntity player, CallbackInfoReturnable<PlayerAdvancementTracker> cir) {
+//        cir.setReturnValue(optimizeAdvancementTracker(player, getServer().getPlayerManager()));
+//    }
+//
+//    public PlayerAdvancementTracker optimizeAdvancementTracker(ServerPlayerEntity player, PlayerManager manager) {
+//        UUID uuid = player.getUuid();
+//        long start = TimeUtil.millions();
+//        TRACKER.info("Loading advancement tracker for " + uuid);
+//        PlayerAdvancementTracker playerAdvancementTracker = advancementTrackerCaches.get(uuid.toString());
+//        if (playerAdvancementTracker == null) {
+//            TRACKER.info("Initializing advancement tracker for " + uuid);
+//            File file = this.server.getSavePath(WorldSavePath.ADVANCEMENTS).toFile();
+//            File file2 = new File(file, uuid + ".json");
+//            playerAdvancementTracker = new PlayerAdvancementTracker(this.server.getDataFixer(), manager, this.server.getAdvancementLoader(), file2, player);
+//            advancementTrackerCaches.put(uuid.toString(), playerAdvancementTracker);
+//        } else {
+//            TRACKER.info("Loading cached advancement tracker");
+//            TRACKER.info("Updating advancements...");
+//            playerAdvancementTracker.reload(null);
+//        }
+//
+//        playerAdvancementTracker.setOwner(player);
+//        TRACKER.info("Loaded advancement tracker for " + uuid + ", done in " + TimeUtil.processMillion(start) + "ms");
+//        return playerAdvancementTracker;
+//    }
+//
+//    @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/PlayerAdvancementTracker;clearCriteria()V"))
+//    public void remove(PlayerAdvancementTracker instance) {
+//
+//    }
 }

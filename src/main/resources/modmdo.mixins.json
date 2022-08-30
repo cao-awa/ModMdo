@@ -4,8 +4,11 @@
     "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
-        "player.advancement.tracker.PlayerAdvancementTrackerInterface",
-        "player.advancement.tracker.PlayerAdvancementTrackerMixin"
+        "voxel.shape.BitSetVoxelSetInterface",
+        "voxel.shape.BitSetVoxelSetMixin",
+        "voxel.shape.VoxelSetInterface",
+        "voxel.shape.VoxelSetMixin",
+        "voxel.shape.VoxelShapeMixin"
     ],
     "client": [
         "client.ServerInfoMixin",
@@ -13,15 +16,15 @@
         "client.play.ClientPlayNetworkHandlerMixin"
     ],
     "server": [
-        "EnchantmentHelperMixin",
-        "MinecraftServerInterface",
         "block.BlockMixin",
         "block.entity.LootableContainerBlockEntityMixin",
         "command.CommandManagerMixin",
         "command.block.CommandBlockMixin",
         "command.save.SaveAllCommandMixin",
+        "command.summon.SummonCommandMixin",
         "connection.ClientConnectionInterface",
         "connection.ClientConnectionMixin",
+        "enchant.EnchantmentHelperMixin",
         "entity.EntityListInterface",
         "entity.EntityListMixin",
         "entity.EntityMixin",
@@ -34,12 +37,14 @@
         "hopper.screen.HopperScreenHandlerMixin",
         "item.ItemEntityMixin",
         "item.ItemStackMixin",
+        "math.MathHelperMixin",
         "nbt.NbtTagSizeTrackerMixin",
         "network.SizePrependerMixin",
         "oshi.FileUtilMixin",
         "player.PlayerManagerMixin",
+        "server.MinecraftServerInterface",
         "server.MinecraftServerMixin",
-        "server.ServerChunkManagerInterface",
+        "server.chunk.ServerChunkManagerInterface",
         "server.chunk.ServerChunkManagerMixin",
         "server.chunk.ThreadedAnvilChunkStorageInterface",
         "server.chunk.WorldChunkMixin",
@@ -52,6 +57,8 @@
         "server.world.ServerWorldMixin",
         "server.world.ThreadedAnvilChunkStorageMixin",
         "tracker.DamageTrackerMixin",
+        "voxel.shape.VoxelShapeInterface",
+        "voxel.shape.VoxelShapesMixin",
         "world.WorldInterface",
         "world.WorldMixin"
     ],

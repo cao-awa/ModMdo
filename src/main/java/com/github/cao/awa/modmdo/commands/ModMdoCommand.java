@@ -5,7 +5,6 @@ import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.Language;
-import com.github.cao.awa.modmdo.mixins.player.advancement.tracker.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.text.*;
@@ -14,7 +13,6 @@ import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
 import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.advancement.*;
 import net.minecraft.command.argument.*;
 import net.minecraft.enchantment.*;
 import net.minecraft.server.command.*;
@@ -289,19 +287,7 @@ public class ModMdoCommand extends SimpleCommand {
             Legacy<Integer, Integer> legacy = ModMdoStdInitializer.loadEvent(true);
             sendFeedback(e, TextUtil.translatable("modmdo.event.reload.success", legacy.newly(), legacy.stale()));
             return 0;
-        }))).then(literal("asyncPlayerAdvancementLoad").then(literal("enable").executes(enable -> {
-            saveVariables(() -> config.set("async_player_advancement_load", true));
-            return 0;
-        }).then(literal("disable").executes(disable -> {
-            saveVariables(() -> {
-                config.set("async_player_advancement_load", false);
-                for (ServerPlayerEntity player : getServer(disable).getPlayerManager().getPlayerList()) {
-                    PlayerAdvancementTracker tracker = getServer(disable).getPlayerManager().getAdvancementTracker(player);
-                    ((PlayerAdvancementTrackerInterface)tracker).transfer();
-                }
-            });
-            return 0;
-        })))));
+        }))));
         return this;
     }
 

@@ -156,5 +156,8 @@
     "modmdo.archive.restoring": "The archive is restoring, please wait for done",
 
     "modmdo.archive.notify.create.database": "Creating database",
-    "modmdo.archive.notify.processing.file": "Processing file: %s"
+    "modmdo.archive.notify.processing.file": "Processing file: %s",
+
+    "commands.summon.success.counted": "Summoned new %s, total %s",
+    "commands.summon.success.lazy": "Summoning new %s, using lazy, total %s"
 }
