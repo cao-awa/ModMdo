@@ -53,7 +53,7 @@ public abstract class VoxelShapesMixin {
                     int l = CACHED_BIT[i];
                     int m = CACHED_BIT[j];
                     int n = CACHED_BIT[k];
-                    BitSetVoxelSet bitSetVoxelSet = BitSetVoxelSet.method_31939(l, m, n, (int) Math.round(minX * l), (int) Math.round(minY * m), (int) Math.round(minZ * n), (int) Math.round(maxX * l), (int) Math.round(maxY * m), (int) Math.round(maxZ * n));
+                    BitSetVoxelSet bitSetVoxelSet = BitSetVoxelSet.create(l, m, n, (int) Math.round(minX * l), (int) Math.round(minY * m), (int) Math.round(minZ * n), (int) Math.round(maxX * l), (int) Math.round(maxY * m), (int) Math.round(maxZ * n));
                     return EntrustParser.tryCreate(() -> SimpleVoxelShape.class.getDeclaredConstructor(VoxelSet.class // parameter types
                     ).newInstance(bitSetVoxelSet // parameters
                     ), null);
