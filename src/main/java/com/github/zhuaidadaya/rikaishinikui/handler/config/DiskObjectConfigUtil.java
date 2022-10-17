@@ -40,6 +40,23 @@ public record DiskObjectConfigUtil(String entrust, String path, String suffix, b
         }
     }
 
+    public static String decompress(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            InflaterInputStream gunzip = new InflaterInputStream(new ByteArrayInputStream(str.getBytes(StandardCharsets.ISO_8859_1)));
+            byte[] buf = new byte[4096];
+            int size;
+            while ((size = gunzip.read(buf)) > - 1) {
+                out.write(buf, 0, size);
+            }
+            return out.toString(StandardCharsets.UTF_8);
+        } catch (Exception ex) {
+            return str;
+        }
+    }
+
     public String getConfigPath(String key) {
         return path + "/" + key + "." + suffix;
     }
@@ -58,23 +75,6 @@ public record DiskObjectConfigUtil(String entrust, String path, String suffix, b
 
     public String get(String key) {
         return EntrustParser.trying(() -> decompress(FileReads.strictRead(new BufferedInputStream(new FileInputStream(getConfigPath(key))))));
-    }
-
-    public static String decompress(String str) {
-        if (str == null || str.length() == 0) {
-            return str;
-        }
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            InflaterInputStream gunzip = new InflaterInputStream(new ByteArrayInputStream(str.getBytes(StandardCharsets.ISO_8859_1)));
-            byte[] buf = new byte[4096];
-            int size;
-            while ((size = gunzip.read(buf)) > - 1) {
-                out.write(buf, 0, size);
-            }
-            return out.toString(StandardCharsets.UTF_8);
-        } catch (Exception ex) {
-            return str;
-        }
     }
 
     public JSONObject getConfigJSONObject(String key) {

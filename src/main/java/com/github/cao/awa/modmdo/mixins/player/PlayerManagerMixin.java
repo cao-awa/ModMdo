@@ -72,8 +72,8 @@ public abstract class PlayerManagerMixin {
         EntrustExecution.tryTemporary(() -> {
             if ((loginUsers.hasUser(player) && ! banned.containsIdentifier(loginUsers.getUser(player.getUuid()).getIdentifier())) || force.contains(player) || player.networkHandler.getConnection().getAddress() == null) {
                 force.remove(player);
-                savePlayerData(player);
             }
+            savePlayerData(player);
         }, Throwable::printStackTrace);
     }
 

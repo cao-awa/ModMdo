@@ -144,35 +144,65 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
             EntrustExecution.tryTemporary(() -> {
                 for (ServerPlayerEntity player : players.getPlayerList()) {
-                    if (!player.networkHandler.connection.isOpen()) {
-                        // try remove
-                        server.getPlayerManager().remove(player);
+                    if (player.networkHandler.connection.getAddress() != null) {
+                        if (! player.networkHandler.connection.isOpen()) {
+                            // try remove
+                            server.getPlayerManager()
+                                  .remove(player);
 
-                        // force remove
-                        server.getPlayerManager().getPlayerList().remove(player);
-                    }
-
-                    if (modmdoWhitelist) {
-                        if (notWhitelist(player) || ! loginUsers.getUser(player).isLogged()) {
-                            player.networkHandler.connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text()));
-                            player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text());
-
+                            // force remove
+                            server.getPlayerManager()
+                                  .getPlayerList()
+                                  .remove(player);
                         }
-                        if (hasBan(player)) {
-                            Certificate ban = banned.get(EntityUtil.getName(player));
-                            if (ban instanceof TemporaryCertificate temporary) {
-                                String remaining = temporary.formatRemaining();
-                                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
-                                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
-                            } else {
-                                player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
-                                player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
+
+                        if (modmdoWhitelist) {
+                            if (notWhitelist(player) || ! loginUsers.getUser(player)
+                                                                    .isLogged()) {
+                                player.networkHandler.connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")
+                                                                                                      .text()));
+                                player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")
+                                                                                    .text());
+
+                            }
+                            if (hasBan(player)) {
+                                Certificate ban = banned.get(EntityUtil.getName(player));
+                                if (ban instanceof TemporaryCertificate temporary) {
+                                    String remaining = temporary.formatRemaining();
+                                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(
+                                                                                                                             new Dictionary(ban.getLastLanguage()),
+                                                                                                                             "multiplayer.disconnect.banned-time-limited",
+                                                                                                                             remaining
+                                                                                                                     )
+                                                                                                                     .text()));
+                                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(
+                                                                                                           new Dictionary(ban.getLastLanguage()),
+                                                                                                           "multiplayer.disconnect.banned-time-limited",
+                                                                                                           remaining
+                                                                                                   )
+                                                                                                   .text());
+                                } else {
+                                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(
+                                                                                                                             new Dictionary(ban.getLastLanguage()),
+                                                                                                                             "multiplayer.disconnect.banned-indefinite"
+                                                                                                                     )
+                                                                                                                     .text()));
+                                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(
+                                                                                                           new Dictionary(ban.getLastLanguage()),
+                                                                                                           "multiplayer.disconnect.banned-indefinite"
+                                                                                                   )
+                                                                                                   .text());
+                                }
                             }
                         }
-                    }
 
-                    if (Archiver.restoring) {
-                        player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.archive.restoring").text()));
+                        if (Archiver.restoring) {
+                            player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(
+                                                                                                                     loginUsers.getUser(player),
+                                                                                                                     "modmdo.archive.restoring"
+                                                                                                             )
+                                                                                                             .text()));
+                        }
                     }
                 }
 

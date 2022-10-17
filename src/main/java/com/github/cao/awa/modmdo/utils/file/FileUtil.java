@@ -37,7 +37,7 @@ public class FileUtil extends MessageDigger {
                     InputStream is = zipFile.getInputStream(entry);
                     FileOutputStream fos = new FileOutputStream(targetFile);
                     int len;
-                    byte[] buf = new byte[1024 * 1024];
+                    byte[] buf = new byte[4096];
                     while ((len = is.read(buf)) != - 1) {
                         fos.write(buf, 0, len);
                     }
@@ -46,7 +46,7 @@ public class FileUtil extends MessageDigger {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("failed to unzip: " + zip, e);
+            throw new RuntimeException("Failed to unzip: " + zip, e);
         } finally {
             if (zipFile != null) {
                 try {
