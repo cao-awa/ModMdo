@@ -15,7 +15,12 @@ public class ModMdoServerInitializer implements DedicatedServerModInitializer {
     public void onInitializeServer() {
         TRACKER.info("Loading ModMdo " + SharedVariables.VERSION_ID + " (step 2/2)");
 
-        staticConfig.setIfNoExist("private_verify_key", RandomIdentifier.randomIdentifier(16, true));
+        staticConfig.setIfNoExist("private_verify_key",
+                                  RandomIdentifier.randomIdentifier(
+                                          16,
+                                          true
+                                  )
+        );
 
         SharedVariables.modMdoType = ModMdoType.SERVER;
     }

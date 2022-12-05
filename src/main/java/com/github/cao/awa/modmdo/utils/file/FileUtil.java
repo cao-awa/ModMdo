@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.*;
 
-public class FileUtil extends MessageDigger {
+public class FileUtil {
     public static void deleteFiles(String path) {
         File file = new File(path);
         for (File f : file.listFiles()) {

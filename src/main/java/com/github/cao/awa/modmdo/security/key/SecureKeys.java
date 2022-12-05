@@ -28,33 +28,63 @@ public class SecureKeys extends Storable {
 
     public String use(String target, String address) {
         if (keys.containsKey(target)) {
-            return use(level, target);
+            return use(
+                    level,
+                    target
+            );
         }
-        keep(target, address);
-        return use(level, target);
+        keep(
+                target,
+                address
+        );
+        return use(
+                level,
+                target
+        );
     }
 
     public void keep(String target, String address) {
         if (level == SecureLevel.UNEQUAL_KEY) {
-            set(target,
-                    has(target) ?
-                            SECURE_KEYS.get(target) :
-                            new SecureKey(
-                                    RandomIdentifier.randomIdentifier(32, true),
-                                    RandomIdentifier.randomIdentifier(32, true),
-                                    address));
+            set(
+                    target,
+                    has(target) ? SECURE_KEYS.get(target) : new SecureKey(
+                            RandomIdentifier.randomIdentifier(
+                                    32,
+                                    true
+                            ),
+                            RandomIdentifier.randomIdentifier(
+                                    32,
+                                    true
+                            ),
+                            address
+                    )
+            );
         } else {
-            SecureKey key = has(target) ?
-                    SECURE_KEYS.get(target) :
-                    new SecureKey(
-                            RandomIdentifier.randomIdentifier(32, true),
-                            RandomIdentifier.randomIdentifier(32, true),
-                            RandomIdentifier.randomIdentifier(),
-                            address);
+            SecureKey key = has(target) ? SECURE_KEYS.get(target) : new SecureKey(
+                    RandomIdentifier.randomIdentifier(
+                            32,
+                            true
+                    ),
+                    RandomIdentifier.randomIdentifier(
+                            32,
+                            true
+                    ),
+                    RandomIdentifier.randomIdentifier(
+                            4096,
+                            true
+                    ),
+                    address
+            );
             if (! key.hasId()) {
-                key.setId(RandomIdentifier.randomIdentifier());
+                key.setId(RandomIdentifier.randomIdentifier(
+                        4096,
+                        true
+                ));
             }
-            set(target, key);
+            set(
+                    target,
+                    key
+            );
         }
     }
 
@@ -64,17 +94,23 @@ public class SecureKeys extends Storable {
             switch (level) {
                 case UNEQUAL_KEY -> {
                     if (has(s)) {
-                        if (keys.get(s).getPrivateKey().equals(key.getPrivateKey())) {
+                        if (keys.get(s)
+                                .getPrivateKey()
+                                .equals(key.getPrivateKey())) {
                             keys.remove(s);
                         }
                     }
                 }
                 case UNEQUAL_ID -> {
-                    EntrustExecution.notNull(keys.get(s).getId(), id -> {
-                        if (id.equals(key.getId())) {
-                            keys.remove(s);
-                        }
-                    });
+                    EntrustExecution.notNull(
+                            keys.get(s)
+                                .getId(),
+                            id -> {
+                                if (id.equals(key.getId())) {
+                                    keys.remove(s);
+                                }
+                            }
+                    );
                 }
                 default -> {
                     return;
@@ -82,12 +118,16 @@ public class SecureKeys extends Storable {
             }
         }
         if (create.get()) {
-            keys.put(target, key);
+            keys.put(
+                    target,
+                    key
+            );
         }
     }
 
     public boolean has(String target) {
-        return keys.containsKey(target) && keys.get(target).hasAddress();
+        return keys.containsKey(target) && keys.get(target)
+                                               .hasAddress();
     }
 
     public SecureKey get(String target) {
@@ -96,15 +136,26 @@ public class SecureKeys extends Storable {
 
     private String use(SecureLevel level, String target) {
         return switch (level) {
-            case UNEQUAL_KEY -> EntrustParser.trying(() -> AES.aesEncryptToString(staticConfig.get("identifier").getBytes(), keys.get(target).getPrivateKey().getBytes()), ex -> staticConfig.get("identifier"));
-            case UNEQUAL_ID -> keys.get(target).getId();
+            case UNEQUAL_KEY -> EntrustParser.trying(
+                    () -> AES.aesEncryptToString(
+                            staticConfig.get("identifier")
+                                        .getBytes(),
+                            keys.get(target)
+                                .getPrivateKey()
+                                .getBytes()
+                    ),
+                    ex -> staticConfig.get("identifier")
+            );
+            case UNEQUAL_ID -> keys.get(target)
+                                   .getId();
             default -> staticConfig.get("identifier");
         };
     }
 
     public boolean hasAddress(@NotNull String address) {
         for (String s : keys.keySet()) {
-            if (address.equals(keys.get(s).getAddress())) {
+            if (address.equals(keys.get(s)
+                                   .getAddress())) {
                 return true;
             }
         }
@@ -116,13 +167,21 @@ public class SecureKeys extends Storable {
     }
 
     public void save() {
-        staticConfig.set("private_key", SECURE_KEYS.toJSONObject().toString());
+        staticConfig.set(
+                "private_key",
+                SECURE_KEYS.toJSONObject()
+                           .toString()
+        );
     }
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
         for (String target : keys.keySet()) {
-            json.put(target, keys.get(target).toJSONObject());
+            json.put(
+                    target,
+                    keys.get(target)
+                        .toJSONObject()
+            );
         }
         return json;
     }
@@ -130,7 +189,10 @@ public class SecureKeys extends Storable {
     public void load(JSONObject json) {
         for (String s : json.keySet()) {
             EntrustExecution.tryTemporary(() -> {
-                SECURE_KEYS.set(s, new SecureKey(json.getJSONObject(s)));
+                SECURE_KEYS.set(
+                        s,
+                        new SecureKey(json.getJSONObject(s))
+                );
             });
         }
     }

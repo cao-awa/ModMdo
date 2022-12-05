@@ -32,7 +32,7 @@ import java.io.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoTriggerBuilder {
-    public static final Object2ObjectOpenHashMap<String, String> classMap = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
+    public static final Object2ObjectOpenHashMap<String, String> classMap = EntrustEnvironment.operation(new Object2ObjectOpenHashMap<>(), map -> {
         map.put("net.minecraft.server.network.ServerPlayerEntity", ServerPlayerEntity.class.getName());
         map.put("net.minecraft.entity.passive.PigEntity", PigEntity.class.getName());
         map.put("net.minecraft.entity.passive.AxolotlEntity", AxolotlEntity.class.getName());
@@ -137,7 +137,7 @@ public class ModMdoTriggerBuilder {
         map.put("net.minecraft.entity.FallingBlockEntity", FallingBlockEntity.class.getName());
         map.put("net.minecraft.entity.LightningEntity", LightningEntity.class.getName());
     });
-    public final ObjectArrayList<String> events = EntrustParser.operation(new ObjectArrayList<>(), list -> {
+    public final ObjectArrayList<String> events = EntrustEnvironment.operation(new ObjectArrayList<>(), list -> {
         list.add(DisconnectTrigger.class.getName());
         list.add(KillEntityTrigger.class.getName());
         list.add(SendMessageTrigger.class.getName());
@@ -146,7 +146,7 @@ public class ModMdoTriggerBuilder {
         list.add(SummonTrigger.class.getName());
         list.add(TeleportEntityTrigger.class.getName());
     });
-    public final ObjectArrayList<String> targeted = EntrustParser.operation(new ObjectArrayList<>(), list -> {
+    public final ObjectArrayList<String> targeted = EntrustEnvironment.operation(new ObjectArrayList<>(), list -> {
         list.add(DisconnectTrigger.class.getName());
         list.add(KillEntityTrigger.class.getName());
         list.add(SendMessageTrigger.class.getName());
@@ -170,13 +170,13 @@ public class ModMdoTriggerBuilder {
     }
 
     public void prepareTargeted(JSONObject event, EntityTargetedEvent<?> targeted, File trace) {
-        String instance = EntrustParser.trying(() -> event.getString("target-instanceof"));
-        if (targeted.getTargeted().size() > 1 || instance == null || instance.equals("") || EntrustParser.trying(() -> classMap.getOrDefault(instance, instance).equals(targeted.getTargeted().get(0).getClass().getName()), () -> true)) {
+        String instance = EntrustEnvironment.trys(() -> event.getString("target-instanceof"));
+        if (targeted.getTargeted().size() > 1 || instance == null || instance.equals("") || EntrustEnvironment.trys(() -> classMap.getOrDefault(instance, instance).equals(targeted.getTargeted().get(0).getClass().getName()), () -> true)) {
             TriggerSelector selector = event.has("controller") ? controller(event.getJSONObject("controller")) : new AllSelector();
             OperationalInteger i = new OperationalInteger();
             selector.select(event.getJSONObject("triggers"), (name, json) -> {
                 Temporary action = () -> {
-                    EntrustExecution.notNull(EntrustParser.trying(() -> {
+                    EntrustEnvironment.notNull(EntrustEnvironment.trys(() -> {
                         TargetedTrigger<EntityTargetedEvent<?>> trigger = (TargetedTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                         return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
                     }, ex -> {
@@ -186,7 +186,7 @@ public class ModMdoTriggerBuilder {
                     i.add();
                 };
 
-                EntrustExecution.tryTemporary(() -> {
+                EntrustEnvironment.trys(() -> {
                     JSONObject awaiting = json.getJSONObject("await");
                     int wait = awaiting.getInt("or-wait");
                     SharedVariables.event.events.get(awaiting.getString("instanceof")).await(action, wait, trace);
@@ -200,7 +200,7 @@ public class ModMdoTriggerBuilder {
         OperationalInteger i = new OperationalInteger();
         selector.select(event.getJSONObject("triggers"), (name, json) -> {
             Temporary action = () -> {
-                EntrustExecution.notNull(EntrustParser.trying(() -> {
+                EntrustEnvironment.notNull(EntrustEnvironment.trys(() -> {
                     ModMdoEventTrigger<ModMdoEvent<?>> trigger = (ModMdoEventTrigger<ModMdoEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                     return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
                 }, ex -> {
@@ -210,7 +210,7 @@ public class ModMdoTriggerBuilder {
                 i.add();
             };
 
-            EntrustExecution.tryTemporary(() -> {
+            EntrustEnvironment.trys(() -> {
                 JSONObject awaiting = json.getJSONObject("await");
                 int wait = awaiting.getInt("or-wait");
                 SharedVariables.event.events.get(awaiting.getString("instanceof")).await(action, wait, trace);
@@ -219,7 +219,7 @@ public class ModMdoTriggerBuilder {
     }
 
     public TriggerSelector controller(JSONObject json) {
-        return EntrustParser.trying(() -> {
+        return EntrustEnvironment.trys(() -> {
             TriggerSelector selector = (TriggerSelector) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
             selector.build(json);
             return selector;

@@ -44,11 +44,17 @@ public abstract class PlayerManagerMixin {
         if (SharedVariables.enableRejectReconnect) {
             UUID uuid = PlayerUtil.getUUID(profile);
             for (ServerPlayerEntity player : this.players) {
-                if (player.networkHandler.connection.getAddress() == null)
+                if (player.networkHandler.connection.getAddress() == null) {
                     break;
-                if (player.getUuid().equals(uuid)) {
+                }
+                if (player.getUuid()
+                          .equals(uuid)) {
                     if (loginUsers.hasUser(player)) {
-                        SimpleCommandOperation.sendMessage(player, Translatable.translatable("login.dump.rejected"), false);
+                        SimpleCommandOperation.sendMessage(
+                                player,
+                                Translatable.translatable("login.dump.rejected"),
+                                false
+                        );
                     }
                     cir.setReturnValue(null);
                 }
@@ -59,7 +65,12 @@ public abstract class PlayerManagerMixin {
     @Inject(method = "onPlayerConnect", at = @At("RETURN"), cancellable = true)
     public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         if (SharedVariables.extras != null && SharedVariables.extras.isActive(SharedVariables.EXTRA_ID)) {
-            SharedVariables.event.submit(new JoinServerEvent(player, connection, player.getPos(), SharedVariables.server));
+            SharedVariables.event.submit(new JoinServerEvent(
+                    player,
+                    connection,
+                    player.getPos(),
+                    SharedVariables.server
+            ));
         }
 
         if (! connection.isOpen()) {
@@ -69,53 +80,59 @@ public abstract class PlayerManagerMixin {
 
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;savePlayerData(Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
     public void remove(PlayerManager instance, ServerPlayerEntity player) {
-        EntrustExecution.tryTemporary(() -> {
-            if ((loginUsers.hasUser(player) && ! banned.containsIdentifier(loginUsers.getUser(player.getUuid()).getIdentifier())) || force.contains(player) || player.networkHandler.getConnection().getAddress() == null) {
-                force.remove(player);
-            }
-            savePlayerData(player);
-        }, Throwable::printStackTrace);
+        EntrustExecution.tryTemporary(
+                () -> {
+                    if ((loginUsers.hasUser(player) && ! banned.containsIdentifier(loginUsers.getUser(player.getUuid())
+                                                                                             .getIdentifier())) || force.contains(player) || player.networkHandler.getConnection()
+                                                                                                                                                                  .getAddress() == null) {
+                        force.remove(player);
+                    }
+                    savePlayerData(player);
+                },
+                Throwable::printStackTrace
+        );
     }
 
     @Shadow
     protected abstract void savePlayerData(ServerPlayerEntity player);
 
-    @Shadow public abstract MinecraftServer getServer();
+    @Shadow
+    public abstract MinecraftServer getServer();
 
     @Redirect(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V"))
     public void sendPacket(ServerPlayNetworkHandler instance, Packet<?> packet) {
         instance.sendPacket(packet);
     }
 
-//    @Inject(method = "getAdvancementTracker", at = @At("HEAD"), cancellable = true)
-//    public void optimizeAdvancementTracker(ServerPlayerEntity player, CallbackInfoReturnable<PlayerAdvancementTracker> cir) {
-//        cir.setReturnValue(optimizeAdvancementTracker(player, getServer().getPlayerManager()));
-//    }
-//
-//    public PlayerAdvancementTracker optimizeAdvancementTracker(ServerPlayerEntity player, PlayerManager manager) {
-//        UUID uuid = player.getUuid();
-//        long start = TimeUtil.millions();
-//        TRACKER.info("Loading advancement tracker for " + uuid);
-//        PlayerAdvancementTracker playerAdvancementTracker = advancementTrackerCaches.get(uuid.toString());
-//        if (playerAdvancementTracker == null) {
-//            TRACKER.info("Initializing advancement tracker for " + uuid);
-//            File file = this.server.getSavePath(WorldSavePath.ADVANCEMENTS).toFile();
-//            File file2 = new File(file, uuid + ".json");
-//            playerAdvancementTracker = new PlayerAdvancementTracker(this.server.getDataFixer(), manager, this.server.getAdvancementLoader(), file2, player);
-//            advancementTrackerCaches.put(uuid.toString(), playerAdvancementTracker);
-//        } else {
-//            TRACKER.info("Loading cached advancement tracker");
-//            TRACKER.info("Updating advancements...");
-//            playerAdvancementTracker.reload(null);
-//        }
-//
-//        playerAdvancementTracker.setOwner(player);
-//        TRACKER.info("Loaded advancement tracker for " + uuid + ", done in " + TimeUtil.processMillion(start) + "ms");
-//        return playerAdvancementTracker;
-//    }
-//
-//    @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/PlayerAdvancementTracker;clearCriteria()V"))
-//    public void remove(PlayerAdvancementTracker instance) {
-//
-//    }
+    //    @Inject(method = "getAdvancementTracker", at = @At("HEAD"), cancellable = true)
+    //    public void optimizeAdvancementTracker(ServerPlayerEntity player, CallbackInfoReturnable<PlayerAdvancementTracker> cir) {
+    //        cir.setReturnValue(optimizeAdvancementTracker(player, getServer().getPlayerManager()));
+    //    }
+    //
+    //    public PlayerAdvancementTracker optimizeAdvancementTracker(ServerPlayerEntity player, PlayerManager manager) {
+    //        UUID uuid = player.getUuid();
+    //        long start = TimeUtil.millions();
+    //        TRACKER.info("Loading advancement tracker for " + uuid);
+    //        PlayerAdvancementTracker playerAdvancementTracker = advancementTrackerCaches.get(uuid.toString());
+    //        if (playerAdvancementTracker == null) {
+    //            TRACKER.info("Initializing advancement tracker for " + uuid);
+    //            File file = this.server.getSavePath(WorldSavePath.ADVANCEMENTS).toFile();
+    //            File file2 = new File(file, uuid + ".json");
+    //            playerAdvancementTracker = new PlayerAdvancementTracker(this.server.getDataFixer(), manager, this.server.getAdvancementLoader(), file2, player);
+    //            advancementTrackerCaches.put(uuid.toString(), playerAdvancementTracker);
+    //        } else {
+    //            TRACKER.info("Loading cached advancement tracker");
+    //            TRACKER.info("Updating advancements...");
+    //            playerAdvancementTracker.reload(null);
+    //        }
+    //
+    //        playerAdvancementTracker.setOwner(player);
+    //        TRACKER.info("Loaded advancement tracker for " + uuid + ", done in " + TimeUtil.processMillion(start) + "ms");
+    //        return playerAdvancementTracker;
+    //    }
+    //
+    //    @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/PlayerAdvancementTracker;clearCriteria()V"))
+    //    public void remove(PlayerAdvancementTracker instance) {
+    //
+    //    }
 }

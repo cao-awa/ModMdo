@@ -1,7 +1,6 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
 import com.github.cao.awa.modmdo.annotations.extra.*;
-import com.github.cao.awa.modmdo.extra.loader.parameter.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.activity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -54,10 +53,6 @@ public class ModMdoExtraLoader {
 
     public boolean isActive(UUID id) {
         return EntrustParser.trying(() -> extras.get(id).isActive(), () -> false);
-    }
-
-    public void setArg(UUID id, UncertainParameter args) {
-        extras.get(id).get().setArgs(args);
     }
 
     public void load() {

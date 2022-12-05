@@ -14,11 +14,11 @@ public class AES {
     }
 
     public static String aesEncryptToString(byte[] content, byte[] key) throws Exception {
-        return StringUtils.newStringUtf8(aesEncrypt(content, key));
+        return StringUtils.newStringIso8859_1(aesEncrypt(content, key));
     }
 
     public static String aesDecryptToString(byte[] content, byte[] key) throws Exception {
-        return StringUtils.newStringUtf8(aesDecrypt(content, key));
+        return StringUtils.newStringIso8859_1(aesDecrypt(content, key));
     }
 
     public static byte[] aesDecrypt(byte[] content, byte[] key) throws Exception {

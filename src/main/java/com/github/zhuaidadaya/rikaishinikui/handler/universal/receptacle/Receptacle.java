@@ -8,6 +8,14 @@ public final class Receptacle<T> {
         this.target = target;
     }
 
+    public static <X> Receptacle<X> of() {
+        return of(null);
+    }
+
+    public static <X> Receptacle<X> of(X target) {
+        return new Receptacle<>(target);
+    }
+
     public String getSub() {
         return sub;
     }
