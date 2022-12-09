@@ -1,27 +1,33 @@
 package com.github.cao.awa.modmdo.mixins.client.play;
 
 import com.github.cao.awa.modmdo.security.level.*;
+import com.github.cao.awa.modmdo.utils.digger.*;
+import com.github.cao.awa.modmdo.utils.encryption.*;
 import com.github.cao.awa.modmdo.utils.entity.player.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.config.encryption.*;
+import com.github.cao.awa.modmdo.utils.packet.buf.*;
+import com.github.cao.awa.modmdo.utils.packet.sender.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.authlib.*;
-import io.netty.buffer.*;
+import net.minecraft.client.*;
 import net.minecraft.client.network.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
-import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.*;
+import org.apache.logging.log4j.*;
 import org.json.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
+import java.nio.charset.*;
+
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketListener {
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoClientAuthHandler");
+
     @Shadow
     @Final
     private ClientConnection connection;
@@ -29,6 +35,10 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
     @Shadow
     @Final
     private GameProfile profile;
+
+    @Shadow
+    @Final
+    private MinecraftClient client;
 
     /**
      * 与服务端进行自定义通信
@@ -38,71 +48,153 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      * @param ci
      *         callback
      * @author 草二号机
-     * @author 草awa
+     * @author cao_awa
      * @author zhuaidadaya
      */
-    @Inject(method = "onCustomPayload", at = @At("HEAD"))
+    @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-        PacketByteBuf data = packet.getData();
+        boolean doCancel = EntrustEnvironment.receptacle(cancel -> EntrustEnvironment.trys(
+                () -> {
+                    final PacketDataProcessor processor = new PacketDataProcessor(packet.getData());
 
-        Identifier informationSign = EntrustParser.tryCreate(data::readIdentifier, new Identifier(""));
+                    final Identifier informationSign = processor.readIdentifier();
 
-        EntrustExecution.tryTemporary(() -> {
-            if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
-                SECURE_KEYS.load(staticConfig.getConfigJSONObject("private_key"));
-                Receptacle<String> serverId = new Receptacle<>(null);
-                if (informationSign.equals(CHECKING_CHANNEL)) {
-                    EntrustExecution.tryTemporary(() -> serverId.set(data.readString()));
-                }
-                TRACKER.submit("Server are requesting login data, as: " + informationSign, () -> {
-                    EntrustExecution.notNull(staticConfig.get("secure_level"), level -> {
-                        SECURE_KEYS.setLevel(SecureLevel.of(level));
-                        TRACKER.submit("Changed config secure_level as " + level);
-                    });
-                    String address = EntrustParser.tryCreate(() -> {
-                        String addr = connection.getAddress().toString();
-                        return addr.substring(addr.indexOf("/") + 1);
-                    }, connection.getAddress().toString());
-                    boolean hasServerId = serverId.get() != null;
-                    String loginId = hasServerId ? SECURE_KEYS.use(serverId.get(), address) : SECURE_KEYS.use(address, address);
-                    if (serverId.get() != null && loginId != null) {
-                        if (SECURE_KEYS.has(address) && ! SECURE_KEYS.has(serverId.get())) {
-                            EntrustExecution.notNull(SECURE_KEYS.get(address), k -> k.setServerId(serverId.get()));
-                            SECURE_KEYS.set(SECURE_KEYS.get(address).getServerId(), SECURE_KEYS.get(address));
-                            TRACKER.submit("Changed server address " + address + " to id: " + serverId.get());
+                    final ClientPacketSender sender = new ClientPacketSender(
+                            connection,
+                            CLIENT_CHANNEL
+                    );
+
+                    if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
+                        SECURE_KEYS.load(staticConfig.getJSONObject("private_key"));
+                        final String serverId = EntrustEnvironment.receptacle(receptacle -> {
+                            if (informationSign.equals(CHECKING_CHANNEL)) {
+                                receptacle.set(processor.readString());
+                            }
+                        });
+                        LOGGER.debug(
+                                "Server are requesting login data, as: {}",
+                                informationSign
+                        );
+                        EntrustEnvironment.notNull(
+                                staticConfig.getString("secure_level"),
+                                level -> {
+                                    SECURE_KEYS.setLevel(SecureLevel.of(level));
+                                    LOGGER.debug("Changed config secure_level as " + level);
+                                }
+                        );
+                        final String address = EntrustEnvironment.get(
+                                () -> {
+                                    String addr = connection.getAddress()
+                                                            .toString();
+                                    return addr.substring(addr.indexOf("/") + 1);
+                                },
+                                connection.getAddress()
+                                          .toString()
+                        );
+                        final String identifier = serverId != null ? SECURE_KEYS.use(
+                                serverId,
+                                address
+                        ) : SECURE_KEYS.use(
+                                address,
+                                address
+                        );
+                        if (serverId != null && identifier != null) {
+                            if (SECURE_KEYS.has(address) && ! SECURE_KEYS.has(serverId)) {
+                                EntrustEnvironment.notNull(
+                                        SECURE_KEYS.get(address),
+                                        k -> k.setServerId(serverId)
+                                );
+                                SECURE_KEYS.set(
+                                        SECURE_KEYS.get(address)
+                                                   .getServerId(),
+                                        SECURE_KEYS.get(address)
+                                );
+                                LOGGER.debug(
+                                        "Changed server address '{}' to id: {}",
+                                        address,
+                                        serverId
+                                );
+                            }
+                            SECURE_KEYS.removeAddress(address);
+                            SECURE_KEYS.save();
                         }
-                        SECURE_KEYS.removeAddress(address);
-                        SECURE_KEYS.save();
-                    }
-                    String verifyKey = hasServerId ? SECURE_KEYS.get(serverId.get()).getVerifyKey() : null;
-                    if (verifyKey == null) {
-                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer()))
-                                .writeString(LOGIN_CHANNEL.toString())
-                                .writeString(profile.getName())
-                                .writeString(PlayerUtil.getUUID(profile).toString())
-                                .writeString(loginId)
-                                .writeString(String.valueOf(MODMDO_VERSION))
-                                .writeString(MODMDO_VERSION_NAME)));
-                    } else {
-                        String sendingVerify;
-                        JSONObject json = new JSONObject();
-                        json.put("identifier", loginId);
-                        sendingVerify = EntrustParser.trying(() -> AES.aesEncryptToString(json.toString().getBytes(), verifyKey.getBytes()), ex -> "");
-                        connection.send(new CustomPayloadC2SPacket(CLIENT_CHANNEL, (new PacketByteBuf(Unpooled.buffer()))
-                                .writeString(LOGIN_CHANNEL.toString())
-                                .writeString(profile.getName())
-                                .writeString(PlayerUtil.getUUID(profile).toString())
-                                .writeString(loginId)
-                                .writeString(String.valueOf(MODMDO_VERSION))
-                                .writeString(MODMDO_VERSION_NAME)
-                                .writeString(sendingVerify)
-                                .writeString(verifyKey)));
-                    }
-                });
-            }
-        }, ex -> TRACKER.err("Error in connecting ModMdo server", ex));
+                        String verifyKey = serverId == null ? null : SECURE_KEYS.get(serverId)
+                                                                                .getVerifyKey();
+                        JSONObject loginData = new JSONObject();
+                        loginData.put(
+                                "name",
+                                profile.getName()
+                        );
+                        loginData.put(
+                                "uuid",
+                                PlayerUtil.getUUID(profile)
+                                          .toString()
+                        );
+                        loginData.put(
+                                "identifier",
+                                identifier
+                        );
+                        loginData.put(
+                                "versionName",
+                                MODMDO_VERSION_NAME
+                        );
 
-        if (informationSign.equals(SERVER_CHANNEL)) {
+                        if (verifyKey == null) {
+                            loginData.put(
+                                    "verifyData",
+                                    ""
+                            );
+                            loginData.put(
+                                    "verifyKey",
+                                    ""
+                            );
+                        } else {
+                            if (identifier == null) {
+                                return;
+                            }
+                            JSONObject verifyData = new JSONObject();
+                            verifyData.put(
+                                    "identifier",
+                                    EntrustEnvironment.get(
+                                            () -> MessageDigger.digest(
+                                                    identifier,
+                                                    MessageDigger.Sha3.SHA_512
+                                            ),
+                                            identifier
+                                    )
+                            );
+                            loginData.put(
+                                    "verifyData",
+                                    EntrustEnvironment.trys(
+                                            () -> AES.aesEncryptToString(
+                                                    verifyData.toString()
+                                                              .getBytes(StandardCharsets.ISO_8859_1),
+                                                    verifyKey.getBytes()
+                                            ),
+                                            ex -> ""
+                                    )
+                            );
+                            loginData.put(
+                                    "verifyKey",
+                                    verifyKey
+                            );
+                        }
+
+                        sender.custom()
+                              .write(LOGIN_CHANNEL)
+                              .write(loginData)
+                              .send();
+                    }
+
+                    cancel.set(true);
+                },
+                ex -> LOGGER.error(
+                        "Error in connecting ModMdo server",
+                        ex
+                )
+        ));
+
+        if (doCancel) {
             ci.cancel();
         }
     }

@@ -14,7 +14,7 @@ public class RandomIdentifier {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public static String randomIdentifier() {
-        return randomIdentifier(256, false);
+        return randomIdentifier(1024, false);
     }
 
     public static String randomIdentifier(int size, boolean noNano) {
@@ -26,7 +26,7 @@ public class RandomIdentifier {
             } else {
                 if (i % (size / nano.length()) == 0 && i > 1) {
                     builder.append('-');
-                    EntrustExecution.tryTemporary(() -> {
+                    EntrustEnvironment.trys(() -> {
                         builder.insert(RANDOM.nextInt(builder.length()), nano.charAt(0));
                         nano.delete(0, 1);
                     });

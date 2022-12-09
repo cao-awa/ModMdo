@@ -1,78 +1,65 @@
 package com.github.cao.awa.modmdo.mixins.client.login;
 
-import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import net.minecraft.client.*;
 import net.minecraft.client.network.*;
-import net.minecraft.client.util.*;
-import net.minecraft.network.*;
-import net.minecraft.network.encryption.*;
-import net.minecraft.network.packet.c2s.login.*;
 import net.minecraft.network.packet.s2c.login.*;
 import net.minecraft.text.*;
-import org.jetbrains.annotations.*;
+import org.apache.logging.log4j.*;
 import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.*;
 
-import javax.crypto.*;
-import java.math.*;
-import java.security.*;
 import java.util.*;
-import java.util.function.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ClientLoginNetworkHandler.class)
 public abstract class ClientLoginNetworkHandlerMixin {
-    @Shadow @Final private Consumer<Text> statusConsumer;
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoClientLoginHandler");
 
-    @Shadow @Final private ClientConnection connection;
-
-    @Shadow @Nullable protected abstract Text joinServerSession(String serverId);
-
-    @Shadow @Final private MinecraftClient client;
-
-    private boolean isModMdo;
+    private boolean isModMdoServer;
 
     /**
-     * @author 草awa
-     * @reason
+     * Check server is ModMdo server and mark it.
+     *
+     * @author 草二号机
+     * @author cao_awa
+     *
+     * @param packet Login packet
+     * @param ci Callback
      */
-    @Overwrite
-    public void onHello(LoginHelloS2CPacket packet) {
-        isModMdo = EntrustParser.tryCreate(() -> Arrays.equals(NONCE, packet.getNonce()), false);
-        Cipher cipher;
-        Cipher cipher2;
-        String string;
-        LoginKeyC2SPacket loginKeyC2SPacket;
-        try {
-            SecretKey secretKey = NetworkEncryptionUtils.generateKey();
-            PublicKey publicKey = packet.getPublicKey();
-            string = new BigInteger(NetworkEncryptionUtils.generateServerId(packet.getServerId(), publicKey, secretKey)).toString(16);
-            cipher = NetworkEncryptionUtils.cipherFromKey(2, secretKey);
-            cipher2 = NetworkEncryptionUtils.cipherFromKey(1, secretKey);
-            loginKeyC2SPacket = new LoginKeyC2SPacket(secretKey, publicKey, packet.getNonce());
-        } catch (NetworkEncryptionException var8) {
-            throw new IllegalStateException("Protocol error", var8);
+    @Inject(method = "onHello", at = @At("HEAD"))
+    private void onHello(LoginHelloS2CPacket packet, CallbackInfo ci) {
+        this.isModMdoServer = EntrustEnvironment.get(
+                () -> Arrays.equals(
+                        EntrustEnvironment.operation(
+                                new byte[22],
+                                nonce -> System.arraycopy(
+                                        packet.getNonce(),
+                                        0,
+                                        nonce,
+                                        0,
+                                        22
+                                )
+                        ),
+                        MODMDO_NONCE_HEAD
+                ),
+                false
+        );
+    }
+
+    /**
+     * Let client ignored vanilla verify when server is ModMdo server.
+     *
+     * @author 草二号机
+     *
+     * @param serverId ServerId
+     * @param cir Callback
+     */
+    @Inject(method = "joinServerSession", at = @At("RETURN"), cancellable = true)
+    public void joinServerSession(String serverId, CallbackInfoReturnable<Text> cir) {
+        if (isModMdoServer) {
+            cir.setReturnValue(null);
         }
-
-        this.statusConsumer.accept(Translatable.translatable("connect.authorizing").text());
-        NetworkUtils.EXECUTOR.submit(() -> {
-            Text text = this.joinServerSession(string);
-            if (!isModMdo) {
-                if (text != null) {
-                    if (this.client.getCurrentServerEntry() == null || ! this.client.getCurrentServerEntry().isLocal()) {
-                        this.connection.disconnect(text);
-                        return;
-                    }
-
-                    TRACKER.warn(text.getString());
-                }
-            }
-
-            this.statusConsumer.accept(Translatable.translatable("connect.encrypting").text());
-            this.connection.send(loginKeyC2SPacket, (future) -> {
-                this.connection.setupEncryption(cipher, cipher2);
-            });
-        });
     }
 }

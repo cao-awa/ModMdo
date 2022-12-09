@@ -1,4 +1,4 @@
-package com.github.zhuaidadaya.rikaishinikui.handler.config.encryption;
+package com.github.cao.awa.modmdo.utils.encryption;
 
 import org.apache.commons.codec.binary.*;
 

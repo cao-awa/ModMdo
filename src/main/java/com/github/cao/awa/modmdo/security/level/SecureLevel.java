@@ -1,5 +1,8 @@
 package com.github.cao.awa.modmdo.security.level;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
+
+@Client
 public enum SecureLevel {
     UNEQUAL_KEY, UNEQUAL_ID, NO_SECURE;
 

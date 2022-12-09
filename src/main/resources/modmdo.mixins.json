@@ -8,8 +8,6 @@
         "client.login.ClientLoginNetworkHandlerMixin",
         "client.play.ClientPlayNetworkHandlerMixin"
     ],
-    "server": [
-    ],
     "injectors": {
         "defaultRequire": 1
     }

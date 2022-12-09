@@ -1,9 +1,11 @@
 package com.github.cao.awa.modmdo.security.key;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.storage.*;
 import org.jetbrains.annotations.*;
 import org.json.*;
 
+@Client
 public class SecureKey extends Storable {
     private @NotNull String privateKey;
     private @NotNull String verifyKey;
@@ -34,7 +36,7 @@ public class SecureKey extends Storable {
     }
 
     public @NotNull String getVerifyKey() {
-        return verifyKey;
+        return this.verifyKey;
     }
 
     public void setVerifyKey(@NotNull String verifyKey) {
@@ -42,7 +44,7 @@ public class SecureKey extends Storable {
     }
 
     public String getServerId() {
-        return serverId;
+        return this.serverId;
     }
 
     public void setServerId(String serverId) {
@@ -50,7 +52,7 @@ public class SecureKey extends Storable {
     }
 
     public String getAddress() {
-        return address;
+        return this.address;
     }
 
     public void setAddress(String address) {
@@ -58,7 +60,7 @@ public class SecureKey extends Storable {
     }
 
     public @NotNull String getPrivateKey() {
-        return privateKey;
+        return this.privateKey;
     }
 
     public void setPrivateKey(@NotNull String privateKey) {
@@ -66,7 +68,7 @@ public class SecureKey extends Storable {
     }
 
     public @Nullable String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(@Nullable String id) {
@@ -75,17 +77,29 @@ public class SecureKey extends Storable {
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
-        json.put("private-key", privateKey);
-        json.put("verify-key", verifyKey);
-        if (id != null) {
-            json.put("id", id);
+        json.put(
+                "private-key",
+                this.privateKey
+        );
+        json.put(
+                "verify-key",
+                this.verifyKey
+        );
+        if (this.id != null) {
+            json.put(
+                    "id",
+                    this.id
+            );
         }
-        json.put("address", address);
+        json.put(
+                "address",
+                this.address
+        );
         return json;
     }
 
     public boolean hasId() {
-        return id != null;
+        return this.id != null;
     }
 
     public boolean hasKey() {
@@ -93,6 +107,6 @@ public class SecureKey extends Storable {
     }
 
     public boolean hasAddress() {
-        return address != null;
+        return this.address != null;
     }
 }

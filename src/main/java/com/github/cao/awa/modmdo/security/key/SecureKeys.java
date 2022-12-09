@@ -1,9 +1,10 @@
 package com.github.cao.awa.modmdo.security.key;
 
+import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.security.*;
 import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.config.encryption.*;
+import com.github.cao.awa.modmdo.utils.encryption.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -12,6 +13,7 @@ import org.json.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
+@Client
 public class SecureKeys extends Storable {
     private final Object2ObjectOpenHashMap<String, SecureKey> keys = new Object2ObjectOpenHashMap<>();
     private SecureLevel level = SecureLevel.UNEQUAL_KEY;
@@ -26,21 +28,63 @@ public class SecureKeys extends Storable {
 
     public String use(String target, String address) {
         if (keys.containsKey(target)) {
-            return use(level, target);
+            return use(
+                    level,
+                    target
+            );
         }
-        keep(target, address);
-        return use(level, target);
+        keep(
+                target,
+                address
+        );
+        return use(
+                level,
+                target
+        );
     }
 
     public void keep(String target, String address) {
         if (level == SecureLevel.UNEQUAL_KEY) {
-            set(target, has(target) ? SECURE_KEYS.get(target) : new SecureKey(RandomIdentifier.randomIdentifier(32, true), RandomIdentifier.randomIdentifier(32, true), address));
+            set(
+                    target,
+                    has(target) ? SECURE_KEYS.get(target) : new SecureKey(
+                            RandomIdentifier.randomIdentifier(
+                                    32,
+                                    true
+                            ),
+                            RandomIdentifier.randomIdentifier(
+                                    32,
+                                    true
+                            ),
+                            address
+                    )
+            );
         } else {
-            SecureKey key = has(target) ? SECURE_KEYS.get(target) : new SecureKey(RandomIdentifier.randomIdentifier(32, true), RandomIdentifier.randomIdentifier(32, true), RandomIdentifier.randomIdentifier(), address);
+            SecureKey key = has(target) ? SECURE_KEYS.get(target) : new SecureKey(
+                    RandomIdentifier.randomIdentifier(
+                            32,
+                            true
+                    ),
+                    RandomIdentifier.randomIdentifier(
+                            32,
+                            true
+                    ),
+                    RandomIdentifier.randomIdentifier(
+                            4096,
+                            true
+                    ),
+                    address
+            );
             if (! key.hasId()) {
-                key.setId(RandomIdentifier.randomIdentifier());
+                key.setId(RandomIdentifier.randomIdentifier(
+                        4096,
+                        true
+                ));
             }
-            set(target, key);
+            set(
+                    target,
+                    key
+            );
         }
     }
 
@@ -49,27 +93,39 @@ public class SecureKeys extends Storable {
         for (String s : keys.keySet()) {
             switch (level) {
                 case UNEQUAL_KEY -> {
-                    if (has(s) && keys.get(s).getPrivateKey().equals(key.getPrivateKey())) {
-                        keys.remove(s);
+                    if (has(s)) {
+                        if (keys.get(s)
+                                .getPrivateKey()
+                                .equals(key.getPrivateKey())) {
+                            keys.remove(s);
+                        }
                     }
                 }
-                case UNEQUAL_ID -> EntrustExecution.notNull(keys.get(s).getId(), id -> {
-                    if (id.equals(key.getId())) {
-                        keys.remove(s);
-                    }
-                });
+                case UNEQUAL_ID -> EntrustEnvironment.notNull(
+                        keys.get(s)
+                            .getId(),
+                        id -> {
+                            if (id.equals(key.getId())) {
+                                keys.remove(s);
+                            }
+                        }
+                );
                 default -> {
                     return;
                 }
             }
         }
         if (create.get()) {
-            keys.put(target, key);
+            keys.put(
+                    target,
+                    key
+            );
         }
     }
 
     public boolean has(String target) {
-        return keys.containsKey(target) && keys.get(target).hasAddress();
+        return keys.containsKey(target) && keys.get(target)
+                                               .hasAddress();
     }
 
     public SecureKey get(String target) {
@@ -78,14 +134,30 @@ public class SecureKeys extends Storable {
 
     private String use(SecureLevel level, String target) {
         return switch (level) {
-            case UNEQUAL_KEY -> EntrustParser.trying(() -> AES.aesEncryptToString(staticConfig.get("identifier").getBytes(), keys.get(target).getPrivateKey().getBytes()), ex -> staticConfig.get("identifier"));
-            case UNEQUAL_ID -> keys.get(target).getId();
-            default -> staticConfig.get("identifier");
+            case UNEQUAL_KEY -> EntrustEnvironment.trys(
+                    () -> AES.aesEncryptToString(
+                            staticConfig.getString("identifier")
+                                        .getBytes(),
+                            keys.get(target)
+                                .getPrivateKey()
+                                .getBytes()
+                    ),
+                    () -> staticConfig.getString("identifier")
+            );
+            case UNEQUAL_ID -> keys.get(target)
+                                   .getId();
+            default -> staticConfig.getString("identifier");
         };
     }
 
     public boolean hasAddress(@NotNull String address) {
-        return keys.keySet().parallelStream().anyMatch(s -> address.equals(keys.get(s).getAddress()));
+        for (String s : keys.keySet()) {
+            if (address.equals(keys.get(s)
+                                   .getAddress())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void removeAddress(String address) {
@@ -93,16 +165,31 @@ public class SecureKeys extends Storable {
     }
 
     public void save() {
-        staticConfig.set("private_key", SECURE_KEYS.toJSONObject().toString());
+        staticConfig.set(
+                "private_key",
+                SECURE_KEYS.toJSONObject()
+                           .toString()
+        );
     }
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
-        EntrustExecution.tryFor(keys.keySet(), target -> json.put(target, keys.get(target).toJSONObject()));
+        for (String target : keys.keySet()) {
+            json.put(
+                    target,
+                    keys.get(target)
+                        .toJSONObject()
+            );
+        }
         return json;
     }
 
     public void load(JSONObject json) {
-        EntrustExecution.tryFor(json.keySet(), s -> EntrustExecution.tryTemporary(() -> SECURE_KEYS.set(s, new SecureKey(json.getJSONObject(s)))));
+        for (String s : json.keySet()) {
+            EntrustEnvironment.trys(() -> SECURE_KEYS.set(
+                    s,
+                    new SecureKey(json.getJSONObject(s))
+            ));
+        }
     }
 }
