@@ -63,10 +63,6 @@ public class BlockBreakEvent extends EntityTargetedEvent<BlockBreakEvent> {
         return previously.target();
     }
 
-    public String synopsis() {
-        return "";
-    }
-
     @Override
     public String abbreviate() {
         return "BlockDestroyEvent";

@@ -21,7 +21,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Auto
 public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends TargetedTrigger<T> {
-    private static final UnmodifiableListReceptacle<String> supported = new UnmodifiableListReceptacle<>(EntrustParser.operation(new ObjectArrayList<>(), list -> {
+    private static final UnmodifiableListReceptacle<String> supported = new UnmodifiableListReceptacle<>(EntrustEnvironment.operation(new ObjectArrayList<>(), list -> {
         list.add(ServerPlayerEntity.class.getName());
     }));
     private final ObjectArrayList<Receptacle<String>> args = new ObjectArrayList<>();
@@ -34,7 +34,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
         JSONObject message = metadata.getJSONObject("reason");
         key = message.getString("key");
         JSONArray array = message.getJSONArray("args");
-        EntrustParser.operation(args, list -> {
+        EntrustEnvironment.operation(args, list -> {
             for (int i = 0; i < array.length(); i++) {
                 list.add(new Receptacle<>(array.get(i).toString()));
             }
@@ -47,7 +47,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> disconnect(format().text()));
+        EntrustEnvironment.trys(() -> disconnect(format().text()));
     }
 
     public void disconnect(Text reason) {
@@ -63,17 +63,17 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
                 }
             });
             selector.prepare(WORLD, target -> {
-                EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
+                EntrustEnvironment.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
                     player.networkHandler.disconnect(reason);
                 }));
             });
             selector.prepare(ALL, target -> {
-                EntrustExecution.tryFor(server.getPlayerManager().getPlayerList(), player -> {
+                EntrustEnvironment.tryFor(server.getPlayerManager().getPlayerList(), player -> {
                     player.networkHandler.disconnect(reason);
                 });
             });
             selector.prepare(APPOINT, target -> {
-                EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), targeted -> targeted.networkHandler.disconnect(reason));
+                EntrustEnvironment.notNull(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), targeted -> targeted.networkHandler.disconnect(reason));
             });
             selector.action();
         }
@@ -82,7 +82,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
     public Literal format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
-                String name = EntrustParser.trying(() -> {
+                String name = EntrustEnvironment.trys(() -> {
                     JSONObject json = new JSONObject(s.get());
                     return json.getString("name");
                 }, ex -> {
@@ -93,20 +93,20 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
                     active = false;
                     break;
                 }
-                EntrustExecution.tryTemporary(() -> {
+                EntrustEnvironment.trys(() -> {
                     TARGETED_FORMATTER.get("^{variable}").accept(this, s.setSub(name));
                 }, e -> {
                     err("Cannot find target variable: " + name, e);
                     active = false;
                 });
             } else {
-                EntrustExecution.notNull(TARGETED_FORMATTER.get(s.get()), receptacle -> receptacle.accept(this, s));
+                EntrustEnvironment.notNull(TARGETED_FORMATTER.get(s.get()), receptacle -> receptacle.accept(this, s));
             }
         }
         if (! active) {
             return null;
         }
-        Object[] objs = EntrustParser.operation(new Object[args.size()], e -> {
+        Object[] objs = EntrustEnvironment.operation(new Object[args.size()], e -> {
             for (int i = 0; i < args.size(); i++) {
                 e[i] = args.get(i).get();
             }

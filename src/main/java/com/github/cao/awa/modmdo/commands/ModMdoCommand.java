@@ -1,10 +1,10 @@
 package com.github.cao.awa.modmdo.commands;
 
 import com.github.cao.awa.modmdo.*;
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.*;
+import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.text.*;
@@ -70,12 +70,10 @@ public class ModMdoCommand extends SimpleCommand {
             SimpleCommandOperation.sendFeedback(rejectReconnect, formatConfigReturnMessage("reject_reconnect"));
             return 2;
         }).then(literal("enable").executes(reject -> {
-            if (SharedVariables.commandApplyToPlayer(1, SimpleCommandOperation.getPlayer(reject), reject)) {
                 SharedVariables.enableRejectReconnect = true;
                 SharedVariables.saveVariables();
 
                 SimpleCommandOperation.sendFeedback(reject, TextUtil.translatable("reject_reconnect.true.rule.format"));
-            }
             return 1;
         })).then(literal("disable").executes(receive -> {
             SharedVariables.enableRejectReconnect = false;
@@ -221,15 +219,15 @@ public class ModMdoCommand extends SimpleCommand {
     }
 
     public Translatable formatConfigCachedReturnMessage(String config) {
-        return TextUtil.translatable(config + "." + SharedVariables.config.getConfigString(config) + ".rule.format");
+        return TextUtil.translatable(config + "." + SharedVariables.config.getString(config) + ".rule.format");
     }
 
     public Translatable formatConfigReturnMessage(String config) {
-        return TextUtil.translatable(config + "." + SharedVariables.config.getConfigString(config) + ".rule.format");
+        return TextUtil.translatable(config + "." + SharedVariables.config.getString(config) + ".rule.format");
     }
 
     public Translatable formatCheckerTimeLimit() {
-        return TextUtil.translatable("checker_time_limit.rule.format", config.getConfigInt("checker_time_limit"));
+        return TextUtil.translatable("checker_time_limit.rule.format", config.getInt("checker_time_limit"));
     }
 
     public Translatable formatItemDespawnTicks() {
@@ -271,7 +269,7 @@ public class ModMdoCommand extends SimpleCommand {
     public Translatable formatModMdoDescription(ServerPlayerEntity player) {
         Translatable modmdoVersion;
         String name;
-        if (SharedVariables.getPlayerModMdoVersion(player) > 0 && (name = getPlayerModMdoName(player)) != null) {
+        if ((name = getPlayerModMdoName(player)) != null) {
             modmdoVersion = TextUtil.translatable("modmdo.description.your.modmdo", name);
         } else {
             modmdoVersion = TextUtil.translatable("modmdo.description.you.do.not.have.modmdo");

@@ -19,7 +19,7 @@ public abstract class ItemEntityMixin extends Entity {
     /**
      * 修改item的age限制
      *
-     * @author 草awa
+     * @author cao_awa
      * @author 草二号机
      */
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000))

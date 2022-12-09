@@ -4,7 +4,7 @@ import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.security.*;
 import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.config.encryption.*;
+import com.github.cao.awa.modmdo.utils.encryption.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
@@ -101,17 +101,15 @@ public class SecureKeys extends Storable {
                         }
                     }
                 }
-                case UNEQUAL_ID -> {
-                    EntrustExecution.notNull(
-                            keys.get(s)
-                                .getId(),
-                            id -> {
-                                if (id.equals(key.getId())) {
-                                    keys.remove(s);
-                                }
+                case UNEQUAL_ID -> EntrustEnvironment.notNull(
+                        keys.get(s)
+                            .getId(),
+                        id -> {
+                            if (id.equals(key.getId())) {
+                                keys.remove(s);
                             }
-                    );
-                }
+                        }
+                );
                 default -> {
                     return;
                 }
@@ -136,19 +134,19 @@ public class SecureKeys extends Storable {
 
     private String use(SecureLevel level, String target) {
         return switch (level) {
-            case UNEQUAL_KEY -> EntrustParser.trying(
+            case UNEQUAL_KEY -> EntrustEnvironment.trys(
                     () -> AES.aesEncryptToString(
-                            staticConfig.get("identifier")
+                            staticConfig.getString("identifier")
                                         .getBytes(),
                             keys.get(target)
                                 .getPrivateKey()
                                 .getBytes()
                     ),
-                    ex -> staticConfig.get("identifier")
+                    () -> staticConfig.getString("identifier")
             );
             case UNEQUAL_ID -> keys.get(target)
                                    .getId();
-            default -> staticConfig.get("identifier");
+            default -> staticConfig.getString("identifier");
         };
     }
 
@@ -188,12 +186,10 @@ public class SecureKeys extends Storable {
 
     public void load(JSONObject json) {
         for (String s : json.keySet()) {
-            EntrustExecution.tryTemporary(() -> {
-                SECURE_KEYS.set(
-                        s,
-                        new SecureKey(json.getJSONObject(s))
-                );
-            });
+            EntrustEnvironment.trys(() -> SECURE_KEYS.set(
+                    s,
+                    new SecureKey(json.getJSONObject(s))
+            ));
         }
     }
 }

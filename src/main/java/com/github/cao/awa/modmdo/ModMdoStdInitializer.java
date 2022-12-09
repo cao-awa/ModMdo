@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo;
 
 import com.github.cao.awa.modmdo.commands.*;
+import com.github.cao.awa.modmdo.config.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.server.*;
 import com.github.cao.awa.modmdo.event.server.tick.*;
@@ -11,13 +12,13 @@ import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
-import com.github.cao.awa.modmdo.utils.file.reads.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
+import com.github.cao.awa.modmdo.utils.io.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import net.fabricmc.api.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.*;
 import net.minecraft.server.*;
+import org.apache.logging.log4j.*;
 import org.json.*;
 
 import java.io.*;
@@ -26,48 +27,50 @@ import java.nio.charset.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoStdInitializer implements ModInitializer {
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoInitializer");
+    
     public static void initModMdoVariables(ModMdoType type) {
         if (type == ModMdoType.SERVER) {
-            TRACKER.submit("Init level as server mode");
+            LOGGER.debug("Init level as server mode");
         } else {
-            TRACKER.submit("Init level as client mode");
+            LOGGER.debug("Init level as client mode");
         }
         EntrustEnvironment.notNull(
-                config.getConfigBoolean("here_command"),
+                config.getBoolean("here_command"),
                 here -> {
                     SharedVariables.enableHereCommand = here;
-                    TRACKER.submit("Init config here_command as " + here);
+                    LOGGER.debug("Init config here_command as " + here);
                 }
         );
         EntrustEnvironment.notNull(
-                config.getConfigBoolean("secure_enchant"),
+                config.getBoolean("secure_enchant"),
                 enchant -> {
                     SharedVariables.enableSecureEnchant = enchant;
-                    TRACKER.submit("Init config secure_enchant as " + enchant);
+                    LOGGER.debug("Init config secure_enchant as " + enchant);
                 }
         );
         EntrustEnvironment.notNull(
-                config.getConfigBoolean("time_active"),
+                config.getBoolean("time_active"),
                 tac -> {
                     SharedVariables.timeActive = tac;
-                    TRACKER.submit("Init config time_active as " + tac);
+                    LOGGER.debug("Init config time_active as " + tac);
                 }
         );
         EntrustEnvironment.notNull(
-                config.getConfigBoolean("modmdo_whitelist"),
+                config.getBoolean("modmdo_whitelist"),
                 whitelist -> {
                     SharedVariables.modmdoWhitelist = whitelist;
-                    TRACKER.submit("Init config modmdo_whitelist as " + whitelist);
+                    LOGGER.debug("Init config modmdo_whitelist as " + whitelist);
                 }
         );
 
 
         if (type == ModMdoType.CLIENT) {
             EntrustEnvironment.notNull(
-                    config.get("secure_level"),
+                    config.getString("secure_level"),
                     level -> {
                         SECURE_KEYS.setLevel(SecureLevel.of(level));
-                        TRACKER.submit("Init config secure_level as " + level);
+                        LOGGER.debug("Init config secure_level as " + level);
                     }
             );
         }
@@ -86,15 +89,15 @@ public class ModMdoStdInitializer implements ModInitializer {
                 System.getProperty("-DmodmdoDebug"),
                 debug -> {
                     SharedVariables.debug = Boolean.parseBoolean(debug);
-                    TRACKER.submit("Init modmdo debug as " + debug);
+                    LOGGER.debug("Init modmdo debug as " + debug);
                 }
         );
-        TRACKER.submit("ModMdo loading");
-        TRACKER.info("Loading ModMdo " + SharedVariables.VERSION_ID + " (step 1/2)");
-        TRACKER.info("ModMdo Std Initiator running");
-        TRACKER.info("Loading for ModMdo Std init");
+        LOGGER.debug("ModMdo loading");
+        LOGGER.info("Loading ModMdo " + SharedVariables.VERSION_ID + " (step 1/2)");
+        LOGGER.info("ModMdo Std Initiator running");
+        LOGGER.info("Loading for ModMdo Std init");
 
-        staticConfig = new DiskObjectConfigUtil(
+        staticConfig = new DiskConfigUtil(
                 "ModMdo",
                 "config/modmdo",
                 "modmdo",
@@ -117,10 +120,12 @@ public class ModMdoStdInitializer implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             SharedVariables.server = server;
 
-            EntrustExecution.tryTemporary(() -> {
+            EntrustEnvironment.trys(() -> {
                 commandRegister = new ModMdoCommandRegister(server);
 
                 ModMdoStdInitializer.initForLevel(server);
+
+                new BenchmarkCommand().register();
             });
         });
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
@@ -142,7 +147,7 @@ public class ModMdoStdInitializer implements ModInitializer {
                 "assets/modmdo/format/enchantment_level.json"
         );
 
-        TRACKER.info("Registering for ModMdo major");
+        LOGGER.info("Registering for ModMdo major");
         SharedVariables.extras = new ModMdoExtraLoader(new ModMdo().setName("ModMdo")
                                                                    .setId(SharedVariables.EXTRA_ID));
 
@@ -150,7 +155,7 @@ public class ModMdoStdInitializer implements ModInitializer {
     }
 
     public static void initForLevel(MinecraftServer server) {
-        TRACKER.submit("ModMdo extra init");
+        LOGGER.debug("ModMdo extra init");
         SharedVariables.extras.getExtra(
                                ModMdo.class,
                                SharedVariables.EXTRA_ID
@@ -162,7 +167,7 @@ public class ModMdoStdInitializer implements ModInitializer {
     }
 
     public static Legacy<Integer, Integer> loadEvent(boolean reload) {
-        TRACKER.submit(reload ? "ModMdo event reloading" : "ModMdo event loading");
+        LOGGER.debug(reload ? "ModMdo event reloading" : "ModMdo event loading");
         int old = 0;
         if (event != null) {
             old = event.registered();
@@ -177,7 +182,7 @@ public class ModMdoStdInitializer implements ModInitializer {
 
     public void parseMapFormat() {
         try {
-            JSONObject versionMap = new JSONObject(FileReads.read(new BufferedReader(new InputStreamReader(
+            JSONObject versionMap = new JSONObject(IOUtil.read(new BufferedReader(new InputStreamReader(
                     Resources.getResource(
                             "assets/modmdo/versions/versions_map.json",
                             getClass()
@@ -186,13 +191,13 @@ public class ModMdoStdInitializer implements ModInitializer {
             ))));
 
             for (String s : versionMap.keySet())
-                SharedVariables.modMdoIdToVersionMap.put(
+                SharedVariables.MOD_MDO_ID_TO_VERSION_MAP.put(
                         Integer.valueOf(s),
                         versionMap.getString(s)
                 );
 
             for (String s : versionMap.keySet())
-                SharedVariables.modMdoVersionToIdMap.put(
+                SharedVariables.MOD_MDO_VERSION_TO_ID_MAP.put(
                         versionMap.getString(s),
                         Integer.valueOf(s)
                                .intValue()

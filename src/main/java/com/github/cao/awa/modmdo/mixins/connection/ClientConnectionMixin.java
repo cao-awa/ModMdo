@@ -1,55 +1,42 @@
 package com.github.cao.awa.modmdo.mixins.connection;
 
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.cao.awa.modmdo.develop.text.*;
+import com.github.cao.awa.modmdo.storage.*;
 import io.netty.channel.*;
-import io.netty.util.concurrent.*;
 import net.minecraft.network.*;
 import net.minecraft.text.*;
-import org.jetbrains.annotations.*;
+import org.apache.logging.log4j.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
-
-import java.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ClientConnection.class)
 public abstract class ClientConnectionMixin {
-    @Shadow @Nullable public abstract Text getDisconnectReason();
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoClientConnectionPost");
+
+    private static final Translatable DISCONNECT = Translatable.translatable("Disconnect");
 
     @Shadow
     private Channel channel;
     @Shadow
     private boolean errored;
 
-    @Shadow
-    public abstract void send(Packet<?> packet);
+    @Shadow public abstract void disconnect(Text disconnectReason);
 
-    @Inject(method = "disconnect", at = @At("RETURN"))
-    public void disconnect(CallbackInfo ci) {
-        TRACKER.submit("Disconnect: " + EntrustParser.tryCreate(() -> Objects.requireNonNull(getDisconnectReason()).getString(), null));
+    @Inject(method = "handleDisconnection", at = @At("HEAD"))
+    public void handleDisconnection(CallbackInfo ci) {
+        CONNECTIONS.remove((ClientConnection) (Object) this);
     }
 
-    /**
-     * @author 草awa
-     */
-    @Inject(method = "exceptionCaught", at = @At("HEAD"))
-    public void exceptionCaught(ChannelHandlerContext context, Throwable ex, CallbackInfo ci) {
-        ex.printStackTrace();
-    }
-
-    @Shadow
-    protected abstract NetworkState getState();
-
-    @Shadow
-    public abstract void disconnect(Text disconnectReason);
-
-    @Shadow
-    public abstract void disableAutoRead();
-
-    @Inject(method = "send(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", at = @At("HEAD"))
-    public void send(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> callback, CallbackInfo ci) {
-        TRACKER.submit("Send packet: " + packet.getClass());
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
+    public void tick(CallbackInfo ci) {
+        if (serverUnderDdosAttack.get()) {
+            if (! SharedVariables.CONNECTIONS.contains((ClientConnection) (Object) this)) {
+                disconnect(DISCONNECT.text());
+                ci.cancel();
+            }
+        }
     }
 }

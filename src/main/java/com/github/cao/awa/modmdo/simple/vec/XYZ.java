@@ -4,7 +4,7 @@ import com.github.cao.awa.modmdo.storage.*;
 import net.minecraft.util.math.*;
 import org.json.*;
 
-public class XYZ extends Storable {
+public class XYZ extends Storable implements Cloneable {
     public double x;
     public double y;
     public double z;
@@ -153,7 +153,7 @@ public class XYZ extends Storable {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put("x", SharedVariables.fractionDigits2.format(x)).put("y", SharedVariables.fractionDigits2.format(y)).put("z", SharedVariables.fractionDigits2.format(z));
+        return new JSONObject().put("x", SharedVariables.FRACTION_DIGITS_2.format(x)).put("y", SharedVariables.FRACTION_DIGITS_2.format(y)).put("z", SharedVariables.FRACTION_DIGITS_2.format(z));
     }
 
     public boolean equal(XYZ xyz) {

@@ -2,7 +2,6 @@ package com.github.cao.awa.modmdo.event.command;
 
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.delay.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.server.*;
 import net.minecraft.server.command.*;
 
@@ -42,11 +41,6 @@ public class CommandExecuteEvent extends ModMdoEvent<CommandExecuteEvent> {
     @Override
     public CommandExecuteEvent fuse(Previously<CommandExecuteEvent> previously, CommandExecuteEvent delay) {
         return previously.target();
-    }
-
-    @Override
-    public String synopsis() {
-        return EntrustParser.tryCreate(() -> String.format("CommandExecuteEvent{command=%s}", command), toString());
     }
 
     @Override

@@ -67,10 +67,6 @@ public class BlockStateSetEvent extends ModMdoEvent<BlockStateSetEvent> {
         return previously.target();
     }
 
-    public String synopsis() {
-        return "";
-    }
-
     @Override
     public String abbreviate() {
         return "BlockStateSetEvent";

@@ -65,11 +65,6 @@ public class BlockExplosionDestroyEvent extends EntityTargetedEvent<BlockExplosi
         return previously.target();
     }
 
-    // Deprecated
-    public String synopsis() {
-        return "";
-    }
-
     @Override
     public String abbreviate() {
         return "BlockExplosionDestroyEvent";

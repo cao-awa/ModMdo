@@ -1,51 +1,65 @@
 package com.github.cao.awa.modmdo.server.login;
 
 import com.github.cao.awa.modmdo.annotations.platform.*;
-import com.github.cao.awa.modmdo.certificate.identity.*;
+import com.github.cao.awa.modmdo.security.certificate.identity.*;
 import com.github.cao.awa.modmdo.storage.*;
+import org.jetbrains.annotations.*;
 import org.json.*;
 
 import java.util.*;
 
 @Server
 public final class LoginRecorde extends Storable {
-    private final Identity identity;
-    private final LoginRecordeType type;
+    private final @NotNull Identity identity;
+    private final @NotNull LoginRecordeType type;
 
-    public LoginRecorde(String modmdoUniqueId, UUID uuid, String unidirectionalVerify, LoginRecordeType type) {
-        this.identity = new Identity(modmdoUniqueId, uuid, unidirectionalVerify);
+    public LoginRecorde(String modmdoUniqueId, UUID uuid, String unidirectionalVerify, @NotNull LoginRecordeType type) {
+        this.identity = new Identity(
+                modmdoUniqueId,
+                uuid,
+                unidirectionalVerify
+        );
         this.type = type;
     }
 
-    public LoginRecorde(Identity identity, LoginRecordeType type) {
+    public LoginRecorde(@NotNull Identity identity, @NotNull LoginRecordeType type) {
         this.identity = identity;
         this.type = type;
     }
 
     public static LoginRecorde build(JSONObject json) {
-        return new LoginRecorde(Identity.build(json.getJSONObject("identity")), LoginRecordeType.of(json.getString("type")));
+        return new LoginRecorde(
+                Identity.build(json.getJSONObject("identity")),
+                LoginRecordeType.of(json.getString("type"))
+        );
     }
 
     public String getUniqueId() {
-        return identity.getUniqueId();
+        return this.identity.getUniqueId();
     }
 
     public UUID getUuid() {
-        return identity.getUuid();
+        return this.identity.getUuid();
     }
 
-    public LoginRecordeType type() {
-        return type;
+    public @NotNull LoginRecordeType type() {
+        return this.type;
     }
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
-        json.put("identity", identity.toJSONObject());
-        json.put("type", type);
+        json.put(
+                "identity",
+                this.identity.toJSONObject()
+        );
+        json.put(
+                "type",
+                this.type
+        );
         return json;
     }
 
-    public Identity getIdentity() {
-        return identity;
+    public @NotNull Identity getIdentity() {
+        return this.identity;
     }
 }

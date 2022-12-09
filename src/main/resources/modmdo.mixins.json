@@ -15,8 +15,6 @@
         "command.CommandManagerMixin",
         "command.block.CommandBlockMixin",
         "command.save.SaveAllCommandMixin",
-        "command.summon.SummonCommandMixin",
-        "connection.ClientConnectionInterface",
         "connection.ClientConnectionMixin",
         "enchant.EnchantmentHelperMixin",
         "entity.EntityListMixin",

@@ -14,8 +14,12 @@ public class ModMdoExtraSuggester {
     public static ModMdoExtra<?> getExtra(String uuid) {
         return SharedVariables.extras.getExtra(UUID.fromString(uuid));
     }
+
     public static <S> CompletableFuture<Suggestions> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         ObjectArrayList<String> ids = new ObjectArrayList<>();
-        return CommandSource.suggestMatching(ids, builder);
+        return CommandSource.suggestMatching(
+                ids,
+                builder
+        );
     }
 }

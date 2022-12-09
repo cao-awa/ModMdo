@@ -70,10 +70,6 @@ public class BlockPlaceEvent extends EntityTargetedEvent<BlockPlaceEvent> {
         return previously.target();
     }
 
-    public String synopsis() {
-        return "";
-    }
-
     @Override
     public void adaptive(BlockPlaceEvent target) {
         if (isSubmitted()) {

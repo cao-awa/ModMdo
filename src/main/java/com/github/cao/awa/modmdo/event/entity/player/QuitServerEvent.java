@@ -3,9 +3,6 @@ package com.github.cao.awa.modmdo.event.entity.player;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
-import com.github.cao.awa.modmdo.utils.dimension.*;
-import com.github.cao.awa.modmdo.utils.entity.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
 import net.minecraft.network.*;
@@ -62,17 +59,6 @@ public class QuitServerEvent extends EntityTargetedEvent<QuitServerEvent> {
 
     public QuitServerEvent fuse(Previously<QuitServerEvent> previously, QuitServerEvent delay) {
         return previously.target();
-    }
-
-    public String synopsis() {
-        String name = EntrustParser.trying(() -> EntrustParser.tryCreate(() -> {
-            String str = EntityUtil.getName(player);
-            if (str.equals("")) {
-                throw new IllegalArgumentException("empty name");
-            }
-            return str;
-        }, player.toString()), () -> "null");
-        return EntrustParser.tryCreate(() -> String.format("QuitServerEvent{player=%s, pos=%s, dimension=%s}", name, pos, DimensionUtil.getDimension(player)), toString());
     }
 
     @Override

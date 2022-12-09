@@ -17,10 +17,11 @@ import com.github.cao.awa.modmdo.event.server.tick.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import it.unimi.dsi.fastutil.objects.*;
-
-import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
+import org.apache.logging.log4j.*;
 
 public class ModMdoEventTracer {
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoEventTracer");
+
     public final EntityDeathEvent entityDeath = EntityDeathEvent.snap();
     public final BlockBreakEvent blockDestroy = BlockBreakEvent.snap();
     public final BlockPlaceEvent blockPlace = BlockPlaceEvent.snap();
@@ -37,42 +38,133 @@ public class ModMdoEventTracer {
     public final ServerQueryEvent serverQuery = ServerQueryEvent.snap();
     public final CommandExecuteEvent commandExecute = CommandExecuteEvent.snap();
     public final CommandBlockExecuteEvent commandBlockExecute = CommandBlockExecuteEvent.snap();
-    public final Object2ObjectOpenHashMap<String, ModMdoEvent<?>> events = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
-        map.put(entityDeath.clazz(), entityDeath);
-        map.put(blockDestroy.clazz(), blockDestroy);
-        map.put(blockPlace.clazz(), blockPlace);
-        map.put(blockStateSet.clazz(), blockStateSet);
-        map.put(blockExplosion.clazz(), blockExplosion);
-        map.put(entityDamage.clazz(), entityDamage);
-        map.put(joinServer.clazz(), joinServer);
-        map.put(quitServer.clazz(), quitServer);
-        map.put(gameTickStart.clazz(), gameTickStart);
-        map.put(serverStarted.clazz(), serverStarted);
-        map.put(gameChat.clazz(), gameChat);
-        map.put(clientSetting.clazz(), clientSetting);
-        map.put(serverQuery.clazz(), serverQuery);
-        map.put(commandExecute.clazz(), commandExecute);
-        map.put(commandBlockExecute.clazz(), commandBlockExecute);
-        map.put(gameTickEnd.clazz(), gameTickEnd);
-    });
-    public final Object2ObjectOpenHashMap<String, EntityTargetedEvent<?>> targeted = EntrustParser.operation(new Object2ObjectOpenHashMap<>(), map -> {
-        map.put(entityDeath.clazz(), entityDeath);
-        map.put(blockDestroy.clazz(), blockDestroy);
-        map.put(blockPlace.clazz(), blockPlace);
-        map.put(blockExplosion.clazz(), blockExplosion);
-        map.put(entityDamage.clazz(), entityDamage);
-        map.put(joinServer.clazz(), joinServer);
-        map.put(quitServer.clazz(), quitServer);
-        map.put(gameTickStart.clazz(), gameTickStart);
-        map.put(gameTickEnd.clazz(), gameTickEnd);
-        map.put(gameChat.clazz(), gameChat);
-        map.put(clientSetting.clazz(), clientSetting);
-    });
+    public final Object2ObjectOpenHashMap<String, ModMdoEvent<?>> events = EntrustEnvironment.operation(
+            new Object2ObjectOpenHashMap<>(),
+            map -> {
+                map.put(
+                        entityDeath.clazz(),
+                        entityDeath
+                );
+                map.put(
+                        blockDestroy.clazz(),
+                        blockDestroy
+                );
+                map.put(
+                        blockPlace.clazz(),
+                        blockPlace
+                );
+                map.put(
+                        blockStateSet.clazz(),
+                        blockStateSet
+                );
+                map.put(
+                        blockExplosion.clazz(),
+                        blockExplosion
+                );
+                map.put(
+                        entityDamage.clazz(),
+                        entityDamage
+                );
+                map.put(
+                        joinServer.clazz(),
+                        joinServer
+                );
+                map.put(
+                        quitServer.clazz(),
+                        quitServer
+                );
+                map.put(
+                        gameTickStart.clazz(),
+                        gameTickStart
+                );
+                map.put(
+                        serverStarted.clazz(),
+                        serverStarted
+                );
+                map.put(
+                        gameChat.clazz(),
+                        gameChat
+                );
+                map.put(
+                        clientSetting.clazz(),
+                        clientSetting
+                );
+                map.put(
+                        serverQuery.clazz(),
+                        serverQuery
+                );
+                map.put(
+                        commandExecute.clazz(),
+                        commandExecute
+                );
+                map.put(
+                        commandBlockExecute.clazz(),
+                        commandBlockExecute
+                );
+                map.put(
+                        gameTickEnd.clazz(),
+                        gameTickEnd
+                );
+            }
+    );
+    public final Object2ObjectOpenHashMap<String, EntityTargetedEvent<?>> targeted = EntrustEnvironment.operation(
+            new Object2ObjectOpenHashMap<>(),
+            map -> {
+                map.put(
+                        entityDeath.clazz(),
+                        entityDeath
+                );
+                map.put(
+                        blockDestroy.clazz(),
+                        blockDestroy
+                );
+                map.put(
+                        blockPlace.clazz(),
+                        blockPlace
+                );
+                map.put(
+                        blockExplosion.clazz(),
+                        blockExplosion
+                );
+                map.put(
+                        entityDamage.clazz(),
+                        entityDamage
+                );
+                map.put(
+                        joinServer.clazz(),
+                        joinServer
+                );
+                map.put(
+                        quitServer.clazz(),
+                        quitServer
+                );
+                map.put(
+                        gameTickStart.clazz(),
+                        gameTickStart
+                );
+                map.put(
+                        gameTickEnd.clazz(),
+                        gameTickEnd
+                );
+                map.put(
+                        gameChat.clazz(),
+                        gameChat
+                );
+                map.put(
+                        clientSetting.clazz(),
+                        clientSetting
+                );
+            }
+    );
 
     public void build() {
-        ModMdoEventCenter.callingBuilding.forEach((id, extra) -> {
-            EntrustExecution.tryTemporary(extra::initEvent, ex -> TRACKER.submit("Extra " + id + " init failed", ex));
-        });
+        ModMdoEventCenter.callingBuilding.forEach((id, extra) -> EntrustEnvironment.trys(
+                extra::initEvent,
+                ex -> LOGGER.debug(
+                        "Extra " + id + " init failed",
+                        ex
+                )
+        ));
     }
 
     public int registered() {
@@ -82,6 +174,7 @@ public class ModMdoEventTracer {
     }
 
     public void submit(ModMdoEvent<?> event) {
-        events.get(event.clazz()).auto(event);
+        events.get(event.clazz())
+              .auto(event);
     }
 }

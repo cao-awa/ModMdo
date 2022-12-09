@@ -1,19 +1,20 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
-import com.github.cao.awa.modmdo.certificate.*;
+import com.github.cao.awa.modmdo.attack.ddos.recorder.*;
 import com.github.cao.awa.modmdo.commands.*;
+import com.github.cao.awa.modmdo.config.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.format.console.*;
 import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
+import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
-import com.github.cao.awa.modmdo.utils.file.reads.*;
+import com.github.cao.awa.modmdo.utils.io.*;
 import com.github.cao.awa.modmdo.utils.text.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
@@ -28,18 +29,20 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 public class ModMdo extends ModMdoExtra<ModMdo> {
     private MinecraftServer server;
 
+    private int ticks;
+
     public void init() {
         String path = getServerLevelPath(getServer()) + "modmdo/configs";
         File file = new File(path + "/compress.txt");
         if (! file.isFile()) {
-            EntrustExecution.tryTemporary(file::createNewFile);
+            EntrustEnvironment.trys(file::createNewFile);
         }
-        boolean compress = EntrustParser.trying(
-                () -> Boolean.parseBoolean(FileReads.strictRead(new BufferedInputStream(new FileInputStream(path + "/compress.txt")))),
+        boolean compress = EntrustEnvironment.trys(
+                () -> Boolean.parseBoolean(IOUtil.read(new BufferedInputStream(new FileInputStream(path + "/compress.txt")))),
                 () -> false
         );
-        config = new DiskObjectConfigUtil(
-                entrust,
+        config = new DiskConfigUtil(
+                ENTRUST,
                 path,
                 "modmdo",
                 compress
@@ -48,7 +51,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         allDefault();
         defaultConfig();
 
-        EntrustExecution.tryTemporary(() -> initModMdoVariables(modMdoType));
+        EntrustEnvironment.trys(() -> initModMdoVariables(modMdoType));
 
         saveVariables();
     }
@@ -62,7 +65,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
     }
 
     public void initCommand() {
-        EntrustExecution.tryTemporary(
+        EntrustEnvironment.trys(
                 () -> {
                     new HereCommand().register();
                     new DimensionHereCommand().register();
@@ -70,9 +73,9 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                     new TemporaryCommand().register();
                     new ModMdoCommand().register();
                     new NoteCommand().register();
-                    //            new ArchiveCommand().register();
+                    new BenchmarkCommand().register();
                 },
-                ex -> TRACKER.submit("Failed load ModMdo commands")
+                ex -> LOGGER.debug("Failed load ModMdo commands", ex)
         );
     }
 
@@ -82,20 +85,20 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
     public void initEvent() {
         triggerBuilder = new ModMdoTriggerBuilder();
 
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             new File(getServerLevelPath(getServer()) + "/modmdo/resources/events/").mkdirs();
 
-            EntrustExecution.tryFor(
-                    EntrustParser.getNotNull(
+            EntrustEnvironment.tryFor(
+                    EntrustEnvironment.getNotNull(
                             new File(getServerLevelPath(getServer()) + "/modmdo/resources/events/").listFiles(),
                             new File[0]
                     ),
                     file -> {
-                        EntrustExecution.tryTemporary(
+                        EntrustEnvironment.trys(
                                 () -> {
                                     if (file.isFile()) {
                                         triggerBuilder.register(
-                                                new JSONObject(FileReads.read(new BufferedReader(new FileReader(file)))),
+                                                new JSONObject(IOUtil.read(new BufferedReader(new FileReader(file)))),
                                                 file
                                         );
                                         LOGGER.info("Registered event: " + file.getPath());
@@ -112,24 +115,24 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
             );
         });
 
-        variables.clear();
+        VARIABLES.clear();
         variableBuilder = new ModMdoVariableBuilder();
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             new File(getServerLevelPath(getServer()) + "/modmdo/resources/persistent/").mkdirs();
 
-            EntrustExecution.tryFor(
-                    EntrustParser.getNotNull(
+            EntrustEnvironment.tryFor(
+                    EntrustEnvironment.getNotNull(
                             new File(getServerLevelPath(getServer()) + "/modmdo/resources/persistent/").listFiles(),
                             new File[0]
                     ),
                     file -> {
-                        EntrustExecution.notNull(
+                        EntrustEnvironment.notNull(
                                 variableBuilder.build(
                                         file,
-                                        new JSONObject(FileReads.read(new BufferedReader(new FileReader(file))))
+                                        new JSONObject(IOUtil.read(new BufferedReader(new FileReader(file))))
                                 ),
                                 v -> {
-                                    variables.put(
+                                    VARIABLES.put(
                                             v.getName(),
                                             v
                                     );
@@ -149,18 +152,18 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                 "assets/modmdo/lang/en_us.json"
         );
 
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             new File(getServerLevelPath(getServer()) + "/modmdo/resources/lang/").mkdirs();
 
-            EntrustExecution.tryFor(
-                    EntrustParser.getNotNull(
+            EntrustEnvironment.tryFor(
+                    EntrustEnvironment.getNotNull(
                             new File(getServerLevelPath(getServer()) + "/modmdo/resources/lang/").listFiles(),
                             new File[0]
                     ),
                     file -> {
                         if (file.getName()
                                 .startsWith("dictionary_")) {
-                            EntrustExecution.tryTemporary(
+                            EntrustEnvironment.trys(
                                     () -> {
                                         resource.set(
                                                 file.getName()
@@ -221,7 +224,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                 event -> {
                     PlayerManager players = server.getPlayerManager();
 
-                    EntrustExecution.tryTemporary(() -> {
+                    EntrustEnvironment.trys(() -> {
                         for (ServerPlayerEntity player : players.getPlayerList()) {
                             if (player.networkHandler.connection.getAddress() != null) {
                                 if (! player.networkHandler.connection.isOpen()) {
@@ -278,6 +281,22 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                         }
 
                     });
+
+                    if (ddosRecording != null) {
+                        if (ticks++ > 200) {
+                            ticks = 0;
+                            DdosAttackRecorder.LOGGER.info("----DDOS INFO----");
+                            DdosAttackRecorder.LOGGER.info("Times(Seconds): " + ddosRecording.getTimes());
+                            DdosAttackRecorder.LOGGER.info("Total attacks: " + ddosRecording.getAttacks()
+                                                                                            .get(ddosRecording.getAttacks()
+                                                                                                              .size() - 1));
+                            DdosAttackRecorder.LOGGER.info("Attacks per second: " + ddosRecording.average());
+                            DdosAttackRecorder.LOGGER.info("In second attacks: " + ddosRecording.getOccurring());
+                        }
+                        if (ticks % 20 == 0) {
+                            ddosRecording.occursAhead();
+                        }
+                    }
                 },
                 this,
                 "HandlePlayers"

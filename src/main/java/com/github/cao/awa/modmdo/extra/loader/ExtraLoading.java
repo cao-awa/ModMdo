@@ -17,12 +17,24 @@ public class ExtraLoading {
     }
 
     public void load(ExceptingConsumer<ModMdoExtra<?>> action) {
-        EntrustExecution.tryTemporary(() -> action.accept(major));
-        EntrustExecution.tryFor(then, action);
+        EntrustEnvironment.trys(() -> action.accept(major));
+        EntrustEnvironment.tryFor(
+                then,
+                action
+        );
     }
 
     public void load(ExceptingConsumer<ModMdoExtra<?>> action, ExceptingConsumer<ModMdoExtra<?>> whenFailed) {
-        EntrustExecution.ensureTrying(major, action, whenFailed);
-        EntrustExecution.ensureTryFor(then, action, whenFailed);
+        EntrustEnvironment.trys(
+                () -> action.accept(major),
+                () -> whenFailed.accept(major)
+        );
+        EntrustEnvironment.tryFor(
+                then,
+                extra -> EntrustEnvironment.trys(
+                        () -> action.accept(extra),
+                        () -> whenFailed.accept(extra)
+                )
+        );
     }
 }

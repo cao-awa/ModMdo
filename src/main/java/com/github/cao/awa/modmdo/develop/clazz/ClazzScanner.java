@@ -16,7 +16,7 @@ public class ClazzScanner {
 
     public ObjectArrayList<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> clazz) {
         ObjectArrayList<Class<?>> list = new ObjectArrayList<>();
-        EntrustExecution.tryFor(classes, c -> {
+        EntrustEnvironment.tryFor(classes, c -> {
             if (c.isAnnotationPresent(clazz)) {
                 list.add(c);
             }
@@ -26,7 +26,7 @@ public class ClazzScanner {
 
     public ObjectArrayList<Class<?>> getAllAssignedClass(Class<?> clazz) {
         ObjectArrayList<Class<?>> classes = new ObjectArrayList<>();
-        EntrustExecution.tryFor(getClasses(clazz), c -> {
+        EntrustEnvironment.tryFor(getClasses(clazz), c -> {
             if (clazz.isAssignableFrom(c) && ! clazz.equals(c)) {
                 classes.add(c);
             }
@@ -47,7 +47,7 @@ public class ClazzScanner {
         if (! dir.exists()) {
             return classes;
         }
-        EntrustExecution.tryFor(dir.listFiles(), file -> {
+        EntrustEnvironment.tryFor(dir.listFiles(), file -> {
             if (file.isDirectory()) {
                 classes.addAll(getClasses(file, path + "." + file.getName()));
             }

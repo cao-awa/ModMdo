@@ -25,6 +25,7 @@ import net.minecraft.entity.projectile.*;
 import net.minecraft.entity.projectile.thrown.*;
 import net.minecraft.entity.vehicle.*;
 import net.minecraft.server.network.*;
+import org.apache.logging.log4j.*;
 import org.json.*;
 
 import java.io.*;
@@ -32,6 +33,8 @@ import java.io.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoTriggerBuilder {
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoTriggerBuilder");
+
     public static final Object2ObjectOpenHashMap<String, String> classMap = EntrustEnvironment.operation(new Object2ObjectOpenHashMap<>(), map -> {
         map.put("net.minecraft.server.network.ServerPlayerEntity", ServerPlayerEntity.class.getName());
         map.put("net.minecraft.entity.passive.PigEntity", PigEntity.class.getName());
@@ -155,6 +158,9 @@ public class ModMdoTriggerBuilder {
 
     public void register(JSONObject json, File trace) {
         JSONObject e = json.getJSONObject("event");
+        if (e.has("enable") && !e.getBoolean("enable")) {
+            return;
+        }
         String name = e.getString("instanceof");
         try {
             ModMdoEvent<?> register = event.targeted.get(name);
@@ -180,7 +186,7 @@ public class ModMdoTriggerBuilder {
                         TargetedTrigger<EntityTargetedEvent<?>> trigger = (TargetedTrigger<EntityTargetedEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                         return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
                     }, ex -> {
-                        TRACKER.submit(Thread.currentThread(), "Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
+                        LOGGER.debug("Failed build event: {}", new TriggerTrace(trace, i.get(), name).at(), ex);
                         return null;
                     }), ModMdoEventTrigger::action);
                     i.add();
@@ -204,7 +210,7 @@ public class ModMdoTriggerBuilder {
                     ModMdoEventTrigger<ModMdoEvent<?>> trigger = (ModMdoEventTrigger<ModMdoEvent<?>>) Class.forName(json.getString("instanceof")).getDeclaredConstructor().newInstance();
                     return trigger.build(targeted, json, new TriggerTrace(trace, i.get(), name));
                 }, ex -> {
-                    TRACKER.submit("Failed build event: " + new TriggerTrace(trace, i.get(), name).at(), ex);
+                    LOGGER.debug("Failed build event: {}", new TriggerTrace(trace, i.get(), name).at(), ex);
                     return null;
                 }), ModMdoEventTrigger::action);
                 i.add();

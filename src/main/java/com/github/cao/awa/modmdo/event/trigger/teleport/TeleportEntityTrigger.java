@@ -29,7 +29,7 @@ public class TeleportEntityTrigger<T extends EntityTargetedEvent<?>> extends Tar
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             selector.prepare(SELF, target -> {
                 if (getTarget().size() > 1) {
                     err("Cannot use \"SELF\" selector in targeted more than one", new IllegalArgumentException("Unable to process \"SELF\" selector for entities, it need appoint an entity"));
@@ -38,19 +38,19 @@ public class TeleportEntityTrigger<T extends EntityTargetedEvent<?>> extends Tar
                 getTarget().get(0).teleport(xyz.getX(), xyz.getY(), xyz.getZ());
             });
             selector.prepare(WORLD, target -> {
-                EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.iterateEntities().forEach(entity -> selector.filter(entity, e -> e.teleport(xyz.getX(), xyz.getY(), xyz.getZ()))));
+                EntrustEnvironment.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.iterateEntities().forEach(entity -> selector.filter(entity, e -> e.teleport(xyz.getX(), xyz.getY(), xyz.getZ()))));
             });
             selector.prepare(ALL, target -> {
                 getServer().getWorlds().forEach(world -> world.iterateEntities().forEach(entity -> selector.filter(entity, e -> e.teleport(xyz.getX(), xyz.getY(), xyz.getZ()))));
             });
             selector.prepare(APPOINT, target -> {
-                EntrustExecution.tryTemporary(() -> {
+                EntrustEnvironment.trys(() -> {
                     UUID id = UUID.fromString(target);
                     getServer().getWorlds().forEach(world -> {
-                        EntrustExecution.notNull(world.getEntity(id), e -> e.teleport(xyz.getX(), xyz.getY(), xyz.getZ()));
+                        EntrustEnvironment.notNull(world.getEntity(id), e -> e.teleport(xyz.getX(), xyz.getY(), xyz.getZ()));
                     });
                 }, () -> {
-                    EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(target), player -> player.teleport(xyz.getX(), xyz.getY(), xyz.getZ()));
+                    EntrustEnvironment.notNull(getServer().getPlayerManager().getPlayer(target), player -> player.teleport(xyz.getX(), xyz.getY(), xyz.getZ()));
                 });
             });
             selector.action();
