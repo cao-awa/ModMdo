@@ -145,10 +145,10 @@ public class ModMdoCommand extends SimpleCommand {
             SimpleCommandOperation.sendFeedback(disable, formatConfigReturnMessage("whitelist_only_id"));
             return 0;
         }))).then(literal("whitelist").then(literal("remove").then(argument("name", StringArgumentType.string()).suggests(ModMdoWhitelistSuggester::suggestions).executes(remove -> {
-                    Certificate wl = ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(remove, "name"));
-                    if (SharedVariables.whitelist.containsName(wl.getName())) {
-                        SharedVariables.whitelist.remove(wl.getName());
-                        SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.removed", wl.getName()));
+                    String name = StringArgumentType.getString(remove, "name");
+                    if (SharedVariables.whitelists.containsName(name)) {
+                        SharedVariables.whitelists.remove(name);
+                        SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.removed", name));
                         SharedVariables.saveVariables();
                         return 0;
                     }
@@ -205,13 +205,13 @@ public class ModMdoCommand extends SimpleCommand {
     public void showWhitelist(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
         SharedVariables.handleTemporaryWhitelist();
         ServerPlayerEntity player = SimpleCommandOperation.getPlayer(source);
-        if (SharedVariables.whitelist.size() > 0) {
+        if (SharedVariables.whitelists.size() > 0) {
             StringBuilder builder = new StringBuilder();
-            for (Certificate wl : SharedVariables.whitelist.values()) {
+            for (Certificate wl : SharedVariables.whitelists.values()) {
                 builder.append(wl.getName()).append(", ");
             }
             builder.delete(builder.length() - 2, builder.length());
-            SimpleCommandOperation.sendMessage(player, TextUtil.translatable("commands.modmdo.whitelist.list", SharedVariables.whitelist.size(), builder.toString()), false);
+            SimpleCommandOperation.sendMessage(player, TextUtil.translatable("commands.modmdo.whitelist.list", SharedVariables.whitelists.size(), builder.toString()), false);
         } else {
             SimpleCommandOperation.sendMessage(player, TextUtil.translatable("commands.modmdo.whitelist.none"), false);
 

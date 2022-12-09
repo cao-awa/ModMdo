@@ -70,7 +70,7 @@ public class TemporaryCommand extends SimpleCommand {
                     success.set(true);
                 }
             });
-            EntrustEnvironment.notNull(temporaryInvite.get(certificate.getName()), invite -> {
+            EntrustEnvironment.notNull(temporaryInvites.get(certificate.getName()), invite -> {
                 invite.setMillions(- 1);
                 success.set(true);
             });
@@ -85,7 +85,7 @@ public class TemporaryCommand extends SimpleCommand {
             return 0;
         })).then(literal("reduce").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
             String name = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(invite, "target")).getName();
-            if (temporaryInvite.containsName(name)) {
+            if (temporaryInvites.containsName(name)) {
                 int minute = IntegerArgumentType.getInteger(invite, "minutes");
                 return invite(invite, name, - minute);
             } else {
@@ -134,7 +134,7 @@ public class TemporaryCommand extends SimpleCommand {
             sendFeedback(source, TextUtil.translatable("temporary.station.add.already.is", name));
             return - 1;
         }
-        if (SharedVariables.whitelist.containsName(name)) {
+        if (SharedVariables.whitelists.containsName(name)) {
             sendFeedback(source, TextUtil.translatable("modmdo.whitelist.add.already.is", name));
             return - 1;
         }
@@ -243,11 +243,11 @@ public class TemporaryCommand extends SimpleCommand {
                 sendFeedback(invite, TextUtil.translatable("temporary.station.add.already.is", name));
                 return - 1;
             }
-            if (SharedVariables.whitelist.containsName(name)) {
+            if (SharedVariables.whitelists.containsName(name)) {
                 sendFeedback(invite, TextUtil.translatable("modmdo.invite.add.already.is", name));
                 return - 1;
             }
-            TemporaryCertificate invited = temporaryInvite.get(name);
+            TemporaryCertificate invited = temporaryInvites.get(name);
             boolean already = false;
             if (invited == null) {
                 temporaryInvite(EntityUtil.getName(getPlayer(invite)), name, minutes == - 1 ? - 1 : minutes * 1000L * 60L, false);
@@ -257,7 +257,7 @@ public class TemporaryCommand extends SimpleCommand {
             if (already) {
                 temporaryInvite(EntityUtil.getName(getPlayer(invite)), name, minutes == - 1 ? - 1 : minutes * 1000L * 60L, true);
                 if (invited.getMillions() > 0) {
-                    sendFeedback(invite, TextUtil.translatable(minutes > 0 ? "modmdo.invite.overtime" : "modmdo.invite.reduce", name, new TemporaryCertificate("", TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), temporaryInvite.get(name).formatRemaining()));
+                    sendFeedback(invite, TextUtil.translatable(minutes > 0 ? "modmdo.invite.overtime" : "modmdo.invite.reduce", name, new TemporaryCertificate("", TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), temporaryInvites.get(name).formatRemaining()));
                 } else {
                     temporaryInvite(EntityUtil.getName(getPlayer(invite)), name, - 1, false);
                     sendFeedback(invite, TextUtil.translatable("modmdo.invite.cancel", name));
@@ -274,12 +274,12 @@ public class TemporaryCommand extends SimpleCommand {
     public void temporaryInvite(String organizer, String name, long millions, boolean add) {
         TemporaryCertificate certificate;
         if (add) {
-            TemporaryCertificate temp = temporaryInvite.get(name);
+            TemporaryCertificate temp = temporaryInvites.get(name);
             temp.setMillions(temp.getMillions() + millions);
             return;
         }
-        if (temporaryInvite.containsName(name)) {
-            certificate = temporaryInvite.get(name);
+        if (temporaryInvites.containsName(name)) {
+            certificate = temporaryInvites.get(name);
             certificate.setMillions(millions);
         } else {
             certificate = new TemporaryCertificate(name, new LoginRecorde(name, null, null, LoginRecordeType.TEMPORARY), TimeUtil.millions(), 1000L * 5 * 60);
@@ -296,7 +296,7 @@ public class TemporaryCommand extends SimpleCommand {
             ServerPlayerEntity player = getPlayer(source);
             int count = 0;
             StringBuilder builder = new StringBuilder();
-            for (TemporaryCertificate certificate : temporaryInvite.values()) {
+            for (TemporaryCertificate certificate : temporaryInvites.values()) {
                 count++;
                 builder.append(certificate.getName()).append(": ");
                 builder.append(minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), "commands.temporary.invite.remaining", certificate.formatRemaining()).getString());
@@ -312,7 +312,7 @@ public class TemporaryCommand extends SimpleCommand {
             }
             if (count > 0) {
                 builder.delete(builder.length() - 1, builder.length());
-                sendMessage(player, TextUtil.translatable("commands.temporary.invite.list", temporaryInvite.size(), builder.toString()), false);
+                sendMessage(player, TextUtil.translatable("commands.temporary.invite.list", temporaryInvites.size(), builder.toString()), false);
             } else {
                 sendMessage(player, TextUtil.translatable("commands.temporary.invite.none"), false);
             }

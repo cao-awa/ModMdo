@@ -13,7 +13,7 @@ public final class LoginRecorde extends Storable {
     private final @NotNull Identity identity;
     private final @NotNull LoginRecordeType type;
 
-    public LoginRecorde(String modmdoUniqueId, UUID uuid, String unidirectionalVerify, @NotNull LoginRecordeType type) {
+    public LoginRecorde(@NotNull String modmdoUniqueId, @Nullable UUID uuid, String unidirectionalVerify, @NotNull LoginRecordeType type) {
         this.identity = new Identity(
                 modmdoUniqueId,
                 uuid,

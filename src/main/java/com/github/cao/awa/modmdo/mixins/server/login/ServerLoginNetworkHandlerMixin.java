@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.mixins.server.login;
 
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.*;
+import com.github.cao.awa.modmdo.login.network.*;
 import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.digger.*;
@@ -20,8 +21,8 @@ import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
-import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.*;
+import org.slf4j.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -33,7 +34,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacketListener {
-    private static final Logger LOGGER = LogManager.getLogger("ModMdoServerLoginHandler");
+    private static final Logger LOGGER = LoggerFactory.getLogger("ModMdoServerLoginHandler");
 
     private static final int loginLimit = 300;
     private static final Literal DISCONNECT_DDOS = TextUtil.literal("Server are under ddos attack, please login later");
@@ -69,31 +70,31 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
             MODMDO_NONCE[MODMDO_NONCE.length - radix--] = b;
         }
 
-//        if (    // Attack protection trigger.
-//                currentLogin >= loginLimit ||
-//                // Debug code, will not happen in using.
-//                serverUnderDdosAttack.get()) {
-//            lock.lock();
-//            connection.setPacketListener(new UnderAttackHandler(connection));
-//            connection.send(new LoginDisconnectS2CPacket(DISCONNECT_DDOS.text()));
-//            connection.disconnect(DISCONNECT_DDOS.text());
-//            if (ddosRecording == null) {
-//                DdosAttackRecorder.LOGGER.warn("Modmdo detected a maybe ddos attack, protection measures are enabled");
-//                serverUnderDdosAttack.set(true);
-//                ddosRecording = new DdosAttackRecorder(TimeUtil.millions());
-//                SharedVariables.sendMessageToAllPlayer(
-//                        server,
-//                        NOTIFY_DDOS.text(),
-//                        false
-//                );
-//                ddosAttackRecorders.add(ddosRecording);
-//            } else {
-//                ddosRecording.occurs();
-//            }
-//            lock.unlock();
-//        } else {
-//            currentLogin++;
-//        }
+        //        if (    // Attack protection trigger.
+        //                currentLogin >= loginLimit ||
+        //                // Debug code, will not happen in using.
+        //                serverUnderDdosAttack.get()) {
+        //            lock.lock();
+        //            connection.setPacketListener(new UnderAttackHandler(connection));
+        //            connection.send(new LoginDisconnectS2CPacket(DISCONNECT_DDOS.text()));
+        //            connection.disconnect(DISCONNECT_DDOS.text());
+        //            if (ddosRecording == null) {
+        //                DdosAttackRecorder.LOGGER.warn("Modmdo detected a maybe ddos attack, protection measures are enabled");
+        //                serverUnderDdosAttack.set(true);
+        //                ddosRecording = new DdosAttackRecorder(TimeUtil.millions());
+        //                SharedVariables.sendMessageToAllPlayer(
+        //                        server,
+        //                        NOTIFY_DDOS.text(),
+        //                        false
+        //                );
+        //                ddosAttackRecorders.add(ddosRecording);
+        //            } else {
+        //                ddosRecording.occurs();
+        //            }
+        //            lock.unlock();
+        //        } else {
+        //            currentLogin++;
+        //        }
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
@@ -181,81 +182,88 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             if (config.getBoolean("compatible_online_mode")) {
                                 EntrustEnvironment.trys(
                                         () -> {
-                                            serverLogin.loginUsingYgg(
+                                            if (serverLogin.loginUsingYgg(
                                                     name,
                                                     profile.getId()
                                                            .toString()
-                                            );
-                                            manager.onPlayerConnect(
-                                                    connection,
-                                                    player
-                                            );
-                                            isDoneOnlineMode.set(true);
-                                        },
-                                        ex -> {
-                                            serverLogin.reject(
-                                                    name,
-                                                    profile.getId()
-                                                           .toString(),
-                                                    "",
-                                                    TextUtil.translatable("multiplayer.disconnect.not_whitelisted")
-                                                            .text()
-                                            );
-                                            ex.printStackTrace();
+                                            )) {
+                                                manager.onPlayerConnect(
+                                                        connection,
+                                                        player
+                                                );
+                                                isDoneOnlineMode.set(true);
+                                            }
                                         }
                                 );
                             }
                         }
                     }
 
+                    if (isDoneOnlineMode.get()) {
+                        return;
+                    }
+
                     LOGGER.debug("Server send test packet: old modmdo version test");
+
+                    // Processing login packet need uses ServerPlayNetworkHandler
+                    // Let packet handler of ClientConnection become this
+                    new ModMdoLoginNetworkHandler(
+                            server,
+                            connection,
+                            player
+                    );
 
                     sender.chanel(SERVER_CHANNEL)
                           .custom()
                           .var(modmdoWhitelist ? 99 : 96)
                           .send();
 
-                    if (! isDoneOnlineMode.get()) {
-                        LOGGER.debug("Server send login packet: modmdo login");
-                        EntrustEnvironment.trys(() -> {
-                            if (modmdoWhitelist) {
-                                String identifier = staticConfig.getString("identifier");
-                                sender.custom()
-                                      .write(CHECKING_CHANNEL)
-                                      .write(EntrustEnvironment.get(
-                                              () -> MessageDigger.digest(
-                                                      identifier,
-                                                      MessageDigger.Sha3.SHA_512
-                                              ),
-                                              identifier
-                                      ))
-                                      .send();
-                            } else {
-                                sender.custom()
-                                      .write(LOGIN_CHANNEL)
-                                      .send();
-                            }
-                        });
+                    LOGGER.debug("Server send login packet: modmdo login");
+                    EntrustEnvironment.trys(() -> {
+                        if (modmdoWhitelist) {
+                            String identifier = staticConfig.getString("identifier");
+                            sender.custom()
+                                  .write(CHECKING_CHANNEL)
+                                  .write(EntrustEnvironment.get(
+                                          () -> MessageDigger.digest(
+                                                  identifier,
+                                                  MessageDigger.Sha3.SHA_512
+                                          ),
+                                          identifier
+                                  ))
+                                  .send();
+                        } else {
+                            sender.custom()
+                                  .write(LOGIN_CHANNEL)
+                                  .send();
+                        }
+                    });
 
-                        CompletableFuture.runAsync(() -> {
-                            while (TimeUtil.millions() < loginTimedOut.get(name) && ! loginUsers.hasUser(name)) {
-                                TimeUtil.coma(10);
+                    CompletableFuture.runAsync(() -> {
+                        boolean skip = false;
+                        while (TimeUtil.millions() < loginTimedOut.get(name)) {
+                            TimeUtil.coma(10);
+                            if (loginUsers.hasUser(name) || !connection.isOpen()) {
+                                skip = true;
+                                break;
                             }
-                            if (loginTimedOut.containsKey(name) && (connection.isOpen() || ! loginUsers.hasUser(name))) {
-                                if (rejectUsers.hasUser(name)) {
-                                    disc(rejectUsers.getUser(name)
-                                                    .getMessage());
+                        }
+                        if (skip) {
+                            loginTimedOut.remove(name);
+                        }
+                        if (loginTimedOut.containsKey(name)) {
+                            if (rejectUsers.hasUser(name)) {
+                                disc(rejectUsers.getUser(name)
+                                                .getMessage());
 
-                                    rejectUsers.removeUser(name);
-                                } else {
-                                    disc(TextUtil.literal("You are failed login because too long did not received login request")
-                                                 .text());
-                                }
+                                rejectUsers.removeUser(name);
                             } else {
-                                loginTimedOut.remove(name);
+                                disc(TextUtil.literal("You are failed login because too long did not received login request")
+                                             .text());
                             }
-                        });
-                    }
+                        }
+                        loginTimedOut.remove(name);
+                    });
                 }
             } else {
                 serverLogin.login(
@@ -296,7 +304,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
         }
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
     public void onDisconnected0(Logger instance, String s, Object o1, Object o2) {
         if (serverUnderDdosAttack.get()) {
             return;

@@ -4,6 +4,7 @@ import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.security.certificate.identity.*;
+import com.github.cao.awa.modmdo.server.login.exception.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.digger.*;
 import com.github.cao.awa.modmdo.utils.encryption.*;
@@ -36,10 +37,10 @@ public class ServerLogin {
         );
     }
 
-    public void login(String name, String uuid, String identifier, String modmdoName, String unidirectionalVerify, String verifyKey) {
+    public void login(@NotNull String name, @NotNull String uuid, @NotNull String identifier, String modmdoName, String unidirectionalVerify, String verifyKey) {
         if (config.getBoolean("modmdo_whitelist")) {
             if (config.getBoolean("whitelist_only_id")) {
-                loginUsingId(
+                loginUsingSimple(
                         name,
                         uuid,
                         identifier,
@@ -57,8 +58,10 @@ public class ServerLogin {
             }
         } else {
             String idSha = calculateIdSha(identifier);
-            LOGGER.info("Login player: {}",
-                        name);
+            LOGGER.info(
+                    "Login player: {}",
+                    name
+            );
             EntrustEnvironment.trys(
                     () -> loginUsers.getUser(uuid)
                                     .setIdentifier(idSha)
@@ -77,7 +80,7 @@ public class ServerLogin {
         }
     }
 
-    public void loginUsingId(String name, String uuid, String identifier, String unidirectionalVerify, String verifyKey) {
+    public void loginUsingSimple(String name, String uuid, String identifier, String unidirectionalVerify, String verifyKey) {
         String idSha = calculateIdSha(identifier);
         Receptacle<Translatable> message = new Receptacle<>(null);
         EntrustEnvironment.notNull(
@@ -86,7 +89,7 @@ public class ServerLogin {
                     if (certificate.isValid()) {
                         switch (certificate.getType()) {
                             case "whitelist" -> {
-                                if (whitelist.getFromId(idSha) == null) {
+                                if (whitelists.getFromId(idSha) == null) {
                                     acceptWhitelist(
                                             name,
                                             uuid,
@@ -105,60 +108,52 @@ public class ServerLogin {
                     temporaryStation.remove(name);
                 }
         );
-        EntrustEnvironment.trys(
-                () -> loginUsers.getUser(uuid)
-                                .setIdentifier(identifier),
+        User user = new User(
+                name,
+                uuid,
+                - 1,
+                idSha
+        );
+        if (unidirectionalVerify != null && EntrustEnvironment.get(
                 () -> {
-                    User user = new User(
-                            name,
-                            uuid,
-                            - 1,
+                    if (temporaryInvites.containsName(name)) {
+                        return false;
+                    }
+                    Certificate wl = whitelists.getFromId(idSha);
+                    if (wl == null) {
+                        return true;
+                    }
+                    Identity identity = wl.getRecorde()
+                                          .getIdentity();
+
+                    return ! verify(
+                            identity,
+                            identity.getVerify(),
+                            unidirectionalVerify,
+                            verifyKey,
                             idSha
                     );
-                    if (unidirectionalVerify != null && EntrustEnvironment.get(
-                            () -> {
-                                if (temporaryInvite.containsName(name)) {
-                                    return false;
-                                }
-                                Certificate wl = whitelist.getFromId(idSha);
-                                if (wl == null) {
-                                    return true;
-                                }
-                                Identity identity = wl.getRecorde()
-                                                      .getIdentity();
-
-                                return ! verify(
-                                        identity,
-                                        identity.getVerify(),
-                                        unidirectionalVerify,
-                                        verifyKey,
-                                        idSha
-                                );
-                            },
-                            true
-                    )) {
-                        LOGGER.info(
-                                "Reject player using id login: {}",
-                                name
-                        );
-                        reject(user);
-                    } else {
-                        LOGGER.info(
-                                "Login player using id login: {}",
-                                name
-                        );
-                        accept(user.setMessage(message.get() == null ?
-                                               null :
-                                               message.get()
-                                                      .text()));
-                    }
-                }
-        );
+                },
+                true
+        )) {
+            reject(
+                    user,
+                    "SimpleModMdo"
+            );
+        } else {
+            accept(
+                    user.setMessage(message.get() == null ?
+                                    null :
+                                    message.get()
+                                           .text()),
+                    "SimpleModMdo"
+            );
+        }
     }
 
     public static void processInvite(String name, TemporaryCertificate certificate, Receptacle<Translatable> message) {
-        if (temporaryInvite.get(name) == null) {
-            temporaryInvite.put(
+        if (temporaryInvites.get(name) == null) {
+            temporaryInvites.put(
                     name,
                     certificate.snapSpare()
             );
@@ -188,7 +183,7 @@ public class ServerLogin {
           .equals(idSha);
     }
 
-    public static String calculateIdSha(String identifier) {
+    public static @NotNull String calculateIdSha(@NotNull String identifier) {
         return EntrustEnvironment.get(
                 () -> MessageDigger.digest(
                         identifier,
@@ -198,16 +193,17 @@ public class ServerLogin {
         );
     }
 
-    public void reject(User user) {
-        rejectUsers.put(user);
-    }
-
-    public void accept(User user) {
+    public void accept(User user, String type) {
+        LOGGER.info(
+                "Player '{}' success to login, using '{}'",
+                user.getName(),
+                type
+        );
         loginUsers.put(user);
     }
 
     public static void acceptWhitelist(@NotNull String name, @NotNull String uuid, @Nullable String idSha, @Nullable String unidirectionalVerify) {
-        whitelist.put(
+        whitelists.put(
                 name,
                 new PermanentCertificate(
                         name,
@@ -217,6 +213,15 @@ public class ServerLogin {
                 )
         );
         saveVariables();
+    }
+
+    public void reject(User user, String type) {
+        LOGGER.info(
+                "Player '{}' failed to login, using '{}'",
+                user.getName(),
+                type
+        );
+        rejectUsers.put(user);
     }
 
     public void strictLogin(String name, String uuid, String identifier, String unidirectionalVerify, String verifyKey) {
@@ -229,9 +234,9 @@ public class ServerLogin {
                         switch (certificate.getType()) {
                             case "whitelist" -> {
                                 if (EntrustEnvironment.trys(
-                                        () -> whitelist.get(name)
-                                                       .getIdentifier()
-                                                       .equals(idSha),
+                                        () -> whitelists.get(name)
+                                                        .getIdentifier()
+                                                        .equals(idSha),
                                         () -> false
                                 )) {
                                     return;
@@ -253,66 +258,62 @@ public class ServerLogin {
                     temporaryStation.remove(name);
                 }
         );
-        EntrustEnvironment.trys(
-                () -> loginUsers.getUser(uuid)
-                                .setIdentifier(idSha),
-                () -> {
-                    User user = new User(
-                            name,
-                            uuid,
-                            - 1,
-                            idSha
-                    );
-                    if (EntrustEnvironment.get(
-                            () -> {
-                                Certificate wl = whitelist.get(name);
-                                boolean reject = wl.getIdentifier()
-                                                   .equals(idSha) && ! temporaryInvite.containsName(name);
-                                if (unidirectionalVerify == null) {
-                                    return reject;
-                                }
-                                Identity identity = wl.getRecorde()
-                                                      .getIdentity();
 
-                                return ! verify(
-                                        identity,
-                                        identity.getVerify(),
-                                        unidirectionalVerify,
-                                        verifyKey,
-                                        idSha
-                                );
-                            },
-                            true
-                    )) {
-                        LOGGER.info(
-                                "Reject player using strict login: {}",
-                                name
-                        );
-                        reject(user);
-                    } else {
-                        LOGGER.info(
-                                "Login player using strict login: {}",
-                                name
-                        );
-                        accept(user.setMessage(message.get() == null ?
-                                               null :
-                                               message.get()
-                                                      .text()));
-                    }
-                }
-        );
-    }
-
-    public void reject(String name, String uuid, String identifier, Text reson) {
-        reject(new User(
+        User user = new User(
                 name,
                 uuid,
                 - 1,
-                identifier
-        ).setMessage(reson));
+                idSha
+        );
+        if (EntrustEnvironment.get(
+                () -> {
+                    Certificate wl = whitelists.get(name);
+                    boolean reject = wl.getIdentifier()
+                                       .equals(idSha) && ! temporaryInvites.containsName(name);
+                    if (unidirectionalVerify == null) {
+                        return reject;
+                    }
+                    Identity identity = wl.getRecorde()
+                                          .getIdentity();
+
+                    return ! verify(
+                            identity,
+                            identity.getVerify(),
+                            unidirectionalVerify,
+                            verifyKey,
+                            idSha
+                    );
+                },
+                true
+        )) {
+            reject(
+                    user,
+                    "StrictModMdo"
+            );
+        } else {
+            accept(
+                    user.setMessage(message.get() == null ?
+                                    null :
+                                    message.get()
+                                           .text()),
+                    "StrictModMdo"
+            );
+        }
     }
 
-    public void loginUsingYgg(String name, String uuid) {
+    public void reject(String name, String uuid, String identifier, Text reson, String type) {
+        reject(
+                new User(
+                        name,
+                        uuid,
+                        - 1,
+                        identifier
+                ).setMessage(reson),
+                type
+        );
+    }
+
+    public boolean loginUsingYgg(String name, String uuid) throws LoginFailedException {
         Receptacle<Translatable> message = Receptacle.of();
         EntrustEnvironment.notNull(
                 temporaryStation.get(name),
@@ -320,13 +321,13 @@ public class ServerLogin {
                     if (certificate.isValid()) {
                         switch (certificate.getType()) {
                             case "whitelist" -> {
-                                if (EntrustEnvironment.trys(
-                                        () -> uuid.equals(whitelist.get(name)
-                                                                   .getRecorde()
-                                                                   .getUuid()
-                                                                   .toString()),
+                                if (EntrustEnvironment.get(
+                                        () -> uuid.equals(whitelists.get(name)
+                                                                    .getRecorde()
+                                                                    .getUuid()
+                                                                    .toString()),
 
-                                        ex -> false
+                                        false
                                 )) {
                                     return;
                                 }
@@ -354,25 +355,20 @@ public class ServerLogin {
                 - 1,
                 ""
         );
-        if (! temporaryInvite.containsName(name) && ! uuid.equals(whitelist.get(name)
-                                                                           .getRecorde()
-                                                                           .getUuid()
-                                                                           .toString())) {
-            LOGGER.info(
-                    "Reject player using ygg login: {}",
-                    name
-            );
-            reject(user);
-        } else {
-            LOGGER.info(
-                    "Login player using ygg login: {}",
-                    name
-            );
-            accept(user.setMessage(message.get() == null ?
-                                   null :
-                                   message.get()
-                                          .text()));
+        if (! temporaryInvites.containsName(name) && ! whitelists.verifyUUID(
+                name,
+                uuid
+        )) {
+            throw new LoginFailedException();
         }
+        accept(
+                user.setMessage(message.get() == null ?
+                                null :
+                                message.get()
+                                       .text()),
+                "Ygg"
+        );
+        return true;
     }
 
     public void logout(ServerPlayerEntity player) {
@@ -387,12 +383,12 @@ public class ServerLogin {
                 );
                 EntrustEnvironment.trys(() -> {
                     loginUsers.removeUser(player);
-                    if (temporaryInvite.containsName(EntityUtil.getName(player))) {
+                    if (temporaryInvites.containsName(EntityUtil.getName(player))) {
                         LOGGER.info(
                                 "Invite expired for player: {}",
                                 EntityUtil.getName(player)
                         );
-                        temporaryInvite.remove(EntityUtil.getName(player));
+                        temporaryInvites.remove(EntityUtil.getName(player));
                     }
                 });
             }

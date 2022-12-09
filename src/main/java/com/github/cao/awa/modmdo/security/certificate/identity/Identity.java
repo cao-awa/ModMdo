@@ -2,6 +2,7 @@ package com.github.cao.awa.modmdo.security.certificate.identity;
 
 import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.storage.*;
+import org.jetbrains.annotations.*;
 import org.json.*;
 
 import java.util.*;
@@ -12,7 +13,7 @@ public class Identity extends Storable {
     private String uniqueId;
     private String unidirectionalVerify;
 
-    public Identity(String uniqueId, UUID uuid, String unidirectionalVerify) {
+    public Identity(@NotNull String uniqueId, @Nullable UUID uuid, String unidirectionalVerify) {
         this.uniqueId = uniqueId;
         this.uuid = uuid;
         this.unidirectionalVerify = unidirectionalVerify;
@@ -20,7 +21,7 @@ public class Identity extends Storable {
 
     public static Identity build(JSONObject json) {
         return new Identity(
-                json.getString("unique_id"),
+                json.has("unique_id") ? json.getString("unique_id") : "",
                 UUID.fromString(json.getString("uuid")),
                 json.has("verify") ? json.getString("verify") : ""
         );
@@ -51,7 +52,7 @@ public class Identity extends Storable {
         JSONObject json = new JSONObject();
         json.put(
                 "unique_id",
-                this.uniqueId
+                this.uniqueId == null ? "" : this.uniqueId
         );
         json.put(
                 "uuid",
