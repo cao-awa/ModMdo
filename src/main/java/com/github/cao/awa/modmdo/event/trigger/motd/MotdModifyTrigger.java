@@ -28,7 +28,7 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
         JSONObject motd = metadata.getJSONObject("motd");
         key = motd.getString("key");
         JSONArray array = motd.getJSONArray("args");
-        EntrustParser.operation(args, list -> {
+        EntrustEnvironment.operation(args, list -> {
             for (int i = 0; i < array.length(); i++) {
                 list.add(new Receptacle<>(array.get(i).toString()));
             }
@@ -45,7 +45,7 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             if (favicon != null) {
                 packet.getServerMetadata().setFavicon(favicon);
             }
@@ -56,7 +56,7 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
     public Literal format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
-                String name = EntrustParser.trying(() -> {
+                String name = EntrustEnvironment.trys(() -> {
                     JSONObject json = new JSONObject(s.get());
                     return json.getString("name");
                 }, ex -> {
@@ -67,14 +67,14 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
                     active = false;
                     break;
                 }
-                EntrustExecution.tryTemporary(() -> {
+                EntrustEnvironment.trys(() -> {
                     BASE_FORMATTER.get("^{variable}").accept(s.setSub(name));
                 }, e -> {
                     err("Cannot find target variable: " + name, e);
                     active = false;
                 });
             } else {
-                EntrustExecution.tryTemporary(() -> BASE_FORMATTER.get(s.get()).accept(s), ex -> {
+                EntrustEnvironment.trys(() -> BASE_FORMATTER.get(s.get()).accept(s), ex -> {
                 });
             }
         }
@@ -82,7 +82,7 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
         if (! active) {
             return null;
         }
-        Object[] objs = EntrustParser.operation(new Object[args.size()], e -> {
+        Object[] objs = EntrustEnvironment.operation(new Object[args.size()], e -> {
             for (int i = 0; i < args.size(); i++) {
                 e[i] = args.get(i).get();
             }

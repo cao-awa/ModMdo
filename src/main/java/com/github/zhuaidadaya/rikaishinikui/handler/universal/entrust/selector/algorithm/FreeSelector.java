@@ -23,7 +23,7 @@ public final class FreeSelector<L, R> extends ObjectSelector<L, R> {
     @BecomeDeprecated
     public void select() {
         ensure();
-        L left = EntrustParser.select(new ArrayList<>(getTargets().keySet()), random);
+        L left = EntrustEnvironment.select(new ArrayList<>(getTargets().keySet()), random);
         R right = getTargets().get(left);
         getTargets().clear();
         getTargets().put(left, right);

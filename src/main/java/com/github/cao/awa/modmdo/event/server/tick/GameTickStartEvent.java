@@ -32,10 +32,6 @@ public class GameTickStartEvent extends EntityTargetedEvent<GameTickStartEvent> 
         return previously.target();
     }
 
-    public String synopsis() {
-        return EntrustParser.tryCreate(() -> "GameTickStartEvent{}", toString());
-    }
-
     @Override
     public String abbreviate() {
         return "GameTickStartEvent";
@@ -47,11 +43,11 @@ public class GameTickStartEvent extends EntityTargetedEvent<GameTickStartEvent> 
 
     @Override
     public ObjectArrayList<? extends Entity> getTargeted() {
-        return EntrustParser.operation(new ObjectArrayList<>(), targeted -> EntrustExecution.tryTemporary(() -> targeted.addAll(server.getPlayerManager().getPlayerList())));
+        return EntrustEnvironment.operation(new ObjectArrayList<>(), targeted -> EntrustEnvironment.trys(() -> targeted.addAll(server.getPlayerManager().getPlayerList())));
     }
 
     @Override
     public void adaptive(GameTickStartEvent event) {
-        skipDelay(event);
+        refrainAsync(event);
     }
 }

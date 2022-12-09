@@ -16,7 +16,6 @@ public class User extends Storable {
     private int level = 1;
     private long onlineTime = 0;
     private String modmdoIdentifier = "";
-    private int modmdoVersion;
     private String modmdoName;
     private Language language = SharedVariables.getLanguage();
     private Text message = null;
@@ -61,14 +60,6 @@ public class User extends Storable {
         this.modmdoIdentifier = modmdoIdentifier;
     }
 
-    public User(String name, String uuid, int level, String modmdoIdentifier, int modmdoVersion) {
-        this.name = name;
-        this.uuid = UUID.fromString(uuid);
-        this.level = level;
-        this.modmdoIdentifier = modmdoIdentifier;
-        this.modmdoVersion = modmdoVersion;
-    }
-
     public User(JSONObject json) {
         String name = json.get("name").toString();
         String uuid = json.get("uuid").toString();
@@ -78,11 +69,9 @@ public class User extends Storable {
         this.uuid = UUID.fromString(uuid);
         this.level = level;
 
-        onlineTime = EntrustParser.tryCreate(() -> json.getLong("onlineTime"), - 1L);
+        onlineTime = EntrustEnvironment.get(() -> json.getLong("onlineTime"), - 1L);
 
-        modmdoVersion = EntrustParser.tryCreate(() -> json.getInt("version"), - 1);
-
-        modmdoIdentifier = EntrustParser.tryCreate(() -> json.getString("identifier"), "");
+        modmdoIdentifier = EntrustEnvironment.get(() -> json.getString("identifier"), "");
     }
 
     public String getModmdoName() {
@@ -125,15 +114,6 @@ public class User extends Storable {
         return this;
     }
 
-    public int getVersion() {
-        return modmdoVersion;
-    }
-
-    public User setVersion(int version) {
-        this.modmdoVersion = version;
-        return this;
-    }
-
     public String getName() {
         return name;
     }
@@ -148,7 +128,6 @@ public class User extends Storable {
         json.put("name", name);
         json.put("uuid", getUuid().toString());
         json.put("level", level);
-        json.put("version", modmdoVersion);
         json.put("identifier", modmdoIdentifier);
 
         return json;

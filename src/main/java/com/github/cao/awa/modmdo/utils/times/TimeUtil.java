@@ -63,31 +63,19 @@ public class TimeUtil {
     }
 
     public static long formatMinute(long million) {
-        if(formatSecond(million) > 59)
-            return formatSecond(million) / 60;
-        else
-            return 0;
+        return formatSecond(million) > 59 ? formatSecond(million) / 60 : 0;
     }
 
     public static long formatHour(long million) {
-        if(formatMinute(million) > 59)
-            return formatMinute(million) / 60;
-        else
-            return 0;
+        return formatMinute(million) > 59 ? formatMinute(million) / 60 : 0;
     }
 
     public static long formatDay(long million) {
-        if(formatHour(million) > 23)
-            return formatHour(million) / 24;
-        else
-            return 0;
+        return formatHour(million) > 23 ? formatHour(million) / 24 : 0;
     }
 
     public static long formatMonth(long million) {
-        if(formatDay(million) > 29)
-            return formatDay(million) / 30;
-        else
-            return 0;
+        return formatDay(million) > 29 ? formatDay(million) / 30 : 0;
     }
 
     public static long ticksMillionTotal(long ticks) {
@@ -117,8 +105,6 @@ public class TimeUtil {
     }
 
     public static void coma(long millions) {
-        EntrustExecution.tryTemporary(() -> {
-            Thread.sleep(millions);
-        });
+        EntrustEnvironment.trys(() -> Thread.sleep(millions));
     }
 }

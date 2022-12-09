@@ -6,12 +6,8 @@ import net.minecraft.util.registry.*;
 import net.minecraft.world.*;
 import net.minecraft.world.dimension.*;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.*;
 
 import java.util.function.*;
-
-import static com.github.cao.awa.modmdo.storage.SharedVariables.futureTask;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World {
@@ -25,11 +21,5 @@ public abstract class ServerWorldMixin extends World {
                 debugWorld,
                 seed
         );
-    }
-
-    @Inject(method = "tick", at = @At("HEAD"))
-    public void tickHead(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-        // tick tasks
-        futureTask.tick();
     }
 }

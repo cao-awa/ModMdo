@@ -17,7 +17,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class SimpleCommandOperation {
     public static Literal formatModMdoVersionRequire(int versionRequire, ServerPlayerEntity player) {
-        return minecraftTextFormat.format(loginUsers.getUser(player), "command.require.version", modMdoIdToVersionMap.get(versionRequire));
+        return minecraftTextFormat.format(loginUsers.getUser(player), "command.require.version", MOD_MDO_ID_TO_VERSION_MAP.get(versionRequire));
     }
 
     public static void sendFeedback(CommandContext<ServerCommandSource> source, Translatable message) {
@@ -118,7 +118,7 @@ public class SimpleCommandOperation {
     }
 
     public static void sendError(CommandContext<ServerCommandSource> source, Translatable message) {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             sendError(source.getSource(), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()));
         }, ex -> {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
@@ -126,7 +126,7 @@ public class SimpleCommandOperation {
     }
 
     public static void sendError(ServerCommandSource source, Translatable message) {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             sendError(source, minecraftTextFormat.format(loginUsers.getUser(Objects.requireNonNull(getPlayer(source))), message.getKey(), message.getArgs()));
         }, ex -> {
             LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));

@@ -32,19 +32,19 @@ public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<
         this.id = metadata.getString("identifier");
         JSONObject position = metadata.getJSONObject("pos");
         this.pos = new BlockPos(position.getInt("x"), position.getInt("y"), position.getInt("z"));
-        this.count = EntrustParser.tryCreate(() -> metadata.getInt("count"), 1);
+        this.count = EntrustEnvironment.get(() -> metadata.getInt("count"), 1);
         // TODO: 2022/6/14
-        //this.nbt = EntrustParser.trying(() -> metadata.getString("nbt"));
+        //this.nbt = EntrustEnvironment.trys(() -> metadata.getString("nbt"));
         this.dimension = metadata.getString("world");
-        this.name = EntrustParser.trying(() -> metadata.getString("name"));
-        this.alignPosition = EntrustParser.trying(() -> metadata.getBoolean("alignPosition"), ex -> false);
-        this.invertY = EntrustParser.trying(() -> metadata.getBoolean("invertY"), ex -> false);
+        this.name = EntrustEnvironment.trys(() -> metadata.getString("name"));
+        this.alignPosition = EntrustEnvironment.trys(() -> metadata.getBoolean("alignPosition"), ex -> false);
+        this.invertY = EntrustEnvironment.trys(() -> metadata.getBoolean("invertY"), ex -> false);
         return this;
     }
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             OperationalInteger integer = new OperationalInteger(count);
             while (integer.reduce() > - 1) {
                 RegistryKey<World> world;

@@ -12,6 +12,7 @@ import java.util.function.*;
  *
  * @author cao_awa
  * @author zhuaidadaya
+ * @author 草二号机
  * @since 1.0.0
  */
 public class EntrustEnvironment {
@@ -70,19 +71,28 @@ public class EntrustEnvironment {
      * @author cao_awa
      * @since 1.0.0
      */
-    public static <T> T trys(ExceptingSupplier<T> action, Action<Throwable, T> actionWhenException) {
+    public static <T> T trys(ExceptingSupplier<T> action, Function<Throwable, T> actionWhenException) {
         try {
             return action.get();
         } catch (Exception e) {
-            return actionWhenException.action(e);
+            return actionWhenException.apply(e);
         }
     }
 
-    public static <T> void nulls(T target, ExceptingConsumer<T> action) {
+    public static <T> void nulls(T target, ExceptingConsumer<T> asNull) {
         if (target == null) {
-            trys(() -> action.accept(null));
+            trys(() -> asNull.accept(null));
         }
     }
+
+    public static <T> void nulls(T target, ExceptingConsumer<T> asNull, ExceptingConsumer<T> asNotNull) {
+        if (target == null) {
+            trys(() -> asNull.accept(null));
+        } else {
+            trys(() -> asNotNull.accept(target));
+        }
+    }
+
 
     public static <T> T operation(T target, ExceptingConsumer<T> action) {
         trys(() -> action.accept(target));
@@ -343,6 +353,32 @@ public class EntrustEnvironment {
     @NotNull
     public static <T> T cast(@NotNull Object target) {
         return (T) target;
+    }
+
+    /**
+     * Create a thread of target action.
+     *
+     * @param action action
+     * @return A thread of target action
+     *
+     * @author 草二号机
+     * @since 1.0.0
+     */
+    @NotNull
+    public static Thread thread(Temporary action) {
+        return new Thread(action::apply);
+    }
+
+    public static <T> void tryFor(Collection<T> targets, ExceptingConsumer<T> action) {
+        for (T t : targets) {
+            trys(() -> action.accept(t));
+        }
+    }
+
+    public static <T> void tryFor(T[] targets, ExceptingConsumer<T> action) {
+        for (T t : targets) {
+            trys(() -> action.accept(t));
+        }
     }
 }
 

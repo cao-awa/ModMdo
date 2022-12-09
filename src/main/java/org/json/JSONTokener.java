@@ -408,7 +408,7 @@ public class JSONTokener {
      * the next number or identifier.
      *
      * @throws JSONException
-     *         Thrown if trying to step back more than 1 step
+     *         Thrown if trys to step back more than 1 step
      *         or if already at the start of the string
      */
     public void back() throws JSONException {

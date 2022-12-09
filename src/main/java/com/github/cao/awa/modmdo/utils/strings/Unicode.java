@@ -11,25 +11,16 @@ public class Unicode {
 
     public static String stringToUnicode(String s){
         sb.setLength(0);
-        StringBuilder tmp = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         Do.letForUp(s.length(), integer -> {
             sb.append("\\u");
-            tmp.setLength(0);
-            tmp.append(Integer.toHexString(s.charAt(integer)).toLowerCase());
-            while(tmp.length() < 4){
-                tmp.insert(0, 0);
+            builder.setLength(0);
+            builder.append(Integer.toHexString(s.charAt(integer)).toLowerCase());
+            while(builder.length() < 4){
+                builder.insert(0, 0);
             }
-            sb.append(tmp);
+            sb.append(builder);
         });
-//        for(int i = 0; i < s.length(); i++){
-//            sb.append("\\u");
-//            tmp.setLength(0);
-//            tmp.append(Integer.toHexString(s.charAt(i)).toLowerCase());
-//            while(tmp.length() < 4){
-//                tmp.insert(0, 0);
-//            }
-//            sb.append(tmp);
-//        }
         return sb.toString();
     }
 

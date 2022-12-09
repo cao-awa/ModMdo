@@ -22,7 +22,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Auto
 public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends TargetedTrigger<T> {
-    private static final UnmodifiableListReceptacle<String> supported = new UnmodifiableListReceptacle<>(EntrustParser.operation(new ObjectArrayList<>(), list -> {
+    private static final UnmodifiableListReceptacle<String> supported = new UnmodifiableListReceptacle<>(EntrustEnvironment.operation(new ObjectArrayList<>(), list -> {
         list.add(ServerPlayerEntity.class.getName());
     }));
     private final ObjectArrayList<Receptacle<String>> args = new ObjectArrayList<>();
@@ -36,7 +36,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         JSONObject message = metadata.getJSONObject("message");
         key = message.getString("key");
         JSONArray array = message.getJSONArray("args");
-        EntrustParser.operation(args, list -> {
+        EntrustEnvironment.operation(args, list -> {
             for (int i = 0; i < array.length(); i++) {
                 list.add(new Receptacle<>(array.get(i).toString()));
             }
@@ -52,7 +52,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> send(format().text()));
+        EntrustEnvironment.trys(() -> send(format().text()));
     }
 
     public void send(Text message) {
@@ -68,7 +68,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                 }
             });
             selector.prepare(WORLD, target -> {
-                EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
+                EntrustEnvironment.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.getPlayers().forEach(player -> {
                     player.sendMessage(message, false);
                 }));
             });
@@ -78,7 +78,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                 });
             });
             selector.prepare(APPOINT, target -> {
-                EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(target), targeted -> sendMessage(targeted, message, false));
+                EntrustEnvironment.notNull(getServer().getPlayerManager().getPlayer(target), targeted -> sendMessage(targeted, message, false));
             });
             selector.action();
         }
@@ -87,7 +87,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
     public Literal format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
-                String name = EntrustParser.trying(() -> {
+                String name = EntrustEnvironment.trys(() -> {
                     JSONObject json = new JSONObject(s.get());
                     return json.getString("name");
                 }, ex -> {
@@ -98,14 +98,14 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
                     active = false;
                     break;
                 }
-                EntrustExecution.tryTemporary(() -> {
+                EntrustEnvironment.trys(() -> {
                     BASE_FORMATTER.get("^{variable}").accept(s.setSub(name));
                 }, e -> {
                     err("Cannot find target variable: " + name, e);
                     active = false;
                 });
             } else {
-                EntrustExecution.tryTemporary(() -> BASE_FORMATTER.get(s.get()).accept(s), ex -> {
+                EntrustEnvironment.trys(() -> BASE_FORMATTER.get(s.get()).accept(s), ex -> {
                 });
             }
         }
@@ -113,7 +113,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         if (! active) {
             return null;
         }
-        Object[] objs = EntrustParser.operation(new Object[args.size()], e -> {
+        Object[] objs = EntrustEnvironment.operation(new Object[args.size()], e -> {
             for (int i = 0; i < args.size(); i++) {
                 e[i] = args.get(i).get();
             }

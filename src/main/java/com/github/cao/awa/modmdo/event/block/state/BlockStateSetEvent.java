@@ -3,12 +3,9 @@ package com.github.cao.awa.modmdo.event.block.state;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.delay.*;
-import com.github.cao.awa.modmdo.utils.dimension.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.block.*;
 import net.minecraft.server.*;
 import net.minecraft.util.math.*;
-import net.minecraft.util.registry.*;
 import net.minecraft.world.*;
 
 @Auto
@@ -68,10 +65,6 @@ public class BlockStateSetEvent extends ModMdoEvent<BlockStateSetEvent> {
 
     public BlockStateSetEvent fuse(Previously<BlockStateSetEvent> previously, BlockStateSetEvent delay) {
         return previously.target();
-    }
-
-    public String synopsis() {
-        return EntrustParser.tryCreate(() -> String.format("BlockStateSetEvent{block=%s, pos=%s, dimension=%s, flag=%s, maxUpdateDepth=%s}", Registry.BLOCK.getId(state.getBlock()), pos, DimensionUtil.getDimension(world), flags, maxUpdateDepth), toString());
     }
 
     @Override

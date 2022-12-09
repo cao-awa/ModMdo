@@ -24,9 +24,9 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
                 map.put(
                         "^{variable}",
                         (str) -> {
-                            ModMdoPersistent<?> v = SharedVariables.variables.get(str.getSub())
+                            ModMdoPersistent<?> v = SharedVariables.VARIABLES.get(str.getSub())
                                                                              .clone();
-                            EntrustExecution.tryTemporary(() -> v.handle(new JSONObject(str.get())));
+                            EntrustEnvironment.trys(() -> v.handle(new JSONObject(str.get())));
                             str.set(v.get()
                                      .toString());
                         }

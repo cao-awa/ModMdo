@@ -14,7 +14,7 @@ public class RandomSelector extends TriggerSelector {
 
     @Override
     public void select(JSONObject json, BiConsumer<String, JSONObject> operation) {
-        EntrustExecution.tryFor(json.keySet(), name -> getTargets().put(name, json.getJSONObject(name)));
+        EntrustEnvironment.tryFor(json.keySet(), name -> getTargets().put(name, json.getJSONObject(name)));
         selector.select(getTargets());
         accept(operation);
     }

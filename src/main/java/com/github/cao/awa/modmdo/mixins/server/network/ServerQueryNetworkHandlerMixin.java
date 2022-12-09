@@ -7,15 +7,17 @@ import net.minecraft.network.packet.s2c.query.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
+import org.apache.logging.log4j.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.event;
-import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerQueryNetworkHandler.class)
 public class ServerQueryNetworkHandlerMixin {
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoServerQueryHandler");
+
     @Shadow
     @Final
     private static Text REQUEST_HANDLED;
@@ -29,28 +31,24 @@ public class ServerQueryNetworkHandlerMixin {
     private MinecraftServer server;
 
     /**
-     * @author 草awa
+     * @author cao_awa
+     * @author 草二号机
      * @reason
      */
-    @Overwrite
-    public void onRequest(QueryRequestC2SPacket packet) {
-        TRACKER.submit("Handle request(query)");
+    @Inject(method = "onRequest", at = @At("HEAD"), cancellable = true)
+    public void onRequest(QueryRequestC2SPacket packet, CallbackInfo ci) {
         if (this.responseSent) {
             this.connection.disconnect(REQUEST_HANDLED);
         } else {
             QueryResponseS2CPacket p = new QueryResponseS2CPacket(this.server.getServerMetadata());
             event.submit(new ServerQueryEvent(
-                    connection,
+                    this.connection,
                     p,
-                    server
+                    this.server
             ));
             this.responseSent = true;
             this.connection.send(p);
         }
-    }
-
-    @Inject(method = "onPing", at = @At("HEAD"))
-    public void onPing(QueryPingC2SPacket packet, CallbackInfo ci) {
-        TRACKER.submit("Handle ping(query)");
+        ci.cancel();
     }
 }

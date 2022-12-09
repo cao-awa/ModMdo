@@ -19,30 +19,42 @@ public class ChunkPosMixin {
 
     @Inject(method = "stream(Lnet/minecraft/util/math/ChunkPos;Lnet/minecraft/util/math/ChunkPos;)Ljava/util/stream/Stream;", at = @At("HEAD"), cancellable = true)
     private static void stream(ChunkPos pos1, ChunkPos pos2, CallbackInfoReturnable<Stream<ChunkPos>> cir) {
-        final int naX = pos1.x < pos2.x ? 1 : -1;
-        final int naZ = pos1.z < pos2.z ? 1 : -1;
-        cir.setReturnValue(StreamSupport.stream(new Spliterators.AbstractSpliterator<>((long) (Math.abs(pos1.x - pos2.x) + 1) * (Math.abs(pos1.z - pos2.z) + 1), Spliterator.SIZED) {
-            @Nullable
-            private ChunkPos position;
+        final int naX = pos1.x < pos2.x ? 1 : - 1;
+        final int naZ = pos1.z < pos2.z ? 1 : - 1;
+        cir.setReturnValue(StreamSupport.stream(
+                new Spliterators.AbstractSpliterator<>(
+                        (Math.abs(pos1.x - pos2.x) + 1L) * (Math.abs(pos1.z - pos2.z) + 1L),
+                        Spliterator.SIZED
+                ) {
+                    @Nullable
+                    private ChunkPos position;
 
-            public boolean tryAdvance(Consumer<? super ChunkPos> consumer) {
-                if (this.position == null) {
-                    this.position = pos1;
-                } else {
-                    if (this.position.x == pos2.x) {
-                        if (this.position.z == pos2.z) {
-                            return false;
+                    public boolean tryAdvance(Consumer<? super ChunkPos> consumer) {
+                        if (this.position == null) {
+                            this.position = pos1;
+                        } else {
+                            if (this.position.x == pos2.x) {
+                                if (this.position.z == pos2.z) {
+                                    return false;
+                                }
+
+                                this.position = new ChunkPos(
+                                        pos1.x,
+                                        this.position.z + naZ
+                                );
+                            } else {
+                                this.position = new ChunkPos(
+                                        this.position.x + naX,
+                                        this.position.z
+                                );
+                            }
                         }
 
-                        this.position = new ChunkPos(pos1.x, this.position.z + naZ);
-                    } else {
-                        this.position = new ChunkPos(this.position.x + naX, this.position.z);
+                        consumer.accept(this.position);
+                        return true;
                     }
-                }
-
-                consumer.accept(this.position);
-                return true;
-            }
-        }, false));
+                },
+                false
+        ));
     }
 }

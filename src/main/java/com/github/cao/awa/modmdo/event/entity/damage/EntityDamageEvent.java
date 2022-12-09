@@ -3,9 +3,6 @@ package com.github.cao.awa.modmdo.event.entity.damage;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
-import com.github.cao.awa.modmdo.utils.dimension.*;
-import com.github.cao.awa.modmdo.utils.entity.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.*;
@@ -72,17 +69,6 @@ public class EntityDamageEvent extends EntityTargetedEvent<EntityDamageEvent> {
     @Override
     public EntityDamageEvent fuse(Previously<EntityDamageEvent> previously, EntityDamageEvent delay) {
         return previously.target();
-    }
-
-    public String synopsis() {
-        String name = EntrustParser.tryCreate(() -> {
-            String str = EntityUtil.getName(entity);
-            if (str.equals("")) {
-                throw new IllegalArgumentException("empty name");
-            }
-            return str;
-        }, entity.toString());
-        return EntrustParser.tryCreate(() -> String.format("EntityDamageEvent{entity=%s, pos=%s, dimension=%s, origin-health=%s, damage=%s}", name, entity.getPos(), DimensionUtil.getDimension(world), originalHealth, damage), toString());
     }
 
     @Override

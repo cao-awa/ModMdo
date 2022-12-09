@@ -19,9 +19,9 @@ public class PersistentModifyTrigger<T extends ModMdoEvent<?>> extends ModMdoEve
     @Override
     public ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace trace) {
         JSONArray variables = metadata.getJSONArray("variables");
-        EntrustParser.operation(vars, list -> {
+        EntrustEnvironment.operation(vars, list -> {
             for (OperationalInteger i = new OperationalInteger(); i.get() < variables.length(); i.add()) {
-                EntrustExecution.tryTemporary(() -> {
+                EntrustEnvironment.trys(() -> {
                     list.add(new Receptacle<>(new JSONObject(variables.get(i.get()).toString())));
                 }, ex -> {
                     err("Cannot format variable: <V." + i.get() + ">", ex);
@@ -33,9 +33,9 @@ public class PersistentModifyTrigger<T extends ModMdoEvent<?>> extends ModMdoEve
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             for (Receptacle<JSONObject> json : vars) {
-                String name = EntrustParser.trying(() -> {
+                String name = EntrustEnvironment.trys(() -> {
                     return json.get().getString("name");
                 }, ex -> {
                     err("Cannot format variable", ex);
@@ -44,8 +44,8 @@ public class PersistentModifyTrigger<T extends ModMdoEvent<?>> extends ModMdoEve
                 if (name == null) {
                     break;
                 }
-                EntrustExecution.tryTemporary(() -> {
-                    variables.get(name).handle(json.get());
+                EntrustEnvironment.trys(() -> {
+                    VARIABLES.get(name).handle(json.get());
                 }, e -> {
                     err("Cannot find target variable: " + name, e);
                 });

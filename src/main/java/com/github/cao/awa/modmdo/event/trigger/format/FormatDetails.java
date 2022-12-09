@@ -26,7 +26,7 @@ public class FormatDetails {
     }
 
     public void set(String key, JSONArray array, Dictionary dictionary) {
-        EntrustParser.operation(args, list -> {
+        EntrustEnvironment.operation(args, list -> {
             for (int i = 0; i < array.length(); i++) {
                 list.add(new Receptacle<>(array.get(i).toString()));
             }
@@ -42,7 +42,7 @@ public class FormatDetails {
     public Literal format() {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
-                String name = EntrustParser.trying(() -> {
+                String name = EntrustEnvironment.trys(() -> {
                     JSONObject json = new JSONObject(s.get());
                     return json.getString("name");
                 }, ex -> {
@@ -51,17 +51,17 @@ public class FormatDetails {
                 if (name == null) {
                     return null;
                 }
-                EntrustExecution.tryTemporary(() -> {
+                EntrustEnvironment.trys(() -> {
                     ModMdoEventTrigger.BASE_FORMATTER.get("^{variable}").accept(s.setSub(name));
                 }, e -> {
                     throw new IllegalStateException("Cannot format variable", e);
                 });
             } else {
-                EntrustExecution.tryTemporary(() -> ModMdoEventTrigger.BASE_FORMATTER.get(s.get()).accept(s), ex -> {
+                EntrustEnvironment.trys(() -> ModMdoEventTrigger.BASE_FORMATTER.get(s.get()).accept(s), ex -> {
                 });
             }
         }
-        Object[] objs = EntrustParser.operation(new Object[args.size()], e -> {
+        Object[] objs = EntrustEnvironment.operation(new Object[args.size()], e -> {
             for (int i = 0; i < args.size(); i++) {
                 e[i] = args.get(i).get();
             }

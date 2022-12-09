@@ -16,7 +16,7 @@ import java.util.*;
 public class EnchantmentHelperMixin {
 
     /**
-     * @author 草awa
+     * @author cao_awa
      * @reason
      */
     @Overwrite

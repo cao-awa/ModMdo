@@ -90,7 +90,7 @@ public class NoteCommand extends SimpleCommand {
     }
 
     public void feedback(CommandContext<ServerCommandSource> source, String collector, String name) {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             if (collector != null) {
                 if (notes.has(collector)) {
                     JSONObject collected = notes.getJSONObject(collector);
@@ -114,7 +114,7 @@ public class NoteCommand extends SimpleCommand {
     }
 
     public void delete(CommandContext<ServerCommandSource> source, String collector, String name, boolean deleteCollector) {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             if (collector != null) {
                 if (notes.has(collector)) {
                     if (deleteCollector) {

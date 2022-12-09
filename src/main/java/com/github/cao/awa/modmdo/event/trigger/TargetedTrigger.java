@@ -14,7 +14,7 @@ import java.util.function.*;
 
 @Auto
 public abstract class TargetedTrigger<T extends EntityTargetedEvent<?>> extends ModMdoEventTrigger<T> {
-    public static final Object2ObjectArrayMap<String, BiConsumer<TargetedTrigger<?>, Receptacle<String>>> TARGETED_FORMATTER = EntrustParser.operation(new Object2ObjectArrayMap<>(), map -> {
+    public static final Object2ObjectArrayMap<String, BiConsumer<TargetedTrigger<?>, Receptacle<String>>> TARGETED_FORMATTER = EntrustEnvironment.operation(new Object2ObjectArrayMap<>(), map -> {
         map.put("%{dim_name}", (trigger, str) -> {
             str.set(DimensionUtil.getDimension(trigger.target.get(0).getEntityWorld()));
         });
