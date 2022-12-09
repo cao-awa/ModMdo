@@ -73,12 +73,12 @@ public abstract class BitSetVoxelSetMixin {
         }
     }
 
-    @Inject(method = "method_31939", at = @At("HEAD"), cancellable = true)
-    private static void method_31939(int sizeX, int sizeY, int sizeZ, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, CallbackInfoReturnable<BitSetVoxelSet> cir) {
-        cir.setReturnValue(set(sizeX, sizeY, sizeZ, minX, minY, minZ, maxX, maxY, maxZ));
+    @Inject(method = "create", at = @At("HEAD"), cancellable = true)
+    private static void fastCreate(int sizeX, int sizeY, int sizeZ, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, CallbackInfoReturnable<BitSetVoxelSet> cir) {
+        cir.setReturnValue(fastCreate(sizeX, sizeY, sizeZ, minX, minY, minZ, maxX, maxY, maxZ));
     }
 
-    private static BitSetVoxelSet set(int sizeX, int sizeY, int sizeZ, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    private static BitSetVoxelSet fastCreate(int sizeX, int sizeY, int sizeZ, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         BitSetVoxelSetInterface bitSetVoxelSet = ((BitSetVoxelSetInterface)(VoxelSet)new BitSetVoxelSet(sizeX, sizeY, sizeZ));
         bitSetVoxelSet.setMinX(minX);
         bitSetVoxelSet.setMinY(minY);
