@@ -12,17 +12,12 @@ import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
-import com.github.cao.awa.modmdo.utils.io.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import net.fabricmc.api.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.*;
 import net.minecraft.server.*;
 import org.apache.logging.log4j.*;
-import org.json.*;
-
-import java.io.*;
-import java.nio.charset.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -115,8 +110,6 @@ public class ModMdoStdInitializer implements ModInitializer {
         SharedVariables.loginUsers = new Users();
         SharedVariables.rejectUsers = new Users();
 
-        parseMapFormat();
-
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             SharedVariables.server = server;
 
@@ -178,32 +171,5 @@ public class ModMdoStdInitializer implements ModInitializer {
                 event.registered(),
                 old
         );
-    }
-
-    public void parseMapFormat() {
-        try {
-            JSONObject versionMap = new JSONObject(IOUtil.read(new BufferedReader(new InputStreamReader(
-                    Resources.getResource(
-                            "assets/modmdo/versions/versions_map.json",
-                            getClass()
-                    ),
-                    StandardCharsets.UTF_8
-            ))));
-
-            for (String s : versionMap.keySet())
-                SharedVariables.MOD_MDO_ID_TO_VERSION_MAP.put(
-                        Integer.valueOf(s),
-                        versionMap.getString(s)
-                );
-
-            for (String s : versionMap.keySet())
-                SharedVariables.MOD_MDO_VERSION_TO_ID_MAP.put(
-                        versionMap.getString(s),
-                        Integer.valueOf(s)
-                               .intValue()
-                );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

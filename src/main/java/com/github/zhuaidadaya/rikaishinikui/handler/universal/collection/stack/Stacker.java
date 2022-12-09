@@ -15,6 +15,6 @@ public class Stacker<T> extends Stack<T> {
     }
 
     public boolean hasElements() {
-        return this.isEmpty();
+        return !this.isEmpty();
     }
 }

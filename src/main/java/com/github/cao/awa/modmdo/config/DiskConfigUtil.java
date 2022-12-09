@@ -4,17 +4,29 @@ import com.github.cao.awa.modmdo.information.compressor.deflater.*;
 import com.github.cao.awa.modmdo.utils.io.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.apache.commons.codec.binary.*;
+import org.jetbrains.annotations.*;
 import org.json.*;
 
 import java.io.*;
 import java.nio.charset.*;
 
 public record DiskConfigUtil(String entrust, String path, String suffix, boolean compress) {
+    public void setIfNoExist(String key, Object value) {
+        if (new File(getConfigPath(key)).isFile()) {
+            return;
+        }
+        set(
+                key,
+                value == null ? "null" : value.toString()
+        );
+    }
+
     public void set(String key, Object value) {
         EntrustEnvironment.trys(() -> IOUtil.write(
                 new FileOutputStream(getConfigPath(key)),
                 compress ?
-                compress(value.toString().getBytes(StandardCharsets.UTF_8)) :
+                compress(value.toString()
+                              .getBytes(StandardCharsets.UTF_8)) :
                 value.toString()
                      .getBytes()
         ));
@@ -31,8 +43,18 @@ public record DiskConfigUtil(String entrust, String path, String suffix, boolean
         return path + "/" + key + "." + suffix;
     }
 
-    public String getString(String key) {
-        return EntrustEnvironment.trys(() -> StringUtils.newStringUtf8(decompress(IOUtil.readBytes(new BufferedInputStream(new FileInputStream(getConfigPath(key)))))));
+    public @NotNull JSONObject getJSONObject(String key) {
+        return EntrustEnvironment.trys(
+                () -> new JSONObject(getString(key)),
+                () -> new JSONObject()
+        );
+    }
+
+    public @NotNull String getString(String key) {
+        return EntrustEnvironment.get(
+                () -> StringUtils.newStringUtf8(decompress(IOUtil.readBytes(new BufferedInputStream(new FileInputStream(getConfigPath(key)))))),
+                ""
+        );
     }
 
     public static byte[] decompress(byte[] bytes) {
@@ -40,23 +62,6 @@ public record DiskConfigUtil(String entrust, String path, String suffix, boolean
             return DeflaterCompressor.EMPTY_BYTES;
         }
         return DeflaterCompressor.INSTANCE.decompress(bytes);
-    }
-
-    public void setIfNoExist(String key, Object value) {
-        if (new File(getConfigPath(key)).isFile()) {
-            return;
-        }
-        set(
-                key,
-                value == null ? "null" : value.toString()
-        );
-    }
-
-    public JSONObject getJSONObject(String key) {
-        return EntrustEnvironment.trys(
-                () -> new JSONObject(getString(key)),
-                () -> new JSONObject()
-        );
     }
 
     public int getInt(String key) {

@@ -6,6 +6,8 @@ import it.unimi.dsi.fastutil.objects.*;
 
 import java.util.*;
 
+import static com.github.cao.awa.modmdo.storage.SharedVariables.whitelists;
+
 @Server
 public class Certificates<T extends Certificate> {
     private final Map<String, T> certificate = new Object2ObjectArrayMap<>();
@@ -23,10 +25,6 @@ public class Certificates<T extends Certificate> {
                         wl.getName()
                 )
         );
-    }
-
-    public T get(String name) {
-        return this.certificate.get(name);
     }
 
     public T getFromId(String id) {
@@ -73,5 +71,19 @@ public class Certificates<T extends Certificate> {
     public void clear() {
         this.certificate.clear();
         this.idToName.clear();
+    }
+
+    public boolean verifyUUID(String name, String uuid) {
+        return EntrustEnvironment.get(
+                () -> uuid.equals(whitelists.get(name)
+                                            .getRecorde()
+                                            .getUuid()
+                                            .toString()),
+                false
+        );
+    }
+
+    public T get(String name) {
+        return this.certificate.get(name);
     }
 }

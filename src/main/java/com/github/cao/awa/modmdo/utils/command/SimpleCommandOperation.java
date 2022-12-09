@@ -16,10 +16,6 @@ import java.util.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class SimpleCommandOperation {
-    public static Literal formatModMdoVersionRequire(int versionRequire, ServerPlayerEntity player) {
-        return minecraftTextFormat.format(loginUsers.getUser(player), "command.require.version", MOD_MDO_ID_TO_VERSION_MAP.get(versionRequire));
-    }
-
     public static void sendFeedback(CommandContext<ServerCommandSource> source, Translatable message) {
         try {
             SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), false);
