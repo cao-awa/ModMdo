@@ -160,7 +160,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             PlayerUtil.getUUID(player)
                                       .toString(),
                             staticConfig.getString("identifier"),
-                            String.valueOf(MODMDO_VERSION),
+                            MODMDO_VERSION_NAME,
                             null,
                             null
                     );

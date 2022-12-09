@@ -280,7 +280,6 @@ public class ModMdoLoginNetworkHandler extends ServerPlayPacketHandler {
 
     @Override
     public void onDisconnected(Text reason) {
-        LOGGER.info("?????");
         LOGGER.info(
                 "{} lost connection: {}",
                 this.player.getName()
