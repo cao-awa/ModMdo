@@ -84,6 +84,11 @@ public class ClientLoginNetworkHandlerB implements ClientLoginPacketListener {
         });
     }
 
+    @Override
+    public void onSuccess(LoginSuccessS2CPacket packet) {
+
+    }
+
     @Nullable
     private Text joinServerSession(String serverId) {
         try {
@@ -105,18 +110,6 @@ public class ClientLoginNetworkHandlerB implements ClientLoginPacketListener {
 
     private MinecraftSessionService getSessionService() {
         return sessionService;
-    }
-
-    public void onLoginSuccess(LoginSuccessS2CPacket packet) {
-        //        this.statusConsumer.accept(new TranslatableText("connect.joining"));
-        //        this.profile = packet.getProfile();
-        //        this.connection.setState(NetworkState.PLAY);
-        //        this.connection.setPacketListener(new ClientPlayNetworkHandler(
-        //                this.client,
-        //                this.parentScreen,
-        //                this.connection,
-        //                this.profile
-        //        ));
     }
 
     public void onDisconnect(LoginDisconnectS2CPacket packet) {

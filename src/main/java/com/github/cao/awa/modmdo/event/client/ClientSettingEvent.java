@@ -46,7 +46,7 @@ public class ClientSettingEvent extends EntityTargetedEvent<ClientSettingEvent> 
     }
 
     public String getLanguage() {
-        return packet.getLanguage();
+        return packet.language();
     }
 
     public MinecraftServer getServer() {
