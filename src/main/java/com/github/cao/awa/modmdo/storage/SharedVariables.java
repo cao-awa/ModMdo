@@ -23,7 +23,6 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.brigadier.context.*;
-import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.s2c.play.*;
@@ -51,8 +50,6 @@ public class SharedVariables {
     public static final String ENTRUST = "ModMdo";
     public static final int MODMDO_VERSION = 31;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
-    public static final Object2IntOpenHashMap<String> MOD_MDO_VERSION_TO_ID_MAP = new Object2IntOpenHashMap<>();
-    public static final Int2ObjectOpenHashMap<String> MOD_MDO_ID_TO_VERSION_MAP = new Int2ObjectOpenHashMap<>();
     public static final NumberFormat FRACTION_DIGITS_2 = NumberFormat.getNumberInstance();
     public static final NumberFormat FRACTION_DIGITS_1 = NumberFormat.getNumberInstance();
     public static final NumberFormat FRACTION_DIGITS_0 = NumberFormat.getNumberInstance();
@@ -83,9 +80,9 @@ public class SharedVariables {
     public static ModMdoType modMdoType = ModMdoType.NONE;
     public static int itemDespawnAge = 6000;
     public static ServerLogin serverLogin = new ServerLogin();
-    public static Certificates<PermanentCertificate> whitelist = new Certificates<>();
+    public static Certificates<PermanentCertificate> whitelists = new Certificates<>();
     public static Certificates<TemporaryCertificate> temporaryStation = new Certificates<>();
-    public static Certificates<TemporaryCertificate> temporaryInvite = new Certificates<>();
+    public static Certificates<TemporaryCertificate> temporaryInvites = new Certificates<>();
     public static Certificates<Certificate> banned = new Certificates<>();
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
@@ -125,20 +122,20 @@ public class SharedVariables {
         loginUsers = new Users();
         itemDespawnAge = 6000;
 
-        temporaryInvite.clear();
+        temporaryInvites.clear();
 
         FORCE.clear();
     }
 
     public static void initWhiteList() {
         temporaryStation.clear();
-        whitelist.clear();
+        whitelists.clear();
 
         EntrustEnvironment.trys(() -> {
             JSONObject json = config.getJSONObject("whitelist");
 
             for (String s : json.keySet()) {
-                whitelist.put(
+                whitelists.put(
                         s,
                         PermanentCertificate.build(json.getJSONObject(s))
                 );
@@ -324,11 +321,11 @@ public class SharedVariables {
         if (modMdoType == ModMdoType.SERVER) {
             EntrustEnvironment.trys(() -> {
                 JSONObject json = new JSONObject();
-                for (String s : whitelist.keySet()) {
+                for (String s : whitelists.keySet()) {
                     json.put(
                             s,
-                            whitelist.get(s)
-                                     .toJSONObject()
+                            whitelists.get(s)
+                                      .toJSONObject()
                     );
                 }
                 config.set(
@@ -394,10 +391,10 @@ public class SharedVariables {
 
     public static boolean hasWhitelist(ServerPlayerEntity player) {
         try {
-            if (temporaryInvite.containsName(EntityUtil.getName(player))) {
-                if (temporaryInvite.get(EntityUtil.getName(player))
-                                   .getMillions() == - 1) {
-                    temporaryInvite.remove(EntityUtil.getName(player));
+            if (temporaryInvites.containsName(EntityUtil.getName(player))) {
+                if (temporaryInvites.get(EntityUtil.getName(player))
+                                    .getMillions() == - 1) {
+                    temporaryInvites.remove(EntityUtil.getName(player));
                     player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(
                                                                                                              loginUsers.getUser(player),
                                                                                                              "modmdo.invite.canceled"
@@ -410,9 +407,9 @@ public class SharedVariables {
                                                                                    .text());
                     return true;
                 }
-                if (! temporaryInvite.get(EntityUtil.getName(player))
-                                     .isValid()) {
-                    temporaryInvite.remove(EntityUtil.getName(player));
+                if (! temporaryInvites.get(EntityUtil.getName(player))
+                                      .isValid()) {
+                    temporaryInvites.remove(EntityUtil.getName(player));
                     player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(
                                                                                                              loginUsers.getUser(player),
                                                                                                              "modmdo.invite.expired"
@@ -427,37 +424,56 @@ public class SharedVariables {
                 return true;
             }
             if (config.getBoolean("whitelist_only_id")) {
-                return whitelist.getFromId(loginUsers.getUser(player)
-                                                     .getIdentifier()) != null;
+                return whitelists.getFromId(loginUsers.getUser(player)
+                                                      .getIdentifier()) != null;
             }
-            switch (whitelist.get(EntityUtil.getName(player))
-                             .getRecorde()
-                             .type()) {
+            switch (whitelists.get(EntityUtil.getName(player))
+                              .getRecorde()
+                              .type()) {
                 case IDENTIFIER -> {
-                    return whitelist.get(EntityUtil.getName(player))
-                                    .getRecorde()
-                                    .getUniqueId()
-                                    .equals(loginUsers.getUser(player)
-                                                      .getIdentifier());
+                    return validIdentifierWhitelist(EntityUtil.getName(player));
                 }
                 case UUID -> {
                     if (Objects.requireNonNull(player.getServer())
                                .isOnlineMode()) {
-                        if (! player.getUuid()
-                                    .equals(whitelist.get(EntityUtil.getName(player))
-                                                     .getRecorde()
-                                                     .getUuid())) {
-                            return false;
-                        }
+                        return validUuidWhitelist(
+                                EntityUtil.getName(player),
+                                player.getUuid()
+                        );
+
                     } else {
                         return false;
                     }
+                }
+                case MULTIPLE -> {
+                    return validIdentifierWhitelist(EntityUtil.getName(player)) || (Objects.requireNonNull(player.getServer())
+                                                                                           .isOnlineMode() && validUuidWhitelist(
+                            EntityUtil.getName(player),
+                            player.getUuid()
+                    ));
                 }
             }
         } catch (Exception e) {
             return false;
         }
         return true;
+    }
+
+    public static boolean validIdentifierWhitelist(String name) {
+        return EntrustEnvironment.get(
+                () -> whitelists.get(name)
+                                .getRecorde()
+                                .getUniqueId()
+                                .equals(loginUsers.getUser(name)
+                                                  .getIdentifier()),
+                false
+        );
+    }
+
+    public static boolean validUuidWhitelist(String name, UUID uuid) {
+        return uuid.equals(whitelists.get(name)
+                                     .getRecorde()
+                                     .getUuid());
     }
 
     public static boolean handleBanned(ServerPlayerEntity player) {

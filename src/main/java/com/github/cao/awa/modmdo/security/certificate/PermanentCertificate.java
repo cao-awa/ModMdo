@@ -10,13 +10,17 @@ import java.util.*;
 
 @Server
 public class PermanentCertificate extends Certificate {
-    public PermanentCertificate(@NotNull String name, String identifier, UUID uuid, String unidirectionalVerify) {
+    public PermanentCertificate(@NotNull String name, @NotNull String identifier, UUID uuid, String unidirectionalVerify) {
         super(
                 name,
-                new LoginRecorde(identifier,
-                                 uuid,
-                                 unidirectionalVerify,
-                                 identifier.equals("") ? LoginRecordeType.UUID : LoginRecordeType.IDENTIFIER
+                new LoginRecorde(
+                        identifier,
+                        uuid,
+                        unidirectionalVerify,
+                        identifier.equals("") ?
+                        LoginRecordeType.UUID :
+                        uuid.toString()
+                            .equals("") ? LoginRecordeType.IDENTIFIER : LoginRecordeType.MULTIPLE
                 )
         );
     }

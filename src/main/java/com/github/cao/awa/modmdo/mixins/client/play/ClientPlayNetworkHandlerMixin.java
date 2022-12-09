@@ -51,9 +51,9 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      * @author cao_awa
      * @author zhuaidadaya
      */
-    @Inject(method = "onCustomPayload", at = @At("HEAD"))
+    @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-        EntrustEnvironment.trys(
+        boolean doCancel = EntrustEnvironment.receptacle(cancel -> EntrustEnvironment.trys(
                 () -> {
                     final PacketDataProcessor processor = new PacketDataProcessor(packet.getData());
 
@@ -138,7 +138,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                                 "versionName",
                                 MODMDO_VERSION_NAME
                         );
-                        
+
                         if (verifyKey == null) {
                             loginData.put(
                                     "verifyData",
@@ -185,11 +185,17 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                               .write(loginData)
                               .send();
                     }
+
+                    cancel.set(true);
                 },
                 ex -> LOGGER.error(
                         "Error in connecting ModMdo server",
                         ex
                 )
-        );
+        ));
+
+        if (doCancel) {
+            ci.cancel();
+        }
     }
 }

@@ -11,7 +11,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoWhitelistSuggester {
     public static Certificate getWhiteList(String name) {
-        Certificate whiteList = whitelist.get(name);
+        Certificate whiteList = whitelists.get(name);
         return whiteList == null ?
                new TemporaryCertificate(name,
                                         - 1,
@@ -22,7 +22,7 @@ public class ModMdoWhitelistSuggester {
 
     public static <S> CompletableFuture<Suggestions> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         return CommandSource.suggestMatching(
-                whitelist.keySet(),
+                whitelists.keySet(),
                 builder
         );
     }
