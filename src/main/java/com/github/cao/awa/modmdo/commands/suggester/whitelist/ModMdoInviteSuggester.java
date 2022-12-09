@@ -1,6 +1,7 @@
 package com.github.cao.awa.modmdo.commands.suggester.whitelist;
 
 import com.github.cao.awa.modmdo.certificate.*;
+import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.suggestion.*;
@@ -18,20 +19,33 @@ public class ModMdoInviteSuggester {
             TemporaryCertificate certificate = temporaryStation.get(name);
             if ("invite".equals(certificate.getType())) {
                 invite = certificate;
+            } else {
+                return new TemporaryCertificate(name,
+                                         - 1,
+                                         - 1
+                );
             }
         }
-        return invite == null ? new TemporaryCertificate(name, - 1, - 1) : invite;
+        return invite;
     }
 
     public static <S> CompletableFuture<Suggestions> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        ObjectArrayList<String> list = EntrustParser.operation(new ObjectArrayList<>(), l -> {
-            l.addAll(temporaryInvite.keySet());
-            temporaryStation.values().forEach(certificate -> {
-                if (certificate.getType().equals("invite")) {
-                    l.add(certificate.getName());
+        ObjectArrayList<String> list = EntrustEnvironment.operation(
+                new ObjectArrayList<>(),
+                l -> {
+                    l.addAll(temporaryInvite.keySet());
+                    temporaryStation.values()
+                                    .forEach(certificate -> {
+                                        if (certificate.getType()
+                                                       .equals("invite")) {
+                                            l.add(certificate.getName());
+                                        }
+                                    });
                 }
-            });
-        });
-        return CommandSource.suggestMatching(list, builder);
+        );
+        return CommandSource.suggestMatching(
+                list,
+                builder
+        );
     }
 }

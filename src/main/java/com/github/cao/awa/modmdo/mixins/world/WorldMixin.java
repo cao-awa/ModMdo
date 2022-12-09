@@ -23,7 +23,7 @@ public abstract class WorldMixin implements WorldAccess {
                 pos,
                 flags,
                 maxUpdateDepth,
-                EntrustParser.trying(() -> getServer().getWorld(getRegistryKey())),
+                EntrustEnvironment.trys(() -> getServer().getWorld(getRegistryKey())),
                 getServer()
         ));
     }

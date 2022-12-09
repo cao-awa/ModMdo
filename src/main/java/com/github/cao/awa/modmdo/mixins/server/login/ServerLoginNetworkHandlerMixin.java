@@ -1,36 +1,45 @@
 package com.github.cao.awa.modmdo.mixins.server.login;
 
 import com.github.cao.awa.modmdo.certificate.*;
+import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.*;
+import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.storage.*;
+import com.github.cao.awa.modmdo.utils.digger.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
 import com.github.cao.awa.modmdo.utils.entity.player.*;
-import com.github.cao.awa.modmdo.utils.file.*;
+import com.github.cao.awa.modmdo.utils.packet.sender.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.authlib.*;
-import io.netty.buffer.*;
 import net.minecraft.network.*;
 import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.c2s.login.*;
-import net.minecraft.network.packet.s2c.login.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
+import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
 import java.util.concurrent.*;
+import java.util.concurrent.locks.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacketListener {
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoServerLoginHandler");
+
+    private static final int loginLimit = 300;
+    private static final Literal DISCONNECT_DDOS = TextUtil.literal("Server are under ddos attack, please login later");
+    private static final Literal NOTIFY_DDOS = TextUtil.literal("Server are under ddos attack, unable to login again if logout");
+    private static final ReentrantLock lock = new ReentrantLock();
     @Shadow
     @Final
     public ClientConnection connection;
@@ -47,12 +56,45 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     @Final
     private byte[] nonce;
 
+    private ServerPacketSender sender;
+
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(MinecraftServer server, ClientConnection connection, CallbackInfo ci) {
+        sender = new ServerPacketSender(
+                connection,
+                SERVER_CHANNEL
+        );
+
         int radix = 4;
         for (byte b : this.nonce) {
             MODMDO_NONCE[MODMDO_NONCE.length - radix--] = b;
         }
+
+//        if (    // Attack protection trigger.
+//                currentLogin >= loginLimit ||
+//                // Debug code, will not happen in using.
+//                serverUnderDdosAttack.get()) {
+//            lock.lock();
+//            connection.setPacketListener(new UnderAttackHandler(connection));
+//            connection.send(new LoginDisconnectS2CPacket(DISCONNECT_DDOS.text()));
+//            connection.disconnect(DISCONNECT_DDOS.text());
+//            if (ddosRecording == null) {
+//                DdosAttackRecorder.LOGGER.warn("Modmdo detected a maybe ddos attack, protection measures are enabled");
+//                serverUnderDdosAttack.set(true);
+//                ddosRecording = new DdosAttackRecorder(TimeUtil.millions());
+//                SharedVariables.sendMessageToAllPlayer(
+//                        server,
+//                        NOTIFY_DDOS.text(),
+//                        false
+//                );
+//                ddosAttackRecorders.add(ddosRecording);
+//            } else {
+//                ddosRecording.occurs();
+//            }
+//            lock.unlock();
+//        } else {
+//            currentLogin++;
+//        }
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
@@ -67,18 +109,21 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
     public abstract void acceptPlayer();
 
     /**
-     * @author 草awa
+     * @author cao_awa
      * @author 草二号机
      */
     @Redirect(method = "addToServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
     private void onPlayerConnect(PlayerManager manager, ClientConnection connection, ServerPlayerEntity player) {
-        if (player == null) {
+        if (player == null || serverUnderDdosAttack.get()) {
             return;
         }
 
         String name = EntityUtil.getName(player);
 
-        TRACKER.info("player " + name + " trying join server");
+        LOGGER.info(
+                "player {} trys join server",
+                name
+        );
 
         if (handleBanned(player)) {
             Certificate certificate = banned.get(EntityUtil.getName(player));
@@ -90,17 +135,23 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                                                 remaining
                                         )
                                         .text());
-                TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
+                LOGGER.info(
+                        "Player {} has been banned form server",
+                        PlayerUtil.getName(player)
+                );
             } else {
                 disc(minecraftTextFormat.format(
                                                 new Dictionary(certificate.getLastLanguage()),
                                                 "multiplayer.disconnect.banned-indefinite"
                                         )
                                         .text());
-                TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
+                LOGGER.info(
+                        "Player {} has been banned form server",
+                        PlayerUtil.getName(player)
+                );
             }
         } else {
-            if (config.getConfigBoolean("modmdo_whitelist")) {
+            if (config.getBoolean("modmdo_whitelist")) {
                 Receptacle<Boolean> isDoneOnlineMode = new Receptacle<>(false);
 
                 if (server.isHost(player.getGameProfile())) {
@@ -108,7 +159,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             name,
                             PlayerUtil.getUUID(player)
                                       .toString(),
-                            staticConfig.getConfigString("identifier"),
+                            staticConfig.getString("identifier"),
                             String.valueOf(MODMDO_VERSION),
                             null,
                             null
@@ -119,7 +170,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                             player
                     );
                 } else {
-                    int loginCheckTimeLimit = config.getConfigInt("checker_time_limit");
+                    int loginCheckTimeLimit = config.getInt("checker_time_limit");
 
                     loginTimedOut.put(
                             name,
@@ -128,8 +179,8 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
                     if (server.isOnlineMode()) {
                         if (! (profile == null || profile.getId() == null) && ! preReject) {
-                            if (config.getConfigBoolean("compatible_online_mode")) {
-                                EntrustExecution.tryTemporary(
+                            if (config.getBoolean("compatible_online_mode")) {
+                                EntrustEnvironment.trys(
                                         () -> {
                                             serverLogin.loginUsingYgg(
                                                     name,
@@ -158,49 +209,34 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                         }
                     }
 
-                    ServerPlayNetworkHandler handler = new ServerPlayNetworkHandler(
-                            server,
-                            connection,
-                            player
-                    );
-                    TRACKER.submit(
-                            "Server send test packet: old modmdo version test",
-                            () -> {
-                                handler.sendPacket(new CustomPayloadS2CPacket(
-                                        SERVER_CHANNEL,
-                                        new PacketByteBuf(Unpooled.buffer()).writeVarInt(modmdoWhitelist ? 99 : 96)
-                                ));
-                            }
-                    );
+                    LOGGER.debug("Server send test packet: old modmdo version test");
 
-                    if (isDoneOnlineMode.get()) {
-                        TRACKER.info("Player " + name + " are done in online mode, will not check again using modmdo");
-                    } else {
-                        TRACKER.info("Player " + name + " are not done in online mode, will check again using modmdo");
-                        TRACKER.submit(
-                                "Server send login packet: modmdo login",
-                                () -> {
-                                    if (modmdoWhitelist) {
-                                        String identifier = staticConfig.get("identifier");
-                                        handler.sendPacket(new CustomPayloadS2CPacket(
-                                                SERVER_CHANNEL,
-                                                new PacketByteBuf(Unpooled.buffer()).writeIdentifier(CHECKING_CHANNEL)
-                                                                                    .writeString(EntrustEnvironment.get(
-                                                                                            () -> MessageDigger.digest(
-                                                                                                    identifier,
-                                                                                                    MessageDigger.Sha3.SHA_512
-                                                                                            ),
-                                                                                            identifier
-                                                                                    ))
-                                        ));
-                                    } else {
-                                        handler.sendPacket(new CustomPayloadS2CPacket(
-                                                SERVER_CHANNEL,
-                                                new PacketByteBuf(Unpooled.buffer()).writeIdentifier(LOGIN_CHANNEL)
-                                        ));
-                                    }
-                                }
-                        );
+                    sender.chanel(SERVER_CHANNEL)
+                          .custom()
+                          .var(modmdoWhitelist ? 99 : 96)
+                          .send();
+
+                    if (! isDoneOnlineMode.get()) {
+                        LOGGER.debug("Server send login packet: modmdo login");
+                        EntrustEnvironment.trys(() -> {
+                            if (modmdoWhitelist) {
+                                String identifier = staticConfig.getString("identifier");
+                                sender.custom()
+                                      .write(CHECKING_CHANNEL)
+                                      .write(EntrustEnvironment.get(
+                                              () -> MessageDigger.digest(
+                                                      identifier,
+                                                      MessageDigger.Sha3.SHA_512
+                                              ),
+                                              identifier
+                                      ))
+                                      .send();
+                            } else {
+                                sender.custom()
+                                      .write(LOGIN_CHANNEL)
+                                      .send();
+                            }
+                        });
 
                         CompletableFuture.runAsync(() -> {
                             while (TimeUtil.millions() < loginTimedOut.get(name) && ! loginUsers.hasUser(name)) {
@@ -253,7 +289,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
     @Inject(method = "disconnect", at = @At("HEAD"), cancellable = true)
     public void disconnect(Text reason, CallbackInfo ci) {
-        if (authing && config.getConfigBoolean("compatible_online_mode") && config.getConfigBoolean("modmdo_whitelist")) {
+        if (authing && config.getBoolean("compatible_online_mode") && config.getBoolean("modmdo_whitelist")) {
             profile = profileOld;
             preReject = true;
             afterOnlineMode = true;
@@ -261,15 +297,29 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
         }
     }
 
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
+    public void onDisconnected0(Logger instance, String s, Object o1, Object o2) {
+        if (serverUnderDdosAttack.get()) {
+            return;
+        }
+        instance.info(
+                s,
+                o1,
+                o2
+        );
+    }
+
     @Redirect(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;)V"))
-    public void helloModMdo(ClientConnection instance, Packet<?> packet) {
-        instance.send(new LoginHelloS2CPacket(
-                "",
-                this.server.getKeyPair()
-                           .getPublic()
-                           .getEncoded(),
-                SharedVariables.MODMDO_NONCE
-        ));
+    public void helloModMdo(ClientConnection connection, Packet<?> packet) {
+        sender.swap(connection)
+              .hello(
+                      "",
+                      this.server.getKeyPair()
+                                 .getPublic()
+                                 .getEncoded(),
+                      SharedVariables.MODMDO_NONCE
+              )
+              .send();
     }
 
     @Redirect(method = "onKey", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerLoginNetworkHandler;nonce:[B"))

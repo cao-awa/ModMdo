@@ -5,6 +5,7 @@ import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.activity.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
+import org.apache.logging.log4j.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -12,6 +13,7 @@ import java.util.concurrent.atomic.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoExtraLoader {
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoExtraLoader");
     private final Object2ObjectRBTreeMap<UUID, ActivityObject<ModMdoExtra<?>>> extras = new Object2ObjectRBTreeMap<>();
     private final ExtraLoading loading;
     private final ModMdoExtra<?> major;
@@ -52,7 +54,7 @@ public class ModMdoExtraLoader {
     }
 
     public boolean isActive(UUID id) {
-        return EntrustParser.trying(() -> extras.get(id).isActive(), () -> false);
+        return EntrustEnvironment.trys(() -> extras.get(id).isActive(), () -> false);
     }
 
     public void load() {
@@ -63,18 +65,18 @@ public class ModMdoExtraLoader {
         });
 
         for (Class<?> clazz : EXTRA_AUTO.getTypesAnnotatedWith(ModMdoAutoExtra.class)) {
-            EntrustExecution.tryTemporary(() -> {
-                TRACKER.info("Registering for auto extra: " + clazz.getName());
+            EntrustEnvironment.trys(() -> {
+                LOGGER.info("Registering for auto extra: " + clazz.getName());
                 ModMdoExtra<?> extra = (ModMdoExtra<?>) clazz.getDeclaredConstructor().newInstance();
                 extra.prepare();
                 extra.signAuto();
                 register(extra.getId(), extra);
             }, ex -> {
-                TRACKER.submit("Failed to register auto extra: " + clazz.getName(), ex);
+                LOGGER.debug("Failed to register auto extra: " + clazz.getName(), ex);
             });
         }
 
-        TRACKER.info("Loading ModMdo extras");
+        LOGGER.info("Loading ModMdo extras");
 
         AtomicBoolean loaded = new AtomicBoolean(false);
         AtomicLong start = new AtomicLong(TimeUtil.millions());
@@ -83,11 +85,11 @@ public class ModMdoExtraLoader {
                 long time = TimeUtil.processMillion(start.get());
                 if ((time - 320) % 1000 == 0) {
                     if (loadingExtra != null) {
-                        TRACKER.warn("Extra: " + loadingId + "(" + loadingExtra.getName() + ") loading time has " + time / 1000 + " seconds longer than expected");
+                        LOGGER.warn("Extra: " + loadingId + "(" + loadingExtra.getName() + ") loading time has " + time / 1000 + " seconds longer than expected");
                     }
                 }
 
-                EntrustExecution.tryTemporary(() -> TimeUtil.coma(10));
+                EntrustEnvironment.trys(() -> TimeUtil.coma(10));
             }
         }).start();
 
@@ -99,12 +101,12 @@ public class ModMdoExtraLoader {
             long startLoad = TimeUtil.millions();
             loadingId = extra.getId();
             loadingExtra = extra;
-            TRACKER.info("Loading extra: " + loadingId + "(" + loadingExtra.getName() + ")");
+            LOGGER.info("Loading extra: " + loadingId + "(" + loadingExtra.getName() + ")");
             loadingExtra.auto(forcedMajor || active);
-            TRACKER.info("Loaded extra: " + loadingId + "(" + loadingExtra.getName() + ") in " + TimeUtil.processMillion(startLoad) + "ms");
+            LOGGER.info("Loaded extra: " + loadingId + "(" + loadingExtra.getName() + ") in " + TimeUtil.processMillion(startLoad) + "ms");
             start.set(TimeUtil.millions());
         }, failed -> {
-            TRACKER.submit("Failed to load extra: " + failed.getId() + "(" + failed.getName() + ")");
+            LOGGER.debug("Failed to load extra: " + failed.getId() + "(" + failed.getName() + ")");
             start.set(TimeUtil.millions());
         });
 
@@ -115,10 +117,10 @@ public class ModMdoExtraLoader {
     }
 
     public void register(UUID id, ModMdoExtra<?> extra) {
-        EntrustExecution.executeNull(extras.get(id), ActivityObject::active, asNull -> {
+        EntrustEnvironment.nulls(extras.get(id), ActivityObject::active, asNull -> {
             extras.put(id, new ActivityObject<>(extra));
             loading.then(extra);
-            TRACKER.info("Registered extra: " + id + "(" + extra.getName() + ")");
+            LOGGER.info("Registered extra: " + id + "(" + extra.getName() + ")");
         });
     }
 }

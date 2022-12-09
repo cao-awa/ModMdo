@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.server.*;
 
 import java.io.*;
+import java.util.*;
 import java.util.function.*;
 
 @AsyncDelay
@@ -30,53 +31,72 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     }
 
     public void register(Consumer<T> action, File register) {
-        actions.add(new TaskOrder<>(action, "F): " + register.getPath()));
+        actions.add(new TaskOrder<>(
+                action,
+                "F): " + register.getPath()
+        ));
     }
 
     public void register(Consumer<T> action, ModMdoExtra<?> register, String name) {
-        actions.add(new TaskOrder<>(action, "\"" + register.getName() + "\": " + name));
+        actions.add(new TaskOrder<>(
+                action,
+                "\"" + register.getName() + "\": " + name
+        ));
     }
 
     public ObjectArrayList<String> getRegistered() {
-        return EntrustParser.operation(new ObjectArrayList<>(), list -> {
-            for (TaskOrder<T> task : actions) {
-                list.add(task.getRegister());
-            }
-        });
+        return EntrustEnvironment.operation(
+                new ObjectArrayList<>(),
+                list -> {
+                    for (TaskOrder<T> task : actions) {
+                        list.add(task.getRegister());
+                    }
+                }
+        );
     }
 
     public boolean isSubmitted() {
         return submitted;
     }
 
-    public abstract String synopsis();
-
     @AsyncDelay
     public void await(Temporary action, int orWait, File register) {
-        orWait(new TaskOrder<>(e -> action.apply(), true, "File: \n  " + register.getPath()), orWait);
+        orWait(
+                new TaskOrder<>(
+                        e -> action.apply(),
+                        true,
+                        "File: \n  " + register.getPath()
+                ),
+                orWait
+        );
     }
 
     public void orWait(TaskOrder<T> order, final int wait) {
-        await.put(order, EntrustParser.thread(() -> {
-            synchronized (await) {
-                EntrustExecution.tryTemporary(() -> {
-                    OperationalInteger integer = new OperationalInteger(wait);
-                    while (integer.get() > 0) {
-                        TimeUtil.coma(10);
-                        integer.reduce(10);
-                        if (await.get(order).isInterrupted()) {
-                            await.remove(order);
-                            return;
-                        }
+        await.put(
+                order,
+                EntrustEnvironment.thread(() -> {
+                    synchronized (await) {
+                        EntrustEnvironment.trys(() -> {
+                            OperationalInteger integer = new OperationalInteger(wait);
+                            while (integer.get() > 0) {
+                                TimeUtil.coma(10);
+                                integer.reduce(10);
+                                if (await.get(order)
+                                         .isInterrupted()) {
+                                    await.remove(order);
+                                    return;
+                                }
+                            }
+                            if (await.containsKey(order)) {
+                                order.call(null);
+                                await.remove(order);
+                            }
+                        });
                     }
-                    if (await.containsKey(order)) {
-                        order.call(null);
-                        await.remove(order);
-                    }
-                });
-            }
-        }));
-        await.get(order).start();
+                })
+        );
+        await.get(order)
+             .start();
     }
 
     public void skipDelay(T target) {
@@ -95,19 +115,18 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     public void action(boolean enforce) {
         for (T target : delay) {
             for (TaskOrder<T> event : actions) {
-                if (enforce) {
-                    EntrustExecution.trying(target, event::enforce);
-                } else {
-                    EntrustExecution.trying(target, event::call);
-                }
+                EntrustEnvironment.operation(
+                        target,
+                        enforce ? event::enforce : event::call
+                );
             }
             for (TaskOrder<T> event : await.keySet()) {
-                await.get(event).interrupt();
-                if (enforce) {
-                    EntrustExecution.trying(target, event::enforce);
-                } else {
-                    EntrustExecution.trying(target, event::call);
-                }
+                await.get(event)
+                     .interrupt();
+                EntrustEnvironment.operation(
+                        target,
+                        enforce ? event::enforce : event::call
+                );
                 await.remove(event);
             }
             delay.remove(target);
@@ -119,7 +138,10 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     @AsyncDelay
     public void submit(T target) {
         if (previously.size() > 0) {
-            target = fuse(previously.get(0), target);
+            target = fuse(
+                    previously.get(0),
+                    target
+            );
             previously.remove(0);
         }
         delay.add(target);
@@ -134,19 +156,28 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
 
     @AsyncDelay
     public void immediately(T target, Temporary action) {
-        previously(target, action);
+        previously(
+                target,
+                action
+        );
         submit(target);
         action();
     }
 
     @AsyncDelay
     public void previously(T target, Temporary action) {
-        previously.add(new Previously<>(target, action));
+        previously.add(new Previously<>(
+                target,
+                action
+        ));
     }
 
     @SingleThread
     public void refrainAsync(T target, Temporary action) {
-        previously(target, action);
+        previously(
+                target,
+                action
+        );
         submit(target);
         action(true);
     }
@@ -158,7 +189,10 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     }
 
     public void auto(ModMdoEvent<?> target) {
-        if (target.clazz().equals(clazz())) {
+        if (Objects.equals(
+                target.clazz(),
+                clazz()
+        )) {
             adaptive((T) target);
         }
     }

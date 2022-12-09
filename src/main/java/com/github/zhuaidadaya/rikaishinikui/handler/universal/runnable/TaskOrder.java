@@ -90,7 +90,7 @@ public class TaskOrder<T> {
 
     @AsyncDelay
     private void action(T target) {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             action.getTarget().accept(target);
             resolve();
         });

@@ -1,8 +1,9 @@
 package com.github.cao.awa.modmdo.storage;
 
-import com.github.cao.awa.hyacinth.logging.*;
+import com.github.cao.awa.modmdo.attack.ddos.recorder.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
+import com.github.cao.awa.modmdo.config.*;
 import com.github.cao.awa.modmdo.develop.clazz.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
@@ -12,19 +13,20 @@ import com.github.cao.awa.modmdo.format.console.*;
 import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.Language;
 import com.github.cao.awa.modmdo.mixins.server.*;
+import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.security.key.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.brigadier.context.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.network.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.scoreboard.*;
 import net.minecraft.server.*;
@@ -47,24 +49,26 @@ public class SharedVariables {
     public static final String SUFFIX = "-ES";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
     public static final String RELEASE_TIME = "UTC+8 2022.8.5";
+    public static final String ENTRUST = "ModMdo";
     public static final int MODMDO_VERSION = 31;
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
-    public static final Object2IntOpenHashMap<String> modMdoVersionToIdMap = new Object2IntOpenHashMap<>();
-    public static final Int2ObjectOpenHashMap<String> modMdoIdToVersionMap = new Int2ObjectOpenHashMap<>();
-    public static final NumberFormat fractionDigits2 = NumberFormat.getNumberInstance();
-    public static final NumberFormat fractionDigits1 = NumberFormat.getNumberInstance();
-    public static final NumberFormat fractionDigits0 = NumberFormat.getNumberInstance();
+    public static final Object2IntOpenHashMap<String> MOD_MDO_VERSION_TO_ID_MAP = new Object2IntOpenHashMap<>();
+    public static final Int2ObjectOpenHashMap<String> MOD_MDO_ID_TO_VERSION_MAP = new Int2ObjectOpenHashMap<>();
+    public static final NumberFormat FRACTION_DIGITS_2 = NumberFormat.getNumberInstance();
+    public static final NumberFormat FRACTION_DIGITS_1 = NumberFormat.getNumberInstance();
+    public static final NumberFormat FRACTION_DIGITS_0 = NumberFormat.getNumberInstance();
     public static final Identifier CHECKING_CHANNEL = new Identifier("modmdo:check");
     public static final Identifier LOGIN_CHANNEL = new Identifier("modmdo:login");
     public static final Identifier SERVER_CHANNEL = new Identifier("modmdo:server");
     public static final Identifier CLIENT_CHANNEL = new Identifier("modmdo:client");
     public static final Identifier TOKEN_CHANNEL = new Identifier("modmdo:token");
-    public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> variables = new Object2ObjectOpenHashMap<>();
-    public static final GlobalTracker TRACKER = new GlobalTracker();
-    public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
+    public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> VARIABLES = new Object2ObjectOpenHashMap<>();
+    public static final ObjectArrayList<ServerPlayerEntity> FORCE = new ObjectArrayList<>();
     public static final SecureKeys SECURE_KEYS = new SecureKeys();
+    public static final ClazzScanner EXTRA_AUTO = new ClazzScanner(ModMdoExtra.class);
+    public static final List<ClientConnection> CONNECTIONS = new ObjectArrayList<>();
+    public static final List<DdosAttackRecorder> ddosAttackRecorders = new ObjectArrayList<>();
     public static String identifier;
-    public static String entrust = "ModMdo";
     public static boolean enableRanking = false;
     public static boolean enableHereCommand = true;
     public static boolean enableSecureEnchant = true;
@@ -74,14 +78,12 @@ public class SharedVariables {
     public static Object2ObjectOpenHashMap<String, Long> loginTimedOut = new Object2ObjectOpenHashMap<>();
     public static Users rejectUsers;
     public static Users loginUsers;
-    public static DiskObjectConfigUtil config;
-    public static DiskObjectConfigUtil staticConfig;
+    public static DiskConfigUtil config;
+    public static DiskConfigUtil staticConfig;
     public static MinecraftServer server;
     public static ModMdoType modMdoType = ModMdoType.NONE;
     public static int itemDespawnAge = 6000;
     public static ServerLogin serverLogin = new ServerLogin();
-    public static TemporaryCertificate modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
-    public static Certificates<PermanentCertificate> modmdoConnectionWhitelist = new Certificates<>();
     public static Certificates<PermanentCertificate> whitelist = new Certificates<>();
     public static Certificates<TemporaryCertificate> temporaryStation = new Certificates<>();
     public static Certificates<TemporaryCertificate> temporaryInvite = new Certificates<>();
@@ -96,25 +98,24 @@ public class SharedVariables {
     public static ModMdoEventTracer event = new ModMdoEventTracer();
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
-
     public static JSONObject notes = new JSONObject();
+    public static Receptacle<Boolean> serverUnderDdosAttack = Receptacle.of(false);
+    public static DdosAttackRecorder ddosRecording = null;
 
-    public static final ClazzScanner EXTRA_AUTO = new ClazzScanner(ModMdoExtra.class);
-
-    public static FutureTaskOrder futureTask = new FutureTaskOrder();
+    public static long currentLogin = 0;
 
     public static void allDefault() {
-        fractionDigits0.setGroupingUsed(false);
-        fractionDigits0.setMinimumFractionDigits(0);
-        fractionDigits0.setMaximumFractionDigits(0);
+        FRACTION_DIGITS_0.setGroupingUsed(false);
+        FRACTION_DIGITS_0.setMinimumFractionDigits(0);
+        FRACTION_DIGITS_0.setMaximumFractionDigits(0);
 
-        fractionDigits1.setGroupingUsed(false);
-        fractionDigits1.setMinimumFractionDigits(1);
-        fractionDigits1.setMaximumFractionDigits(1);
+        FRACTION_DIGITS_1.setGroupingUsed(false);
+        FRACTION_DIGITS_1.setMinimumFractionDigits(1);
+        FRACTION_DIGITS_1.setMaximumFractionDigits(1);
 
-        fractionDigits2.setGroupingUsed(false);
-        fractionDigits2.setMinimumFractionDigits(2);
-        fractionDigits2.setMaximumFractionDigits(2);
+        FRACTION_DIGITS_2.setGroupingUsed(false);
+        FRACTION_DIGITS_2.setMinimumFractionDigits(2);
+        FRACTION_DIGITS_2.setMaximumFractionDigits(2);
 
         enableRanking = false;
         enableHereCommand = true;
@@ -127,27 +128,21 @@ public class SharedVariables {
 
         temporaryInvite.clear();
 
-        force.clear();
+        FORCE.clear();
     }
 
     public static void initWhiteList() {
         temporaryStation.clear();
         whitelist.clear();
-        modmdoConnectionWhitelist.clear();
 
-        EntrustExecution.tryTemporary(() -> {
-            JSONObject json = config.getConfigJSONObject("whitelist");
-
-            for (String s : json.keySet()) {
-                whitelist.put(s, PermanentCertificate.build(json.getJSONObject(s)));
-            }
-        });
-
-        EntrustExecution.tryTemporary(() -> {
-            JSONObject json = config.getConfigJSONObject("connection-whitelist");
+        EntrustEnvironment.trys(() -> {
+            JSONObject json = config.getJSONObject("whitelist");
 
             for (String s : json.keySet()) {
-                modmdoConnectionWhitelist.put(s, PermanentCertificate.build(json.getJSONObject(s)));
+                whitelist.put(
+                        s,
+                        PermanentCertificate.build(json.getJSONObject(s))
+                );
             }
         });
     }
@@ -155,19 +150,25 @@ public class SharedVariables {
     public static void initNotes() {
         notes = new JSONObject();
 
-        EntrustExecution.tryTemporary(() -> notes = config.getConfigJSONObject("notes"));
+        EntrustEnvironment.trys(() -> notes = config.getJSONObject("notes"));
     }
 
     public static void initBan() {
         banned.clear();
 
-        EntrustExecution.tryTemporary(() -> {
-            JSONObject json = config.getConfigJSONObject("banned");
+        EntrustEnvironment.trys(
+                () -> {
+                    JSONObject json = config.getJSONObject("banned");
 
-            for (String s : json.keySet()) {
-                banned.put(s, Certificate.build(json.getJSONObject(s)));
-            }
-        }, Throwable::printStackTrace);
+                    for (String s : json.keySet()) {
+                        banned.put(
+                                s,
+                                Certificate.build(json.getJSONObject(s))
+                        );
+                    }
+                },
+                Throwable::printStackTrace
+        );
     }
 
     public static void addScoreboard(MinecraftServer server, Text displayName, String id) {
@@ -175,7 +176,12 @@ public class SharedVariables {
         if (scoreboard.containsObjective(id)) {
             scoreboard.removeObjective(scoreboard.getObjective(id));
         }
-        scoreboard.addObjective(id, ScoreboardCriterion.DUMMY, displayName, ScoreboardCriterion.DUMMY.getDefaultRenderType());
+        scoreboard.addObjective(
+                id,
+                ScoreboardCriterion.DUMMY,
+                displayName,
+                ScoreboardCriterion.DUMMY.getDefaultRenderType()
+        );
     }
 
     public static String getServerLevelPath(MinecraftServer server) {
@@ -187,7 +193,8 @@ public class SharedVariables {
     }
 
     public static String getServerLevelName(MinecraftServer server) {
-        return ((MinecraftServerInterface) server).getSession().getDirectoryName();
+        return ((MinecraftServerInterface) server).getSession()
+                                                  .getDirectoryName();
     }
 
     public static String getApply(CommandContext<ServerCommandSource> source) {
@@ -195,7 +202,8 @@ public class SharedVariables {
     }
 
     public static String getApply(MinecraftServer server) {
-        return ((MinecraftServerInterface) server).getSession().getDirectoryName() + "/";
+        return ((MinecraftServerInterface) server).getSession()
+                                                  .getDirectoryName() + "/";
     }
 
     public static String getApply() {
@@ -203,59 +211,84 @@ public class SharedVariables {
     }
 
     public static void sendMessageToAllPlayer(Text message, boolean actionBar) {
-        sendMessageToAllPlayer(server, message, actionBar);
+        sendMessageToAllPlayer(
+                server,
+                message,
+                actionBar
+        );
     }
 
     public static void sendMessageToAllPlayer(MinecraftServer server, Text message, boolean actionBar) {
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
-            sendMessage(player, message, actionBar);
+        for (ServerPlayerEntity player : server.getPlayerManager()
+                                               .getPlayerList())
+            sendMessage(
+                    player,
+                    message,
+                    actionBar
+            );
     }
 
     public static void sendMessage(ServerPlayerEntity player, Text message, boolean actionBar) {
-        player.sendMessage(message, actionBar);
-    }
-
-    public static boolean equalsModMdoVersion(ServerPlayerEntity player) {
-        return getPlayerModMdoVersion(player) == MODMDO_VERSION;
-    }
-
-    public static int getPlayerModMdoVersion(ServerPlayerEntity player) {
-        return EntrustParser.tryCreate(() -> loginUsers.getUser(player).getVersion(), - 1);
+        player.sendMessage(
+                message,
+                actionBar
+        );
     }
 
     public static String getPlayerModMdoName(ServerPlayerEntity player) {
-        return EntrustParser.trying(() -> loginUsers.getUser(player).getModmdoName());
-    }
-
-    public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, CommandContext<ServerCommandSource> source) {
-        return commandApplyToPlayer(versionRequire, player, source.getSource());
-    }
-
-    public static boolean commandApplyToPlayer(int versionRequire, ServerPlayerEntity player, ServerCommandSource source) {
-        if (! SimpleCommandOperation.getServer(source).isDedicated() || player == null || getFeatureCanUse(versionRequire, player))
-            return true;
-
-        SimpleCommandOperation.sendError(source, SimpleCommandOperation.formatModMdoVersionRequire(versionRequire, player));
-        return false;
-    }
-
-    public static boolean getFeatureCanUse(int versionRequire, ServerPlayerEntity player) {
-        return versionRequire <= getPlayerModMdoVersion(player);
+        return EntrustEnvironment.trys(() -> loginUsers.getUser(player)
+                                                       .getModmdoName());
     }
 
     public static void defaultConfig() {
-        config.setIfNoExist("default_language", Language.EN_US);
-        config.setIfNoExist("here_command", true);
-        config.setIfNoExist("cava", true);
-        config.setIfNoExist("secure_enchant", true);
-        config.setIfNoExist("modmdo_whitelist", false);
-        config.setIfNoExist("reject_reconnect", true);
-        config.setIfNoExist("time_active", true);
-        config.setIfNoExist("checker_time_limit", 3000);
-        config.setIfNoExist("enchantment_clear_if_level_too_high", false);
-        config.setIfNoExist("reject_no_fall_chest", true);
-        config.setIfNoExist("whitelist_only_id", false);
-        config.setIfNoExist("compatible_online_mode", true);
+        config.setIfNoExist(
+                "default_language",
+                Language.EN_US
+        );
+        config.setIfNoExist(
+                "here_command",
+                true
+        );
+        config.setIfNoExist(
+                "cava",
+                true
+        );
+        config.setIfNoExist(
+                "secure_enchant",
+                true
+        );
+        config.setIfNoExist(
+                "modmdo_whitelist",
+                false
+        );
+        config.setIfNoExist(
+                "reject_reconnect",
+                true
+        );
+        config.setIfNoExist(
+                "time_active",
+                true
+        );
+        config.setIfNoExist(
+                "checker_time_limit",
+                3000
+        );
+        config.setIfNoExist(
+                "enchantment_clear_if_level_too_high",
+                false
+        );
+        config.setIfNoExist(
+                "reject_no_fall_chest",
+                true
+        );
+        config.setIfNoExist(
+                "whitelist_only_id",
+                false
+        );
+        config.setIfNoExist(
+                "compatible_online_mode",
+                true
+        );
     }
 
     public static void saveVariables(Temporary action) {
@@ -264,42 +297,66 @@ public class SharedVariables {
     }
 
     public static void saveVariables() {
-        config.set("here_command", enableHereCommand);
-        config.set("secure_enchant", enableSecureEnchant);
-        config.set("reject_reconnect", enableRejectReconnect);
-        config.set("time_active", timeActive);
-        config.set("modmdo_whitelist", modmdoWhitelist);
-        config.set("notes", notes);
+        config.set(
+                "here_command",
+                enableHereCommand
+        );
+        config.set(
+                "secure_enchant",
+                enableSecureEnchant
+        );
+        config.set(
+                "reject_reconnect",
+                enableRejectReconnect
+        );
+        config.set(
+                "time_active",
+                timeActive
+        );
+        config.set(
+                "modmdo_whitelist",
+                modmdoWhitelist
+        );
+        config.set(
+                "notes",
+                notes
+        );
 
         if (modMdoType == ModMdoType.SERVER) {
-            EntrustExecution.tryTemporary(() -> {
+            EntrustEnvironment.trys(() -> {
                 JSONObject json = new JSONObject();
                 for (String s : whitelist.keySet()) {
-                    json.put(s, whitelist.get(s).toJSONObject());
+                    json.put(
+                            s,
+                            whitelist.get(s)
+                                     .toJSONObject()
+                    );
                 }
-                config.set("whitelist", json);
+                config.set(
+                        "whitelist",
+                        json
+                );
             });
 
-            EntrustExecution.tryTemporary(() -> {
-                JSONObject json = new JSONObject();
-                for (String s : modmdoConnectionWhitelist.keySet()) {
-                    json.put(s, modmdoConnectionWhitelist.get(s).toJSONObject());
-                }
-                config.set("connection-whitelist", json);
-            });
-
-            EntrustExecution.tryTemporary(() -> {
+            EntrustEnvironment.trys(() -> {
                 JSONObject json = new JSONObject();
                 for (String s : banned.keySet()) {
-                    json.put(s, banned.get(s).toJSONObject());
+                    json.put(
+                            s,
+                            banned.get(s)
+                                  .toJSONObject()
+                    );
                 }
-                config.set("banned", json);
+                config.set(
+                        "banned",
+                        json
+                );
             });
         }
     }
 
     public static Language getLanguage() {
-        return Language.ofs(config.getConfigString("default_language"));
+        return Language.ofs(config.getString("default_language"));
     }
 
     public static void handleTemporaryWhitelist() {
@@ -326,7 +383,10 @@ public class SharedVariables {
     }
 
     public static boolean isActive() {
-        return EntrustParser.trying(() -> extras.isActive(EXTRA_ID), () -> false);
+        return EntrustEnvironment.trys(
+                () -> extras.isActive(EXTRA_ID),
+                () -> false
+        );
     }
 
     public static boolean notWhitelist(ServerPlayerEntity player) {
@@ -336,29 +396,58 @@ public class SharedVariables {
     public static boolean hasWhitelist(ServerPlayerEntity player) {
         try {
             if (temporaryInvite.containsName(EntityUtil.getName(player))) {
-                if (temporaryInvite.get(EntityUtil.getName(player)).getMillions() == - 1) {
+                if (temporaryInvite.get(EntityUtil.getName(player))
+                                   .getMillions() == - 1) {
                     temporaryInvite.remove(EntityUtil.getName(player));
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled").text()));
-                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.canceled").text());
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(
+                                                                                                             loginUsers.getUser(player),
+                                                                                                             "modmdo.invite.canceled"
+                                                                                                     )
+                                                                                                     .text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(
+                                                                                           loginUsers.getUser(player),
+                                                                                           "modmdo.invite.canceled"
+                                                                                   )
+                                                                                   .text());
                     return true;
                 }
-                if (! temporaryInvite.get(EntityUtil.getName(player)).isValid()) {
+                if (! temporaryInvite.get(EntityUtil.getName(player))
+                                     .isValid()) {
                     temporaryInvite.remove(EntityUtil.getName(player));
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.expired").text()));
-                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(loginUsers.getUser(player), "modmdo.invite.expired").text());
+                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(
+                                                                                                             loginUsers.getUser(player),
+                                                                                                             "modmdo.invite.expired"
+                                                                                                     )
+                                                                                                     .text()));
+                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(
+                                                                                           loginUsers.getUser(player),
+                                                                                           "modmdo.invite.expired"
+                                                                                   )
+                                                                                   .text());
                 }
                 return true;
             }
-            if (config.getConfigBoolean("whitelist_only_id")) {
-                return whitelist.getFromId(loginUsers.getUser(player).getIdentifier()) != null;
+            if (config.getBoolean("whitelist_only_id")) {
+                return whitelist.getFromId(loginUsers.getUser(player)
+                                                     .getIdentifier()) != null;
             }
-            switch (whitelist.get(EntityUtil.getName(player)).getRecorde().type()) {
+            switch (whitelist.get(EntityUtil.getName(player))
+                             .getRecorde()
+                             .type()) {
                 case IDENTIFIER -> {
-                    return whitelist.get(EntityUtil.getName(player)).getRecorde().getUniqueId().equals(loginUsers.getUser(player).getIdentifier());
+                    return whitelist.get(EntityUtil.getName(player))
+                                    .getRecorde()
+                                    .getUniqueId()
+                                    .equals(loginUsers.getUser(player)
+                                                      .getIdentifier());
                 }
                 case UUID -> {
-                    if (Objects.requireNonNull(player.getServer()).isOnlineMode()) {
-                        if (! player.getUuid().equals(whitelist.get(EntityUtil.getName(player)).getRecorde().getUuid())) {
+                    if (Objects.requireNonNull(player.getServer())
+                               .isOnlineMode()) {
+                        if (! player.getUuid()
+                                    .equals(whitelist.get(EntityUtil.getName(player))
+                                                     .getRecorde()
+                                                     .getUuid())) {
                             return false;
                         }
                     } else {
@@ -373,7 +462,7 @@ public class SharedVariables {
     }
 
     public static boolean handleBanned(ServerPlayerEntity player) {
-        if (config.getConfigBoolean("modmdo_whitelist")) {
+        if (config.getBoolean("modmdo_whitelist")) {
             if (hasBan(player)) {
                 Certificate certificate = banned.get(EntityUtil.getName(player));
                 if (certificate instanceof TemporaryCertificate temp) {
@@ -392,14 +481,22 @@ public class SharedVariables {
 
     public static boolean hasBan(ServerPlayerEntity player) {
         try {
-            switch (banned.get(EntityUtil.getName(player)).getRecorde().type()) {
+            switch (banned.get(EntityUtil.getName(player))
+                          .getRecorde()
+                          .type()) {
                 case IDENTIFIER -> {
-                    if (banned.get(EntityUtil.getName(player)).getRecorde().getUniqueId().equals("")) {
+                    if (banned.get(EntityUtil.getName(player))
+                              .getRecorde()
+                              .getUniqueId()
+                              .equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
-                    if (! player.getUuid().equals(banned.get(EntityUtil.getName(player)).getRecorde().getUuid())) {
+                    if (! player.getUuid()
+                                .equals(banned.get(EntityUtil.getName(player))
+                                              .getRecorde()
+                                              .getUuid())) {
                         return false;
                     }
                 }

@@ -25,7 +25,7 @@ public class KillEntityTrigger<T extends EntityTargetedEvent<?>> extends Targete
 
     @Override
     public void action() {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             selector.prepare(SELF, target -> {
                 if (getTarget().size() > 1) {
                     err("Cannot use \"SELF\" selector in targeted more than one", new IllegalArgumentException("Unable to process \"SELF\" selector for entities, it need appoint an entity"));
@@ -34,7 +34,7 @@ public class KillEntityTrigger<T extends EntityTargetedEvent<?>> extends Targete
                 getTarget().get(0).kill();
             });
             selector.prepare(WORLD, target -> {
-                EntrustExecution.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.iterateEntities().forEach(entity -> {
+                EntrustEnvironment.notNull(getServer().getWorld(getTarget().get(0).world.getRegistryKey()), world -> world.iterateEntities().forEach(entity -> {
                     selector.filter(entity, Entity::kill);
                 }));
             });
@@ -42,7 +42,7 @@ public class KillEntityTrigger<T extends EntityTargetedEvent<?>> extends Targete
                 getServer().getWorlds().forEach(world -> world.iterateEntities().forEach(entity -> selector.filter(entity, Entity::kill)));
             });
             selector.prepare(APPOINT, target -> {
-                EntrustExecution.notNull(getServer().getPlayerManager().getPlayer(target), LivingEntity::kill);
+                EntrustEnvironment.notNull(getServer().getPlayerManager().getPlayer(target), LivingEntity::kill);
             });
             selector.action();
         });

@@ -73,19 +73,21 @@ public abstract class PlayerManagerMixin {
             ));
         }
 
-        if (! connection.isOpen()) {
+        if (connection.isOpen()) {
+            CONNECTIONS.add(connection);
+        } else {
             ci.cancel();
         }
     }
 
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;savePlayerData(Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
     public void remove(PlayerManager instance, ServerPlayerEntity player) {
-        EntrustExecution.tryTemporary(
+        EntrustEnvironment.trys(
                 () -> {
                     if ((loginUsers.hasUser(player) && ! banned.containsIdentifier(loginUsers.getUser(player.getUuid())
-                                                                                             .getIdentifier())) || force.contains(player) || player.networkHandler.getConnection()
+                                                                                             .getIdentifier())) || FORCE.contains(player) || player.networkHandler.getConnection()
                                                                                                                                                                   .getAddress() == null) {
-                        force.remove(player);
+                        FORCE.remove(player);
                     }
                     savePlayerData(player);
                 },

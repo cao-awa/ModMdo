@@ -20,11 +20,11 @@ public class ReusableThread {
     public void start() {
         while (running) {
             if (wait) {
-                EntrustExecution.tryTemporary(() -> {
+                EntrustEnvironment.trys(() -> {
                     TimeUnit.MILLISECONDS.sleep(1);
                 }, ex -> finish());
             } else {
-                EntrustExecution.tryTemporary(() -> this.action.apply());
+                EntrustEnvironment.trys(() -> this.action.apply());
 
                 wait = true;
             }

@@ -79,7 +79,7 @@ public class JSONObject {
      * output to guarantee that we are always writing valid JSON.
      */
     static final Pattern NUMBER_PATTERN = Pattern.compile("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?");
-    private static final Int2ObjectArrayMap<String> indents = EntrustParser.operation(new Int2ObjectArrayMap<>(), map -> {
+    private static final Int2ObjectArrayMap<String> indents = EntrustEnvironment.operation(new Int2ObjectArrayMap<>(), map -> {
         map.put(1, " ");
         map.put(2, "  ");
         map.put(3, "   ");
@@ -106,7 +106,9 @@ public class JSONObject {
      */
     public JSONObject(JSONObject jo, String... names) {
         this(names.length);
-        EntrustExecution.tryFor(names, name -> this.putOnce(name, jo.opt(name)));
+            EntrustEnvironment.tryFor(names, name -> {
+                this.putOnce(name, jo.opt(name));
+            });
     }
 
     /**
@@ -368,7 +370,7 @@ public class JSONObject {
     public JSONObject(Object object, String... names) {
         this(names.length);
         Class<?> c = object.getClass();
-        EntrustExecution.tryFor(names, name -> this.putOpt(name, c.getField(name).get(object)));
+        EntrustEnvironment.tryFor(names, name -> this.putOpt(name, c.getField(name).get(object)));
     }
 
     /**

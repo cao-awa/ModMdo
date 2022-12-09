@@ -3,7 +3,6 @@ package com.github.cao.awa.modmdo.event.server.query;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.delay.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.s2c.query.*;
 import net.minecraft.server.*;
@@ -44,10 +43,6 @@ public class ServerQueryEvent extends ModMdoEvent<ServerQueryEvent> {
 
     public ServerQueryEvent fuse(Previously<ServerQueryEvent> previously, ServerQueryEvent delay) {
         return previously.target();
-    }
-
-    public String synopsis() {
-        return EntrustParser.tryCreate(() -> String.format("ServerQueryEvent{meta=%s}", packet.getServerMetadata()), toString());
     }
 
     @Override

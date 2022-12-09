@@ -27,7 +27,7 @@ public final class ExcludeSelector<L, R> extends ObjectSelector<L, R> {
         ensure();
         List<L> keys = new ArrayList<>(getTargets().keySet());
         for (; exclude > 0 && keys.size() > 0; exclude--) {
-            getTargets().remove(EntrustParser.desert(keys, random));
+            getTargets().remove(EntrustEnvironment.desert(keys, random));
         }
     }
 

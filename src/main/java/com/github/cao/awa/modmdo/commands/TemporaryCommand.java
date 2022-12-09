@@ -1,9 +1,10 @@
 package com.github.cao.awa.modmdo.commands;
 
 import com.github.cao.awa.modmdo.certificate.*;
-import com.github.cao.awa.modmdo.certificate.pass.*;
 import com.github.cao.awa.modmdo.commands.suggester.ban.*;
 import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
+import com.github.cao.awa.modmdo.security.certificate.*;
+import com.github.cao.awa.modmdo.security.certificate.pass.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
@@ -64,13 +65,13 @@ public class TemporaryCommand extends SimpleCommand {
         })))).then(literal("remove").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).executes(remove -> {
             Certificate certificate = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(remove, "target"));
             Receptacle<Boolean> success = new Receptacle<>(false);
-            EntrustExecution.notNull(temporaryStation.get(certificate.getName()), c -> {
+            EntrustEnvironment.notNull(temporaryStation.get(certificate.getName()), c -> {
                 if (c.getType().equals("invite")) {
                     temporaryStation.remove(c.getName());
                     success.set(true);
                 }
             });
-            EntrustExecution.notNull(temporaryInvite.get(certificate.getName()), invite -> {
+            EntrustEnvironment.notNull(temporaryInvite.get(certificate.getName()), invite -> {
                 invite.setMillions(- 1);
                 success.set(true);
             });
@@ -107,34 +108,6 @@ public class TemporaryCommand extends SimpleCommand {
             }
             sendError(remove, TextUtil.translatable("arguments.temporary.station.not.registered", wl.getName()));
             return - 1;
-        })))).then(literal("connection").then(literal("whitelist").executes(whitelist -> {
-            if (modmdoConnectionAccepting.isValid()) {
-                long million = modmdoConnectionAccepting.getMillions() - TimeUtil.processMillion(modmdoConnectionAccepting.getRecording());
-                long minute = TimeUtil.processRemainingMinutes(million);
-                long second = TimeUtil.processRemainingSeconds(million);
-                sendFeedback(whitelist, TextUtil.translatable("connection.whitelist.accepting", minute, second));
-            } else {
-                sendFeedback(whitelist, TextUtil.translatable("connection.whitelist.no.accepting"));
-            }
-            return 0;
-        }).then(literal("accept").then(literal("one").executes(acceptOne -> {
-            if (modmdoConnectionAccepting.isValid()) {
-                long million = modmdoConnectionAccepting.getMillions() - TimeUtil.processMillion(modmdoConnectionAccepting.getRecording());
-                long minute = TimeUtil.processRemainingMinutes(million);
-                long second = TimeUtil.processRemainingSeconds(million);
-                sendError(acceptOne, TextUtil.translatable("connection.whitelist.accepting", minute, second));
-            } else {
-                sendFeedback(acceptOne, TextUtil.translatable("connection.whitelist.accepting.one"));
-                modmdoConnectionAccepting = new TemporaryCertificate("", TimeUtil.millions(), 1000 * 60 * 5);
-            }
-            return 0;
-        }))).then(literal("cancel").executes(cancel -> {
-            if (modmdoConnectionAccepting.isValid()) {
-                modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
-            } else {
-                sendError(cancel, TextUtil.translatable("connection.whitelist.no.accepting"));
-            }
-            return 0;
         })))));
         return this;
     }
@@ -204,7 +177,7 @@ public class TemporaryCommand extends SimpleCommand {
 
     public int ban(CommandContext<ServerCommandSource> ban, String name, int minutes) {
         ServerPlayerEntity player = getServer(ban).getPlayerManager().getPlayer(name);
-        force.add(player);
+        FORCE.add(player);
         Certificate certificate = ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target"));
         Certificate banned = SharedVariables.banned.get(name);
         boolean already = false;
@@ -221,7 +194,7 @@ public class TemporaryCommand extends SimpleCommand {
                     sendFeedback(ban, TextUtil.translatable("modmdo.banned.convert.indefinite", certificate.name, ((TemporaryCertificate) SharedVariables.banned.get(name)).formatRemaining()));
                 } else {
                     if (temp.getMillions() > 0) {
-                        sendFeedback(ban, TextUtil.translatable(minutes > 0 ? "modmdo.banned.overtime" : "modmdo.banned.reduce", name, new TemporaryCertificate(null, TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), ((TemporaryCertificate) SharedVariables.banned.get(name)).formatRemaining()));
+                        sendFeedback(ban, TextUtil.translatable(minutes > 0 ? "modmdo.banned.overtime" : "modmdo.banned.reduce", name, new TemporaryCertificate("", TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), ((TemporaryCertificate) SharedVariables.banned.get(name)).formatRemaining()));
                     } else {
                         SharedVariables.banned.remove(temp.getName());
                         sendFeedback(ban, TextUtil.translatable("modmdo.ban.pardon", name));
@@ -285,7 +258,7 @@ public class TemporaryCommand extends SimpleCommand {
             if (already) {
                 temporaryInvite(EntityUtil.getName(getPlayer(invite)), name, minutes == - 1 ? - 1 : minutes * 1000L * 60L, true);
                 if (invited.getMillions() > 0) {
-                    sendFeedback(invite, TextUtil.translatable(minutes > 0 ? "modmdo.invite.overtime" : "modmdo.invite.reduce", name, new TemporaryCertificate(null, TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), temporaryInvite.get(name).formatRemaining()));
+                    sendFeedback(invite, TextUtil.translatable(minutes > 0 ? "modmdo.invite.overtime" : "modmdo.invite.reduce", name, new TemporaryCertificate("", TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), temporaryInvite.get(name).formatRemaining()));
                 } else {
                     temporaryInvite(EntityUtil.getName(getPlayer(invite)), name, - 1, false);
                     sendFeedback(invite, TextUtil.translatable("modmdo.invite.cancel", name));

@@ -3,7 +3,6 @@ package com.github.cao.awa.modmdo.event.command.block;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.delay.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.block.*;
 import net.minecraft.server.*;
 import net.minecraft.util.math.*;
@@ -60,11 +59,6 @@ public class CommandBlockExecuteEvent extends ModMdoEvent<CommandBlockExecuteEve
     @Override
     public CommandBlockExecuteEvent fuse(Previously<CommandBlockExecuteEvent> previously, CommandBlockExecuteEvent delay) {
         return previously.target();
-    }
-
-    @Override
-    public String synopsis() {
-        return EntrustParser.tryCreate(() -> String.format("CommandBlockExecuteEvent{command=%s, pos=%s}", executor.getCommand(), pos.toString()), toString());
     }
 
     @Override

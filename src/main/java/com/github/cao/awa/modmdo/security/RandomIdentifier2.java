@@ -6,7 +6,7 @@ import java.nio.charset.*;
 import java.util.concurrent.*;
 
 public class RandomIdentifier2 {
-    private static final byte[] BYTES = EntrustParser.operation(new byte[253], chars -> {
+    private static final byte[] BYTES = EntrustEnvironment.operation(new byte[253], chars -> {
         for (int i = 0;i < chars.length;i++) {
             if (((char)i == '\n') || ((char)i) == '\r') {
                 continue;
@@ -14,7 +14,7 @@ public class RandomIdentifier2 {
             chars[i] = (byte) i;
         }
     });
-    private static final byte[] BYTES_LR = EntrustParser.operation(new byte[255], chars -> {
+    private static final byte[] BYTES_LR = EntrustEnvironment.operation(new byte[255], chars -> {
         for (int i = 0;i < chars.length;i++) {
             chars[i] = (byte) i;
         }

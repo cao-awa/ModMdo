@@ -22,7 +22,7 @@ public abstract class TextFormat<T> {
     }
 
     public void set(Resource<String> resource) {
-        EntrustExecution.tryFor(resource.getNames(), lang -> {
+        EntrustEnvironment.tryFor(resource.getNames(), lang -> {
             Object2ObjectLinkedOpenHashMap<String, String> map = new Object2ObjectLinkedOpenHashMap<>();
             for (String res : resource.read(lang)) {
                 JSONObject json = new JSONObject(res);
@@ -30,7 +30,7 @@ public abstract class TextFormat<T> {
                     map.put(s, json.getString(s));
                 }
             }
-            EntrustExecution.executeNull(format.get(lang), m -> m.putAll(map), nu -> format.put(lang, map));
+            EntrustEnvironment.nulls(format.get(lang), m -> m.putAll(map), nu -> format.put(lang, map));
         });
     }
 
@@ -74,7 +74,7 @@ public abstract class TextFormat<T> {
                 }
                 final String str = o.toString();
                 try {
-                    EntrustExecution.tryTemporary(() -> formatReturn.set(formatReturn.get().replaceFirst("%s", format.get(language.get()).get(str))), ex -> formatReturn.set(formatReturn.get().replaceFirst("%s", str)));
+                    EntrustEnvironment.trys(() -> formatReturn.set(formatReturn.get().replaceFirst("%s", format.get(language.get()).get(str))), () -> formatReturn.set(formatReturn.get().replaceFirst("%s", str)));
                 } catch (Exception ex) {
                     return formatReturn.get();
                 }
@@ -86,7 +86,7 @@ public abstract class TextFormat<T> {
     }
 
     public String auto(String key, Object... args) {
-        ObjectOpenHashSet<String> languages = EntrustParser.operation(new ObjectOpenHashSet<>(), set -> {
+        ObjectOpenHashSet<String> languages = EntrustEnvironment.operation(new ObjectOpenHashSet<>(), set -> {
             set.addAll(format.keySet());
             set.remove(getLanguage().getName());
         });

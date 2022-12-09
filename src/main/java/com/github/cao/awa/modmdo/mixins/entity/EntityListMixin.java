@@ -19,7 +19,7 @@ public abstract class EntityListMixin {
     private Int2ObjectMap<Entity> temp;
 
     /**
-     * @author 草awa
+     * @author cao_awa
      * @reason
      */
     @Overwrite

@@ -6,7 +6,7 @@ import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.Vec3i;
 import org.json.JSONObject;
 
-public class XYZ extends Storable {
+public class XYZ extends Storable implements Cloneable {
     public double x;
     public double y;
     public double z;
@@ -161,7 +161,7 @@ public class XYZ extends Storable {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put("x", SharedVariables.fractionDigits2.format(x)).put("y", SharedVariables.fractionDigits2.format(y)).put("z", SharedVariables.fractionDigits2.format(z));
+        return new JSONObject().put("x", SharedVariables.FRACTION_DIGITS_2.format(x)).put("y", SharedVariables.FRACTION_DIGITS_2.format(y)).put("z", SharedVariables.FRACTION_DIGITS_2.format(z));
     }
 
     public boolean equal(XYZ xyz) {
