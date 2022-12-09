@@ -15,7 +15,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.futureTask;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World {
-    protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DimensionType dimensionType, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed) {
+    protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, RegistryEntry<DimensionType> dimensionType, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed) {
         super(
                 properties,
                 registryRef,
