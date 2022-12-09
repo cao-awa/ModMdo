@@ -1,56 +1,71 @@
 package com.github.cao.awa.modmdo.utils.file;
 
 import java.io.*;
+import java.nio.charset.*;
 import java.security.*;
 
-import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
-
 public class MessageDigger {
-    public static String fileSha(File file, Sha sha) {
-        try {
-            int buff = 16384;
-
-            RandomAccessFile accessFile = new RandomAccessFile(file, "r");
-
-            MessageDigest messageDigest = MessageDigest.getInstance(sha.instanceName());
-
-            byte[] buffer = new byte[buff];
-
-            long read = 0;
-
-            long offset = accessFile.length();
-            int unitsize;
-            while (read < offset) {
-                unitsize = (int) (((offset - read) < buff) ? (offset - read) : buff);
-                accessFile.read(buffer, 0, unitsize);
-
-                messageDigest.update(buffer, 0, unitsize);
-
-                read += unitsize;
+    public static String digest(String message, DigestAlgorithm sha) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance(sha.instanceName());
+        messageDigest.update(message.getBytes(StandardCharsets.UTF_8));
+        StringBuilder result = new StringBuilder();
+        for (byte b : messageDigest.digest()) {
+            String hexString = Integer.toHexString(b & 0xFF);
+            if (2 > hexString.length()) {
+                result.append(0);
             }
-
-            accessFile.close();
-
-            StringBuilder builder = new StringBuilder();
-
-            String hexString;
-            for (byte b : messageDigest.digest()) {
-                hexString = Integer.toHexString(b & 255);
-                if (hexString.length() < 2) {
-                    builder.append(0);
-                }
-                builder.append(hexString);
-            }
-
-            return builder.toString();
-        } catch (Exception e) {
-            TRACKER.submit("Failed digest", e);
-            return "null";
+            result.append(hexString);
         }
+        return result.toString();
     }
 
-    public interface Sha {
-        String instanceName();
+    public static String digestFile(File file, DigestAlgorithm sha) throws Exception {
+        int bufSize = 16384;
+
+        RandomAccessFile accessFile = new RandomAccessFile(
+                file,
+                "r"
+        );
+
+        MessageDigest messageDigest = MessageDigest.getInstance(sha.instanceName());
+
+        byte[] buffer = new byte[bufSize];
+
+        long read = 0;
+
+        long offset = accessFile.length();
+        int unitsize;
+        while (read < offset) {
+            unitsize = (int) (((offset - read) < bufSize) ? (offset - read) : bufSize);
+            accessFile.read(
+                    buffer,
+                    0,
+                    unitsize
+            );
+
+            messageDigest.update(
+                    buffer,
+                    0,
+                    unitsize
+            );
+
+            read += unitsize;
+        }
+
+        accessFile.close();
+
+        StringBuilder result = new StringBuilder();
+
+        String hexString;
+        for (byte b : messageDigest.digest()) {
+            hexString = Integer.toHexString(b & 255);
+            if (hexString.length() < 2) {
+                result.append(0);
+            }
+            result.append(hexString);
+        }
+
+        return result.toString();
     }
 
     public enum Sha1 implements Sha {
@@ -82,4 +97,45 @@ public class MessageDigger {
             return instance;
         }
     }
+
+    public enum MD4 implements MD {
+        MD_4("MD4");
+
+        private final String instance;
+
+        MD4(String instance) {
+            this.instance = instance;
+        }
+
+        @Override
+        public String instanceName() {
+            return instance;
+        }
+    }
+
+    public enum MD5 implements MD {
+        MD_5("MD5");
+
+        private final String instance;
+
+        MD5(String instance) {
+            this.instance = instance;
+        }
+
+        @Override
+        public String instanceName() {
+            return instance;
+        }
+    }
+
+    public interface DigestAlgorithm {
+        String instanceName();
+    }
+
+    public interface Sha extends DigestAlgorithm {
+    }
+
+    public interface MD extends DigestAlgorithm {
+    }
 }
+

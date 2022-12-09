@@ -4,7 +4,7 @@ import com.github.cao.awa.modmdo.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
 import com.github.cao.awa.modmdo.develop.text.*;
-import com.github.cao.awa.modmdo.lang.Language;
+import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.text.*;
@@ -13,11 +13,8 @@ import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
 import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.command.argument.*;
-import net.minecraft.enchantment.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
-import net.minecraft.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 import static net.minecraft.server.command.CommandManager.*;
@@ -138,74 +135,6 @@ public class ModMdoCommand extends SimpleCommand {
             SharedVariables.saveVariables();
             SimpleCommandOperation.sendFeedback(english, TextUtil.translatable("language.default", SharedVariables.getLanguage()));
             return 0;
-        }))).then(literal("maxEnchantmentLevel").executes(getEnchantControlEnable -> {
-            SimpleCommandOperation.sendFeedback(getEnchantControlEnable, TextUtil.translatable(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
-            return 0;
-        }).then(literal("enable").executes(enableEnchantLimit -> {
-            SharedVariables.enchantLevelController.setEnabledControl(true);
-            SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(enableEnchantLimit, TextUtil.translatable(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
-            return 0;
-        })).then(literal("disable").executes(disableEnchantLimit -> {
-            SharedVariables.enchantLevelController.setEnabledControl(false);
-            SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(disableEnchantLimit, TextUtil.translatable(SharedVariables.enchantLevelController.isEnabledControl() ? "enchantment.level.controller.enabled" : "enchantment.level.controller.disabled"));
-            return 0;
-        })).then(literal("limit").then(literal("all").then(argument("all", IntegerArgumentType.integer(0, Short.MAX_VALUE)).executes(setDef -> {
-            short level = (short) IntegerArgumentType.getInteger(setDef, "all");
-            SharedVariables.enchantLevelController.setAll(level);
-            SimpleCommandOperation.sendFeedback(setDef, TextUtil.translatable("enchantment.max.level.limit.all", level));
-            return 0;
-        })).then(literal("default").executes(recoveryAll -> {
-            SharedVariables.enchantLevelController.allDefault();
-            SimpleCommandOperation.sendFeedback(recoveryAll, TextUtil.translatable("enchantment.max.level.limit.all.default"));
-            return 0;
-        }))).then(literal("appoint").then(argument("appoint", EnchantmentArgumentType.enchantment()).executes(getLimit -> {
-            Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(getLimit, "appoint"));
-            short level = SharedVariables.enchantLevelController.get(name).getMax();
-            SimpleCommandOperation.sendFeedback(getLimit, TextUtil.translatable("enchantment.max.level.limit", name, level));
-            SharedVariables.saveEnchantmentMaxLevel();
-            return 0;
-        }).then(argument("limit", IntegerArgumentType.integer(0, Short.MAX_VALUE)).executes(setLimit -> {
-            Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(setLimit, "appoint"));
-            short level = (short) IntegerArgumentType.getInteger(setLimit, "limit");
-            SharedVariables.enchantLevelController.set(name, level);
-            SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(setLimit, TextUtil.translatable("enchantment.max.level.limit", name, level));
-            return 0;
-        })).then(literal("default").executes(recoveryLevel -> {
-            Identifier name = EnchantmentHelper.getEnchantmentId(EnchantmentArgumentType.getEnchantment(recoveryLevel, "appoint"));
-            short level = SharedVariables.enchantLevelController.get(name).getDefaultMax();
-            SharedVariables.enchantLevelController.set(name, level);
-            SharedVariables.saveEnchantmentMaxLevel();
-            SimpleCommandOperation.sendFeedback(recoveryLevel, TextUtil.translatable("enchantment.max.level.limit", name, level));
-            return 0;
-        })))))).then(literal("clearEnchantIfLevelTooHigh").executes(getClear -> {
-            SimpleCommandOperation.sendFeedback(getClear, TextUtil.formatRule("enchantment_clear_if_level_too_high", SharedVariables.clearEnchantIfLevelTooHigh ? "enabled" : "disabled"));
-            return 0;
-        }).then(literal("enable").executes(enableClear -> {
-            SharedVariables.clearEnchantIfLevelTooHigh = true;
-            SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(enableClear, TextUtil.formatRule("enchantment_clear_if_level_too_high", "enabled"));
-            return 0;
-        })).then(literal("disable").executes(disableClear -> {
-            SharedVariables.clearEnchantIfLevelTooHigh = false;
-            SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(disableClear, TextUtil.formatRule("enchantment_clear_if_level_too_high", "disabled"));
-            return 0;
-        }))).then(literal("rejectNoFallCheat").executes(getRejectNoFall -> {
-            SimpleCommandOperation.sendFeedback(getRejectNoFall, TextUtil.translatable(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
-            return 0;
-        }).then(literal("enable").executes(reject -> {
-            SharedVariables.rejectNoFallCheat = true;
-            SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(reject, TextUtil.translatable(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
-            return 0;
-        })).then(literal("disable").executes(receive -> {
-            SharedVariables.rejectNoFallCheat = false;
-            SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(receive, TextUtil.translatable(SharedVariables.rejectNoFallCheat ? "player.no.fall.cheat.reject" : "player.no.fall.cheat.receive"));
-            return 0;
         }))).then(literal("onlyCheckIdentifier").executes(check -> {
             SimpleCommandOperation.sendFeedback(check, formatConfigReturnMessage("whitelist_only_id"));
             return 0;
@@ -231,22 +160,6 @@ public class ModMdoCommand extends SimpleCommand {
                     showWhitelist(showWhiteList);
                     return 0;
                 }))
-                //                        .then(literal("multiple").then(argument("name", ModMdoWhitelistArgumentType.whitelist()).executes(remove -> {
-                //            Certificate wl = ModMdoWhitelistArgumentType.getWhiteList(remove, "name");
-                //            if (temporaryStation.containsName(wl.getName())) {
-                //                SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.multiple.already", wl.getName()));
-                //                return -1;
-                //            }
-                //            if (SharedVariables.whitelist.containsName(wl.getName())) {
-                //                temporaryStation.put(wl.getName(), new TemporaryCertificate(wl.getName(), new LoginRecorde(null, null,LoginRecordeType.MULTIPLE), 0,0));
-                //                SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.multiple", wl.getName()));
-                //                SharedVariables.updateWhitelistNames(SimpleCommandOperation.getServer(remove), true);
-                //                SharedVariables.saveVariables();
-                //                return 0;
-                //            }
-                //            SimpleCommandOperation.sendError(remove, TextUtil.translatable("arguments.permanent.whitelist.not.registered"));
-                //            return - 1;
-                //        })))
         ).then(literal("compatibleOnlineMode").executes(getCompatible -> {
             SimpleCommandOperation.sendFeedback(getCompatible, formatConfigReturnMessage("compatible_online_mode"));
             return 0;

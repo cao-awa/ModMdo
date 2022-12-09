@@ -18,7 +18,7 @@ public class TaskOrder<T> {
     private boolean usable = true;
     private boolean noDelay;
     private boolean reuse;
-    private final @NotNull ReusableThread thread = new ReusableThread(() -> {
+    private @NotNull Thread thread = new Thread(() -> {
     });
 
     public TaskOrder(Consumer<T> action, String register) {
@@ -71,10 +71,11 @@ public class TaskOrder<T> {
                 action(target);
                 action.reverse();
             } else {
-                thread.execute(() -> {
+                thread = new Thread(() -> {
                     action(target);
                     action.reverse();
                 });
+                thread.start();
             }
         } else {
             if (usable && ! noDelay) {
@@ -96,7 +97,7 @@ public class TaskOrder<T> {
     }
 
     @NotNull
-    public ReusableThread getThread() {
+    public Thread getThread() {
         return thread;
     }
 
