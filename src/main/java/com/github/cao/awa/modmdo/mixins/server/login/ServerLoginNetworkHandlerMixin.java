@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.mixins.server.login;
 
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.security.certificate.*;

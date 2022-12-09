@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.mixins.server.play;
 
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.client.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;

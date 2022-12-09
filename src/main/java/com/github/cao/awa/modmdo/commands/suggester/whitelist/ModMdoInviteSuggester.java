@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.commands.suggester.whitelist;
 
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.context.*;

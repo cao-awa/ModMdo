@@ -1,7 +1,6 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
 import com.github.cao.awa.modmdo.attack.ddos.recorder.*;
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.config.*;
 import com.github.cao.awa.modmdo.event.trigger.*;

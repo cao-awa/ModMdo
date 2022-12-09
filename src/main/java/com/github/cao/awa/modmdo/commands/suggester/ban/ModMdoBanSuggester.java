@@ -1,6 +1,5 @@
 package com.github.cao.awa.modmdo.commands.suggester.ban;
 
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.security.certificate.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.suggestion.*;

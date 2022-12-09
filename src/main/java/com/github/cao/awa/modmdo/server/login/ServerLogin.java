@@ -1,7 +1,6 @@
 package com.github.cao.awa.modmdo.server.login;
 
 import com.github.cao.awa.modmdo.annotations.platform.*;
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.security.certificate.identity.*;

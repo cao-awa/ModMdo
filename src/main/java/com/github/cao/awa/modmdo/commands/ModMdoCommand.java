@@ -1,7 +1,6 @@
 package com.github.cao.awa.modmdo.commands;
 
 import com.github.cao.awa.modmdo.*;
-import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.*;
