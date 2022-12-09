@@ -20,8 +20,8 @@ import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
-import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.*;
+import org.slf4j.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -33,7 +33,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacketListener {
-    private static final Logger LOGGER = LogManager.getLogger("ModMdoServerLoginHandler");
+    private static final Logger LOGGER = LoggerFactory.getLogger("ModMdoServerLoginHandler");
 
     private static final int loginLimit = 300;
     private static final Literal DISCONNECT_DDOS = TextUtil.literal("Server are under ddos attack, please login later");
@@ -296,7 +296,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
         }
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
     public void onDisconnected0(Logger instance, String s, Object o1, Object o2) {
         if (serverUnderDdosAttack.get()) {
             return;
