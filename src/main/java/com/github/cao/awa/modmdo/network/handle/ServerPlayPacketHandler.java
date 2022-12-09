@@ -17,6 +17,16 @@ public abstract class ServerPlayPacketHandler implements ServerPlayPacketListene
     }
 
     @Override
+    public void onCommandExecution(CommandExecutionC2SPacket packet) {
+
+    }
+
+    @Override
+    public void onMessageAcknowledgment(MessageAcknowledgmentC2SPacket packet) {
+
+    }
+
+    @Override
     public void onClientStatus(ClientStatusC2SPacket packet) {
 
     }
@@ -228,6 +238,11 @@ public abstract class ServerPlayPacketHandler implements ServerPlayPacketListene
 
     @Override
     public void onUpdateDifficultyLock(UpdateDifficultyLockC2SPacket packet) {
+
+    }
+
+    @Override
+    public void onPlayerSession(PlayerSessionC2SPacket packet) {
 
     }
 
