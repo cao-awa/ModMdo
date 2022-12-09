@@ -3,7 +3,6 @@ package com.github.cao.awa.modmdo.commands;
 import com.github.cao.awa.modmdo.benchmark.connect.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import com.mojang.authlib.*;
 import com.mojang.brigadier.arguments.*;
 import io.netty.bootstrap.*;
 import io.netty.channel.*;
@@ -26,51 +25,51 @@ public class BenchmarkCommand extends SimpleCommand {
         final ClientConnection clientConnection = new ClientConnection(NetworkSide.CLIENTBOUND);
 
         new Bootstrap().group(ClientConnection.CLIENT_IO_GROUP.get())
-                         .handler(new ChannelInitializer<>() {
-                             protected void initChannel(Channel channel) {
-                                 try {
-                                     channel.config()
-                                            .setOption(
-                                                    ChannelOption.TCP_NODELAY,
-                                                    true
-                                            );
-                                 } catch (ChannelException var3) {
+                       .handler(new ChannelInitializer<>() {
+                           protected void initChannel(Channel channel) {
+                               try {
+                                   channel.config()
+                                          .setOption(
+                                                  ChannelOption.TCP_NODELAY,
+                                                  true
+                                          );
+                               } catch (ChannelException var3) {
 
-                                 }
+                               }
 
-                                 channel.pipeline()
-                                        .addLast(
-                                                "timeout",
-                                                new ReadTimeoutHandler(30)
-                                        )
-                                        .addLast(
-                                                "splitter",
-                                                new SplitterHandler()
-                                        )
-                                        .addLast(
-                                                "decoder",
-                                                new DecoderHandler(NetworkSide.CLIENTBOUND)
-                                        )
-                                        .addLast(
-                                                "prepender",
-                                                new SizePrepender()
-                                        )
-                                        .addLast(
-                                                "encoder",
-                                                new PacketEncoder(NetworkSide.SERVERBOUND)
-                                        )
-                                        .addLast(
-                                                "packet_handler",
-                                                clientConnection
-                                        );
-                             }
-                         })
-                         .channel(NioSocketChannel.class)
-                         .connect(
-                                 address.getAddress(),
-                                 address.getPort()
-                         )
-                         .syncUninterruptibly();
+                               channel.pipeline()
+                                      .addLast(
+                                              "timeout",
+                                              new ReadTimeoutHandler(30)
+                                      )
+                                      .addLast(
+                                              "splitter",
+                                              new SplitterHandler()
+                                      )
+                                      .addLast(
+                                              "decoder",
+                                              new DecoderHandler(NetworkSide.CLIENTBOUND)
+                                      )
+                                      .addLast(
+                                              "prepender",
+                                              new SizePrepender()
+                                      )
+                                      .addLast(
+                                              "encoder",
+                                              new PacketEncoder(NetworkSide.SERVERBOUND)
+                                      )
+                                      .addLast(
+                                              "packet_handler",
+                                              clientConnection
+                                      );
+                           }
+                       })
+                       .channel(NioSocketChannel.class)
+                       .connect(
+                               address.getAddress(),
+                               address.getPort()
+                       )
+                       .syncUninterruptibly();
         return clientConnection;
     }
 
@@ -103,8 +102,7 @@ public class BenchmarkCommand extends SimpleCommand {
         for (int i = 0; i < 2; i++) {
             new Thread(() -> {
                 for (int i1 = 0; i1 < 1000000; i1++) {
-                    EntrustEnvironment.trys(() -> connecting(address)
-                    );
+                    EntrustEnvironment.trys(() -> connecting(address));
                 }
             }).start();
         }
@@ -113,19 +111,17 @@ public class BenchmarkCommand extends SimpleCommand {
     public static void connecting(InetSocketAddress address) {
         ClientConnection connection = ClientConnection.connect(
                 address,
-                 false
+                false
         );
-        connection.setPacketListener(new ClientLoginNetworkHandlerB(
-                connection
-        ));
+        connection.setPacketListener(new ClientLoginNetworkHandlerB(connection));
         connection.send(new HandshakeC2SPacket(
                 address.getHostName(),
                 address.getPort(),
                 NetworkState.LOGIN
         ));
-        connection.send(new LoginHelloC2SPacket(new GameProfile(
-                UUID.randomUUID(),
-                "test" + RANDOM.nextInt(1000000)
-        )));
+        connection.send(new LoginHelloC2SPacket(
+                "test" + RANDOM.nextInt(1000000),
+                Optional.of(UUID.randomUUID())
+        ));
     }
 }

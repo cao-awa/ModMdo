@@ -46,7 +46,7 @@ public class GameChatEvent extends EntityTargetedEvent<GameChatEvent> {
     }
 
     public String getMessage() {
-        return packet.getChatMessage();
+        return packet.chatMessage();
     }
 
     public MinecraftServer getServer() {

@@ -66,9 +66,9 @@ public abstract class ClientLoginNetworkHandlerMixin {
             String serverId;
             LoginKeyC2SPacket loginKeyPacket;
             try {
-                SecretKey secretKey = NetworkEncryptionUtils.generateKey();
+                SecretKey secretKey = NetworkEncryptionUtils.generateSecretKey();
                 PublicKey publicKey = packet.getPublicKey();
-                serverId = new BigInteger(NetworkEncryptionUtils.generateServerId(
+                serverId = new BigInteger(NetworkEncryptionUtils.computeServerId(
                         packet.getServerId(),
                         publicKey,
                         secretKey
@@ -102,10 +102,10 @@ public abstract class ClientLoginNetworkHandlerMixin {
                                                        .text());
                 this.connection.send(
                         loginKeyPacket,
-                        (future) -> this.connection.setupEncryption(
+                        PacketCallbacks.always(() -> this.connection.setupEncryption(
                                 cipher,
                                 cipher2
-                        )
+                        ))
                 );
             });
 

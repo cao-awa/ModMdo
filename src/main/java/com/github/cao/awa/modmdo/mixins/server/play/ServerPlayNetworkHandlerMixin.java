@@ -4,7 +4,7 @@ import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.event.client.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.event.server.chat.*;
-import com.github.cao.awa.modmdo.lang.Dictionary;
+import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
@@ -26,8 +26,6 @@ import org.json.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
-
-import java.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -290,28 +288,27 @@ public abstract class ServerPlayNetworkHandlerMixin {
         ));
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
-    public void onDisconnected0(PlayerManager instance, Text message, MessageType type, UUID sender) {
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V"))
+    public void onDisconnected0(PlayerManager instance, Text message, boolean overlay) {
         if (loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
-            instance.broadcastChatMessage(
+            instance.broadcast(
                     message,
-                    type,
-                    sender
+                    overlay
             );
         }
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
-    public void onDisconnected0(Logger instance, String s, Object o1, Object o2) {
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
+    public void onDisconnected0(org.slf4j.Logger instance, String s, Object o1, Object o2) {
         if (serverUnderDdosAttack.get()) {
             return;
         }
         instance.info(s, o1, o2);
     }
 
-    @Inject(method = "executeCommand", at = @At("HEAD"))
-    private void executeCommand(String input, CallbackInfo ci) {
-        LOGGER.info("'" + EntityUtil.getName(player) + "' run command: " + input);
+    @Inject(method = "onCommandExecution", at = @At("HEAD"))
+    private void executeCommand(CommandExecutionC2SPacket packet, CallbackInfo ci) {
+        LOGGER.info("'" + EntityUtil.getName(player) + "' run command: " + packet.command());
     }
 
     @Inject(method = "onClientSettings", at = @At("HEAD"))
@@ -323,7 +320,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         ));
     }
 
-    @Inject(method = "onGameMessage", at = @At("HEAD"))
+    @Inject(method = "onChatMessage", at = @At("HEAD"))
     public void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         event.submit(new GameChatEvent(
                 player,

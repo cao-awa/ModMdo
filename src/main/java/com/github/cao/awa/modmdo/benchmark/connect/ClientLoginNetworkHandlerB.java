@@ -38,16 +38,16 @@ public class ClientLoginNetworkHandlerB implements ClientLoginPacketListener {
     public void onHello(LoginHelloS2CPacket packet) {
         Cipher cipher;
         Cipher cipher2;
-        String string;
-        LoginKeyC2SPacket loginKeyC2SPacket;
+        String serverId;
+        LoginKeyC2SPacket loginKeyPacket;
         try {
-            SecretKey secretKey = NetworkEncryptionUtils.generateKey();
+            SecretKey secretKey = NetworkEncryptionUtils.generateSecretKey();
             PublicKey publicKey = packet.getPublicKey();
-            string = (new BigInteger(NetworkEncryptionUtils.generateServerId(
+            serverId = new BigInteger(NetworkEncryptionUtils.computeServerId(
                     packet.getServerId(),
                     publicKey,
                     secretKey
-            ))).toString(16);
+            )).toString(16);
             cipher = NetworkEncryptionUtils.cipherFromKey(
                     2,
                     secretKey
@@ -56,7 +56,7 @@ public class ClientLoginNetworkHandlerB implements ClientLoginPacketListener {
                     1,
                     secretKey
             );
-            loginKeyC2SPacket = new LoginKeyC2SPacket(
+            loginKeyPacket = new LoginKeyC2SPacket(
                     secretKey,
                     publicKey,
                     packet.getNonce()
@@ -69,19 +69,21 @@ public class ClientLoginNetworkHandlerB implements ClientLoginPacketListener {
         }
 
         NetworkUtils.EXECUTOR.submit(() -> {
-            Text text = this.joinServerSession(string);
-            if (text != null) {
-                this.connection.disconnect(text);
-            }
+            this.joinServerSession(serverId);
 
             this.connection.send(
-                    loginKeyC2SPacket,
-                    (future) -> this.connection.setupEncryption(
+                    loginKeyPacket,
+                    PacketCallbacks.always(() -> this.connection.setupEncryption(
                             cipher,
                             cipher2
-                    )
+                    ))
             );
         });
+    }
+
+    @Override
+    public void onSuccess(LoginSuccessS2CPacket packet) {
+
     }
 
     @Nullable
@@ -105,18 +107,6 @@ public class ClientLoginNetworkHandlerB implements ClientLoginPacketListener {
 
     private MinecraftSessionService getSessionService() {
         return sessionService;
-    }
-
-    public void onLoginSuccess(LoginSuccessS2CPacket packet) {
-        //        this.statusConsumer.accept(new TranslatableText("connect.joining"));
-        //        this.profile = packet.getProfile();
-        //        this.connection.setState(NetworkState.PLAY);
-        //        this.connection.setPacketListener(new ClientPlayNetworkHandler(
-        //                this.client,
-        //                this.parentScreen,
-        //                this.connection,
-        //                this.profile
-        //        ));
     }
 
     public void onDisconnect(LoginDisconnectS2CPacket packet) {

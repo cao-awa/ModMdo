@@ -2,11 +2,12 @@ package com.github.cao.awa.modmdo.utils.packet.sender;
 
 import com.github.cao.awa.modmdo.utils.packet.buf.*;
 import com.github.cao.awa.modmdo.utils.packet.builder.*;
-import com.mojang.authlib.*;
 import io.netty.buffer.*;
 import net.minecraft.network.*;
 import net.minecraft.util.*;
 import org.jetbrains.annotations.*;
+
+import java.util.*;
 
 public class ClientPacketSender extends PacketSender<ClientPacketSender> {
     public ClientPacketSender(@NotNull ClientConnection connection, @NotNull Identifier channel) {
@@ -31,8 +32,8 @@ public class ClientPacketSender extends PacketSender<ClientPacketSender> {
         return new PacketByteBufBuilder(this, buf);
     }
 
-    public ClientPacketSender hello(GameProfile profile) {
-        this.prepare(ClientPacketBuilder.HELLO.apply(profile));
+    public ClientPacketSender hello(String name, UUID uuid) {
+        this.prepare(ClientPacketBuilder.HELLO.apply(name, Optional.of(uuid)));
         return this;
     }
 }
