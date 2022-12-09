@@ -1,10 +1,8 @@
 package com.github.cao.awa.modmdo.simple.vec;
 
 import com.github.cao.awa.modmdo.storage.*;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
-import net.minecraft.util.math.Vec3i;
-import org.json.JSONObject;
+import net.minecraft.util.math.*;
+import org.json.*;
 
 public class XYZ extends Storable {
     public double x;
@@ -27,12 +25,6 @@ public class XYZ extends Storable {
         this.x = vec3d.x;
         this.y = vec3d.y;
         this.z = vec3d.z;
-    }
-
-    public XYZ(Vec3f vec3f) {
-        this.x = vec3f.getX();
-        this.y = vec3f.getY();
-        this.z = vec3f.getZ();
     }
 
     public XYZ(Vec3i vec3i) {

@@ -8,9 +8,9 @@ import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import net.minecraft.entity.*;
+import net.minecraft.registry.*;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
-import net.minecraft.util.registry.*;
 import net.minecraft.world.*;
 import org.json.*;
 
@@ -55,7 +55,7 @@ public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<
                 } else {
                     world = World.END;
                 }
-                Registry.ENTITY_TYPE.get(new Identifier(id)).spawn(getServer().getWorld(world), null, name == null ? null : TextUtil.literal(name).text(), null, pos, SpawnReason.EVENT, alignPosition, invertY);
+                Registries.ENTITY_TYPE.get(new Identifier(id)).spawn(getServer().getWorld(world), null, entity -> entity.setCustomName(name == null ? null : TextUtil.literal(name).text()), pos, SpawnReason.EVENT, alignPosition, invertY);
             }
         });
     }

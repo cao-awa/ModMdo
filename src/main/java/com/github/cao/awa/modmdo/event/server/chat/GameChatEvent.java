@@ -48,7 +48,7 @@ public class GameChatEvent extends EntityTargetedEvent<GameChatEvent> {
     }
 
     public String getMessage() {
-        return packet.getChatMessage();
+        return packet.chatMessage();
     }
 
     public MinecraftServer getServer() {
@@ -67,7 +67,7 @@ public class GameChatEvent extends EntityTargetedEvent<GameChatEvent> {
             }
             return str;
         }, player.toString()), () -> "null");
-        return EntrustParser.tryCreate(() -> String.format("GameChatEvent{player=%s, message=%s}", name, packet.getChatMessage()), toString());
+        return EntrustParser.tryCreate(() -> String.format("GameChatEvent{player=%s, message=%s}", name, packet.chatMessage()), toString());
     }
 
     @Override

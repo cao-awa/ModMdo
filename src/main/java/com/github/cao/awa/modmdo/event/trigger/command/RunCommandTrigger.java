@@ -17,6 +17,6 @@ public class RunCommandTrigger extends ModMdoEventTrigger<ModMdoEvent<?>> {
 
     @Override
     public void action() {
-        getServer().getCommandManager().execute(getServer().getCommandSource(), command);
+        getServer().getCommandManager().executeWithPrefix(getServer().getCommandSource(), command);
     }
 }

@@ -79,9 +79,9 @@ public abstract class ClientLoginNetworkHandlerMixin {
             }
 
             this.statusConsumer.accept(Translatable.translatable("connect.encrypting").text());
-            this.connection.send(loginKeyC2SPacket, (future) -> {
+            this.connection.send(loginKeyC2SPacket, PacketCallbacks.always(() -> {
                 this.connection.setupEncryption(cipher, cipher2);
-            });
+            }));
         });
     }
 }

@@ -3,15 +3,11 @@ package com.github.cao.awa.modmdo.event.block.destroy;
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.delay.*;
 import com.github.cao.awa.modmdo.event.entity.*;
-import com.github.cao.awa.modmdo.utils.dimension.*;
-import com.github.cao.awa.modmdo.utils.entity.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.server.*;
 import net.minecraft.util.math.*;
-import net.minecraft.util.registry.*;
 import net.minecraft.world.*;
 import net.minecraft.world.explosion.*;
 
@@ -69,15 +65,9 @@ public class BlockExplosionDestroyEvent extends EntityTargetedEvent<BlockExplosi
         return previously.target();
     }
 
+    // Deprecated
     public String synopsis() {
-        String name = EntrustParser.tryCreate(() -> {
-            String str = EntityUtil.getName(explosion.getCausingEntity());
-            if (str.equals("")) {
-                throw new IllegalArgumentException("empty name");
-            }
-            return str;
-        }, "");
-        return EntrustParser.tryCreate(() -> String.format("BlockExplosionDestroyEvent{block=%s, pos=%s, dimension=%s, perpetrator=%s}", Registry.BLOCK.getId(state.getBlock()), pos, DimensionUtil.getDimension(world.getDimension()), name), toString());
+        return "";
     }
 
     @Override

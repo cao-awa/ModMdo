@@ -28,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.*;
 import java.util.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.loginUsers;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
@@ -291,20 +292,19 @@ public abstract class ServerPlayNetworkHandlerMixin {
         ));
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
-    public void onDisconnected0(PlayerManager instance, Text message, MessageType type, UUID sender) {
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V"))
+    public void onDisconnected0(PlayerManager instance, Text message, boolean overlay) {
         if (loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
-            instance.broadcastChatMessage(
+            instance.broadcast(
                     message,
-                    type,
-                    sender
+                    overlay
             );
         }
     }
 
-    @Inject(method = "executeCommand", at = @At("HEAD"))
-    private void executeCommand(String input, CallbackInfo ci) {
-        LOGGER.info("'" + EntityUtil.getName(player) + "' run command: " + input);
+    @Inject(method = "onCommandExecution", at = @At("HEAD"))
+    private void executeCommand(CommandExecutionC2SPacket packet, CallbackInfo ci) {
+        LOGGER.info("'" + EntityUtil.getName(player) + "' run command: " + packet.command());
     }
 
     @Inject(method = "onClientSettings", at = @At("HEAD"))
@@ -316,7 +316,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         ));
     }
 
-    @Inject(method = "onGameMessage", at = @At("HEAD"))
+    @Inject(method = "onChatMessage", at = @At("HEAD"))
     public void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         event.submit(new GameChatEvent(
                 player,

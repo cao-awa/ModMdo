@@ -29,7 +29,7 @@ public abstract class ExplosionMixin {
             BlockState source = world.getBlockState(pos);
             if (!(source.getBlock() instanceof AirBlock)) {
                 SharedVariables.event.blockExplosion.previously(new BlockExplosionDestroyEvent(null, source, pos, world, world.getServer()), () -> world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL));
-                SharedVariables.event.submit(new BlockExplosionDestroyEvent(new Explosion(world, getCausingEntity(), x, y ,z, power), null, null, null, null));
+                SharedVariables.event.submit(new BlockExplosionDestroyEvent((Explosion)(Object) this, null, null, null, null));
             }
             return false;
         } else {
