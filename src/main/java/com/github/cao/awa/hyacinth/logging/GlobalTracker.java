@@ -11,28 +11,50 @@ public class GlobalTracker {
     private BufferedWriter writer;
 
     public GlobalTracker() {
-        EntrustExecution.tryTemporary(() -> {
+        EntrustEnvironment.trys(() -> {
             File file = new File("logs/tracker/latest.log");
-            file.getParentFile().mkdirs();
+            file.getParentFile()
+                .mkdirs();
             file.createNewFile();
             writer = new BufferedWriter(new FileWriter(file));
         });
     }
 
     public static Tracking tacker(StackTraceElement[] tracker) {
-        return new Tracking(tracker, 5, 1, "Tracking...");
+        return new Tracking(
+                tracker,
+                5,
+                1,
+                "Tracking..."
+        );
     }
 
     public static Tracking tacker(String... messages) {
-        return new Tracking(Thread.currentThread().getStackTrace(), 5, 2, messages);
+        return new Tracking(
+                Thread.currentThread()
+                      .getStackTrace(),
+                5,
+                2,
+                messages
+        );
     }
 
     public static Tracking tacker(StackTraceElement[] tracker, String... messages) {
-        return new Tracking(tracker, 5, 1, messages);
+        return new Tracking(
+                tracker,
+                5,
+                1,
+                messages
+        );
     }
 
     public static Tracking tacker(StackTraceElement[] tracker, int trackLimit, String... messages) {
-        return new Tracking(tracker, trackLimit, 1, messages);
+        return new Tracking(
+                tracker,
+                trackLimit,
+                1,
+                messages
+        );
     }
 
     public void info(String message) {
@@ -40,7 +62,10 @@ public class GlobalTracker {
     }
 
     public void err(String message, Throwable throwable) {
-        Tracking.TRACKER.error(message, throwable);
+        Tracking.TRACKER.error(
+                message,
+                throwable
+        );
     }
 
     public void warn(String message) {
@@ -53,8 +78,14 @@ public class GlobalTracker {
 
     public void submit(String message) {
         if (SharedVariables.debug) {
-            String data = tacker(Thread.currentThread().getStackTrace(), - 1, 2, message).shortPrint();
-            EntrustExecution.tryTemporary(() -> {
+            String data = tacker(
+                    Thread.currentThread()
+                          .getStackTrace(),
+                    - 1,
+                    2,
+                    message
+            ).shortPrint();
+            EntrustEnvironment.trys(() -> {
                 if (writer != null) {
                     writer.write(data);
                     writer.flush();
@@ -64,7 +95,12 @@ public class GlobalTracker {
     }
 
     public static Tracking tacker(StackTraceElement[] tracker, int trackLimit, int startFrom, String... messages) {
-        return new Tracking(tracker, trackLimit, startFrom, messages);
+        return new Tracking(
+                tracker,
+                trackLimit,
+                startFrom,
+                messages
+        );
     }
 
     public void submit(String message, Temporary... actons) {
@@ -76,8 +112,14 @@ public class GlobalTracker {
 
     public void submit(String message, Throwable throwable) {
         if (SharedVariables.debug) {
-            String data = tacker(Thread.currentThread(), throwable, - 1, 2, message).shortPrint();
-            EntrustExecution.tryTemporary(() -> {
+            String data = tacker(
+                    Thread.currentThread(),
+                    throwable,
+                    - 1,
+                    2,
+                    message
+            ).shortPrint();
+            EntrustEnvironment.trys(() -> {
                 if (writer != null) {
                     writer.write(data);
                     writer.flush();
@@ -86,17 +128,37 @@ public class GlobalTracker {
         }
     }
 
+    public static Tracking tacker(Thread parent, Throwable tracker, int trackLimit, int startFrom, String... messages) {
+        return new Tracking(
+                parent,
+                tracker,
+                trackLimit,
+                startFrom,
+                messages
+        );
+    }
+
     public void submit(Thread parent, String message, Temporary... actons) {
         for (Temporary temporary : actons) {
             temporary.apply();
-            submit(parent, message);
+            submit(
+                    parent,
+                    message
+            );
         }
     }
 
     public void submit(Thread parent, String message) {
         if (SharedVariables.debug) {
-            String data = tacker(parent, Thread.currentThread().getStackTrace(), - 1, 2, message).shortPrint();
-            EntrustExecution.tryTemporary(() -> {
+            String data = tacker(
+                    parent,
+                    Thread.currentThread()
+                          .getStackTrace(),
+                    - 1,
+                    2,
+                    message
+            ).shortPrint();
+            EntrustEnvironment.trys(() -> {
                 if (writer != null) {
                     writer.write(data);
                     writer.flush();
@@ -106,17 +168,25 @@ public class GlobalTracker {
     }
 
     public static Tracking tacker(Thread parent, StackTraceElement[] tracker, int trackLimit, int startFrom, String... messages) {
-        return new Tracking(parent, tracker, trackLimit, startFrom, messages);
-    }
-
-    public static Tracking tacker(Thread parent, Throwable tracker, int trackLimit, int startFrom, String... messages) {
-        return new Tracking(parent, tracker, trackLimit, startFrom, messages);
+        return new Tracking(
+                parent,
+                tracker,
+                trackLimit,
+                startFrom,
+                messages
+        );
     }
 
     public void submit(Thread parent, String message, Throwable throwable) {
         if (SharedVariables.debug) {
-            String data = tacker(parent, throwable.getStackTrace(), - 1, 2, message).shortPrint();
-            EntrustExecution.tryTemporary(() -> {
+            String data = tacker(
+                    parent,
+                    throwable.getStackTrace(),
+                    - 1,
+                    2,
+                    message
+            ).shortPrint();
+            EntrustEnvironment.trys(() -> {
                 if (writer != null) {
                     writer.write(data);
                     writer.flush();

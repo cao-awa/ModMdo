@@ -1,13 +1,11 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
 import com.github.cao.awa.modmdo.event.*;
-import com.github.cao.awa.modmdo.extra.loader.parameter.*;
 
 import java.util.*;
 
 public abstract class ModMdoExtra<T> {
     private boolean signAuto = false;
-    private UncertainParameter args = new UncertainParameter();
     private String name = "ModMdoExtra<Ab.>";
     private UUID id = UUID.randomUUID();
 
@@ -50,15 +48,6 @@ public abstract class ModMdoExtra<T> {
 
     public ModMdoExtra<T> setName(String name) {
         this.name = name;
-        return this;
-    }
-
-    public UncertainParameter getArgs() {
-        return args;
-    }
-
-    public ModMdoExtra<T> setArgs(UncertainParameter args) {
-        this.args = args;
         return this;
     }
 

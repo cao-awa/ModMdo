@@ -18,18 +18,27 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Auto
 public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
-    public static final Object2ObjectArrayMap<String, Consumer<Receptacle<String>>> BASE_FORMATTER = EntrustParser.operation(new Object2ObjectArrayMap<>(), map -> {
-        map.put("^{variable}", (str) -> {
-            ModMdoPersistent<?> v = SharedVariables.variables.get(str.getSub()).clone();
-            EntrustExecution.tryTemporary(() -> {
-                v.handle(new JSONObject(str.get()));
-            });
-            str.set(v.get().toString());
-        });
-        map.put("^{random}", (str) -> {
-            str.set(String.valueOf(new SecureRandom().nextInt(101)));
-        });
-    });
+    public static final Object2ObjectArrayMap<String, Consumer<Receptacle<String>>> BASE_FORMATTER = EntrustEnvironment.operation(
+            new Object2ObjectArrayMap<>(),
+            map -> {
+                map.put(
+                        "^{variable}",
+                        (str) -> {
+                            ModMdoPersistent<?> v = SharedVariables.variables.get(str.getSub())
+                                                                             .clone();
+                            EntrustExecution.tryTemporary(() -> v.handle(new JSONObject(str.get())));
+                            str.set(v.get()
+                                     .toString());
+                        }
+                );
+                map.put(
+                        "^{random}",
+                        (str) -> {
+                            str.set(String.valueOf(new SecureRandom().nextInt(101)));
+                        }
+                );
+            }
+    );
     private TriggerTrace trace;
     private MinecraftServer server;
     private JSONObject meta;
@@ -53,7 +62,11 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
     public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace triggerTrace) {
         setMeta(metadata);
         setTrace(triggerTrace);
-        return prepare(event, metadata, triggerTrace);
+        return prepare(
+                event,
+                metadata,
+                triggerTrace
+        );
     }
 
     public abstract ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace triggerTrace);
@@ -61,7 +74,10 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
     public abstract void action();
 
     public void err(String message, Throwable exception) {
-        LOGGER.warn(message + at(), exception);
+        LOGGER.warn(
+                message + at(),
+                exception
+        );
     }
 
     public String at() {

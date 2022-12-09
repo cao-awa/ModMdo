@@ -20,6 +20,7 @@ import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
+import org.json.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -65,66 +66,100 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo ci) {
         try {
-            Identifier channel = EntrustParser.tryCreate(packet::getChannel, new Identifier(""));
+            Identifier channel = EntrustEnvironment.get(
+                    packet::getChannel,
+                    new Identifier("")
+            );
 
-            PacketByteBuf packetByteBuf = EntrustParser.trying(() -> new PacketByteBuf(packet.getData().copy()));
+            PacketByteBuf packetByteBuf = EntrustEnvironment.trys(() -> new PacketByteBuf(packet.getData()
+                                                                                                .copy()));
 
-            EntrustExecution.notNull(packetByteBuf, buf -> {
-                String oldLogin = "";
-                Identifier informationSign = new Identifier("");
-                if (TOKEN_CHANNEL.equals(channel)) {
-                    oldLogin = EntrustParser.tryCreate(buf::readString, "");
-                } else {
-                    informationSign = new Identifier(EntrustParser.tryCreate(buf::readString, ""));
-                }
-                String data1 = EntrustParser.tryCreate(buf::readString, "");
-                String data2 = EntrustParser.tryCreate(buf::readString, "");
-                String data3 = EntrustParser.tryCreate(buf::readString, "");
-                String data4 = EntrustParser.tryCreate(buf::readString, "");
-                String data5 = EntrustParser.tryCreate(buf::readString, "");
-                String data6 = EntrustParser.tryCreate(buf::readString, "");
-                String data7 = EntrustParser.tryCreate(buf::readString, "");
+            EntrustExecution.notNull(
+                    packetByteBuf,
+                    buf -> {
+                        String oldLogin = "";
+                        Identifier informationSign = new Identifier("");
+                        if (TOKEN_CHANNEL.equals(channel)) {
+                            oldLogin = EntrustEnvironment.get(
+                                    buf::readString,
+                                    ""
+                            );
+                        } else {
+                            informationSign = new Identifier(EntrustEnvironment.get(
+                                    buf::readString,
+                                    ""
+                            ));
+                        }
+                        JSONObject loginData = new JSONObject(EntrustEnvironment.get(
+                                buf::readString,
+                                ""
+                        ));
+                        //
+                        String name = loginData.getString("name");
+                        String uuid = loginData.getString("uuid");
+                        String identifier = loginData.getString("identifier");
+                        String modmdoVersion = loginData.getString("version");
+                        String modmdoName = loginData.getString("versionName");
+                        String unidirectionalVerify = loginData.getString("verifyData");
+                        String verifyKey = loginData.getString("verifyKey");
 
-                if (TOKEN_CHANNEL.equals(channel)) {
-                    TRACKER.debug("Client are sent obsoleted login data");
-                    serverLogin.reject(data1, oldLogin, "", TextUtil.literal("obsolete login type").text());
-                    return;
-                }
+                        if (TOKEN_CHANNEL.equals(channel)) {
+                            TRACKER.debug("Processing client obsoleted login data");
+                            serverLogin.reject(
+                                    name,
+                                    oldLogin,
+                                    "",
+                                    TextUtil.literal("Obsolete login type")
+                                            .text()
+                            );
+                            return;
+                        }
 
-                if (CLIENT_CHANNEL.equals(channel)) {
-                    TRACKER.debug("Client are sent login data");
-                    if (informationSign.equals(LOGIN_CHANNEL)) {
-                        TRACKER.submit("Login data1: " + data1);
-                        TRACKER.submit("Login data2: " + data2);
-                        TRACKER.submit("Login data3: " + data3);
-                        TRACKER.submit("Login data4: " + data4);
-                        TRACKER.submit("Login data5: " + data5);
-                        TRACKER.submit("Login data6: " + data6);
-                        TRACKER.submit("Login data7: " + data7);
+                        if (CLIENT_CHANNEL.equals(channel)) {
+                            TRACKER.debug("Processing client login data");
+                            if (informationSign.equals(LOGIN_CHANNEL)) {
+                                TRACKER.submit("Login data1: " + name);
+                                TRACKER.submit("Login data2: " + uuid);
+                                TRACKER.submit("Login data3: " + identifier);
+                                TRACKER.submit("Login data4: " + modmdoVersion);
+                                TRACKER.submit("Login data5: " + modmdoName);
+                                TRACKER.submit("Login data6: " + unidirectionalVerify);
+                                TRACKER.submit("Login data7: " + verifyKey);
 
-                        if (modMdoType == ModMdoType.SERVER) {
-                            if (beforeLogin()) {
-                                serverLogin.login(data1, data2, data3, data4, data5, data6, data7);
-                                afterLogin();
+                                if (modMdoType == ModMdoType.SERVER) {
+                                    if (beforeLogin()) {
+                                        serverLogin.login(
+                                                name,
+                                                uuid,
+                                                identifier,
+                                                modmdoVersion,
+                                                modmdoName,
+                                                unidirectionalVerify,
+                                                verifyKey
+                                        );
+                                        afterLogin();
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            });
+            );
 
             ci.cancel();
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 
     public boolean beforeLogin() {
         String name = EntityUtil.getName(player);
-        if (server.getPlayerManager().getPlayer(name) != null) {
+        if (server.getPlayerManager()
+                  .getPlayer(name) != null) {
             return false;
         }
         if (loginUsers.hasUser(name)) {
-            disc(Translatable.translatable("login.dump.rejected").text());
+            disc(Translatable.translatable("login.dump.rejected")
+                             .text());
             return false;
         }
         return true;
@@ -136,121 +171,167 @@ public abstract class ServerPlayNetworkHandlerMixin {
     }
 
     public void afterLogin() {
-        if (config.getConfigBoolean("modmdo_whitelist")) {
+        if (modmdoWhitelist) {
             String name = EntityUtil.getName(player);
-            if (modMdoType == ModMdoType.SERVER && modmdoWhitelist) {
-                if (rejectUsers.hasUser(player)) {
-                    User rejected = rejectUsers.getUser(player.getUuid());
-                    if (rejected.getMessage() == null) {
-                        TRACKER.warn("ModMdo reject a login request, player \"" + name + "\", because player are not white-listed");
-                    } else {
-                        TRACKER.warn("ModMdo reject a login request, player \"" + name + "\"");
-                    }
-                    disc(rejected.getMessage() == null ? TextUtil.translatable("multiplayer.disconnect.not_whitelisted").text() : rejected.getMessage());
-
-                    rejectUsers.removeUser(player);
-
-                    TRACKER.info("Rejected player: " + name);
-                    return;
+            if (rejectUsers.hasUser(player)) {
+                User rejected = rejectUsers.getUser(player.getUuid());
+                if (rejected.getMessage() == null) {
+                    TRACKER.warn("ModMdo rejected player '" + name + "' login, because player are not whitelisted");
                 } else {
-                    if (loginTimedOut.containsKey(name)) {
-                        if (loginTimedOut.get(name) < TimeUtil.millions()) {
-                            disc(TextUtil.literal("You are failed login because too long did not received login request").text());
-                            TRACKER.warn("ModMdo reject a login request, player \"" + name + "\", because player not sent login request");
+                    TRACKER.warn("ModMdo rejected player '" + name + "' login");
+                }
+                disc(rejected.getMessage() == null ?
+                     TextUtil.translatable("multiplayer.disconnect.not_whitelisted")
+                             .text() :
+                     rejected.getMessage());
 
-                            TRACKER.info("Rejected player: " + name);
-                            return;
-                        }
+                rejectUsers.removeUser(player);
+
+                TRACKER.info("Rejected player: " + name);
+                return;
+            } else {
+                if (loginTimedOut.containsKey(name)) {
+                    if (loginTimedOut.get(name) < TimeUtil.millions()) {
+                        disc(TextUtil.literal("Login timed out")
+                                     .text());
+                        TRACKER.warn("ModMdo rejected player '" + name + "' login, because player not sent login request");
+
+                        TRACKER.info("Rejected player: " + name);
+                        return;
                     }
                 }
+            }
 
-                if (! connection.isOpen()) {
-                    return;
-                }
+            if (! connection.isOpen()) {
+                return;
             }
 
             if (handleBanned(player)) {
-                Certificate ban = banned.get(EntityUtil.getName(player));
-                if (ban instanceof TemporaryCertificate temporary) {
+                Certificate certificate = banned.get(EntityUtil.getName(player));
+                if (certificate instanceof TemporaryCertificate temporary) {
                     String remaining = temporary.formatRemaining();
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text()));
-                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-time-limited", remaining).text());
+                    disc(minecraftTextFormat.format(
+                                                    new com.github.cao.awa.modmdo.lang.Dictionary(certificate.getLastLanguage()),
+                                                    "multiplayer.disconnect.banned-time-limited",
+                                                    remaining
+                                            )
+                                            .text());
                     TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
                 } else {
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(new com.github.cao.awa.modmdo.lang.Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text()));
-                    player.networkHandler.connection.disconnect(minecraftTextFormat.format(new Dictionary(ban.getLastLanguage()), "multiplayer.disconnect.banned-indefinite").text());
+                    disc(minecraftTextFormat.format(
+                                                    new Dictionary(certificate.getLastLanguage()),
+                                                    "multiplayer.disconnect.banned-indefinite"
+                                            )
+                                            .text());
                     TRACKER.info("Player " + PlayerUtil.getName(player) + " has been banned form server");
                 }
-            }
+            } else {
+                EntrustEnvironment.trys(
+                        () -> {
+                            if (connection.isOpen()) {
+                                if (! loginUsers.hasUser(player)) {
+                                    if (! config.getConfigBoolean("modmdo_whitelist")) {
+                                        serverLogin.login(
+                                                player.getName()
+                                                      .getString(),
+                                                player.getUuid()
+                                                      .toString(),
+                                                "",
+                                                "",
+                                                null,
+                                                null
+                                        );
+                                    } else {
+                                        disc(Translatable.translatable("multiplayer.disconnect.not_whitelisted")
+                                                         .text());
+                                    }
+                                }
 
-            EntrustExecution.tryTemporary(() -> {
-                EntrustExecution.tryTemporary(() -> {
-                    if (connection.isOpen()) {
-                        if (! loginUsers.hasUser(player)) {
-                            if (! config.getConfigBoolean("modmdo_whitelist")) {
-                                serverLogin.login(player.getName().getString(), player.getUuid().toString(), "", "", null, null);
+                                TRACKER.info("Accepted player: " + EntityUtil.getName(player));
+
+                                server.getPlayerManager()
+                                      .onPlayerConnect(
+                                              connection,
+                                              player
+                                      );
+
+                                loginTimedOut.remove(EntityUtil.getName(player));
                             } else {
-                                disc(Translatable.translatable("multiplayer.disconnect.not_whitelisted").text());
+                                TRACKER.info("Expired nano: " + EntityUtil.getName(player));
+                            }
+                        },
+                        // This handler will not be happened
+                        e -> {
+                            TRACKER.submit(
+                                    "Exception in join server",
+                                    e
+                            );
+                            if (server.isHost(player.getGameProfile())) {
+                                TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize, but will not be process");
+                            } else {
+                                TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize");
+
+                                disc(TextUtil.literal("lost status synchronize, please connect again")
+                                             .text());
                             }
                         }
-
-                        TRACKER.info("Accepted player: " + EntityUtil.getName(player));
-
-                        futureTask.submit(() -> {
-                            server.getPlayerManager().onPlayerConnect(connection, player);
-                        }, 5);
-
-                        loginTimedOut.remove(EntityUtil.getName(player));
-                    } else {
-                        TRACKER.info("Expired nano: " + EntityUtil.getName(player));
-                    }
-                }, e -> {
-                    TRACKER.submit("Exception in join server", e);
-                    if (! server.isHost(player.getGameProfile())) {
-                        TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize");
-
-                        disc(TextUtil.literal("lost status synchronize, please connect again").text());
-                    } else {
-                        TRACKER.debug("player " + PlayerUtil.getName(player) + " lost status synchronize, but will not be process");
-                    }
-                });
-            }, e -> TRACKER.submit("Exception in handle status sync lost", e));
+                );
+            }
         }
     }
 
     @Inject(method = "onDisconnected", at = @At("RETURN"))
     public void onDisconnected(Text reason, CallbackInfo ci) {
         serverLogin.logout(player);
-        event.submit(new QuitServerEvent(player, connection, player.getPos(), server));
+        event.submit(new QuitServerEvent(
+                player,
+                connection,
+                player.getPos(),
+                server
+        ));
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
     public void onDisconnected0(PlayerManager instance, Text message, MessageType type, UUID sender) {
         if (loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
-            instance.broadcast(message, type, sender);
+            instance.broadcastChatMessage(
+                    message,
+                    type,
+                    sender
+            );
         }
     }
 
     @Inject(method = "executeCommand", at = @At("HEAD"))
     private void executeCommand(String input, CallbackInfo ci) {
-        LOGGER.info(EntityUtil.getName(player) + "(" + player.getUuid().toString() + ") run the command: " + input);
+        LOGGER.info("'" + EntityUtil.getName(player) + "' run command: " + input);
     }
 
     @Inject(method = "onClientSettings", at = @At("HEAD"))
     private void onClientSettings(ClientSettingsC2SPacket packet, CallbackInfo ci) {
-        event.submit(new ClientSettingEvent(player, packet, server));
+        event.submit(new ClientSettingEvent(
+                player,
+                packet,
+                server
+        ));
     }
 
-    @Inject(method = "onChatMessage", at = @At("HEAD"))
+    @Inject(method = "onGameMessage", at = @At("HEAD"))
     public void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
-        event.submit(new GameChatEvent(player, packet, server));
+        event.submit(new GameChatEvent(
+                player,
+                packet,
+                server
+        ));
     }
 
     @Inject(method = "onKeepAlive", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;disconnect(Lnet/minecraft/text/Text;)V"), cancellable = true)
     public void disconnect(KeepAliveC2SPacket packet, CallbackInfo ci) {
         if (loginUsers.hasUser(player)) {
-            if (TimeUtil.processMillion(loginUsers.getUser(player).getLoginTime()) > 10000) {
-                this.disc(TextUtil.translatable("disconnect.timeout").text());
+            if (TimeUtil.processMillion(loginUsers.getUser(player)
+                                                  .getLoginTime()) > 10000) {
+                this.disc(TextUtil.translatable("disconnect.timeout")
+                                  .text());
             } else {
                 waitingForKeepAlive = false;
                 lastKeepAliveTime = TimeUtil.millions();

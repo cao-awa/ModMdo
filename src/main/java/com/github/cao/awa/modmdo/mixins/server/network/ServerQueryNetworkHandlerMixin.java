@@ -16,13 +16,17 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.TRACKER;
 
 @Mixin(ServerQueryNetworkHandler.class)
 public class ServerQueryNetworkHandlerMixin {
-    @Shadow private boolean responseSent;
-
-    @Shadow @Final private ClientConnection connection;
-
-    @Shadow @Final private static Text REQUEST_HANDLED;
-
-    @Shadow @Final private MinecraftServer server;
+    @Shadow
+    @Final
+    private static Text REQUEST_HANDLED;
+    @Shadow
+    private boolean responseSent;
+    @Shadow
+    @Final
+    private ClientConnection connection;
+    @Shadow
+    @Final
+    private MinecraftServer server;
 
     /**
      * @author 草awa
@@ -35,7 +39,11 @@ public class ServerQueryNetworkHandlerMixin {
             this.connection.disconnect(REQUEST_HANDLED);
         } else {
             QueryResponseS2CPacket p = new QueryResponseS2CPacket(this.server.getServerMetadata());
-            event.submit(new ServerQueryEvent(connection, p, server));
+            event.submit(new ServerQueryEvent(
+                    connection,
+                    p,
+                    server
+            ));
             this.responseSent = true;
             this.connection.send(p);
         }

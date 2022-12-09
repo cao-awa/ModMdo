@@ -4,7 +4,6 @@ import com.github.cao.awa.hyacinth.logging.*;
 import com.github.cao.awa.modmdo.certificate.*;
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.develop.clazz.*;
-import com.github.cao.awa.modmdo.enchant.*;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
@@ -19,7 +18,6 @@ import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
-import com.github.cao.awa.shilohrien.databse.increment.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.config.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
@@ -27,13 +25,11 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import com.mojang.brigadier.context.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.advancement.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.scoreboard.*;
 import net.minecraft.server.*;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.*;
-import net.minecraft.server.world.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
 import org.apache.logging.log4j.*;
@@ -62,14 +58,11 @@ public class SharedVariables {
     public static final Identifier LOGIN_CHANNEL = new Identifier("modmdo:login");
     public static final Identifier SERVER_CHANNEL = new Identifier("modmdo:server");
     public static final Identifier CLIENT_CHANNEL = new Identifier("modmdo:client");
-    public static final Identifier DATA_CHANNEL = new Identifier("modmdo:data");
     public static final Identifier TOKEN_CHANNEL = new Identifier("modmdo:token");
     public static final Object2ObjectOpenHashMap<String, ModMdoPersistent<?>> variables = new Object2ObjectOpenHashMap<>();
     public static final GlobalTracker TRACKER = new GlobalTracker();
     public static final ObjectArrayList<ServerPlayerEntity> force = new ObjectArrayList<>();
     public static final SecureKeys SECURE_KEYS = new SecureKeys();
-    public static final Object2ObjectArrayMap<ServerChunkManager, TaskOrder<ServerChunkManager>> chunkTasks = new Object2ObjectArrayMap<>();
-    public static final Object2ObjectArrayMap<ServerWorld, TaskOrder<ServerWorld>> blockEntitiesTasks = new Object2ObjectArrayMap<>();
     public static String identifier;
     public static String entrust = "ModMdo";
     public static boolean enableRanking = false;
@@ -77,7 +70,6 @@ public class SharedVariables {
     public static boolean enableSecureEnchant = true;
     public static boolean enableRejectReconnect = true;
     public static boolean timeActive = true;
-    public static boolean rejectNoFallCheat = true;
     public static boolean modmdoWhitelist = false;
     public static Object2ObjectOpenHashMap<String, Long> loginTimedOut = new Object2ObjectOpenHashMap<>();
     public static Users rejectUsers;
@@ -87,15 +79,12 @@ public class SharedVariables {
     public static MinecraftServer server;
     public static ModMdoType modMdoType = ModMdoType.NONE;
     public static int itemDespawnAge = 6000;
-    public static EnchantLevelController enchantLevelController;
-    public static boolean clearEnchantIfLevelTooHigh = false;
     public static ServerLogin serverLogin = new ServerLogin();
     public static TemporaryCertificate modmdoConnectionAccepting = new TemporaryCertificate("", - 1, - 1);
     public static Certificates<PermanentCertificate> modmdoConnectionWhitelist = new Certificates<>();
     public static Certificates<PermanentCertificate> whitelist = new Certificates<>();
     public static Certificates<TemporaryCertificate> temporaryStation = new Certificates<>();
     public static Certificates<TemporaryCertificate> temporaryInvite = new Certificates<>();
-    public static IncrementDatabase<UUID> whitelist_test;
     public static Certificates<Certificate> banned = new Certificates<>();
     public static ConsoleTextFormat consoleTextFormat;
     public static MinecraftTextFormat minecraftTextFormat;
@@ -110,13 +99,9 @@ public class SharedVariables {
 
     public static JSONObject notes = new JSONObject();
 
-    public static ClazzScanner EXTRA_AUTO = new ClazzScanner(ModMdoExtra.class);
-
-    public static IncrementDatabase<String> backups;
+    public static final ClazzScanner EXTRA_AUTO = new ClazzScanner(ModMdoExtra.class);
 
     public static FutureTaskOrder futureTask = new FutureTaskOrder();
-
-    public static Object2ObjectOpenHashMap<String, PlayerAdvancementTracker> advancementTrackerCaches = new Object2ObjectOpenHashMap<>();
 
     public static void allDefault() {
         fractionDigits0.setGroupingUsed(false);
@@ -140,22 +125,9 @@ public class SharedVariables {
         loginUsers = new Users();
         itemDespawnAge = 6000;
 
-        enchantLevelController.setNoVanillaDefaultMaxLevel((short) 5);
-
         temporaryInvite.clear();
 
         force.clear();
-
-        initEnchantmentMaxLevel();
-    }
-
-    public static void initEnchantmentMaxLevel() {
-        try {
-            JSONObject json = config.getConfigJSONObject("enchantment_level_limit");
-            enchantLevelController.set(json);
-        } catch (Exception e) {
-
-        }
     }
 
     public static void initWhiteList() {
@@ -196,10 +168,6 @@ public class SharedVariables {
                 banned.put(s, Certificate.build(json.getJSONObject(s)));
             }
         }, Throwable::printStackTrace);
-    }
-
-    public static void saveEnchantmentMaxLevel() {
-        config.set("enchantment_level_limit", enchantLevelController.toJSONObject());
     }
 
     public static void addScoreboard(MinecraftServer server, Text displayName, String id) {
@@ -300,8 +268,6 @@ public class SharedVariables {
         config.set("secure_enchant", enableSecureEnchant);
         config.set("reject_reconnect", enableRejectReconnect);
         config.set("time_active", timeActive);
-        config.set("enchantment_clear_if_level_too_high", clearEnchantIfLevelTooHigh);
-        config.set("reject_no_fall_chest", rejectNoFallCheat);
         config.set("modmdo_whitelist", modmdoWhitelist);
         config.set("notes", notes);
 
