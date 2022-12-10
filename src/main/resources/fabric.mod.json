@@ -11,8 +11,8 @@
     "zhuaidadaya"
   ],
   "contact": {
-    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
-    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
+    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.19.x",
+    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.19.x",
     "issues": "https://github.com/zhuaidadaya/ModMdo/issues"
   },
 
@@ -36,9 +36,9 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.12.6",
+    "fabricloader": ">=0.14.11",
     "fabric": "*",
-    "minecraft": "1.17.x",
+    "minecraft": "1.19.x",
     "java": ">=17"
   },
   "suggests": {
