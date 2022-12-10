@@ -1,9 +1,4 @@
-# ModMdo
-a mod for minecraft server
+## Requires
+Minimum Fabric Loader version is 0.14.11.\
+Minimum Java version is 17.
 
-## fabric version
-minimum Fabric Loader version is 0.13.3\
-minimum Fabric API version is 0.47.10+1.18.2
-
-## use
-visit [wiki](https://github.com/zhuaidadaya/ModMdo/wiki)
