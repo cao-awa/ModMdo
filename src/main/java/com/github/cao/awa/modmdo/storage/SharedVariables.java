@@ -43,7 +43,7 @@ public class SharedVariables {
     public static final byte[] MODMDO_NONCE = "MODMDO:SERVER_NONCE_!+[RD]".getBytes();
     public static final byte[] MODMDO_NONCE_HEAD = "MODMDO:SERVER_NONCE_!+".getBytes();
     public static final String TEST_MODMDO_VERSION = "10410004";
-    public static final String VERSION_ID = "1.0.43";
+    public static final String VERSION_ID = "1.0.44";
     public static final String SUFFIX = "-Debug";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
     public static final String RELEASE_TIME = "UTC+8 2022.12.15";
