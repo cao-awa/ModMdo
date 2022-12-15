@@ -7,6 +7,14 @@ import org.jetbrains.annotations.*;
 import java.util.*;
 import java.util.function.*;
 
+/**
+ * Use service mode to handle certificates.
+ *
+ * @param <T>
+ *         Certificate type
+ * @author 草二号机
+ * @since 1.0.43
+ */
 public abstract class CertificateService<T extends Certificate> {
     public abstract boolean containsName(@NotNull String name);
 

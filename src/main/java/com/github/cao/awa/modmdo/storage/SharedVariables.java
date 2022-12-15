@@ -43,10 +43,10 @@ public class SharedVariables {
     public static final byte[] MODMDO_NONCE = "MODMDO:SERVER_NONCE_!+[RD]".getBytes();
     public static final byte[] MODMDO_NONCE_HEAD = "MODMDO:SERVER_NONCE_!+".getBytes();
     public static final String TEST_MODMDO_VERSION = "10410004";
-    public static final String VERSION_ID = "1.0.42";
-    public static final String SUFFIX = "";
+    public static final String VERSION_ID = "1.0.43";
+    public static final String SUFFIX = "-Debug";
     public static final String MODMDO_VERSION_NAME = VERSION_ID + SUFFIX;
-    public static final String RELEASE_TIME = "UTC+8 2022.12.9";
+    public static final String RELEASE_TIME = "UTC+8 2022.12.15";
     public static final String ENTRUST = "ModMdo";
     public static final UUID EXTRA_ID = UUID.fromString("1a6dbe1a-fea8-499f-82d1-cececcf78b7c");
     public static final NumberFormat FRACTION_DIGITS_2 = NumberFormat.getNumberInstance();
