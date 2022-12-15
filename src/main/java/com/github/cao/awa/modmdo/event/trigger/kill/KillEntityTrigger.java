@@ -7,7 +7,7 @@ import com.github.cao.awa.modmdo.event.trigger.selector.entity.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.entity.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import static com.github.cao.awa.modmdo.event.trigger.selector.entity.EntitySelectorType.*;
 

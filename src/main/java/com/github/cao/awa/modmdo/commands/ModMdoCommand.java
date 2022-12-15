@@ -3,8 +3,8 @@ package com.github.cao.awa.modmdo.commands;
 import com.github.cao.awa.modmdo.*;
 import com.github.cao.awa.modmdo.commands.suggester.whitelist.*;
 import com.github.cao.awa.modmdo.develop.text.*;
+import com.github.cao.awa.modmdo.event.register.*;
 import com.github.cao.awa.modmdo.lang.*;
-import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.command.*;
 import com.github.cao.awa.modmdo.utils.text.*;
@@ -37,26 +37,13 @@ public class ModMdoCommand extends SimpleCommand {
             SharedVariables.saveVariables();
             SimpleCommandOperation.sendFeedback(disableHere, formatDisableHere());
             return 0;
-        }))).then(literal("secureEnchant").executes(secureEnchant -> {
-            SimpleCommandOperation.sendFeedback(secureEnchant, formatConfigReturnMessage("secure_enchant"));
-            return 2;
-        }).then(literal("enable").executes(enableSecureEnchant -> {
-            SharedVariables.enableSecureEnchant = true;
-            SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(enableSecureEnchant, formatEnableSecureEnchant());
-            return 1;
-        })).then(literal("disable").executes(disableSecureEnchant -> {
-            SharedVariables.enableSecureEnchant = false;
-            SharedVariables.saveVariables();
-            SimpleCommandOperation.sendFeedback(disableSecureEnchant, formatDisableSecureEnchant());
-            return 0;
         }))).then(literal("useModMdoWhitelist").executes(whitelist -> {
             SharedVariables.saveVariables();
 
             SimpleCommandOperation.sendFeedback(whitelist, formatConfigReturnMessage("modmdo_whitelist"));
             return 2;
         }).then(literal("enable").executes(enableWhitelist -> {
-            config.set("modmdo_whitelist", SharedVariables.modmdoWhitelist = true);
+                config.set("modmdo_whitelist", SharedVariables.modmdoWhitelist = true);
             SharedVariables.saveVariables();
 
             SimpleCommandOperation.sendFeedback(enableWhitelist, formatUseModMdoWhitelist());
@@ -93,23 +80,6 @@ public class ModMdoCommand extends SimpleCommand {
 
             SimpleCommandOperation.sendFeedbackAndInform(setTicksToDefault, formatItemDespawnTicks());
             return 2;
-        }))).then(literal("timeActive").executes(getTimeActive -> {
-            SimpleCommandOperation.sendFeedback(getTimeActive, formatConfigReturnMessage("time_active"));
-            return 0;
-        }).then(literal("enable").executes(enableTimeActive -> {
-            SharedVariables.timeActive = true;
-
-            SharedVariables.saveVariables();
-
-            SimpleCommandOperation.sendFeedback(enableTimeActive, formatConfigReturnMessage("time_active"));
-            return 0;
-        })).then(literal("disable").executes(disableTimeActive -> {
-            SharedVariables.timeActive = false;
-
-            SharedVariables.saveVariables();
-
-            SimpleCommandOperation.sendFeedback(disableTimeActive, formatConfigReturnMessage("time_active"));
-            return 0;
         }))).then(literal("loginCheckTimeLimit").executes(getTimeLimit -> {
             SimpleCommandOperation.sendFeedback(getTimeLimit, formatCheckerTimeLimit());
             return 0;
@@ -146,8 +116,8 @@ public class ModMdoCommand extends SimpleCommand {
             return 0;
         }))).then(literal("whitelist").then(literal("remove").then(argument("name", StringArgumentType.string()).suggests(ModMdoWhitelistSuggester::suggestions).executes(remove -> {
                     String name = StringArgumentType.getString(remove, "name");
-                    if (SharedVariables.whitelists.containsName(name)) {
-                        SharedVariables.whitelists.remove(name);
+                    if (SharedVariables.whitelistsService.containsName(name)) {
+                        SharedVariables.whitelistsService.delete(name);
                         SimpleCommandOperation.sendFeedback(remove, TextUtil.translatable("modmdo.whitelist.removed", name));
                         SharedVariables.saveVariables();
                         return 0;
@@ -184,14 +154,14 @@ public class ModMdoCommand extends SimpleCommand {
             StringBuilder builder = new StringBuilder();
             event.events.forEach((k, v) -> {
                 if (v.registered() > 0) {
-                    ObjectArrayList<String> registered = v.getRegistered();
-                    builder.append("§7").append(k).append(": ").append("\n");
-                    for (String s : registered) {
-                        builder.append(s.startsWith("Mod") ? "§b" : "§6").append(" ").append(s).append("\n");
+                    ObjectArrayList<ModMdoEventRegister> registered = v.getRegistered();
+                    builder.append("§7").append(v.getName()).append(": ").append("\n");
+                    for (ModMdoEventRegister register : registered) {
+                        builder.append(register.getExtra().getId().equals(EXTRA_ID) ? "§b" : "§6").append(" ").append(register.getName()).append("\n");
                     }
                 }
             });
-            builder.append(minecraftTextFormat.format(loginUsers.getUser(getPlayer(list)), "modmdo.event.total", event.registered()).getString());
+            builder.append(textFormatService.format(loginUsers.getUser(getPlayer(list)), "modmdo.event.total", event.registered()).getString());
             sendFeedback(list, TextUtil.translatable(builder.toString()));
             return 0;
         })).then(literal("reload").executes(e -> {
@@ -205,21 +175,15 @@ public class ModMdoCommand extends SimpleCommand {
     public void showWhitelist(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
         SharedVariables.handleTemporaryWhitelist();
         ServerPlayerEntity player = SimpleCommandOperation.getPlayer(source);
-        if (SharedVariables.whitelists.size() > 0) {
+        if (SharedVariables.whitelistsService.count() > 0) {
             StringBuilder builder = new StringBuilder();
-            for (Certificate wl : SharedVariables.whitelists.values()) {
-                builder.append(wl.getName()).append(", ");
-            }
+            SharedVariables.whitelistsService.forEach(wl -> builder.append(wl.getName()).append(", "));
             builder.delete(builder.length() - 2, builder.length());
-            SimpleCommandOperation.sendMessage(player, TextUtil.translatable("commands.modmdo.whitelist.list", SharedVariables.whitelists.size(), builder.toString()), false);
+            SimpleCommandOperation.sendMessage(player, TextUtil.translatable("commands.modmdo.whitelist.list", SharedVariables.whitelistsService.count(), builder.toString()), false);
         } else {
             SimpleCommandOperation.sendMessage(player, TextUtil.translatable("commands.modmdo.whitelist.none"), false);
 
         }
-    }
-
-    public Translatable formatConfigCachedReturnMessage(String config) {
-        return TextUtil.translatable(config + "." + SharedVariables.config.getString(config) + ".rule.format");
     }
 
     public Translatable formatConfigReturnMessage(String config) {
@@ -246,14 +210,6 @@ public class ModMdoCommand extends SimpleCommand {
         return TextUtil.translatable("here_command.false.rule.format");
     }
 
-    public Translatable formatEnableSecureEnchant() {
-        return TextUtil.translatable("secure_enchant.true.rule.format");
-    }
-
-    public Translatable formatDisableSecureEnchant() {
-        return TextUtil.translatable("secure_enchant.false.rule.format");
-    }
-
     public Translatable formatUseModMdoWhitelist() {
         return TextUtil.translatable("modmdo_whitelist.true.rule.format");
     }
@@ -272,7 +228,7 @@ public class ModMdoCommand extends SimpleCommand {
         if ((name = getPlayerModMdoName(player)) != null) {
             modmdoVersion = TextUtil.translatable("modmdo.description.your.modmdo", name);
         } else {
-            modmdoVersion = TextUtil.translatable("modmdo.description.you.do.not.have.modmdo");
+            modmdoVersion = TextUtil.translatable("");
         }
         return TextUtil.translatable("modmdo.description", SharedVariables.MODMDO_VERSION_NAME, SharedVariables.RELEASE_TIME, modmdoVersion);
     }

@@ -1,16 +1,28 @@
 package com.github.cao.awa.modmdo.config;
 
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.information.compressor.deflater.*;
 import com.github.cao.awa.modmdo.utils.io.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.apache.commons.codec.binary.*;
 import org.jetbrains.annotations.*;
-import org.json.*;
 
 import java.io.*;
 import java.nio.charset.*;
 
-public record DiskConfigUtil(String entrust, String path, String suffix, boolean compress) {
+public final class DiskConfigUtil {
+    private final String entrust;
+    private final String path;
+    private final String suffix;
+    private final boolean compress;
+
+    public DiskConfigUtil(String entrust, String path, String suffix, boolean compress) {
+        this.entrust = entrust;
+        this.path = path;
+        this.suffix = suffix;
+        this.compress = compress;
+    }
+
     public void setIfNoExist(String key, Object value) {
         if (new File(getConfigPath(key)).isFile()) {
             return;
@@ -36,7 +48,7 @@ public record DiskConfigUtil(String entrust, String path, String suffix, boolean
         if (str == null || str.length == 0) {
             return DeflaterCompressor.EMPTY_BYTES;
         }
-        return DeflaterCompressor.INSTANCE.compress(str);
+        return DeflaterCompressor.BEST_INSTANCE.compress(str);
     }
 
     public String getConfigPath(String key) {
@@ -45,7 +57,7 @@ public record DiskConfigUtil(String entrust, String path, String suffix, boolean
 
     public @NotNull JSONObject getJSONObject(String key) {
         return EntrustEnvironment.trys(
-                () -> new JSONObject(getString(key)),
+                () -> JSONObject.parseObject(getString(key)),
                 () -> new JSONObject()
         );
     }
@@ -61,7 +73,7 @@ public record DiskConfigUtil(String entrust, String path, String suffix, boolean
         if (bytes == null || bytes.length == 0) {
             return DeflaterCompressor.EMPTY_BYTES;
         }
-        return DeflaterCompressor.INSTANCE.decompress(bytes);
+        return DeflaterCompressor.BEST_INSTANCE.decompress(bytes);
     }
 
     public int getInt(String key) {
@@ -101,5 +113,21 @@ public record DiskConfigUtil(String entrust, String path, String suffix, boolean
 
     public boolean getBoolean(String key) {
         return "true".equalsIgnoreCase(getString(key));
+    }
+
+    public String getEntrust() {
+        return entrust;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public boolean isCompress() {
+        return compress;
     }
 }

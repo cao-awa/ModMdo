@@ -1,9 +1,9 @@
 package com.github.cao.awa.modmdo.security.certificate.identity;
 
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.storage.*;
 import org.jetbrains.annotations.*;
-import org.json.*;
 
 import java.util.*;
 
@@ -21,9 +21,9 @@ public class Identity extends Storable {
 
     public static Identity build(JSONObject json) {
         return new Identity(
-                json.has("unique_id") ? json.getString("unique_id") : "",
+                json.containsKey("unique_id") ? json.getString("unique_id") : "",
                 UUID.fromString(json.getString("uuid")),
-                json.has("verify") ? json.getString("verify") : ""
+                json.containsKey("verify") ? json.getString("verify") : ""
         );
     }
 

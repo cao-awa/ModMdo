@@ -10,7 +10,7 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.network.packet.s2c.query.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -29,15 +29,15 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
         key = motd.getString("key");
         JSONArray array = motd.getJSONArray("args");
         EntrustEnvironment.operation(args, list -> {
-            for (int i = 0; i < array.length(); i++) {
-                list.add(new Receptacle<>(array.get(i).toString()));
+            for (Object o : array) {
+                list.add(new Receptacle<>(o.toString()));
             }
         });
         packet = event.getPacket();
-        if (motd.has("dictionary")) {
+        if (motd.containsKey("dictionary")) {
             dictionary = new Dictionary(motd.getString("dictionary"));
         }
-        if (motd.has("favicon")) {
+        if (motd.containsKey("favicon")) {
             favicon = motd.getString("favicon");
         }
         return this;
@@ -57,7 +57,7 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
                 String name = EntrustEnvironment.trys(() -> {
-                    JSONObject json = new JSONObject(s.get());
+                    JSONObject json = JSONObject.parseObject(s.get());
                     return json.getString("name");
                 }, ex -> {
                     err("Cannot format variable", ex);
@@ -88,6 +88,6 @@ public class MotdModifyTrigger extends ModMdoEventTrigger<ServerQueryEvent> {
             }
         });
 
-        return minecraftTextFormat.format(new Dictionary(dictionary == null ? getLanguage().getName() : dictionary.name()), key, objs);
+        return textFormatService.format(new Dictionary(dictionary == null ? getLanguage().getName() : dictionary.name()), key, objs);
     }
 }

@@ -1,10 +1,8 @@
 package com.github.cao.awa.modmdo.simple.vec;
 
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.storage.*;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
-import net.minecraft.util.math.Vec3i;
-import org.json.JSONObject;
+import net.minecraft.util.math.*;
 
 public class XYZ extends Storable implements Cloneable {
     public double x;
@@ -161,7 +159,11 @@ public class XYZ extends Storable implements Cloneable {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject().put("x", SharedVariables.FRACTION_DIGITS_2.format(x)).put("y", SharedVariables.FRACTION_DIGITS_2.format(y)).put("z", SharedVariables.FRACTION_DIGITS_2.format(z));
+        JSONObject json = new JSONObject();
+        json.put("x", SharedVariables.FRACTION_DIGITS_2.format(x));
+        json.put("y", SharedVariables.FRACTION_DIGITS_2.format(y));
+        json.put("z", SharedVariables.FRACTION_DIGITS_2.format(z));
+        return json;
     }
 
     public boolean equal(XYZ xyz) {

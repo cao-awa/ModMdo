@@ -3,7 +3,7 @@ package com.github.cao.awa.modmdo.utils.packet.buf;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
 import net.minecraft.util.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 public class PacketDataProcessor {
     private final PacketByteBuf buf;
@@ -13,7 +13,7 @@ public class PacketDataProcessor {
     }
 
     public JSONObject readJSONObject() {
-        return new JSONObject(EntrustEnvironment.get(
+        return JSONObject.parseObject(EntrustEnvironment.get(
                 this.buf::readString,
                 ""
         ));

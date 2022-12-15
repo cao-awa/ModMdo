@@ -36,6 +36,11 @@ public class EntityDamageEvent extends EntityTargetedEvent<EntityDamageEvent> {
         this.server = null;
     }
 
+    @Override
+    public String getName() {
+        return "EntityDamage";
+    }
+
     public static EntityDamageEvent snap() {
         return new EntityDamageEvent();
     }

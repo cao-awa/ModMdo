@@ -31,6 +31,11 @@ public class QuitServerEvent extends EntityTargetedEvent<QuitServerEvent> {
         this.connection = null;
     }
 
+    @Override
+    public String getName() {
+        return "QuitServer";
+    }
+
     public static QuitServerEvent snap() {
         return new QuitServerEvent();
     }

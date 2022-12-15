@@ -3,7 +3,7 @@ package com.github.cao.awa.modmdo.utils.packet.buf;
 import com.github.cao.awa.modmdo.utils.packet.sender.*;
 import net.minecraft.network.*;
 import net.minecraft.util.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 public record PacketByteBufBuilder(PacketSender<?> sender, PacketByteBuf buf) {
     public PacketByteBufBuilder write(Identifier identifier) {

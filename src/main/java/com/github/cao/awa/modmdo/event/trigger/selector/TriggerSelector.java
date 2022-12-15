@@ -2,7 +2,7 @@ package com.github.cao.awa.modmdo.event.trigger.selector;
 
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.util.function.*;
 

@@ -14,7 +14,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import static com.github.cao.awa.modmdo.event.trigger.selector.entity.EntitySelectorType.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
@@ -35,8 +35,8 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
         key = message.getString("key");
         JSONArray array = message.getJSONArray("args");
         EntrustEnvironment.operation(args, list -> {
-            for (int i = 0; i < array.length(); i++) {
-                list.add(new Receptacle<>(array.get(i).toString()));
+            for (Object o : array) {
+                list.add(new Receptacle<>(o.toString()));
             }
         });
         setTarget(event.getTargeted());
@@ -73,7 +73,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
                 });
             });
             selector.prepare(APPOINT, target -> {
-                EntrustEnvironment.notNull(getServer().getPlayerManager().getPlayer(getMeta().has("name") ? getMeta().getString("name") : getMeta().getString("uuid")), targeted -> targeted.networkHandler.disconnect(reason));
+                EntrustEnvironment.notNull(getServer().getPlayerManager().getPlayer(getMeta().containsKey("name") ? getMeta().getString("name") : getMeta().getString("uuid")), targeted -> targeted.networkHandler.disconnect(reason));
             });
             selector.action();
         }
@@ -83,7 +83,7 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
                 String name = EntrustEnvironment.trys(() -> {
-                    JSONObject json = new JSONObject(s.get());
+                    JSONObject json = JSONObject.parseObject(s.get());
                     return json.getString("name");
                 }, ex -> {
                     err("Cannot format variable", ex);
@@ -118,9 +118,9 @@ public class DisconnectTrigger<T extends EntityTargetedEvent<?>> extends Targete
             user = loginUsers.getUser(getTarget().get(0).getUuid());
 
         if (user == null) {
-            return minecraftTextFormat.format(getLanguage(), key, objs);
+            return textFormatService.format(getLanguage(), key, objs);
         }
-        return minecraftTextFormat.format(user, key, objs);
+        return textFormatService.format(user, key, objs);
     }
 
     public boolean supported(String target) {

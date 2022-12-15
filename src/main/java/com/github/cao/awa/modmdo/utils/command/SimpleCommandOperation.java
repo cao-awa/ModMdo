@@ -2,7 +2,6 @@ package com.github.cao.awa.modmdo.utils.command;
 
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.storage.*;
-import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.exceptions.*;
@@ -18,49 +17,49 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 public class SimpleCommandOperation {
     public static void sendFeedback(CommandContext<ServerCommandSource> source, Translatable message) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), false);
+            SharedVariables.sendMessage(getPlayer(source), textFormatService.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), false);
         } catch (Exception e) {
-            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error(SharedVariables.textFormatService.format(message.getKey(), message.getArgs()));
         }
     }
 
     public static void sendFeedback(ServerCommandSource source, Translatable message) {
         try {
-            SharedVariables.sendMessage(Objects.requireNonNull(getPlayer(source)), minecraftTextFormat.format(loginUsers.getUser(Objects.requireNonNull(getPlayer(source))), message.getKey(), message.getArgs()).text(), false);
+            SharedVariables.sendMessage(Objects.requireNonNull(getPlayer(source)), textFormatService.format(loginUsers.getUser(Objects.requireNonNull(getPlayer(source))), message.getKey(), message.getArgs()).text(), false);
         } catch (Exception e) {
-            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error(SharedVariables.textFormatService.format(message.getKey(), message.getArgs()));
         }
     }
 
     public static void sendFeedback(ServerPlayerEntity player, Translatable message) {
         try {
-            SharedVariables.sendMessage(player, minecraftTextFormat.format(loginUsers.getUser(player), message.getKey(), message.getArgs()).text(), false);
+            SharedVariables.sendMessage(player, textFormatService.format(loginUsers.getUser(player), message.getKey(), message.getArgs()).text(), false);
         } catch (Exception e) {
-            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error(SharedVariables.textFormatService.format(message.getKey(), message.getArgs()));
         }
     }
 
     public static void sendMessage(CommandContext<ServerCommandSource> source, Translatable message, boolean actionbar) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), actionbar);
+            SharedVariables.sendMessage(getPlayer(source), textFormatService.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), actionbar);
         } catch (Exception e) {
-            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error(SharedVariables.textFormatService.format(message.getKey(), message.getArgs()));
         }
     }
 
     public static void sendMessage(ServerCommandSource source, Translatable message, boolean actionbar) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), actionbar);
+            SharedVariables.sendMessage(getPlayer(source), textFormatService.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()).text(), actionbar);
         } catch (Exception e) {
-            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error(SharedVariables.textFormatService.format(message.getKey(), message.getArgs()));
         }
     }
 
     public static void sendMessage(ServerPlayerEntity source, Translatable message, boolean actionbar) {
         try {
-            SharedVariables.sendMessage(source, minecraftTextFormat.format(loginUsers.getUser(source), message.getKey(), message.getArgs()).text(), actionbar);
+            SharedVariables.sendMessage(source, textFormatService.format(loginUsers.getUser(source), message.getKey(), message.getArgs()).text(), actionbar);
         } catch (Exception e) {
-            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error(SharedVariables.textFormatService.format(message.getKey(), message.getArgs()));
         }
     }
 
@@ -87,7 +86,7 @@ public class SimpleCommandOperation {
 
     public static void sendFeedbackAndInform(CommandContext<ServerCommandSource> source, Translatable message) {
         try {
-            SharedVariables.sendMessage(getPlayer(source), TextUtil.literal(consoleTextFormat.format(message.getKey(), message.getArgs())).text(), false);
+            SharedVariables.sendMessage(getPlayer(source), SharedVariables.textFormatService.format(message.getKey(), message.getArgs()).text(), false);
         } catch (Exception e) {
 
         }
@@ -115,17 +114,17 @@ public class SimpleCommandOperation {
 
     public static void sendError(CommandContext<ServerCommandSource> source, Translatable message) {
         EntrustEnvironment.trys(() -> {
-            sendError(source.getSource(), minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()));
+            sendError(source.getSource(), textFormatService.format(loginUsers.getUser(getPlayer(source)), message.getKey(), message.getArgs()));
         }, ex -> {
-            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error(SharedVariables.textFormatService.format(message.getKey(), message.getArgs()));
         });
     }
 
     public static void sendError(ServerCommandSource source, Translatable message) {
         EntrustEnvironment.trys(() -> {
-            sendError(source, minecraftTextFormat.format(loginUsers.getUser(Objects.requireNonNull(getPlayer(source))), message.getKey(), message.getArgs()));
+            sendError(source, textFormatService.format(loginUsers.getUser(Objects.requireNonNull(getPlayer(source))), message.getKey(), message.getArgs()));
         }, ex -> {
-            LOGGER.error(consoleTextFormat.format(message.getKey(), message.getArgs()));
+            LOGGER.error(SharedVariables.textFormatService.format(message.getKey(), message.getArgs()));
         });
     }
 

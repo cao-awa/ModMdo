@@ -35,6 +35,11 @@ public class BlockStateSetEvent extends ModMdoEvent<BlockStateSetEvent> {
         this.maxUpdateDepth = - 1;
     }
 
+    @Override
+    public String getName() {
+        return "BlockStateSet";
+    }
+
     public static BlockStateSetEvent snap() {
         return new BlockStateSetEvent();
     }

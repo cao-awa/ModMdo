@@ -8,7 +8,7 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
@@ -20,9 +20,9 @@ public class PersistentModifyTrigger<T extends ModMdoEvent<?>> extends ModMdoEve
     public ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace trace) {
         JSONArray variables = metadata.getJSONArray("variables");
         EntrustEnvironment.operation(vars, list -> {
-            for (OperationalInteger i = new OperationalInteger(); i.get() < variables.length(); i.add()) {
+            for (OperationalInteger i = new OperationalInteger(); i.get() < variables.size(); i.add()) {
                 EntrustEnvironment.trys(() -> {
-                    list.add(new Receptacle<>(new JSONObject(variables.get(i.get()).toString())));
+                    list.add(new Receptacle<>(JSONObject.parseObject(variables.get(i.get()).toString())));
                 }, ex -> {
                     err("Cannot format variable: <V." + i.get() + ">", ex);
                 });

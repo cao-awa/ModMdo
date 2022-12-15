@@ -41,6 +41,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
 	shadow 'org.lz4:lz4-java:1.8.0'
+	shadow 'com.alibaba.fastjson2:fastjson2:2.0.20'
 }
 
 processResources {

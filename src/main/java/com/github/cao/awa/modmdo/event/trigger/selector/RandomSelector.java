@@ -4,7 +4,7 @@ import com.github.cao.awa.modmdo.annotations.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.selector.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.selector.algorithm.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.util.function.*;
 
@@ -23,7 +23,7 @@ public class RandomSelector extends TriggerSelector {
     public void build(JSONObject json) {
         String algorithm = json.getString("algorithm");
         switch (algorithm) {
-            case "exclude-select" -> selector = new ExcludeSelector<>(json.getInt("exclude"));
+            case "exclude-select" -> selector = new ExcludeSelector<>(json.getInteger("exclude"));
             case "free-select" -> selector = new FreeSelector<>();
             default -> throw new IllegalArgumentException("Algorithm \"" + algorithm + "\" not found");
         }

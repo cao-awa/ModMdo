@@ -31,8 +31,8 @@ public class TemporaryCommand extends SimpleCommand {
             return ban(ban, ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target")).name, 60);
         })))).then(literal("remove").then(argument("target", StringArgumentType.string()).suggests(ModMdoBanSuggester::suggestions).executes(remove -> {
             Certificate certificate = ModMdoBanSuggester.getCertificate(StringArgumentType.getString(remove, "target"));
-            if (banned.containsName(certificate.getName())) {
-                banned.remove(certificate.getName());
+            if (bans.containsName(certificate.getName())) {
+                bans.delete(certificate.getName());
                 saveVariables();
                 sendFeedback(getPlayer(remove), TextUtil.translatable("modmdo.ban.pardon", certificate.getName()));
                 return 0;
@@ -44,7 +44,7 @@ public class TemporaryCommand extends SimpleCommand {
             return 0;
         })).then(literal("reduce").then(argument("target", StringArgumentType.string()).suggests(ModMdoBanSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(ban -> {
             String name = ModMdoBanSuggester.getCertificate(StringArgumentType.getString(ban, "target")).getName();
-            if (banned.containsName(name)) {
+            if (bans.containsName(name)) {
                 int minute = IntegerArgumentType.getInteger(ban, "minutes");
                 return ban(ban, name, - minute);
             } else {
@@ -64,13 +64,13 @@ public class TemporaryCommand extends SimpleCommand {
         })))).then(literal("remove").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).executes(remove -> {
             Certificate certificate = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(remove, "target"));
             Receptacle<Boolean> success = new Receptacle<>(false);
-            EntrustEnvironment.notNull(temporaryStation.get(certificate.getName()), c -> {
+            EntrustEnvironment.notNull(stationService.get(certificate.getName()), c -> {
                 if (c.getType().equals("invite")) {
-                    temporaryStation.remove(c.getName());
+                    stationService.delete(c.getName());
                     success.set(true);
                 }
             });
-            EntrustEnvironment.notNull(temporaryInvites.get(certificate.getName()), invite -> {
+            EntrustEnvironment.notNull(invitesSerbvice.get(certificate.getName()), invite -> {
                 invite.setMillions(- 1);
                 success.set(true);
             });
@@ -85,7 +85,7 @@ public class TemporaryCommand extends SimpleCommand {
             return 0;
         })).then(literal("reduce").then(argument("target", StringArgumentType.word()).suggests(ModMdoInviteSuggester::suggestions).then(argument("minutes", IntegerArgumentType.integer(1)).executes(invite -> {
             String name = ModMdoInviteSuggester.getInvite(StringArgumentType.getString(invite, "target")).getName();
-            if (temporaryInvites.containsName(name)) {
+            if (invitesSerbvice.containsName(name)) {
                 int minute = IntegerArgumentType.getInteger(invite, "minutes");
                 return invite(invite, name, - minute);
             } else {
@@ -100,8 +100,8 @@ public class TemporaryCommand extends SimpleCommand {
             return 0;
         })).then(literal("remove").then(argument("name", StringArgumentType.string()).suggests(ModMdoStationSuggester::suggestions).executes(remove -> {
             TemporaryCertificate wl = ModMdoStationSuggester.getStation(StringArgumentType.getString(remove, "name"));
-            if (temporaryStation.containsName(wl.getName())) {
-                temporaryStation.remove(wl.getName());
+            if (stationService.containsName(wl.getName())) {
+                stationService.delete(wl.getName());
                 sendFeedback(remove, TextUtil.translatable("temporary.station.removed", wl.getName()));
                 return 0;
             }
@@ -114,15 +114,15 @@ public class TemporaryCommand extends SimpleCommand {
     public void showTemporaryWhitelist(CommandContext<ServerCommandSource> source) throws CommandSyntaxException {
         SharedVariables.handleTemporaryWhitelist();
         ServerPlayerEntity player = getPlayer(source);
-        if (SharedVariables.temporaryStation.size() > 0) {
+        if (SharedVariables.stationService.count() > 0) {
             StringBuilder builder = new StringBuilder();
-            for (TemporaryCertificate wl : SharedVariables.temporaryStation.values()) {
+            for (TemporaryCertificate wl : SharedVariables.stationService.values()) {
                 builder.append(wl.getName()).append(": ");
                 builder.append(wl.formatRemaining());
                 builder.append("\n");
             }
             builder.delete(builder.length() - 1, builder.length());
-            sendMessage(player, TextUtil.translatable("commands.temporary.station.list", SharedVariables.temporaryStation.size(), builder.toString()), false);
+            sendMessage(player, TextUtil.translatable("commands.temporary.station.list", SharedVariables.stationService.count(), builder.toString()), false);
         } else {
             sendMessage(player, TextUtil.translatable("commands.temporary.station.none"), false);
         }
@@ -130,11 +130,11 @@ public class TemporaryCommand extends SimpleCommand {
 
     public int whitelist(CommandContext<ServerCommandSource> source) {
         String name = StringArgumentType.getString(source, "name");
-        if (SharedVariables.temporaryStation.containsName(name)) {
+        if (SharedVariables.stationService.containsName(name)) {
             sendFeedback(source, TextUtil.translatable("temporary.station.add.already.is", name));
             return - 1;
         }
-        if (SharedVariables.whitelists.containsName(name)) {
+        if (SharedVariables.whitelistsService.containsName(name)) {
             sendFeedback(source, TextUtil.translatable("modmdo.whitelist.add.already.is", name));
             return - 1;
         }
@@ -144,28 +144,28 @@ public class TemporaryCommand extends SimpleCommand {
     }
 
     public void temporaryWhitelist(String name, long millions) {
-        SharedVariables.temporaryStation.put(name, new TemporaryCertificate(name, TimeUtil.millions(), millions).setType("whitelist"));
+        SharedVariables.stationService.set(name, new TemporaryCertificate(name, TimeUtil.millions(), millions).setType("whitelist"));
     }
 
     public void showTemporaryBan(CommandContext<ServerCommandSource> source) {
         try {
             SharedVariables.handleTemporaryBan();
             ServerPlayerEntity player = getPlayer(source);
-            if (banned.size() > 0) {
+            if (bans.count() > 0) {
                 StringBuilder builder = new StringBuilder();
-                for (Certificate ban : banned.values()) {
+                for (Certificate ban : bans.values()) {
                     if (ban instanceof TemporaryCertificate timeLimit) {
                         builder.append(timeLimit.getName()).append(": ");
                         builder.append(timeLimit.formatRemaining());
                         builder.append("\n");
                     } else {
                         builder.append(ban.getName()).append(": ");
-                        builder.append(SharedVariables.consoleTextFormat.format("temporary.ban.indefinite"));
+                        builder.append(SharedVariables.textFormatService.format("temporary.ban.indefinite"));
                         builder.append("\n");
                     }
                 }
                 builder.delete(builder.length() - 1, builder.length());
-                sendMessage(player, TextUtil.translatable("commands.temporary.ban.list", banned.size(), builder.toString()), false);
+                sendMessage(player, TextUtil.translatable("commands.temporary.ban.list", bans.count(), builder.toString()), false);
             } else {
                 sendMessage(player, TextUtil.translatable("commands.temporary.ban.none"), false);
             }
@@ -178,11 +178,11 @@ public class TemporaryCommand extends SimpleCommand {
         ServerPlayerEntity player = getServer(ban).getPlayerManager().getPlayer(name);
         FORCE.add(player);
         Certificate certificate = ModMdoWhitelistSuggester.getWhiteList(StringArgumentType.getString(ban, "target"));
-        Certificate banned = SharedVariables.banned.get(name);
+        Certificate banned = SharedVariables.bans.get(name);
         boolean already = false;
         if (banned == null) {
             temporaryBan(name, certificate, minutes == - 1 ? - 1 : minutes * 1000L * 60L, false);
-            banned = SharedVariables.banned.get(name);
+            banned = SharedVariables.bans.get(name);
         } else {
             already = true;
         }
@@ -190,12 +190,12 @@ public class TemporaryCommand extends SimpleCommand {
             if (already) {
                 temporaryBan(name, certificate, minutes == - 1 ? - 1 : minutes * 1000L * 60L, true);
                 if (minutes == - 1) {
-                    sendFeedback(ban, TextUtil.translatable("modmdo.banned.convert.indefinite", certificate.name, ((TemporaryCertificate) SharedVariables.banned.get(name)).formatRemaining()));
+                    sendFeedback(ban, TextUtil.translatable("modmdo.banned.convert.indefinite", certificate.name, ((TemporaryCertificate) SharedVariables.bans.get(name)).formatRemaining()));
                 } else {
                     if (temp.getMillions() > 0) {
-                        sendFeedback(ban, TextUtil.translatable(minutes > 0 ? "modmdo.banned.overtime" : "modmdo.banned.reduce", name, new TemporaryCertificate("", TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), ((TemporaryCertificate) SharedVariables.banned.get(name)).formatRemaining()));
+                        sendFeedback(ban, TextUtil.translatable(minutes > 0 ? "modmdo.banned.overtime" : "modmdo.banned.reduce", name, new TemporaryCertificate("", TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), ((TemporaryCertificate) SharedVariables.bans.get(name)).formatRemaining()));
                     } else {
-                        SharedVariables.banned.remove(temp.getName());
+                        SharedVariables.bans.delete(temp.getName());
                         sendFeedback(ban, TextUtil.translatable("modmdo.ban.pardon", name));
                     }
                 }
@@ -216,7 +216,7 @@ public class TemporaryCommand extends SimpleCommand {
     public void temporaryBan(String player, Certificate certificate, long millions, boolean add) {
         Certificate c;
         if (add) {
-            if (banned.get(player) instanceof TemporaryCertificate temp) {
+            if (bans.get(player) instanceof TemporaryCertificate temp) {
                 temp.setMillions(temp.getMillions() + millions);
                 return;
             }
@@ -231,23 +231,23 @@ public class TemporaryCommand extends SimpleCommand {
             }
         }
         if (loginUsers.hasUser(player)) {
-            c.setLastLanguage(SharedVariables.loginUsers.getUser(player).getLanguage().getName());
+            c.setLanguage(SharedVariables.loginUsers.getUser(player).getLanguage());
         }
         c.setType("ban");
-        banned.put(certificate.name, c);
+        bans.set(certificate.name, c);
     }
 
     public int invite(CommandContext<ServerCommandSource> invite, String name, int minutes) {
         try {
-            if (SharedVariables.temporaryStation.containsName(name)) {
+            if (SharedVariables.stationService.containsName(name)) {
                 sendFeedback(invite, TextUtil.translatable("temporary.station.add.already.is", name));
                 return - 1;
             }
-            if (SharedVariables.whitelists.containsName(name)) {
+            if (SharedVariables.whitelistsService.containsName(name)) {
                 sendFeedback(invite, TextUtil.translatable("modmdo.invite.add.already.is", name));
                 return - 1;
             }
-            TemporaryCertificate invited = temporaryInvites.get(name);
+            TemporaryCertificate invited = invitesSerbvice.get(name);
             boolean already = false;
             if (invited == null) {
                 temporaryInvite(EntityUtil.getName(getPlayer(invite)), name, minutes == - 1 ? - 1 : minutes * 1000L * 60L, false);
@@ -257,7 +257,7 @@ public class TemporaryCommand extends SimpleCommand {
             if (already) {
                 temporaryInvite(EntityUtil.getName(getPlayer(invite)), name, minutes == - 1 ? - 1 : minutes * 1000L * 60L, true);
                 if (invited.getMillions() > 0) {
-                    sendFeedback(invite, TextUtil.translatable(minutes > 0 ? "modmdo.invite.overtime" : "modmdo.invite.reduce", name, new TemporaryCertificate("", TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), temporaryInvites.get(name).formatRemaining()));
+                    sendFeedback(invite, TextUtil.translatable(minutes > 0 ? "modmdo.invite.overtime" : "modmdo.invite.reduce", name, new TemporaryCertificate("", TimeUtil.millions(), minutes * 1000L * 60L).formatRemaining(), invitesSerbvice.get(name).formatRemaining()));
                 } else {
                     temporaryInvite(EntityUtil.getName(getPlayer(invite)), name, - 1, false);
                     sendFeedback(invite, TextUtil.translatable("modmdo.invite.cancel", name));
@@ -274,19 +274,19 @@ public class TemporaryCommand extends SimpleCommand {
     public void temporaryInvite(String organizer, String name, long millions, boolean add) {
         TemporaryCertificate certificate;
         if (add) {
-            TemporaryCertificate temp = temporaryInvites.get(name);
+            TemporaryCertificate temp = invitesSerbvice.get(name);
             temp.setMillions(temp.getMillions() + millions);
             return;
         }
-        if (temporaryInvites.containsName(name)) {
-            certificate = temporaryInvites.get(name);
+        if (invitesSerbvice.containsName(name)) {
+            certificate = invitesSerbvice.get(name);
             certificate.setMillions(millions);
         } else {
             certificate = new TemporaryCertificate(name, new LoginRecorde(name, null, null, LoginRecordeType.TEMPORARY), TimeUtil.millions(), 1000L * 5 * 60);
             certificate.setType("invite");
             certificate.setSpare(new TemporaryCertificate(name, - 1, millions));
             certificate.setPass(new TemporaryPass().setTime(millions).setOrganizer(organizer));
-            temporaryStation.put(name, certificate);
+            stationService.set(name, certificate);
         }
     }
 
@@ -296,23 +296,23 @@ public class TemporaryCommand extends SimpleCommand {
             ServerPlayerEntity player = getPlayer(source);
             int count = 0;
             StringBuilder builder = new StringBuilder();
-            for (TemporaryCertificate certificate : temporaryInvites.values()) {
+            for (TemporaryCertificate certificate : invitesSerbvice.values()) {
                 count++;
                 builder.append(certificate.getName()).append(": ");
-                builder.append(minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), "commands.temporary.invite.remaining", certificate.formatRemaining()).getString());
+                builder.append(textFormatService.format(loginUsers.getUser(getPlayer(source)), "commands.temporary.invite.remaining", certificate.formatRemaining()).getString());
                 builder.append("\n");
             }
-            for (TemporaryCertificate certificate : temporaryStation.values()) {
+            for (TemporaryCertificate certificate : stationService.values()) {
                 if (certificate.getType().equals("invite")) {
                     count++;
                     builder.append(certificate.getName()).append(": ");
-                    builder.append(minecraftTextFormat.format(loginUsers.getUser(getPlayer(source)), "commands.temporary.invite.not.ready", certificate.formatRemaining()).getString());
+                    builder.append(textFormatService.format(loginUsers.getUser(getPlayer(source)), "commands.temporary.invite.not.ready", certificate.formatRemaining()).getString());
                     builder.append("\n");
                 }
             }
             if (count > 0) {
                 builder.delete(builder.length() - 1, builder.length());
-                sendMessage(player, TextUtil.translatable("commands.temporary.invite.list", temporaryInvites.size(), builder.toString()), false);
+                sendMessage(player, TextUtil.translatable("commands.temporary.invite.list", invitesSerbvice.count(), builder.toString()), false);
             } else {
                 sendMessage(player, TextUtil.translatable("commands.temporary.invite.none"), false);
             }

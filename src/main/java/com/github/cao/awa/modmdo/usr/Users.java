@@ -3,7 +3,7 @@ package com.github.cao.awa.modmdo.usr;
 import com.github.cao.awa.modmdo.storage.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.server.network.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.util.*;
 
@@ -96,7 +96,6 @@ public class Users extends Storable {
     public void removeUser(User user) {
         removeUser(user.getUuid());
     }
-
 
     public void removeUser(ServerPlayerEntity player) {
         removeUser(player.getUuid());

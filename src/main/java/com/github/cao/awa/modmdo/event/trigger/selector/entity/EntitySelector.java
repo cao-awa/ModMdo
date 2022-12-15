@@ -4,7 +4,7 @@ import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.util.*;
 import java.util.function.*;
@@ -17,7 +17,7 @@ public class EntitySelector {
 
     public EntitySelector(JSONObject json, TargetedTrigger<?> trigger) {
         EntitySelectorType type = EntitySelectorType.of(json.getString("type"));
-        if (json.has("target")) {
+        if (json.containsKey("target")) {
             String target = json.getString("target");
             if (type == EntitySelectorType.APPOINT) {
                 build(type, target);
@@ -29,7 +29,7 @@ public class EntitySelector {
         } else {
             build(type, null);
         }
-        if (json.has("excepts")) {
+        if (json.containsKey("excepts")) {
             for (Object o : json.getJSONArray("excepts")) {
                 if (ModMdoTriggerBuilder.classMap.containsKey(o.toString())) {
                     excepts.add(ModMdoTriggerBuilder.classMap.get(o.toString()));

@@ -38,6 +38,11 @@ public class BlockPlaceEvent extends EntityTargetedEvent<BlockPlaceEvent> {
         this.server = null;
     }
 
+    @Override
+    public String getName() {
+        return "BlockPlace";
+    }
+
     public static BlockPlaceEvent snap() {
         return new BlockPlaceEvent();
     }

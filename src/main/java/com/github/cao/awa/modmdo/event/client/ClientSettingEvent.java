@@ -27,6 +27,11 @@ public class ClientSettingEvent extends EntityTargetedEvent<ClientSettingEvent> 
         this.server = null;
     }
 
+    @Override
+    public String getName() {
+        return "ClientSetting";
+    }
+
     public static ClientSettingEvent snap() {
         return new ClientSettingEvent();
     }

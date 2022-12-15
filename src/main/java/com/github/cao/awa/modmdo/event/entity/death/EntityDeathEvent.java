@@ -29,6 +29,11 @@ public class EntityDeathEvent extends EntityTargetedEvent<EntityDeathEvent> {
         this.perpetrator = null;
     }
 
+    @Override
+    public String getName() {
+        return "EntityDeath";
+    }
+
     public static EntityDeathEvent snap() {
         return new EntityDeathEvent();
     }

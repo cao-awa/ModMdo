@@ -2,7 +2,7 @@ package com.github.cao.awa.modmdo.event.variable.string;
 
 import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.event.variable.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.io.*;
 
