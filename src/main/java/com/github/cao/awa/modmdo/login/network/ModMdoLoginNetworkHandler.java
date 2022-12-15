@@ -20,12 +20,12 @@ import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
 import org.apache.logging.log4j.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoLoginNetworkHandler extends ServerPlayPacketHandler {
-    private final Logger LOGGER = LogManager.getLogger("ModMdoLoginNetworkHandler");
+    private static final Logger LOGGER = LogManager.getLogger("ModMdoLoginNetworkHandler");
     private final MinecraftServer server;
     private final ClientConnection connection;
     private final ServerPlayerEntity player;
@@ -87,19 +87,6 @@ public class ModMdoLoginNetworkHandler extends ServerPlayPacketHandler {
                         if (CLIENT_CHANNEL.equals(channel)) {
                             LOGGER.debug("Processing client login data");
                             if (informationSign.equals(LOGIN_CHANNEL)) {
-                                LOGGER.info("Name: {}",
-                                             name);
-                                LOGGER.info("UUID: {}",
-                                             uuid);
-                                LOGGER.info("Identifier: {}",
-                                             identifier);
-                                LOGGER.info("ModMdo Name: {}",
-                                             modmdoName);
-                                LOGGER.info("Verify Data: {}",
-                                             unidirectionalVerify);
-                                LOGGER.info("Verify Key: {}",
-                                             verifyKey);
-
                                 if (modMdoType == ModMdoType.SERVER) {
                                     if (beforeLogin()) {
                                         serverLogin.login(
@@ -189,25 +176,25 @@ public class ModMdoLoginNetworkHandler extends ServerPlayPacketHandler {
             }
 
             if (handleBanned(player)) {
-                Certificate certificate = banned.get(EntityUtil.getName(player));
+                Certificate certificate = bans.get(EntityUtil.getName(player));
                 if (certificate instanceof TemporaryCertificate temporary) {
                     String remaining = temporary.formatRemaining();
-                    disconnect(minecraftTextFormat.format(
-                                                          new com.github.cao.awa.modmdo.lang.Dictionary(certificate.getLastLanguage()),
+                    disconnect(textFormatService.format(
+                                                          new Dictionary(certificate.getLanguage()),
                                                           "multiplayer.disconnect.banned-time-limited",
                                                           remaining
                                                   )
-                                                  .text());
+                                                .text());
                     LOGGER.info(
                             "Player {} has been banned form server",
                             PlayerUtil.getName(player)
                     );
                 } else {
-                    disconnect(minecraftTextFormat.format(
-                                                          new Dictionary(certificate.getLastLanguage()),
+                    disconnect(textFormatService.format(
+                                                          new Dictionary(certificate.getLanguage()),
                                                           "multiplayer.disconnect.banned-indefinite"
                                                   )
-                                                  .text());
+                                                .text());
                     LOGGER.info(
                             "Player {} has been banned form server",
                             PlayerUtil.getName(player)
@@ -260,6 +247,7 @@ public class ModMdoLoginNetworkHandler extends ServerPlayPacketHandler {
                                     "Exception in join server",
                                     e
                             );
+                            e.printStackTrace();
                             if (server.isHost(player.getGameProfile())) {
                                 LOGGER.debug(
                                         "Player {} lost status synchronize, but will not be process",

@@ -23,7 +23,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoStdInitializer implements ModInitializer {
     private static final Logger LOGGER = LogManager.getLogger("ModMdoInitializer");
-    
+
     public static void initModMdoVariables(ModMdoType type) {
         if (type == ModMdoType.SERVER) {
             LOGGER.debug("Init level as server mode");
@@ -38,27 +38,12 @@ public class ModMdoStdInitializer implements ModInitializer {
                 }
         );
         EntrustEnvironment.notNull(
-                config.getBoolean("secure_enchant"),
-                enchant -> {
-                    SharedVariables.enableSecureEnchant = enchant;
-                    LOGGER.debug("Init config secure_enchant as " + enchant);
-                }
-        );
-        EntrustEnvironment.notNull(
-                config.getBoolean("time_active"),
-                tac -> {
-                    SharedVariables.timeActive = tac;
-                    LOGGER.debug("Init config time_active as " + tac);
-                }
-        );
-        EntrustEnvironment.notNull(
                 config.getBoolean("modmdo_whitelist"),
                 whitelist -> {
                     SharedVariables.modmdoWhitelist = whitelist;
                     LOGGER.debug("Init config modmdo_whitelist as " + whitelist);
                 }
         );
-
 
         if (type == ModMdoType.CLIENT) {
             EntrustEnvironment.notNull(
@@ -68,11 +53,6 @@ public class ModMdoStdInitializer implements ModInitializer {
                         LOGGER.debug("Init config secure_level as " + level);
                     }
             );
-        }
-
-        if (type == ModMdoType.SERVER) {
-            SharedVariables.initWhiteList();
-            SharedVariables.initBan();
         }
 
         SharedVariables.initNotes();
@@ -117,8 +97,6 @@ public class ModMdoStdInitializer implements ModInitializer {
                 commandRegister = new ModMdoCommandRegister(server);
 
                 ModMdoStdInitializer.initForLevel(server);
-
-                new BenchmarkCommand().register();
             });
         });
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {

@@ -84,8 +84,8 @@ public abstract class PlayerManagerMixin {
     public void remove(PlayerManager instance, ServerPlayerEntity player) {
         EntrustEnvironment.trys(
                 () -> {
-                    if ((loginUsers.hasUser(player) && ! banned.containsIdentifier(loginUsers.getUser(player.getUuid())
-                                                                                             .getIdentifier())) || FORCE.contains(player) || player.networkHandler.getConnection()
+                    if ((loginUsers.hasUser(player) && ! bans.containsIdentifier(loginUsers.getUser(player.getUuid())
+                                                                                           .getIdentifier())) || FORCE.contains(player) || player.networkHandler.getConnection()
                                                                                                                                                                   .getAddress() == null) {
                         FORCE.remove(player);
                     }

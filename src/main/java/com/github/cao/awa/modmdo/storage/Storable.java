@@ -1,6 +1,6 @@
 package com.github.cao.awa.modmdo.storage;
 
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 public abstract class Storable {
     public String toString() {

@@ -1,13 +1,15 @@
 package com.github.cao.awa.modmdo.event;
 
 import com.github.cao.awa.modmdo.event.delay.*;
+import com.github.cao.awa.modmdo.event.register.*;
+import com.github.cao.awa.modmdo.event.task.*;
 import com.github.cao.awa.modmdo.extra.loader.*;
+import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.function.annotaions.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
-import com.github.zhuaidadaya.rikaishinikui.handler.universal.runnable.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.server.*;
 
@@ -17,38 +19,44 @@ import java.util.function.*;
 
 @AsyncDelay
 public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
-    private final Object2ObjectMap<TaskOrder<T>, Thread> await;
-    private final ObjectSet<TaskOrder<T>> actions;
-    private final ObjectList<T> delay;
-    private final ObjectList<Previously<T>> previously;
+    private final Map<ModMdoEventTaskOrder<T>, Thread> await;
+    private final Set<ModMdoEventTaskOrder<T>> actions;
+    private final List<T> delay;
+    private final List<Previously<T>> previously;
     private boolean submitted = false;
 
     public ModMdoEvent() {
-        await = Object2ObjectMaps.synchronize(new Object2ObjectLinkedOpenHashMap<>());
-        actions = ObjectSets.synchronize(new ObjectLinkedOpenHashSet<>());
-        delay = ObjectLists.synchronize(new ObjectArrayList<>());
-        previously = ObjectLists.synchronize(new ObjectArrayList<>());
+        this.await = Object2ObjectMaps.synchronize(new Object2ObjectLinkedOpenHashMap<>());
+        this.actions = ObjectSets.synchronize(new ObjectLinkedOpenHashSet<>());
+        this.delay = ObjectLists.synchronize(new ObjectArrayList<>());
+        this.previously = ObjectLists.synchronize(new ObjectArrayList<>());
     }
 
-    public void register(Consumer<T> action, File register) {
-        actions.add(new TaskOrder<>(
+    public void register(Consumer<T> action, ModMdoExtra<?> register, File file) {
+        this.actions.add(new ModMdoEventTaskOrder<>(
                 action,
-                "F): " + register.getPath()
+                new ModMdoEventRegister(
+                        register,
+                        file
+                )
         ));
     }
 
     public void register(Consumer<T> action, ModMdoExtra<?> register, String name) {
-        actions.add(new TaskOrder<>(
+        this.actions.add(new ModMdoEventTaskOrder<>(
                 action,
-                "\"" + register.getName() + "\": " + name
+                new ModMdoEventRegister(
+                        register,
+                        "'" + register.getName() + "' - " + name
+                )
         ));
     }
 
-    public ObjectArrayList<String> getRegistered() {
+    public ObjectArrayList<ModMdoEventRegister> getRegistered() {
         return EntrustEnvironment.operation(
                 new ObjectArrayList<>(),
                 list -> {
-                    for (TaskOrder<T> task : actions) {
+                    for (ModMdoEventTaskOrder<T> task : this.actions) {
                         list.add(task.getRegister());
                     }
                 }
@@ -56,51 +64,59 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
     }
 
     public boolean isSubmitted() {
-        return submitted;
+        return this.submitted;
     }
 
     @AsyncDelay
-    public void await(Temporary action, int orWait, File register) {
+    public void await(Temporary action, int orWait, File file) {
         orWait(
-                new TaskOrder<>(
+                new ModMdoEventTaskOrder<>(
                         e -> action.apply(),
                         true,
-                        "File: \n  " + register.getPath()
+                        new ModMdoEventRegister(
+                                SharedVariables.extras.getExtra(
+                                        ModMdo.class,
+                                        SharedVariables.EXTRA_ID
+                                ),
+                                file.getName()
+                        )
                 ),
                 orWait
         );
     }
 
-    public void orWait(TaskOrder<T> order, final int wait) {
-        await.put(
+    public abstract String getName();
+
+    public void orWait(ModMdoEventTaskOrder<T> order, final int wait) {
+        this.await.put(
                 order,
                 EntrustEnvironment.thread(() -> {
-                    synchronized (await) {
+                    synchronized (this.await) {
                         EntrustEnvironment.trys(() -> {
                             OperationalInteger integer = new OperationalInteger(wait);
                             while (integer.get() > 0) {
                                 TimeUtil.coma(10);
                                 integer.reduce(10);
-                                if (await.get(order)
+                                if (this.await.get(order)
                                          .isInterrupted()) {
-                                    await.remove(order);
+                                    this.await.remove(order);
                                     return;
                                 }
                             }
-                            if (await.containsKey(order)) {
+                            if (this.await.containsKey(order)) {
                                 order.call(null);
-                                await.remove(order);
+                                this.await.remove(order);
                             }
                         });
                     }
                 })
         );
-        await.get(order)
+        this.await.get(order)
              .start();
     }
 
     public void skipDelay(T target) {
-        if (delay.size() > 0) {
+        if (this.delay.size() > 0) {
             return;
         }
         submit(target);
@@ -113,45 +129,45 @@ public abstract class ModMdoEvent<T extends ModMdoEvent<?>> {
 
     @AsyncDelay
     public void action(boolean enforce) {
-        for (T target : delay) {
-            for (TaskOrder<T> event : actions) {
+        for (T target : this.delay) {
+            for (ModMdoEventTaskOrder<T> event : this.actions) {
                 EntrustEnvironment.operation(
                         target,
                         enforce ? event::enforce : event::call
                 );
             }
-            for (TaskOrder<T> event : await.keySet()) {
-                await.get(event)
+            for (ModMdoEventTaskOrder<T> event : this.await.keySet()) {
+                this.await.get(event)
                      .interrupt();
                 EntrustEnvironment.operation(
                         target,
                         enforce ? event::enforce : event::call
                 );
-                await.remove(event);
+                this.await.remove(event);
             }
-            delay.remove(target);
+            this.delay.remove(target);
         }
 
-        submitted = false;
+        this.submitted = false;
     }
 
     @AsyncDelay
     public void submit(T target) {
-        if (previously.size() > 0) {
+        if (this.previously.size() > 0) {
             target = fuse(
-                    previously.get(0),
+                    this.previously.get(0),
                     target
             );
-            previously.remove(0);
+            this.previously.remove(0);
         }
-        delay.add(target);
-        submitted = true;
+        this.delay.add(target);
+        this.submitted = true;
     }
 
     public abstract T fuse(Previously<T> previously, T delay);
 
     public int registered() {
-        return actions.size();
+        return this.actions.size();
     }
 
     @AsyncDelay

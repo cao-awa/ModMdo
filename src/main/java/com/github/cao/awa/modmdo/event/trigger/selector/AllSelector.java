@@ -1,7 +1,7 @@
 package com.github.cao.awa.modmdo.event.trigger.selector;
 
 import com.github.cao.awa.modmdo.annotations.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.util.function.*;
 

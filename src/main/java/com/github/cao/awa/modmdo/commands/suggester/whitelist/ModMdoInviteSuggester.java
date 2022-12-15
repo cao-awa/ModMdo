@@ -13,9 +13,9 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoInviteSuggester {
     public static TemporaryCertificate getInvite(String name) {
-        TemporaryCertificate invite = temporaryInvites.get(name);
+        TemporaryCertificate invite = invitesSerbvice.get(name);
         if (invite == null) {
-            TemporaryCertificate certificate = temporaryStation.get(name);
+            TemporaryCertificate certificate = stationService.get(name);
             if ("invite".equals(certificate.getType())) {
                 invite = certificate;
             } else {
@@ -32,9 +32,9 @@ public class ModMdoInviteSuggester {
         ObjectArrayList<String> list = EntrustEnvironment.operation(
                 new ObjectArrayList<>(),
                 l -> {
-                    l.addAll(temporaryInvites.keySet());
-                    temporaryStation.values()
-                                    .forEach(certificate -> {
+                    l.addAll(invitesSerbvice.keys());
+                    stationService.values()
+                                  .forEach(certificate -> {
                                         if (certificate.getType()
                                                        .equals("invite")) {
                                             l.add(certificate.getName());

@@ -36,8 +36,8 @@ public class ModMdoEventTracer {
     public final GameChatEvent gameChat = GameChatEvent.snap();
     public final ClientSettingEvent clientSetting = ClientSettingEvent.snap();
     public final ServerQueryEvent serverQuery = ServerQueryEvent.snap();
-    public final CommandExecuteEvent commandExecute = CommandExecuteEvent.snap();
-    public final CommandBlockExecuteEvent commandBlockExecute = CommandBlockExecuteEvent.snap();
+    public final CommandExecutionEvent commandExecute = CommandExecutionEvent.snap();
+    public final CommandBlockExecutionEvent commandBlockExecute = CommandBlockExecutionEvent.snap();
     public final Object2ObjectOpenHashMap<String, ModMdoEvent<?>> events = EntrustEnvironment.operation(
             new Object2ObjectOpenHashMap<>(),
             map -> {

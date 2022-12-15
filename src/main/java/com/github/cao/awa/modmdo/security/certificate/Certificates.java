@@ -3,18 +3,18 @@ package com.github.cao.awa.modmdo.security.certificate;
 import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import it.unimi.dsi.fastutil.objects.*;
+import org.jetbrains.annotations.*;
 
 import java.util.*;
-
-import static com.github.cao.awa.modmdo.storage.SharedVariables.whitelists;
+import java.util.function.*;
 
 @Server
 public class Certificates<T extends Certificate> {
-    private final Map<String, T> certificate = new Object2ObjectArrayMap<>();
+    private final Map<String, T> certificates = new Object2ObjectArrayMap<>();
     private final Map<String, String> idToName = new Object2ObjectArrayMap<>();
 
-    public void put(String name, T whiteList) {
-        this.certificate.put(
+    public void put(@NotNull String name, @NotNull T whiteList) {
+        this.certificates.put(
                 name,
                 whiteList
         );
@@ -27,29 +27,29 @@ public class Certificates<T extends Certificate> {
         );
     }
 
-    public T getFromId(String id) {
-        return this.certificate.get(this.idToName.get(id));
+    public T getFromId(@NotNull String id) {
+        return this.certificates.get(this.idToName.get(id));
     }
 
-    public void remove(String name) {
+    public void remove(@NotNull String name) {
         Certificate certificate;
-        if ((certificate = this.certificate.get(name)) != null) {
+        if ((certificate = this.certificates.get(name)) != null) {
             this.idToName.remove(certificate.getIdentifier());
         }
-        this.certificate.remove(name);
+        this.certificates.remove(name);
     }
 
-    public void removeFromId(String id) {
-        this.certificate.remove(idToName.get(id));
+    public void removeFromId(@NotNull String id) {
+        this.certificates.remove(idToName.get(id));
         this.idToName.remove(id);
     }
 
     public Set<String> keySet() {
-        return this.certificate.keySet();
+        return this.certificates.keySet();
     }
 
     public Collection<T> values() {
-        return this.certificate.values();
+        return this.certificates.values();
     }
 
     public Set<String> identifiers() {
@@ -57,33 +57,27 @@ public class Certificates<T extends Certificate> {
     }
 
     public int size() {
-        return this.certificate.size();
+        return this.certificates.size();
     }
 
     public boolean containsIdentifier(String id) {
         return this.idToName.containsKey(id);
     }
 
-    public boolean containsName(String name) {
-        return this.certificate.containsKey(name);
+    public boolean containsName(@NotNull String name) {
+        return this.certificates.containsKey(name);
     }
 
     public void clear() {
-        this.certificate.clear();
+        this.certificates.clear();
         this.idToName.clear();
     }
 
-    public boolean verifyUUID(String name, String uuid) {
-        return EntrustEnvironment.get(
-                () -> uuid.equals(whitelists.get(name)
-                                            .getRecorde()
-                                            .getUuid()
-                                            .toString()),
-                false
-        );
+    public T get(@NotNull String name) {
+        return this.certificates.get(name);
     }
 
-    public T get(String name) {
-        return this.certificate.get(name);
+    public void forEach(@NotNull Consumer<T> action) {
+        this.certificates.values().forEach(action);
     }
 }

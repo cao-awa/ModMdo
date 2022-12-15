@@ -25,6 +25,11 @@ public class ServerQueryEvent extends ModMdoEvent<ServerQueryEvent> {
         this.server = null;
     }
 
+    @Override
+    public String getName() {
+        return "ServerQuery";
+    }
+
     public static ServerQueryEvent snap() {
         return new ServerQueryEvent();
     }

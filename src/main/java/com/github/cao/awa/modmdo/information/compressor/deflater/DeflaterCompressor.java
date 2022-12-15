@@ -7,7 +7,13 @@ import java.io.*;
 import java.util.zip.*;
 
 public class DeflaterCompressor implements InformationCompressor {
-    public static final DeflaterCompressor INSTANCE = new DeflaterCompressor();
+    public static final DeflaterCompressor BEST_INSTANCE = new DeflaterCompressor(Deflater.BEST_COMPRESSION);
+    public static final DeflaterCompressor INSTANCE = new DeflaterCompressor(Deflater.DEFAULT_COMPRESSION);
+    private final int level;
+
+    public DeflaterCompressor(int level) {
+        this.level = level;
+    }
 
     /**
      * Compress using deflater with best compression
@@ -24,7 +30,7 @@ public class DeflaterCompressor implements InformationCompressor {
             IOUtil.write(
                     new DeflaterOutputStream(
                             out,
-                            new Deflater(Deflater.BEST_COMPRESSION)
+                            new Deflater(level)
                     ),
                     bytes
             );

@@ -35,6 +35,11 @@ public class BlockBreakEvent extends EntityTargetedEvent<BlockBreakEvent> {
         this.server = null;
     }
 
+    @Override
+    public String getName() {
+        return "BlockBreak";
+    }
+
     public static BlockBreakEvent snap() {
         return new BlockBreakEvent();
     }

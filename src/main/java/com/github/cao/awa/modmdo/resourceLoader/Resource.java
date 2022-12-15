@@ -54,4 +54,8 @@ public class Resource<T> {
     public ObjectOpenHashSet<String> get(T name) {
         return map.get(name);
     }
+
+    public static <T> Resource<T> empty() {
+        return new Resource<>();
+    }
 }

@@ -8,7 +8,7 @@ import com.github.cao.awa.modmdo.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.util.*;
 
@@ -17,20 +17,24 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 public abstract class TextFormat<T> {
     protected final Object2ObjectLinkedOpenHashMap<String, Object2ObjectLinkedOpenHashMap<String, String>> format = new Object2ObjectLinkedOpenHashMap<>();
 
-    public TextFormat(Resource<String> resource) {
-        set(resource);
+    public TextFormat() {
+
     }
 
-    public void set(Resource<String> resource) {
+    public TextFormat(Resource<String> resource) {
+        attach(resource);
+    }
+
+    public void attach(Resource<String> resource) {
         EntrustEnvironment.tryFor(resource.getNames(), lang -> {
             Object2ObjectLinkedOpenHashMap<String, String> map = new Object2ObjectLinkedOpenHashMap<>();
             for (String res : resource.read(lang)) {
-                JSONObject json = new JSONObject(res);
+                JSONObject json = JSONObject.parseObject(res);
                 for (String s : json.keySet()) {
                     map.put(s, json.getString(s));
                 }
             }
-            EntrustEnvironment.nulls(format.get(lang), m -> m.putAll(map), nu -> format.put(lang, map));
+            EntrustEnvironment.nulls(format.get(lang), nulls -> format.put(lang, map), m -> m.putAll(map));
         });
     }
 
@@ -76,11 +80,13 @@ public abstract class TextFormat<T> {
                 try {
                     EntrustEnvironment.trys(() -> formatReturn.set(formatReturn.get().replaceFirst("%s", format.get(language.get()).get(str))), () -> formatReturn.set(formatReturn.get().replaceFirst("%s", str)));
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                     return formatReturn.get();
                 }
             }
             return formatReturn.get();
         } catch (Exception e) {
+            e.printStackTrace();
             return key;
         }
     }

@@ -13,9 +13,4 @@ public class EntityUtil {
     public static UUID getUUID(Entity entity) {
         return entity.getUuid();
     }
-
-    public static Entity refreshPositionAndAngles(Entity entity, double x, double y, double z, float yaw, float pitch) {
-        entity.refreshPositionAndAngles(x, y, z, yaw, pitch);
-        return entity;
-    }
 }

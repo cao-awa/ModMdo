@@ -11,7 +11,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class ModMdoBanSuggester {
     public static Certificate getCertificate(String name) {
-        Certificate whiteList = banned.get(name);
+        Certificate whiteList = bans.get(name);
         return whiteList == null ?
                new TemporaryCertificate(name,
                                         - 1,
@@ -22,7 +22,7 @@ public class ModMdoBanSuggester {
 
     public static <S> CompletableFuture<Suggestions> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         return CommandSource.suggestMatching(
-                banned.keySet(),
+                bans.keys(),
                 builder
         );
     }

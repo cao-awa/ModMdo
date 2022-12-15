@@ -15,7 +15,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.entity.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import static com.github.cao.awa.modmdo.event.trigger.selector.entity.EntitySelectorType.*;
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
@@ -37,14 +37,14 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         key = message.getString("key");
         JSONArray array = message.getJSONArray("args");
         EntrustEnvironment.operation(args, list -> {
-            for (int i = 0; i < array.length(); i++) {
-                list.add(new Receptacle<>(array.get(i).toString()));
+            for (Object o : array) {
+                list.add(new Receptacle<>(o.toString()));
             }
         });
         setTarget(event.getTargeted());
         selector = new EntitySelector(metadata.getJSONObject("selector"), this);
         setServer(event.getServer());
-        if (message.has("dictionary")) {
+        if (message.containsKey("dictionary")) {
             dictionary = new Dictionary(message.getString("dictionary"));
         }
         return this;
@@ -88,7 +88,7 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
         for (Receptacle<String> s : args) {
             if (s.get().startsWith("{")) {
                 String name = EntrustEnvironment.trys(() -> {
-                    JSONObject json = new JSONObject(s.get());
+                    JSONObject json = JSONObject.parseObject(s.get());
                     return json.getString("name");
                 }, ex -> {
                     err("Cannot format variable", ex);
@@ -126,11 +126,11 @@ public class SendMessageTrigger<T extends EntityTargetedEvent<?>> extends Target
 
         if (dictionary == null) {
             if (user != null && user.getLanguage() != null) {
-                return minecraftTextFormat.format(user, key, objs);
+                return textFormatService.format(user, key, objs);
             }
-            return minecraftTextFormat.format(getLanguage(), key, objs);
+            return textFormatService.format(getLanguage(), key, objs);
         }
-        return minecraftTextFormat.format(dictionary, key, objs);
+        return textFormatService.format(dictionary, key, objs);
     }
 
     @Override

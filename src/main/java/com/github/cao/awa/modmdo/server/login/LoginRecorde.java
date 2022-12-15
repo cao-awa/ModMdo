@@ -1,10 +1,10 @@
 package com.github.cao.awa.modmdo.server.login;
 
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.security.certificate.identity.*;
 import com.github.cao.awa.modmdo.storage.*;
 import org.jetbrains.annotations.*;
-import org.json.*;
 
 import java.util.*;
 

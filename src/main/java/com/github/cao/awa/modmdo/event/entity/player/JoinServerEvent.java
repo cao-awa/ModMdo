@@ -31,6 +31,11 @@ public class JoinServerEvent extends EntityTargetedEvent<JoinServerEvent> {
         this.connection = null;
     }
 
+    @Override
+    public String getName() {
+        return "JoinServer";
+    }
+
     public static JoinServerEvent snap() {
         return new JoinServerEvent();
     }

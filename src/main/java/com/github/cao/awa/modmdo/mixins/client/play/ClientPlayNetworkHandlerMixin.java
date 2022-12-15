@@ -15,7 +15,7 @@ import net.minecraft.network.listener.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.*;
 import org.apache.logging.log4j.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -166,7 +166,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             loginData.put(
                                     "verifyData",
                                     EntrustEnvironment.trys(
-                                            () -> AES.aesEncryptToString(
+                                            () -> AES.encryptToString(
                                                     verifyData.toString()
                                                               .getBytes(StandardCharsets.ISO_8859_1),
                                                     verifyKey.getBytes()
