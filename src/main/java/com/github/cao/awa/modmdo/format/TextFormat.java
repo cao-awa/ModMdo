@@ -3,7 +3,7 @@ package com.github.cao.awa.modmdo.format;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.lang.Dictionary;
 import com.github.cao.awa.modmdo.lang.*;
-import com.github.cao.awa.modmdo.resourceLoader.*;
+import com.github.cao.awa.modmdo.resource.loader.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;

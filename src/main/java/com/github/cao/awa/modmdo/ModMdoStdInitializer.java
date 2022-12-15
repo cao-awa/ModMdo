@@ -6,7 +6,7 @@ import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.server.*;
 import com.github.cao.awa.modmdo.event.server.tick.*;
 import com.github.cao.awa.modmdo.extra.loader.*;
-import com.github.cao.awa.modmdo.resourceLoader.*;
+import com.github.cao.awa.modmdo.resource.loader.*;
 import com.github.cao.awa.modmdo.security.*;
 import com.github.cao.awa.modmdo.security.level.*;
 import com.github.cao.awa.modmdo.storage.*;

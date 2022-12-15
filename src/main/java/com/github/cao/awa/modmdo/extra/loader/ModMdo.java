@@ -6,7 +6,7 @@ import com.github.cao.awa.modmdo.config.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
 import com.github.cao.awa.modmdo.lang.*;
-import com.github.cao.awa.modmdo.resourceLoader.*;
+import com.github.cao.awa.modmdo.resource.loader.*;
 import com.github.cao.awa.modmdo.security.certificate.*;
 import com.github.cao.awa.modmdo.service.handler.certificate.nosql.lilac.*;
 import com.github.cao.awa.modmdo.service.handler.text.*;
