@@ -7,6 +7,7 @@ import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.cao.awa.modmdo.utils.packet.buf.*;
 import com.github.cao.awa.modmdo.utils.packet.sender.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.authlib.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
@@ -53,7 +54,9 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      */
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-        boolean doCancel = EntrustEnvironment.receptacle(cancel -> EntrustEnvironment.trys(
+        Receptacle<Boolean> doCancel = Receptacle.of(false);
+
+        EntrustEnvironment.trys(
                 () -> {
                     final PacketDataProcessor processor = new PacketDataProcessor(packet.getData());
 
@@ -118,8 +121,10 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             SECURE_KEYS.removeAddress(address);
                             SECURE_KEYS.save();
                         }
-                        String verifyKey = serverId == null ? null : SECURE_KEYS.get(serverId)
-                                                                                .getVerifyKey();
+                        String verifyKey = serverId == null ?
+                                           null :
+                                           SECURE_KEYS.get(serverId)
+                                                      .getVerifyKey();
                         JSONObject loginData = new JSONObject();
                         loginData.put(
                                 "name",
@@ -186,15 +191,15 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                               .send();
                     }
 
-                    cancel.set(true);
+                    doCancel.set(true);
                 },
                 ex -> LOGGER.error(
                         "Error in connecting ModMdo server",
                         ex
                 )
-        ));
+        );
 
-        if (doCancel) {
+        if (doCancel.get()) {
             ci.cancel();
         }
     }
