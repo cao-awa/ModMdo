@@ -3,7 +3,7 @@ package com.github.cao.awa.modmdo.event.trigger.command;
 import com.github.cao.awa.modmdo.event.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.trigger.trace.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 public class RunCommandTrigger extends ModMdoEventTrigger<ModMdoEvent<?>> {
     private String command;

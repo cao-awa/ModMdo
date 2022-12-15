@@ -5,7 +5,7 @@ import com.github.cao.awa.modmdo.event.variable.integer.operation.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import net.minecraft.util.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.io.*;
 
@@ -56,7 +56,7 @@ public class PersistentAutoInteger extends PersistentInteger<Integer> {
     public void handle(JSONObject json) {
         solve();
         IntegerOperation operation = IntegerOperation.of(json.getString("operation"));
-        Integer integer = json.getInt("value");
+        Integer integer = json.getInteger("value");
         switch (operation) {
             case ADD -> value.add(integer);
             case REDUCE -> value.reduce(integer);

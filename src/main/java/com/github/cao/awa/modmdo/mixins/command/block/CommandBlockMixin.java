@@ -14,6 +14,6 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.event;
 public class CommandBlockMixin {
     @Inject(method = "execute", at = @At("HEAD"))
     public void execute(BlockState state, World world, BlockPos pos, CommandBlockExecutor executor, boolean hasCommand, CallbackInfo ci) {
-        event.submit(new CommandBlockExecuteEvent(pos, state, executor, world, world.getServer()));
+        event.submit(new CommandBlockExecutionEvent(pos, state, executor, world, world.getServer()));
     }
 }

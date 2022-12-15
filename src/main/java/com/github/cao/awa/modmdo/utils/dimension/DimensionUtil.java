@@ -1,10 +1,9 @@
 package com.github.cao.awa.modmdo.utils.dimension;
 
+import com.github.cao.awa.modmdo.storage.*;
 import net.minecraft.entity.*;
 import net.minecraft.world.*;
 import net.minecraft.world.dimension.*;
-
-import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 public class DimensionUtil {
     public static String getDimensionColor(String dimension) {
@@ -23,7 +22,7 @@ public class DimensionUtil {
     }
 
     public static String getDimensionName(String dimension) {
-        return consoleTextFormat.format(getDimensionKey(dimension));
+        return SharedVariables.textFormatService.format(getDimensionKey(dimension)).getString();
     }
 
     public static String getDimension(Entity player) {

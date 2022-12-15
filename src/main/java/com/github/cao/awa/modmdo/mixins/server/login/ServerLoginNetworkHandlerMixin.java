@@ -126,25 +126,25 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
         );
 
         if (handleBanned(player)) {
-            Certificate certificate = banned.get(EntityUtil.getName(player));
+            Certificate certificate = bans.get(EntityUtil.getName(player));
             if (certificate instanceof TemporaryCertificate temporary) {
                 String remaining = temporary.formatRemaining();
-                disc(minecraftTextFormat.format(
-                                                new com.github.cao.awa.modmdo.lang.Dictionary(certificate.getLastLanguage()),
+                disc(textFormatService.format(
+                                                new com.github.cao.awa.modmdo.lang.Dictionary(certificate.getLanguage()),
                                                 "multiplayer.disconnect.banned-time-limited",
                                                 remaining
                                         )
-                                        .text());
+                                      .text());
                 LOGGER.info(
                         "Player {} has been banned form server",
                         PlayerUtil.getName(player)
                 );
             } else {
-                disc(minecraftTextFormat.format(
-                                                new Dictionary(certificate.getLastLanguage()),
+                disc(textFormatService.format(
+                                                new Dictionary(certificate.getLanguage()),
                                                 "multiplayer.disconnect.banned-indefinite"
                                         )
-                                        .text());
+                                      .text());
                 LOGGER.info(
                         "Player {} has been banned form server",
                         PlayerUtil.getName(player)

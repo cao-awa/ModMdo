@@ -30,6 +30,11 @@ public class ServerStartedEvent extends ModMdoEvent<ServerStartedEvent> {
     }
 
     @Override
+    public String getName() {
+        return "ServerStarted";
+    }
+
+    @Override
     public String abbreviate() {
         return "ServerStartedEvent";
     }

@@ -12,7 +12,7 @@ import net.minecraft.registry.*;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.world.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 @Auto
 public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<T> {
@@ -31,8 +31,8 @@ public class SummonTrigger<T extends ModMdoEvent<?>> extends ModMdoEventTrigger<
         setServer(event.getServer());
         this.id = metadata.getString("identifier");
         JSONObject position = metadata.getJSONObject("pos");
-        this.pos = new BlockPos(position.getInt("x"), position.getInt("y"), position.getInt("z"));
-        this.count = EntrustEnvironment.get(() -> metadata.getInt("count"), 1);
+        this.pos = new BlockPos(position.getInteger("x"), position.getInteger("y"), position.getInteger("z"));
+        this.count = EntrustEnvironment.get(() -> metadata.getInteger("count"), 1);
         // TODO: 2022/6/14
         //this.nbt = EntrustEnvironment.trys(() -> metadata.getString("nbt"));
         this.dimension = metadata.getString("world");

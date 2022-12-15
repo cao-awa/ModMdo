@@ -4,7 +4,7 @@ import com.github.cao.awa.modmdo.annotations.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.cao.awa.modmdo.utils.io.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.io.*;
 

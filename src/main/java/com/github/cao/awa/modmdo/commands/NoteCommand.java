@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.commands;
 
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.commands.suggester.note.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -8,7 +9,6 @@ import com.mojang.brigadier.context.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.command.*;
 import net.minecraft.server.command.*;
-import org.json.*;
 
 import java.util.*;
 
@@ -27,7 +27,7 @@ public class NoteCommand extends SimpleCommand {
             String collectorName = StringArgumentType.getString(collect, "collect");
             String name = StringArgumentType.getString(collect, "name");
 
-            if (notes.has(collectorName)) {
+            if (notes.containsKey(collectorName)) {
                 if (notes.get(collectorName) instanceof JSONObject collector) {
                     collector.put(name, StringArgumentType.getString(collect, "info"));
                 } else {
@@ -49,7 +49,7 @@ public class NoteCommand extends SimpleCommand {
             return 0;
         }))).then(literal("collected").then(argument("collector", StringArgumentType.string()).suggests(ModMdoNoteSuggester::suggestionsCollected).then(argument("name", StringArgumentType.string()).suggests((source, builder) -> {
             String collector = StringArgumentType.getString(source, "collector");
-            if (notes.has(collector)) {
+            if (notes.containsKey(collector)) {
                 ObjectArrayList<String> list = new ObjectArrayList<>();
                 notes.getJSONObject(collector).keySet().forEach(key -> {
                     list.add("\"" + key + "\"");
@@ -69,7 +69,7 @@ public class NoteCommand extends SimpleCommand {
             return 0;
         }))).then(literal("collected").then(argument("collector", StringArgumentType.string()).suggests(ModMdoNoteSuggester::suggestionsCollected).then(argument("name", StringArgumentType.string()).suggests((source, builder) -> {
             String collector = StringArgumentType.getString(source, "collector");
-            if (notes.has(collector)) {
+            if (notes.containsKey(collector)) {
                 ObjectArrayList<String> list = new ObjectArrayList<>();
                 notes.getJSONObject(collector).keySet().forEach(key -> {
                     list.add("\"" + key + "\"");
@@ -92,9 +92,9 @@ public class NoteCommand extends SimpleCommand {
     public void feedback(CommandContext<ServerCommandSource> source, String collector, String name) {
         EntrustEnvironment.trys(() -> {
             if (collector != null) {
-                if (notes.has(collector)) {
+                if (notes.containsKey(collector)) {
                     JSONObject collected = notes.getJSONObject(collector);
-                    if (collected.has(name)) {
+                    if (collected.containsKey(name)) {
                         String info = collected.getString(name);
                         sendFeedback(source, TextUtil.translatable("command.note.information", collector + "/" + name, info));
                     } else {
@@ -104,7 +104,7 @@ public class NoteCommand extends SimpleCommand {
                     sendFeedback(source, TextUtil.translatable("command.note.not.found", collector + "/" + name));
                 }
             } else {
-                if (notes.has(name)) {
+                if (notes.containsKey(name)) {
                     sendFeedback(source, TextUtil.translatable("command.note.information", name, notes.getString(name)));
                 } else {
                     sendFeedback(source, TextUtil.translatable("command.note.not.found", name));
@@ -115,14 +115,21 @@ public class NoteCommand extends SimpleCommand {
 
     public void delete(CommandContext<ServerCommandSource> source, String collector, String name, boolean deleteCollector) {
         EntrustEnvironment.trys(() -> {
-            if (collector != null) {
-                if (notes.has(collector)) {
+            if (collector == null) {
+                if (notes.containsKey(name)) {
+                    notes.remove(name);
+                    sendFeedback(source, TextUtil.translatable("command.note.deleted", name));
+                } else {
+                    sendFeedback(source, TextUtil.translatable("command.note.not.found", name));
+                }
+            } else {
+                if (notes.containsKey(collector)) {
                     if (deleteCollector) {
                         notes.remove(collector);
                         sendFeedback(source, TextUtil.translatable("command.note.deleted", collector));
                     } else {
                         JSONObject collected = notes.getJSONObject(collector);
-                        if (collected.has(name)) {
+                        if (collected.containsKey(name)) {
                             collected.remove(name);
                             sendFeedback(source, TextUtil.translatable("command.note.deleted", collector + "/" + name));
                         } else {
@@ -131,13 +138,6 @@ public class NoteCommand extends SimpleCommand {
                     }
                 } else {
                     sendFeedback(source, TextUtil.translatable("command.note.not.found", collector + "/" + name));
-                }
-            } else {
-                if (notes.has(name)) {
-                    notes.remove(name);
-                    sendFeedback(source, TextUtil.translatable("command.note.deleted", name));
-                } else {
-                    sendFeedback(source, TextUtil.translatable("command.note.not.found", name));
                 }
             }
         });

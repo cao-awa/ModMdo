@@ -1,5 +1,6 @@
 package com.github.cao.awa.modmdo.server.login;
 
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.security.certificate.*;
@@ -16,7 +17,6 @@ import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.*;
-import org.json.*;
 
 import java.util.*;
 
@@ -84,12 +84,12 @@ public class ServerLogin {
         String idSha = calculateIdSha(identifier);
         Receptacle<Translatable> message = new Receptacle<>(null);
         EntrustEnvironment.notNull(
-                temporaryStation.get(name),
+                stationService.get(name),
                 certificate -> {
                     if (certificate.isValid()) {
                         switch (certificate.getType()) {
                             case "whitelist" -> {
-                                if (whitelists.getFromId(idSha) == null) {
+                                if (whitelistsService.getFromId(idSha) == null) {
                                     acceptWhitelist(
                                             name,
                                             uuid,
@@ -105,7 +105,7 @@ public class ServerLogin {
                             );
                         }
                     }
-                    temporaryStation.remove(name);
+                    stationService.delete(name);
                 }
         );
         User user = new User(
@@ -116,10 +116,10 @@ public class ServerLogin {
         );
         if (unidirectionalVerify != null && EntrustEnvironment.get(
                 () -> {
-                    if (temporaryInvites.containsName(name)) {
+                    if (invitesSerbvice.containsName(name)) {
                         return false;
                     }
-                    Certificate wl = whitelists.getFromId(idSha);
+                    Certificate wl = whitelistsService.getFromId(idSha);
                     if (wl == null) {
                         return true;
                     }
@@ -152,8 +152,8 @@ public class ServerLogin {
     }
 
     public static void processInvite(String name, TemporaryCertificate certificate, Receptacle<Translatable> message) {
-        if (temporaryInvites.get(name) == null) {
-            temporaryInvites.put(
+        if (invitesSerbvice.get(name) == null) {
+            invitesSerbvice.set(
                     name,
                     certificate.snapSpare()
             );
@@ -176,11 +176,12 @@ public class ServerLogin {
             });
             return false;
         }
-        return verify.equals(unidirectionalVerify) || ! new JSONObject(AES.aesDecryptToString(
-                verify.getBytes(),
-                verifyKey.getBytes()
-        )).getString("identifier")
-          .equals(idSha);
+        return verify.equals(unidirectionalVerify) || ! JSONObject.parseObject(AES.decryptToString(
+                                                                          verify.getBytes(),
+                                                                          verifyKey.getBytes()
+                                                                  ))
+                                                                  .getString("identifier")
+                                                                  .equals(idSha);
     }
 
     public static @NotNull String calculateIdSha(@NotNull String identifier) {
@@ -203,7 +204,7 @@ public class ServerLogin {
     }
 
     public static void acceptWhitelist(@NotNull String name, @NotNull String uuid, @Nullable String idSha, @Nullable String unidirectionalVerify) {
-        whitelists.put(
+        whitelistsService.set(
                 name,
                 new PermanentCertificate(
                         name,
@@ -228,15 +229,15 @@ public class ServerLogin {
         Receptacle<Translatable> message = new Receptacle<>(null);
         String idSha = calculateIdSha(identifier);
         EntrustEnvironment.notNull(
-                temporaryStation.get(name),
+                stationService.get(name),
                 certificate -> {
                     if (certificate.isValid()) {
                         switch (certificate.getType()) {
                             case "whitelist" -> {
                                 if (EntrustEnvironment.trys(
-                                        () -> whitelists.get(name)
-                                                        .getIdentifier()
-                                                        .equals(idSha),
+                                        () -> whitelistsService.get(name)
+                                                               .getIdentifier()
+                                                               .equals(idSha),
                                         () -> false
                                 )) {
                                     return;
@@ -255,7 +256,7 @@ public class ServerLogin {
                             );
                         }
                     }
-                    temporaryStation.remove(name);
+                    stationService.delete(name);
                 }
         );
 
@@ -267,9 +268,9 @@ public class ServerLogin {
         );
         if (EntrustEnvironment.get(
                 () -> {
-                    Certificate wl = whitelists.get(name);
+                    Certificate wl = whitelistsService.get(name);
                     boolean reject = wl.getIdentifier()
-                                       .equals(idSha) && ! temporaryInvites.containsName(name);
+                                       .equals(idSha) && ! invitesSerbvice.containsName(name);
                     if (unidirectionalVerify == null) {
                         return reject;
                     }
@@ -316,16 +317,16 @@ public class ServerLogin {
     public boolean loginUsingYgg(String name, String uuid) throws LoginFailedException {
         Receptacle<Translatable> message = Receptacle.of();
         EntrustEnvironment.notNull(
-                temporaryStation.get(name),
+                stationService.get(name),
                 certificate -> {
                     if (certificate.isValid()) {
                         switch (certificate.getType()) {
                             case "whitelist" -> {
                                 if (EntrustEnvironment.get(
-                                        () -> uuid.equals(whitelists.get(name)
-                                                                    .getRecorde()
-                                                                    .getUuid()
-                                                                    .toString()),
+                                        () -> uuid.equals(whitelistsService.get(name)
+                                                                           .getRecorde()
+                                                                           .getUuid()
+                                                                           .toString()),
 
                                         false
                                 )) {
@@ -345,7 +346,7 @@ public class ServerLogin {
                             );
                         }
                     }
-                    temporaryStation.remove(name);
+                    stationService.delete(name);
                 }
         );
 
@@ -355,7 +356,7 @@ public class ServerLogin {
                 - 1,
                 ""
         );
-        if (! temporaryInvites.containsName(name) && ! whitelists.verifyUUID(
+        if (! invitesSerbvice.containsName(name) && ! whitelistsService.verifyUUID(
                 name,
                 uuid
         )) {
@@ -383,12 +384,12 @@ public class ServerLogin {
                 );
                 EntrustEnvironment.trys(() -> {
                     loginUsers.removeUser(player);
-                    if (temporaryInvites.containsName(EntityUtil.getName(player))) {
+                    if (invitesSerbvice.containsName(EntityUtil.getName(player))) {
                         LOGGER.info(
                                 "Invite expired for player: {}",
                                 EntityUtil.getName(player)
                         );
-                        temporaryInvites.remove(EntityUtil.getName(player));
+                        invitesSerbvice.delete(EntityUtil.getName(player));
                     }
                 });
             }

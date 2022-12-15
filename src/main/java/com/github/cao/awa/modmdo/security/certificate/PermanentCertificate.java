@@ -1,10 +1,10 @@
 package com.github.cao.awa.modmdo.security.certificate;
 
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.jetbrains.annotations.*;
-import org.json.*;
 
 import java.util.*;
 
@@ -54,5 +54,10 @@ public class PermanentCertificate extends Certificate {
                 this.getName()
         );
         return json;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
     }
 }

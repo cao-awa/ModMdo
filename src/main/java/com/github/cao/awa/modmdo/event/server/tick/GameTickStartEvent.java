@@ -33,6 +33,11 @@ public class GameTickStartEvent extends EntityTargetedEvent<GameTickStartEvent> 
     }
 
     @Override
+    public String getName() {
+        return "GameTickStart";
+    }
+
+    @Override
     public String abbreviate() {
         return "GameTickStartEvent";
     }

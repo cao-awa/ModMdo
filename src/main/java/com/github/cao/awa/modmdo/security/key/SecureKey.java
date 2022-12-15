@@ -3,7 +3,7 @@ package com.github.cao.awa.modmdo.security.key;
 import com.github.cao.awa.modmdo.annotations.platform.*;
 import com.github.cao.awa.modmdo.storage.*;
 import org.jetbrains.annotations.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 @Client
 public class SecureKey extends Storable {
@@ -29,7 +29,7 @@ public class SecureKey extends Storable {
     public SecureKey(@NotNull JSONObject json) {
         this.privateKey = json.getString("private-key");
         this.verifyKey = json.getString("verify-key");
-        if (json.has("id")) {
+        if (json.containsKey("id")) {
             this.id = json.getString("id");
         }
         this.address = json.getString("address");

@@ -3,13 +3,12 @@ package com.github.cao.awa.modmdo.format.minecraft;
 import com.github.cao.awa.modmdo.develop.text.*;
 import com.github.cao.awa.modmdo.format.*;
 import com.github.cao.awa.modmdo.lang.*;
-import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 
 public class MinecraftTextFormat extends TextFormat<Literal> {
-    public MinecraftTextFormat(Resource<String> resource) {
-        super(resource);
+    public MinecraftTextFormat() {
+        super();
     }
 
     public Literal format(String key, Object... args) {

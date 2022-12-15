@@ -35,6 +35,11 @@ public class BlockExplosionDestroyEvent extends EntityTargetedEvent<BlockExplosi
         this.server = null;
     }
 
+    @Override
+    public String getName() {
+        return "BlockExplosionDestroy";
+    }
+
     public static BlockExplosionDestroyEvent snap() {
         return new BlockExplosionDestroyEvent();
     }

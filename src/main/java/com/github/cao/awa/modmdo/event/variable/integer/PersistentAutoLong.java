@@ -5,7 +5,7 @@ import com.github.cao.awa.modmdo.event.variable.integer.operation.*;
 import com.github.cao.awa.modmdo.utils.times.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.operational.*;
 import net.minecraft.util.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.io.*;
 
@@ -39,7 +39,7 @@ public class PersistentAutoLong extends PersistentInteger<Long> {
     public PersistentAutoLong build(File file, JSONObject json) {
         setFile(file);
         setMeta(json);
-        this.value = new OperationalLong(json.getInt("value"));
+        this.value = new OperationalLong(json.getInteger("value"));
         this.interval = json.getLong("interval");
         this.shouldChange = new Pair<>(json.getLong("should-change-time"), json.getLong("amplifier"));
         this.name = json.getString("name");

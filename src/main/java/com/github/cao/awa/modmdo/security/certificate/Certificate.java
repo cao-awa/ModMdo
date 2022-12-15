@@ -1,12 +1,13 @@
 package com.github.cao.awa.modmdo.security.certificate;
 
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.annotations.platform.*;
+import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.storage.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.*;
-import org.json.*;
 
 @Server
 public abstract class Certificate extends Storable {
@@ -14,7 +15,7 @@ public abstract class Certificate extends Storable {
 
     public final @NotNull String name;
     public final @NotNull LoginRecorde recorde;
-    public String lastLanguage = "en_us";
+    public Language language = Language.EN_US;
     private String type;
 
     public Certificate(@NotNull String name, @NotNull LoginRecorde recorde) {
@@ -50,12 +51,12 @@ public abstract class Certificate extends Storable {
         return this;
     }
 
-    public String getLastLanguage() {
-        return this.lastLanguage;
+    public Language getLanguage() {
+        return this.language;
     }
 
-    public void setLastLanguage(String lastLanguage) {
-        this.lastLanguage = lastLanguage;
+    public void setLanguage(Language language) {
+        this.language = language;
     }
 
     public @NotNull String getName() {
@@ -71,4 +72,6 @@ public abstract class Certificate extends Storable {
     public @NotNull LoginRecorde getRecorde() {
         return this.recorde;
     }
+
+    public abstract boolean isValid();
 }

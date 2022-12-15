@@ -9,7 +9,7 @@ import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.server.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.security.*;
 import java.util.function.*;
@@ -26,7 +26,7 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
                         (str) -> {
                             ModMdoPersistent<?> v = SharedVariables.VARIABLES.get(str.getSub())
                                                                              .clone();
-                            EntrustEnvironment.trys(() -> v.handle(new JSONObject(str.get())));
+                            EntrustEnvironment.trys(() -> v.handle(JSONObject.parseObject(str.get())));
                             str.set(v.get()
                                      .toString());
                         }
@@ -42,6 +42,16 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
     private TriggerTrace trace;
     private MinecraftServer server;
     private JSONObject meta;
+    private boolean enabled;
+    private Consumer<T> action;
+
+    public void setAction(Consumer<T> action) {
+        this.action = action;
+    }
+
+    public Consumer<T> getAction() {
+        return action;
+    }
 
     public JSONObject getMeta() {
         return meta;
@@ -59,9 +69,14 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
         this.server = server;
     }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public ModMdoEventTrigger<T> build(T event, JSONObject metadata, TriggerTrace triggerTrace) {
         setMeta(metadata);
         setTrace(triggerTrace);
+        setEnabled(metadata.containsKey("enable") ? metadata.getBoolean("enable") : true);
         return prepare(
                 event,
                 metadata,
@@ -72,6 +87,16 @@ public abstract class ModMdoEventTrigger<T extends ModMdoEvent<?>> {
     public abstract ModMdoEventTrigger<T> prepare(T event, JSONObject metadata, TriggerTrace triggerTrace);
 
     public abstract void action();
+
+    public final void ensureAction() {
+        if (enabled) {
+            action();
+        }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
 
     public void err(String message, Throwable exception) {
         LOGGER.warn(

@@ -12,6 +12,6 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.event;
 public class CommandManagerMixin {
     @Inject(method = "execute", at = @At("HEAD"))
     public void execute(ServerCommandSource commandSource, String command, CallbackInfoReturnable<Integer> cir) {
-        event.submit(new CommandExecuteEvent(commandSource, command, commandSource.getServer()));
+        event.submit(new CommandExecutionEvent(commandSource, command, commandSource.getServer()));
     }
 }

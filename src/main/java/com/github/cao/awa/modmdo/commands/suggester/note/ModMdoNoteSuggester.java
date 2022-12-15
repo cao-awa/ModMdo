@@ -4,7 +4,7 @@ import com.mojang.brigadier.context.*;
 import com.mojang.brigadier.suggestion.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.command.*;
-import org.json.*;
+import com.alibaba.fastjson2.*;
 
 import java.util.concurrent.*;
 

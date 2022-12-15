@@ -27,6 +27,11 @@ public class GameChatEvent extends EntityTargetedEvent<GameChatEvent> {
         this.server = null;
     }
 
+    @Override
+    public String getName() {
+        return "GameChat";
+    }
+
     public static GameChatEvent snap() {
         return new GameChatEvent();
     }

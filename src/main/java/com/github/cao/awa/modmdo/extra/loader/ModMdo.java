@@ -1,25 +1,24 @@
 package com.github.cao.awa.modmdo.extra.loader;
 
-import com.github.cao.awa.modmdo.attack.ddos.recorder.*;
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.commands.*;
 import com.github.cao.awa.modmdo.config.*;
 import com.github.cao.awa.modmdo.event.trigger.*;
 import com.github.cao.awa.modmdo.event.variable.*;
-import com.github.cao.awa.modmdo.format.console.*;
-import com.github.cao.awa.modmdo.format.minecraft.*;
 import com.github.cao.awa.modmdo.lang.*;
 import com.github.cao.awa.modmdo.resourceLoader.*;
 import com.github.cao.awa.modmdo.security.certificate.*;
-import com.github.cao.awa.modmdo.storage.*;
+import com.github.cao.awa.modmdo.service.handler.certificate.nosql.lilac.*;
+import com.github.cao.awa.modmdo.service.handler.text.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
+import com.github.cao.awa.modmdo.utils.file.*;
 import com.github.cao.awa.modmdo.utils.io.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
-import org.json.*;
 
 import java.io.*;
 
@@ -33,6 +32,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
     public void init() {
         String path = getServerLevelPath(getServer()) + "modmdo/configs";
+        FileUtil.mkdirs(new File(path));
         File file = new File(path + "/compress.txt");
         if (! file.isFile()) {
             EntrustEnvironment.trys(file::createNewFile);
@@ -52,6 +52,14 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         defaultConfig();
 
         EntrustEnvironment.trys(() -> initModMdoVariables(modMdoType));
+
+        whitelistsService = new LilacCertificateService<>(path + "/certificates/whitelists");
+
+        stationService = new LilacCertificateService<>(null);
+
+        invitesSerbvice = new LilacCertificateService<>(null);
+
+        bans = new LilacCertificateService<>(path + "/certificates/bans");
 
         saveVariables();
     }
@@ -73,9 +81,11 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                     new TemporaryCommand().register();
                     new ModMdoCommand().register();
                     new NoteCommand().register();
-                    new BenchmarkCommand().register();
                 },
-                ex -> LOGGER.debug("Failed load ModMdo commands", ex)
+                ex -> LOGGER.debug(
+                        "Failed load ModMdo commands",
+                        ex
+                )
         );
     }
 
@@ -84,6 +94,8 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
     public void initEvent() {
         triggerBuilder = new ModMdoTriggerBuilder();
+
+        textFormatService = new TextFormatService();
 
         EntrustEnvironment.trys(() -> {
             new File(getServerLevelPath(getServer()) + "/modmdo/resources/events/").mkdirs();
@@ -98,7 +110,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                                 () -> {
                                     if (file.isFile()) {
                                         triggerBuilder.register(
-                                                new JSONObject(IOUtil.read(new BufferedReader(new FileReader(file)))),
+                                                JSONObject.parseObject(IOUtil.read(new BufferedReader(new FileReader(file)))),
                                                 file
                                         );
                                         LOGGER.info("Registered event: " + file.getPath());
@@ -129,7 +141,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                         EntrustEnvironment.notNull(
                                 variableBuilder.build(
                                         file,
-                                        new JSONObject(IOUtil.read(new BufferedReader(new FileReader(file))))
+                                        JSONObject.parseObject(IOUtil.read(new BufferedReader(new FileReader(file))))
                                 ),
                                 v -> {
                                     VARIABLES.put(
@@ -194,8 +206,7 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                     }
             );
         });
-        SharedVariables.consoleTextFormat = new ConsoleTextFormat(resource);
-        SharedVariables.minecraftTextFormat = new MinecraftTextFormat(resource);
+        textFormatService.attach(resource);
 
         event.clientSetting.register(
                 event -> {
@@ -205,12 +216,12 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                     if (user.getMessage() != null) {
                         event.getPlayer()
                              .sendMessage(
-                                     minecraftTextFormat.format(
-                                                                new Dictionary(user.getLanguage()
-                                                                                   .getName()),
-                                                                TextUtil.translatable(user.getMessage())
-                                                        )
-                                                        .text(),
+                                     textFormatService.format(
+                                                              new Dictionary(user.getLanguage()
+                                                                                 .getName()),
+                                                              TextUtil.translatable(user.getMessage())
+                                                      )
+                                                      .text(),
                                      false
                              );
                         user.setMessage(null);
@@ -248,32 +259,32 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
                                     }
                                     if (hasBan(player)) {
-                                        Certificate ban = banned.get(EntityUtil.getName(player));
+                                        Certificate ban = bans.get(EntityUtil.getName(player));
                                         if (ban instanceof TemporaryCertificate temporary) {
                                             String remaining = temporary.formatRemaining();
-                                            player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(
-                                                                                                                                     new Dictionary(ban.getLastLanguage()),
-                                                                                                                                     "multiplayer.disconnect.banned-time-limited",
-                                                                                                                                     remaining
-                                                                                                                             )
-                                                                                                                             .text()));
-                                            player.networkHandler.connection.disconnect(minecraftTextFormat.format(
-                                                                                                                   new Dictionary(ban.getLastLanguage()),
-                                                                                                                   "multiplayer.disconnect.banned-time-limited",
-                                                                                                                   remaining
-                                                                                                           )
-                                                                                                           .text());
+                                            player.networkHandler.connection.send(new DisconnectS2CPacket(textFormatService.format(
+                                                                                                                                   new Dictionary(ban.getLanguage()),
+                                                                                                                                   "multiplayer.disconnect.banned-time-limited",
+                                                                                                                                   remaining
+                                                                                                                           )
+                                                                                                                           .text()));
+                                            player.networkHandler.connection.disconnect(textFormatService.format(
+                                                                                                                 new Dictionary(ban.getLanguage()),
+                                                                                                                 "multiplayer.disconnect.banned-time-limited",
+                                                                                                                 remaining
+                                                                                                         )
+                                                                                                         .text());
                                         } else {
-                                            player.networkHandler.connection.send(new DisconnectS2CPacket(minecraftTextFormat.format(
-                                                                                                                                     new Dictionary(ban.getLastLanguage()),
-                                                                                                                                     "multiplayer.disconnect.banned-indefinite"
-                                                                                                                             )
-                                                                                                                             .text()));
-                                            player.networkHandler.connection.disconnect(minecraftTextFormat.format(
-                                                                                                                   new Dictionary(ban.getLastLanguage()),
-                                                                                                                   "multiplayer.disconnect.banned-indefinite"
-                                                                                                           )
-                                                                                                           .text());
+                                            player.networkHandler.connection.send(new DisconnectS2CPacket(textFormatService.format(
+                                                                                                                                   new Dictionary(ban.getLanguage()),
+                                                                                                                                   "multiplayer.disconnect.banned-indefinite"
+                                                                                                                           )
+                                                                                                                           .text()));
+                                            player.networkHandler.connection.disconnect(textFormatService.format(
+                                                                                                                 new Dictionary(ban.getLanguage()),
+                                                                                                                 "multiplayer.disconnect.banned-indefinite"
+                                                                                                         )
+                                                                                                         .text());
                                         }
                                     }
                                 }
@@ -282,21 +293,21 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
                     });
 
-                    if (ddosRecording != null) {
-                        if (ticks++ > 200) {
-                            ticks = 0;
-                            DdosAttackRecorder.LOGGER.info("----DDOS INFO----");
-                            DdosAttackRecorder.LOGGER.info("Times(Seconds): " + ddosRecording.getTimes());
-                            DdosAttackRecorder.LOGGER.info("Total attacks: " + ddosRecording.getAttacks()
-                                                                                            .get(ddosRecording.getAttacks()
-                                                                                                              .size() - 1));
-                            DdosAttackRecorder.LOGGER.info("Attacks per second: " + ddosRecording.average());
-                            DdosAttackRecorder.LOGGER.info("In second attacks: " + ddosRecording.getOccurring());
-                        }
-                        if (ticks % 20 == 0) {
-                            ddosRecording.occursAhead();
-                        }
-                    }
+//                    if (ddosRecording != null) {
+//                        if (ticks++ > 200) {
+//                            ticks = 0;
+//                            DdosAttackRecorder.LOGGER.info("----DDOS INFO----");
+//                            DdosAttackRecorder.LOGGER.info("Times(Seconds): " + ddosRecording.getTimes());
+//                            DdosAttackRecorder.LOGGER.info("Total attacks: " + ddosRecording.getAttacks()
+//                                                                                            .get(ddosRecording.getAttacks()
+//                                                                                                              .size() - 1));
+//                            DdosAttackRecorder.LOGGER.info("Attacks per second: " + ddosRecording.average());
+//                            DdosAttackRecorder.LOGGER.info("In second attacks: " + ddosRecording.getOccurring());
+//                        }
+//                        if (ticks % 20 == 0) {
+//                            ddosRecording.occursAhead();
+//                        }
+//                    }
                 },
                 this,
                 "HandlePlayers"
