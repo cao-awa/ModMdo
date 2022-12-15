@@ -1,9 +1,9 @@
-package com.github.cao.awa.modmdo.resourceLoader;
+package com.github.cao.awa.modmdo.resource.loader;
 
 import java.io.File;
 import java.io.InputStream;
 
-public class Resources {
+public class ResourcesLoader {
     public static InputStream getResource(String resource, Class<?> getC) {
         return getC.getClassLoader().getResourceAsStream(resource);
     }

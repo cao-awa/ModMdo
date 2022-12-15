@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.function.*;
 
 /**
- * Use service mode to handle certificates.
+ * Use lilac service to handle certificates.
  *
  * @param <T>
  *         Certificate type

@@ -1,4 +1,4 @@
-package com.github.cao.awa.modmdo.resourceLoader;
+package com.github.cao.awa.modmdo.resource.loader;
 
 import com.github.cao.awa.modmdo.utils.io.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
@@ -9,7 +9,7 @@ import java.nio.charset.*;
 import java.util.*;
 
 public class Resource<T> {
-    private final Object2ObjectLinkedOpenHashMap<T, ObjectOpenHashSet<String>> map = new Object2ObjectLinkedOpenHashMap<>();
+    private final Map<T, ObjectOpenHashSet<String>> map = new Object2ObjectLinkedOpenHashMap<>();
 
     public void set(T name, String resource) {
         EntrustEnvironment.nulls(
@@ -39,7 +39,7 @@ public class Resource<T> {
                         ))));
                     } else {
                         result.add(IOUtil.read(new BufferedReader(new InputStreamReader(
-                                Resources.getResource(
+                                ResourcesLoader.getResource(
                                         str,
                                         getClass()
                                 ),
