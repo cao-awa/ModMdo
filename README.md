@@ -4,7 +4,7 @@ A fabric mod for secure minecraft server.
 ## Uses
 If server is offline, Client need install ModMdo, nothing more.
 
-If not offline, can use Minecraft account to replace ModMdo login.
+If not offline, can use Minecraft accounts to replace ModMdo login.
 
 ## Command
 Enable ModMdo whitelist:
@@ -19,7 +19,7 @@ Give whitelist to a player:
 
 If player are not join to server before timed out(usually is 5 minutes),
 
-This player will not be approve by ModMdo, need a tempoary whitelist again. 
+This player will not be approved by ModMdo, need a temporary whitelist again. 
 
 ## Build
 ModMdo need environment: ``` Fabric ``` & ``` Fabric API ``` & ``` Java ```.
