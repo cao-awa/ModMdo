@@ -27,12 +27,6 @@ public class XYZ extends Storable implements Cloneable {
         this.z = vec3d.z;
     }
 
-    public XYZ(Vec3f vec3f) {
-        this.x = vec3f.getX();
-        this.y = vec3f.getY();
-        this.z = vec3f.getZ();
-    }
-
     public XYZ(Vec3i vec3i) {
         this.x = vec3i.getX();
         this.y = vec3i.getY();
