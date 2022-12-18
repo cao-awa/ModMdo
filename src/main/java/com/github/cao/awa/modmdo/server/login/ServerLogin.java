@@ -58,20 +58,19 @@ public class ServerLogin {
             }
         } else {
             String idSha = calculateIdSha(identifier);
-            LOGGER.info(
-                    "Login player: {}",
-                    name
-            );
             EntrustEnvironment.trys(
                     () -> loginUsers.getUser(uuid)
                                     .setIdentifier(idSha)
                                     .setLogged(false),
-                    () -> loginUsers.put(new User(
-                            name,
-                            uuid,
-                            - 1,
-                            idSha
-                    ).setLogged(false))
+                    () -> accept(
+                            new User(
+                                    name,
+                                    uuid,
+                                    - 1,
+                                    idSha
+                            ).setLogged(false),
+                            "NoVerify"
+                    )
             );
         }
         if (loginUsers.hasUser(uuid)) {
@@ -116,7 +115,7 @@ public class ServerLogin {
         );
         if (unidirectionalVerify != null && EntrustEnvironment.get(
                 () -> {
-                    if (invitesSerbvice.containsName(name)) {
+                    if (invitesService.containsName(name)) {
                         return false;
                     }
                     Certificate wl = whitelistsService.getFromId(idSha);
@@ -152,8 +151,8 @@ public class ServerLogin {
     }
 
     public static void processInvite(String name, TemporaryCertificate certificate, Receptacle<Translatable> message) {
-        if (invitesSerbvice.get(name) == null) {
-            invitesSerbvice.set(
+        if (invitesService.get(name) == null) {
+            invitesService.set(
                     name,
                     certificate.snapSpare()
             );
@@ -270,7 +269,7 @@ public class ServerLogin {
                 () -> {
                     Certificate wl = whitelistsService.get(name);
                     boolean reject = wl.getIdentifier()
-                                       .equals(idSha) && ! invitesSerbvice.containsName(name);
+                                       .equals(idSha) && ! invitesService.containsName(name);
                     if (unidirectionalVerify == null) {
                         return reject;
                     }
@@ -356,7 +355,7 @@ public class ServerLogin {
                 - 1,
                 ""
         );
-        if (! invitesSerbvice.containsName(name) && ! whitelistsService.verifyUUID(
+        if (! invitesService.containsName(name) && ! whitelistsService.verifyUUID(
                 name,
                 uuid
         )) {
@@ -384,12 +383,12 @@ public class ServerLogin {
                 );
                 EntrustEnvironment.trys(() -> {
                     loginUsers.removeUser(player);
-                    if (invitesSerbvice.containsName(EntityUtil.getName(player))) {
+                    if (invitesService.containsName(EntityUtil.getName(player))) {
                         LOGGER.info(
                                 "Invite expired for player: {}",
                                 EntityUtil.getName(player)
                         );
-                        invitesSerbvice.delete(EntityUtil.getName(player));
+                        invitesService.delete(EntityUtil.getName(player));
                     }
                 });
             }

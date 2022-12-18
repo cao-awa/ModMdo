@@ -1,17 +1,21 @@
 package com.github.cao.awa.modmdo.mixins.server.play;
 
+import com.alibaba.fastjson2.*;
 import com.github.cao.awa.modmdo.event.client.*;
 import com.github.cao.awa.modmdo.event.entity.player.*;
 import com.github.cao.awa.modmdo.event.server.chat.*;
 import com.github.cao.awa.modmdo.utils.entity.*;
+import com.github.cao.awa.modmdo.utils.packet.buf.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.cao.awa.modmdo.utils.times.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
 import net.minecraft.network.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
+import net.minecraft.util.*;
 import org.apache.logging.log4j.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
@@ -56,9 +60,28 @@ public abstract class ServerPlayNetworkHandlerMixin {
         ));
     }
 
-    public void disc(Text reason) {
-        this.connection.send(new DisconnectS2CPacket(reason));
-        this.connection.disconnect(reason);
+    @Inject(method = "onCustomPayload", at = @At("HEAD"))
+    public void onCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo ci) {
+        EntrustEnvironment.trys(() -> {
+            if (packet.getChannel()
+                      .equals(CLIENT_CHANNEL)) {
+                final PacketDataProcessor processor = new PacketDataProcessor(packet.getData());
+
+                Identifier identifier = processor.readIdentifier();
+                if (identifier.equals(INFO_CHANNEL)) {
+                    JSONObject json = processor.readJSONObject();
+
+                    loginUsers.getUser(player)
+                              .setModmdoName(json.getString("versionName"));
+
+                    LOGGER.info(
+                            "Updating modmdo version name for '{}' to '{}'",
+                            EntityUtil.getName(player),
+                            json.getString("versionName")
+                    );
+                }
+            }
+        });
     }
 
     @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
@@ -77,7 +100,11 @@ public abstract class ServerPlayNetworkHandlerMixin {
         if (serverUnderDdosAttack.get()) {
             return;
         }
-        instance.info(s, o1, o2);
+        instance.info(
+                s,
+                o1,
+                o2
+        );
     }
 
     @Inject(method = "executeCommand", at = @At("HEAD"))
@@ -120,6 +147,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Shadow
-    protected abstract boolean isHost();
+    public void disc(Text reason) {
+        this.connection.send(new DisconnectS2CPacket(reason));
+        this.connection.disconnect(reason);
+    }
 }

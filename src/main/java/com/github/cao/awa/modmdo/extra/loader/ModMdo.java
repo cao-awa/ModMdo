@@ -16,6 +16,7 @@ import com.github.cao.awa.modmdo.utils.file.*;
 import com.github.cao.awa.modmdo.utils.io.*;
 import com.github.cao.awa.modmdo.utils.text.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import net.minecraft.network.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
@@ -53,13 +54,25 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
         EntrustEnvironment.trys(() -> initModMdoVariables(modMdoType));
 
-        whitelistsService = new LilacCertificateService<>(path + "/certificates/whitelists");
+        whitelistsService = new LilacCertificateService<>(
+                path + "/certificates/whitelists",
+                "Whitelists"
+        );
 
-        stationService = new LilacCertificateService<>(null);
+        stationService = new LilacCertificateService<>(
+                null,
+                "Stations"
+        );
 
-        invitesSerbvice = new LilacCertificateService<>(null);
+        invitesService = new LilacCertificateService<>(
+                null,
+                "Invites"
+        );
 
-        bans = new LilacCertificateService<>(path + "/certificates/bans");
+        bans = new LilacCertificateService<>(
+                path + "/certificates/bans",
+                "Bans"
+        );
 
         saveVariables();
     }
@@ -237,8 +250,10 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
                     EntrustEnvironment.trys(() -> {
                         for (ServerPlayerEntity player : players.getPlayerList()) {
-                            if (player.networkHandler.connection.getAddress() != null) {
-                                if (! player.networkHandler.connection.isOpen()) {
+                            ClientConnection connection = player.networkHandler.getConnection();
+
+                            if (connection.getAddress() != null) {
+                                if (! connection.isOpen()) {
                                     // try remove
                                     server.getPlayerManager()
                                           .remove(player);
@@ -247,44 +262,45 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
                                     server.getPlayerManager()
                                           .getPlayerList()
                                           .remove(player);
+                                    return;
                                 }
 
                                 if (modmdoWhitelist) {
                                     if (notWhitelist(player) || ! loginUsers.getUser(player)
                                                                             .isLogged()) {
-                                        player.networkHandler.connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")
-                                                                                                              .text()));
-                                        player.networkHandler.connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")
-                                                                                            .text());
-
+                                        connection.send(new DisconnectS2CPacket(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")
+                                                                                        .text()));
+                                        connection.disconnect(TextUtil.translatable("multiplayer.disconnect.not_whitelisted")
+                                                                      .text());
+                                        return;
                                     }
                                     if (hasBan(player)) {
                                         Certificate ban = bans.get(EntityUtil.getName(player));
                                         if (ban instanceof TemporaryCertificate temporary) {
                                             String remaining = temporary.formatRemaining();
-                                            player.networkHandler.connection.send(new DisconnectS2CPacket(textFormatService.format(
-                                                                                                                                   new Dictionary(ban.getLanguage()),
-                                                                                                                                   "multiplayer.disconnect.banned-time-limited",
-                                                                                                                                   remaining
-                                                                                                                           )
-                                                                                                                           .text()));
-                                            player.networkHandler.connection.disconnect(textFormatService.format(
-                                                                                                                 new Dictionary(ban.getLanguage()),
-                                                                                                                 "multiplayer.disconnect.banned-time-limited",
-                                                                                                                 remaining
-                                                                                                         )
-                                                                                                         .text());
+                                            connection.send(new DisconnectS2CPacket(textFormatService.format(
+                                                                                                             new Dictionary(ban.getLanguage()),
+                                                                                                             "multiplayer.disconnect.banned-time-limited",
+                                                                                                             remaining
+                                                                                                     )
+                                                                                                     .text()));
+                                            connection.disconnect(textFormatService.format(
+                                                                                           new Dictionary(ban.getLanguage()),
+                                                                                           "multiplayer.disconnect.banned-time-limited",
+                                                                                           remaining
+                                                                                   )
+                                                                                   .text());
                                         } else {
-                                            player.networkHandler.connection.send(new DisconnectS2CPacket(textFormatService.format(
-                                                                                                                                   new Dictionary(ban.getLanguage()),
-                                                                                                                                   "multiplayer.disconnect.banned-indefinite"
-                                                                                                                           )
-                                                                                                                           .text()));
-                                            player.networkHandler.connection.disconnect(textFormatService.format(
-                                                                                                                 new Dictionary(ban.getLanguage()),
-                                                                                                                 "multiplayer.disconnect.banned-indefinite"
-                                                                                                         )
-                                                                                                         .text());
+                                            connection.send(new DisconnectS2CPacket(textFormatService.format(
+                                                                                                             new Dictionary(ban.getLanguage()),
+                                                                                                             "multiplayer.disconnect.banned-indefinite"
+                                                                                                     )
+                                                                                                     .text()));
+                                            connection.disconnect(textFormatService.format(
+                                                                                           new Dictionary(ban.getLanguage()),
+                                                                                           "multiplayer.disconnect.banned-indefinite"
+                                                                                   )
+                                                                                   .text());
                                         }
                                     }
                                 }
@@ -293,21 +309,21 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
 
                     });
 
-//                    if (ddosRecording != null) {
-//                        if (ticks++ > 200) {
-//                            ticks = 0;
-//                            DdosAttackRecorder.LOGGER.info("----DDOS INFO----");
-//                            DdosAttackRecorder.LOGGER.info("Times(Seconds): " + ddosRecording.getTimes());
-//                            DdosAttackRecorder.LOGGER.info("Total attacks: " + ddosRecording.getAttacks()
-//                                                                                            .get(ddosRecording.getAttacks()
-//                                                                                                              .size() - 1));
-//                            DdosAttackRecorder.LOGGER.info("Attacks per second: " + ddosRecording.average());
-//                            DdosAttackRecorder.LOGGER.info("In second attacks: " + ddosRecording.getOccurring());
-//                        }
-//                        if (ticks % 20 == 0) {
-//                            ddosRecording.occursAhead();
-//                        }
-//                    }
+                    //                    if (ddosRecording != null) {
+                    //                        if (ticks++ > 200) {
+                    //                            ticks = 0;
+                    //                            DdosAttackRecorder.LOGGER.info("----DDOS INFO----");
+                    //                            DdosAttackRecorder.LOGGER.info("Times(Seconds): " + ddosRecording.getTimes());
+                    //                            DdosAttackRecorder.LOGGER.info("Total attacks: " + ddosRecording.getAttacks()
+                    //                                                                                            .get(ddosRecording.getAttacks()
+                    //                                                                                                              .size() - 1));
+                    //                            DdosAttackRecorder.LOGGER.info("Attacks per second: " + ddosRecording.average());
+                    //                            DdosAttackRecorder.LOGGER.info("In second attacks: " + ddosRecording.getOccurring());
+                    //                        }
+                    //                        if (ticks % 20 == 0) {
+                    //                            ddosRecording.occursAhead();
+                    //                        }
+                    //                    }
                 },
                 this,
                 "HandlePlayers"
