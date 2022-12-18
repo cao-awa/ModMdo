@@ -15,16 +15,39 @@ public class ModMdoClientInitializer implements ClientModInitializer {
     public void onInitializeClient() {
         LOGGER.info("ModMdo Auth loading");
 
-        staticConfig = new DiskConfigUtil("ModMdo", "config/modmdo", "modmdo", false);
+        staticConfig = new DiskConfigUtil(
+                "ModMdo",
+                "config/modmdo",
+                "modmdo",
+                false
+        );
 
-        staticConfig.setIfNoExist("identifier", RandomIdentifier.randomIdentifier());
+        staticConfig.setIfNoExist(
+                "identifier",
+                RandomIdentifier.randomIdentifier(
+                        4096,
+                        true
+                )
+        );
 
-        LOGGER.info("Loading ModMdo Auth" + SharedVariables.VERSION_ID);
+        LOGGER.info(
+                "Loading ModMdo Auth '{}'",
+                SharedVariables.VERSION_ID
+        );
         LOGGER.info("Loading private-key for servers");
 
         SECURE_KEYS.load(staticConfig.getJSONObject("private_key"));
-        staticConfig.setIfNoExist("private_verify_key", RandomIdentifier.randomIdentifier(16, true));
+        staticConfig.setIfNoExist(
+                "private_verify_key",
+                RandomIdentifier.randomIdentifier(
+                        16,
+                        true
+                )
+        );
 
-        staticConfig.setIfNoExist("secure_level", SECURE_KEYS.getLevel());
+        staticConfig.setIfNoExist(
+                "secure_level",
+                SECURE_KEYS.getLevel()
+        );
     }
 }

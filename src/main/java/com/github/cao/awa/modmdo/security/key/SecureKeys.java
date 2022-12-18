@@ -135,7 +135,7 @@ public class SecureKeys extends Storable {
     private String use(SecureLevel level, String target) {
         return switch (level) {
             case UNEQUAL_KEY -> EntrustEnvironment.trys(
-                    () -> AES.aesEncryptToString(
+                    () -> AES.encryptToString(
                             staticConfig.getString("identifier")
                                         .getBytes(),
                             keys.get(target)

@@ -7,6 +7,7 @@ import com.github.cao.awa.modmdo.utils.entity.player.*;
 import com.github.cao.awa.modmdo.utils.packet.buf.*;
 import com.github.cao.awa.modmdo.utils.packet.sender.*;
 import com.github.zhuaidadaya.rikaishinikui.handler.universal.entrust.*;
+import com.github.zhuaidadaya.rikaishinikui.handler.universal.receptacle.*;
 import com.mojang.authlib.*;
 import net.minecraft.client.*;
 import net.minecraft.client.network.*;
@@ -23,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.*;
 import java.nio.charset.*;
 
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
+import static com.github.cao.awa.modmdo.storage.SharedVariables.INFO_CHANNEL;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketListener {
@@ -53,7 +55,9 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
      */
     @Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
     private void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-        boolean doCancel = EntrustEnvironment.receptacle(cancel -> EntrustEnvironment.trys(
+        Receptacle<Boolean> doCancel = Receptacle.of(false);
+
+        EntrustEnvironment.trys(
                 () -> {
                     final PacketDataProcessor processor = new PacketDataProcessor(packet.getData());
 
@@ -64,12 +68,10 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             CLIENT_CHANNEL
                     );
 
-                    if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
+                    if (informationSign.equals(CHECKING_CHANNEL)) {
                         SECURE_KEYS.load(staticConfig.getJSONObject("private_key"));
                         final String serverId = EntrustEnvironment.receptacle(receptacle -> {
-                            if (informationSign.equals(CHECKING_CHANNEL)) {
-                                receptacle.set(processor.readString());
-                            }
+                            receptacle.set(processor.readString());
                         });
                         LOGGER.debug(
                                 "Server are requesting login data, as: {}",
@@ -118,8 +120,10 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             SECURE_KEYS.removeAddress(address);
                             SECURE_KEYS.save();
                         }
-                        String verifyKey = serverId == null ? null : SECURE_KEYS.get(serverId)
-                                                                                .getVerifyKey();
+                        String verifyKey = serverId == null ?
+                                           null :
+                                           SECURE_KEYS.get(serverId)
+                                                      .getVerifyKey();
                         JSONObject loginData = new JSONObject();
                         loginData.put(
                                 "name",
@@ -166,7 +170,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             loginData.put(
                                     "verifyData",
                                     EntrustEnvironment.trys(
-                                            () -> AES.aesEncryptToString(
+                                            () -> AES.encryptToString(
                                                     verifyData.toString()
                                                               .getBytes(StandardCharsets.ISO_8859_1),
                                                     verifyKey.getBytes()
@@ -184,17 +188,27 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                               .write(LOGIN_CHANNEL)
                               .write(loginData)
                               .send();
+                    } else if (informationSign.equals(LOGIN_CHANNEL)) {
+                        JSONObject loginData = new JSONObject();
+                        loginData.put(
+                                "versionName",
+                                MODMDO_VERSION_NAME
+                        );
+                        sender.custom()
+                              .write(INFO_CHANNEL)
+                              .write(loginData)
+                              .send();
                     }
 
-                    cancel.set(true);
+                    doCancel.set(true);
                 },
                 ex -> LOGGER.error(
                         "Error in connecting ModMdo server",
                         ex
                 )
-        ));
+        );
 
-        if (doCancel) {
+        if (doCancel.get()) {
             ci.cancel();
         }
     }
