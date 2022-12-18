@@ -18,6 +18,6 @@ public class SharedVariables {
     public static final Identifier SERVER_CHANNEL = new Identifier("modmdo:server");
     public static final Logger LOGGER = LogManager.getLogger("ModMdoAuth");
     public static final SecureKeys SECURE_KEYS = new SecureKeys();
-    public static String entrust = "ModMdo";
+    public static String entrust = "ModMdoAuth";
     public static DiskConfigUtil staticConfig;
 }

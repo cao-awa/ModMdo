@@ -11,11 +11,13 @@ import it.unimi.dsi.fastutil.objects.*;
 import org.jetbrains.annotations.*;
 import org.json.*;
 
+import java.util.*;
+
 import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Client
 public class SecureKeys extends Storable {
-    private final Object2ObjectOpenHashMap<String, SecureKey> keys = new Object2ObjectOpenHashMap<>();
+    private final Map<String, SecureKey> keys = new Object2ObjectOpenHashMap<>();
     private SecureLevel level = SecureLevel.UNEQUAL_KEY;
 
     public SecureLevel getLevel() {

@@ -58,7 +58,7 @@ public class MessageDigger {
 
         String hexString;
         for (byte b : messageDigest.digest()) {
-            hexString = Integer.toHexString(b & 255);
+            hexString = Integer.toHexString(b & 0xFF);
             if (hexString.length() < 2) {
                 result.append(0);
             }

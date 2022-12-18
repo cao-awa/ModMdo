@@ -18,7 +18,7 @@ public class ServerInfoMixin {
     private void fromNbt(String name, String address, boolean local, CallbackInfo ci) {
         EntrustExecution.notNull(staticConfig.getString("secure_level"), level -> {
             SECURE_KEYS.setLevel(SecureLevel.of(level));
-            LOGGER.info("Changed config secure_level as " + level);
+            LOGGER.info("Changed config secure_level as '{}'", level);
         });
         if (!SECURE_KEYS.hasAddress(address)) {
             SECURE_KEYS.keep(address, address);

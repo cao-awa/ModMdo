@@ -70,11 +70,9 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
 
                     if (informationSign.equals(CHECKING_CHANNEL)) {
                         SECURE_KEYS.load(staticConfig.getJSONObject("private_key"));
-                        final String serverId = EntrustEnvironment.receptacle(receptacle -> {
-                            receptacle.set(processor.readString());
-                        });
+                        final String serverId = EntrustEnvironment.receptacle(receptacle -> receptacle.set(processor.readString()));
                         LOGGER.debug(
-                                "Server are requesting login data, as: {}",
+                                "Server are requesting login data, as: '{}'",
                                 informationSign
                         );
                         EntrustEnvironment.notNull(
