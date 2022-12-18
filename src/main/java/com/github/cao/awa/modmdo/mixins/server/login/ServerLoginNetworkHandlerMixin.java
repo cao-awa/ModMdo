@@ -253,7 +253,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                         }
                         if (loginTimedOut.containsKey(name)) {
                             if (rejectUsers.hasUser(name)) {
-                                disc(rejectUsers.getUser(name)
+                                disc(rejectUsers.getUserFromName(name)
                                                 .getMessage());
 
                                 rejectUsers.removeUser(name);
@@ -279,6 +279,9 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
                         connection,
                         player
                 );
+                sender.custom()
+                      .write(LOGIN_CHANNEL)
+                      .send();
             }
         }
     }

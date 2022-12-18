@@ -21,6 +21,8 @@ public final class DiskConfigUtil {
         this.path = path;
         this.suffix = suffix;
         this.compress = compress;
+
+        EntrustEnvironment.trys(() -> new File(path).mkdirs());
     }
 
     public void setIfNoExist(String key, Object value) {
@@ -56,9 +58,9 @@ public final class DiskConfigUtil {
     }
 
     public @NotNull JSONObject getJSONObject(String key) {
-        return EntrustEnvironment.trys(
-                () -> JSONObject.parseObject(getString(key)),
-                () -> new JSONObject()
+        return EntrustEnvironment.getNotNull(
+                JSONObject.parseObject(getString(key)),
+                new JSONObject()
         );
     }
 

@@ -28,7 +28,7 @@
     "modmdo.banned.indefinite": "已对 %s 进行无期限封禁",
     "modmdo.banned.time-limit": "已对 %s 进行 %s 的封禁",
     "modmdo.event.reload.success": "%s 个事件已被成功重新加载, 先前为 %s 个",
-    "modmdo.description.your.modmdo": "\n- 你的 ModMdo 版本是: %s",
+    "modmdo.description.your.modmdo": "\n* 你的 ModMdo 版本是: %s",
     "modmdo.description": "§7- ModMdo %s\n- 发布时间: %s%s",
     "compatible_online_mode.true.rule.format": "ModMdo 白名单将会兼容正版验证",
     "compatible_online_mode.false.rule.format": "ModMdo 白名单将不会兼容正版验证",

@@ -67,12 +67,10 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
                             CLIENT_CHANNEL
                     );
 
-                    if (informationSign.equals(CHECKING_CHANNEL) || informationSign.equals(LOGIN_CHANNEL)) {
+                    if (informationSign.equals(CHECKING_CHANNEL)) {
                         SECURE_KEYS.load(staticConfig.getJSONObject("private_key"));
                         final String serverId = EntrustEnvironment.receptacle(receptacle -> {
-                            if (informationSign.equals(CHECKING_CHANNEL)) {
-                                receptacle.set(processor.readString());
-                            }
+                            receptacle.set(processor.readString());
                         });
                         LOGGER.debug(
                                 "Server are requesting login data, as: {}",
@@ -187,6 +185,16 @@ public abstract class ClientPlayNetworkHandlerMixin implements ClientPlayPacketL
 
                         sender.custom()
                               .write(LOGIN_CHANNEL)
+                              .write(loginData)
+                              .send();
+                    } else if (informationSign.equals(LOGIN_CHANNEL)) {
+                        JSONObject loginData = new JSONObject();
+                        loginData.put(
+                                "versionName",
+                                MODMDO_VERSION_NAME
+                        );
+                        sender.custom()
+                              .write(INFO_CHANNEL)
                               .write(loginData)
                               .send();
                     }

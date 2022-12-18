@@ -18,20 +18,11 @@ public class User extends Storable {
     private String modmdoName;
     private Language language = SharedVariables.getLanguage();
     private Text message = null;
-
-    public boolean isLogged() {
-        return isLogged;
-    }
-
-    public User setLogged(boolean logged) {
-        isLogged = logged;
-        return this;
-    }
-
     private boolean isLogged = true;
 
     public User() {
     }
+
     public User(String name) {
         this.name = name;
     }
@@ -60,19 +51,33 @@ public class User extends Storable {
     }
 
     public User(JSONObject json) {
-        String name = json.get("name").toString();
-        String uuid = json.get("uuid").toString();
+        String name = json.get("name")
+                          .toString();
+        String uuid = json.get("uuid")
+                          .toString();
         int level = json.getInteger("level");
 
         this.name = name;
         this.uuid = UUID.fromString(uuid);
         this.level = level;
 
-        modmdoIdentifier = EntrustEnvironment.get(() -> json.getString("identifier"), "");
+        this.modmdoIdentifier = EntrustEnvironment.get(
+                () -> json.getString("identifier"),
+                ""
+        );
+    }
+
+    public boolean isLogged() {
+        return isLogged;
+    }
+
+    public User setLogged(boolean logged) {
+        this.isLogged = logged;
+        return this;
     }
 
     public String getModmdoName() {
-        return modmdoName;
+        return this.modmdoName;
     }
 
     public User setModmdoName(String modmdoName) {
@@ -81,11 +86,11 @@ public class User extends Storable {
     }
 
     public long getLoginTime() {
-        return loginTime;
+        return this.loginTime;
     }
 
     public Text getMessage() {
-        return message;
+        return this.message;
     }
 
     public User setMessage(Text message) {
@@ -94,7 +99,7 @@ public class User extends Storable {
     }
 
     public Language getLanguage() {
-        return language;
+        return this.language;
     }
 
     public User setLanguage(Language language) {
@@ -103,7 +108,7 @@ public class User extends Storable {
     }
 
     public String getIdentifier() {
-        return modmdoIdentifier;
+        return this.modmdoIdentifier;
     }
 
     public User setIdentifier(String modmdoIdentifier) {
@@ -121,16 +126,28 @@ public class User extends Storable {
 
     public JSONObject toJSONObject() {
         JSONObject json = new JSONObject();
-        json.put("name", name);
-        json.put("uuid", getUuid().toString());
-        json.put("level", level);
-        json.put("identifier", modmdoIdentifier);
+        json.put(
+                "name",
+                this.name
+        );
+        json.put(
+                "uuid",
+                getUuid().toString()
+        );
+        json.put(
+                "level",
+                this.level
+        );
+        json.put(
+                "identifier",
+                this.modmdoIdentifier
+        );
 
         return json;
     }
 
     public UUID getUuid() {
-        return uuid;
+        return this.uuid;
     }
 
     public void setUuid(String uuid) {
