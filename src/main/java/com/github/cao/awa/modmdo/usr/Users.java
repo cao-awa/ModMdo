@@ -8,8 +8,8 @@ import com.alibaba.fastjson2.*;
 import java.util.*;
 
 public class Users extends Storable {
-    private final Object2ObjectRBTreeMap<String, User> users = new Object2ObjectRBTreeMap<>();
-    private final Object2ObjectRBTreeMap<String, String> userNameIdMap = new Object2ObjectRBTreeMap<>();
+    private final Map<String, User> users = new Object2ObjectRBTreeMap<>();
+    private final Map<String, String> userNameIdMap = new Object2ObjectRBTreeMap<>();
 
     public Users() {
 
@@ -62,7 +62,7 @@ public class Users extends Storable {
     }
 
     public User getUser(ServerPlayerEntity player) {
-        return users.get(player.getUuid().toString());
+        return getUser(player.getUuid());
     }
 
     public User getUserFromName(String name) {

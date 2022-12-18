@@ -31,9 +31,11 @@ public class LilacCertificateService<T extends Certificate> extends LocalCertifi
     private static final LilacCertificatesExporter EXPORTER = new LilacCertificatesExporter();
     private final Certificates<T> certificates = new Certificates<>();
     private final @Nullable String path;
+    private final String entrust;
 
-    public LilacCertificateService(@Nullable String path) {
+    public LilacCertificateService(@Nullable String path, String entrust) {
         this.path = path;
+        this.entrust = entrust;
         online();
     }
 
@@ -120,28 +122,29 @@ public class LilacCertificateService<T extends Certificate> extends LocalCertifi
     }
 
     public boolean verifyUUID(@NotNull String name, @NotNull String uuid) {
-        return EntrustEnvironment.get(
+        return EntrustEnvironment.trys(
                 () -> uuid.equals(this.get(name)
                                       .getRecorde()
                                       .getUuid()
                                       .toString()),
-                false
+                ex -> false
         );
     }
 
     @Override
     public void online() {
-        LOGGER.info("Loading lilac certificate service ...");
-        upgrade();
-        EntrustEnvironment.trys(() -> {
-            if (this.path == null) {
-                return;
-            }
-            IOUtil.write(
+        LOGGER.info(
+                "Loading lilac certificate service for '{}'",
+                entrust
+        );
+        if (path != null) {
+            upgrade();
+            EntrustEnvironment.trys(() -> IOUtil.write(
                     new FileOutputStream(path + "/VERSION.ver"),
                     Base256.intToBuf(SERVICE_DATA_VERSION)
-            );
-        });
+            ));
+        }
+
         LOGGER.info("Lilac certificate service ready");
     }
 

@@ -28,7 +28,7 @@
     "modmdo.banned.indefinite": "Banned %s for indefinite",
     "modmdo.banned.time-limit": "Banned %s for %s",
     "modmdo.event.reload.success": "success to reloaded %s events, %s previously",
-    "modmdo.description.your.modmdo": "\n- Your ModMdo version is: %s",
+    "modmdo.description.your.modmdo": "\n* Your ModMdo version is: %s",
     "modmdo.description": "§7- ModMdo %s\n- Release time: %s%s",
     "compatible_online_mode.true.rule.format": "ModMdo will compatible to vanilla verification",
     "compatible_online_mode.false.rule.format": "ModMdo will not compatible to vanilla verification",
