@@ -13,7 +13,10 @@ public class ModMdoClientInitializer implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("ModMdo Auth loading");
+        LOGGER.info(
+                "Loading ModMdo Auth '{}'",
+                SharedVariables.VERSION_ID
+        );
 
         staticConfig = new DiskConfigUtil(
                 "ModMdo",
@@ -30,10 +33,6 @@ public class ModMdoClientInitializer implements ClientModInitializer {
                 )
         );
 
-        LOGGER.info(
-                "Loading ModMdo Auth '{}'",
-                SharedVariables.VERSION_ID
-        );
         LOGGER.info("Loading private-key for servers");
 
         SECURE_KEYS.load(staticConfig.getJSONObject("private_key"));
