@@ -16,7 +16,7 @@ import net.minecraft.server.*;
 import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
-import org.apache.logging.log4j.*;
+import org.slf4j.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -27,7 +27,7 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
-    private static final Logger LOGGER = LogManager.getLogger("ModMdoServerAuthHandler");
+    private static final Logger LOGGER = LoggerFactory.getLogger("ModMdoServerAuthHandler");
 
     @Shadow
     public ServerPlayerEntity player;
@@ -84,10 +84,10 @@ public abstract class ServerPlayNetworkHandlerMixin {
         });
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
     public void onDisconnected0(PlayerManager instance, Text message, MessageType type, UUID sender) {
         if (loginUsers.hasUser(player) || player.networkHandler.connection.getAddress() == null) {
-            instance.broadcastChatMessage(
+            instance.broadcast(
                     message,
                     type,
                     sender
@@ -95,7 +95,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
+    @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
     public void onDisconnected0(Logger instance, String s, Object o1, Object o2) {
         if (serverUnderDdosAttack.get()) {
             return;
@@ -121,7 +121,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         ));
     }
 
-    @Inject(method = "onGameMessage", at = @At("HEAD"))
+    @Inject(method = "onChatMessage", at = @At("HEAD"))
     public void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         event.submit(new GameChatEvent(
                 player,
