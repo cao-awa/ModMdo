@@ -43,4 +43,33 @@ Build jar with gradle command:
 ``` ./gradlew clean remapJar ```
 
 ## How to secure
+### Identifier
+ModMdo use "pre shared" to exchange identifier to server.
 
+Server only store identifier when first join, it is unable to be overwrites.
+
+This identifier will be check when ModMdo requesting once login, fully equals then mean success of checking.\
+<br>
+
+The identifier size is 4096 bytes, was creates 4096^91 possibilities, impossible to try all possibilities.
+### Private key
+Let server store a encrypted data, for futures verify.\
+<br>
+
+ModMdo will send key to decrypt when requesting login, server should not store it.
+
+Server decrypted data, separate out identifier, and equals to current recived identifier then mean success to verify.
+### Sha
+The server should store the identifier using Sha3-512 hash.
+
+And client should sending source identifier, let server to calculate hash, ensure this identifier are not leaking from the server database.
+
+Verify data should be hashed, not source identifier, for faster verifing.\
+<br>
+
+This feature let identifier unable to use when database give away.
+
+### Other
+Server will not send these data to other ModMdo client, includes your client.
+
+The database leaking is meaningless, can be ignored.
