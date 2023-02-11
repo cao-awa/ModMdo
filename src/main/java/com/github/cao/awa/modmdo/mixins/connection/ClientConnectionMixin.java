@@ -1,9 +1,9 @@
 package com.github.cao.awa.modmdo.mixins.connection;
 
 import com.github.cao.awa.modmdo.develop.text.*;
-import com.github.cao.awa.modmdo.storage.*;
 import io.netty.channel.*;
 import net.minecraft.network.*;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.text.*;
 import org.apache.logging.log4j.*;
 import org.spongepowered.asm.mixin.*;
@@ -25,15 +25,18 @@ public abstract class ClientConnectionMixin {
 
     @Shadow public abstract void disconnect(Text disconnectReason);
 
+    @Shadow public abstract void send(Packet<?> packet);
+
     @Inject(method = "handleDisconnection", at = @At("HEAD"))
     public void handleDisconnection(CallbackInfo ci) {
-        CONNECTIONS.remove((ClientConnection) (Object) this);
+        connections.remove((ClientConnection) (Object) this);
     }
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(CallbackInfo ci) {
         if (serverUnderDdosAttack.get()) {
-            if (! SharedVariables.CONNECTIONS.contains((ClientConnection) (Object) this)) {
+            if (! connections.contains((ClientConnection) (Object) this)) {
+                send(new DisconnectS2CPacket(DISCONNECT.text()));
                 disconnect(DISCONNECT.text());
                 ci.cancel();
             }

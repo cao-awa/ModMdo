@@ -15,13 +15,14 @@ public class ModMdoServerInitializer implements DedicatedServerModInitializer {
 
     @Override
     public void onInitializeServer() {
-        LOGGER.info("Loading ModMdo " + SharedVariables.VERSION_ID + " (step 2/2)");
+        LOGGER.info(
+                "Loading ModMdo '{}' for server",
+                SharedVariables.VERSION_ID
+        );
 
-        staticConfig.setIfNoExist("private_verify_key",
-                                  RandomIdentifier.randomIdentifier(
-                                          16,
-                                          true
-                                  )
+        staticConfig.setIfNoExist(
+                "private_verify_key",
+                RandomIdentifier.randomIdentifier(16)
         );
 
         SharedVariables.modMdoType = ModMdoType.SERVER;

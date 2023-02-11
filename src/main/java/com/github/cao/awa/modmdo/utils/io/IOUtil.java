@@ -170,6 +170,20 @@ public class IOUtil {
      * @author cao_awa
      * @since 1.0.0
      */
+    public static String readLine(BufferedReader input) throws IOException {
+        return input.readLine();
+    }
+
+    /**
+     * Read input.
+     *
+     * @param input
+     *         Input
+     * @throws IOException
+     *         Happened IO error
+     * @author cao_awa
+     * @since 1.0.0
+     */
     public static byte[] readBytes(InputStream input) throws IOException {
         return readBytes(new InputStreamReader(input));
     }

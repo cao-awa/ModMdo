@@ -52,6 +52,8 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         allDefault();
         defaultConfig();
 
+        loadDatabaseConfig(path);
+
         EntrustEnvironment.trys(() -> initModMdoVariables(modMdoType));
 
         whitelistsService = new LilacCertificateService<>(
@@ -75,6 +77,32 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
         );
 
         saveVariables();
+    }
+
+    public static void loadDatabaseConfig(String path) {
+        database.init(() -> EntrustEnvironment.receptacle(receptacle -> {
+            File config = new File(path + "/certificate-db.conf");
+            if (! config.isFile()) {
+                LOGGER.warn("ModMdo certificate database config not found, generating default config");
+
+                EntrustEnvironment.trys(() -> config.getParentFile()
+                                                    .mkdirs());
+
+                receptacle.set(IOUtil.read(ResourcesLoader.getResource("configs/certificate-db-default.conf")));
+
+                EntrustEnvironment.operation(
+                        new BufferedWriter(new FileWriter(config)),
+                        writer -> IOUtil.write(
+                                writer,
+                                receptacle.get()
+                        )
+                );
+            }
+
+            if (receptacle.get() == null) {
+                receptacle.set(IOUtil.read(new BufferedReader(new FileReader(config))));
+            }
+        }));
     }
 
     public MinecraftServer getServer() {

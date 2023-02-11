@@ -14,6 +14,13 @@ import org.apache.logging.log4j.*;
 
 import java.io.*;
 
+/**
+ * Export the lilac certificates service.
+ *
+ * @author 草二号机
+ *
+ * @since 1.0.43
+ */
 public class LilacCertificatesExporter extends CertificateServiceExporter {
     private static final Logger LOGGER = LogManager.getLogger("LilacCertificateExporter");
 

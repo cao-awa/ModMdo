@@ -4,11 +4,12 @@
   "version": "${version}",
 
   "name": "ModMdo",
-  "description": "no",
+  "description": "A fabric mod for secure playing server.",
   "authors": [
     "草awa",
     "草二号机",
-    "zhuaidadaya"
+    "zhuaidadaya",
+    "InkerBot"
   ],
   "contact": {
     "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.19.x",
