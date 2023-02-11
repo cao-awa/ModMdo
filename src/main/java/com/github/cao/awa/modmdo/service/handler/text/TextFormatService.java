@@ -10,6 +10,7 @@ import com.github.cao.awa.modmdo.usr.*;
  * Use service mode to handle text format.
  *
  * @author 草二号机
+ *
  * @since 1.0.43
  */
 public class TextFormatService {

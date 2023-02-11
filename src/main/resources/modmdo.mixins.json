@@ -4,6 +4,7 @@
     "package": "com.github.cao.awa.modmdo.mixins",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
+        "server.MinecraftServerMixin"
     ],
     "client": [
         "client.ServerInfoMixin",
@@ -17,7 +18,6 @@
         "command.save.SaveAllCommandMixin",
         "connection.ClientConnectionMixin",
         "enchant.EnchantmentHelperMixin",
-        "entity.EntityListMixin",
         "entity.LivingEntityMixin",
         "entity.player.ServerPlayerEntityMixin",
         "explosion.ExplosionMixin",

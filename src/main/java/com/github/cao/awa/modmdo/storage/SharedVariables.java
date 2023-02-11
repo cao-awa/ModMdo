@@ -16,6 +16,7 @@ import com.github.cao.awa.modmdo.security.key.*;
 import com.github.cao.awa.modmdo.server.login.*;
 import com.github.cao.awa.modmdo.service.handler.certificate.*;
 import com.github.cao.awa.modmdo.service.handler.text.*;
+import com.github.cao.awa.modmdo.supplier.*;
 import com.github.cao.awa.modmdo.type.*;
 import com.github.cao.awa.modmdo.usr.*;
 import com.github.cao.awa.modmdo.utils.command.*;
@@ -34,6 +35,7 @@ import net.minecraft.server.network.*;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
 import org.apache.logging.log4j.*;
+import org.jetbrains.annotations.*;
 
 import java.text.*;
 import java.util.*;
@@ -62,7 +64,7 @@ public class SharedVariables {
     public static final List<ServerPlayerEntity> FORCE = new ObjectArrayList<>();
     public static final SecureKeys SECURE_KEYS = new SecureKeys();
     public static final ClazzScanner EXTRA_AUTO = new ClazzScanner(ModMdoExtra.class);
-    public static final List<ClientConnection> CONNECTIONS = new ObjectArrayList<>();
+    public static final List<ClientConnection> connections = new ObjectArrayList<>();
     public static final List<DdosAttackRecorder> ddosAttackRecorders = new ObjectArrayList<>();
     public static String identifier;
     public static boolean enableHereCommand = true;
@@ -93,6 +95,8 @@ public class SharedVariables {
     public static JSONObject notes = new JSONObject();
     public static Receptacle<Boolean> serverUnderDdosAttack = Receptacle.of(false);
     public static DdosAttackRecorder ddosRecording = null;
+
+    public static final Configure database = new Configure(SupplierTemplates.emptyString());
 
     public static long currentLogin = 0;
 
@@ -245,38 +249,6 @@ public class SharedVariables {
                 "notes",
                 notes
         );
-
-        if (modMdoType == ModMdoType.SERVER) {
-            //            EntrustEnvironment.trys(() -> {
-            //                JSONObject json = new JSONObject();
-            //                for (String s : whitelists.keys()) {
-            //                    json.put(
-            //                            s,
-            //                            whitelists.get(s)
-            //                                      .toJSONObject()
-            //                    );
-            //                }
-            //                config.set(
-            //                        "whitelist",
-            //                        json
-            //                );
-            //            });
-            //
-            //            EntrustEnvironment.trys(() -> {
-            //                JSONObject json = new JSONObject();
-            //                for (String s : bans.keys()) {
-            //                    json.put(
-            //                            s,
-            //                            bans.get(s)
-            //                                  .toJSONObject()
-            //                    );
-            //                }
-            //                config.set(
-            //                        "banned",
-            //                        json
-            //                );
-            //            });
-        }
     }
 
     public static Language getLanguage() {
@@ -306,60 +278,55 @@ public class SharedVariables {
         }
     }
 
-    public static boolean isActive() {
-        return EntrustEnvironment.trys(
-                () -> extras.isActive(EXTRA_ID),
-                () -> false
-        );
-    }
-
     public static boolean notWhitelist(ServerPlayerEntity player) {
         return ! hasWhitelist(player);
     }
 
     public static boolean hasWhitelist(ServerPlayerEntity player) {
         try {
-            if (invitesService.containsName(EntityUtil.getName(player))) {
-                if (invitesService.get(EntityUtil.getName(player))
+            ClientConnection connection = player.networkHandler.getConnection();
+            String name = EntityUtil.getName(player);
+            User user = loginUsers.getUser(player);
+            if (invitesService.containsName(name)) {
+                if (invitesService.get(name)
                                   .getMillions() == - 1) {
-                    invitesService.delete(EntityUtil.getName(player));
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(textFormatService.format(
-                                                                                                           loginUsers.getUser(player),
-                                                                                                           "modmdo.invite.canceled"
-                                                                                                   )
-                                                                                                   .text()));
-                    player.networkHandler.connection.disconnect(textFormatService.format(
-                                                                                         loginUsers.getUser(player),
-                                                                                         "modmdo.invite.canceled"
-                                                                                 )
-                                                                                 .text());
+                    invitesService.delete(name);
+                    connection.send(new DisconnectS2CPacket(textFormatService.format(
+                                                                                     user,
+                                                                                     "modmdo.invite.canceled"
+                                                                             )
+                                                                             .text()));
+                    connection.disconnect(textFormatService.format(
+                                                                   user,
+                                                                   "modmdo.invite.canceled"
+                                                           )
+                                                           .text());
                     return true;
                 }
-                if (! invitesService.get(EntityUtil.getName(player))
+                if (! invitesService.get(name)
                                     .isValid()) {
-                    invitesService.delete(EntityUtil.getName(player));
-                    player.networkHandler.connection.send(new DisconnectS2CPacket(textFormatService.format(
-                                                                                                           loginUsers.getUser(player),
-                                                                                                           "modmdo.invite.expired"
-                                                                                                   )
-                                                                                                   .text()));
-                    player.networkHandler.connection.disconnect(textFormatService.format(
-                                                                                         loginUsers.getUser(player),
-                                                                                         "modmdo.invite.expired"
-                                                                                 )
-                                                                                 .text());
+                    invitesService.delete(name);
+                    connection.send(new DisconnectS2CPacket(textFormatService.format(
+                                                                                     user,
+                                                                                     "modmdo.invite.expired"
+                                                                             )
+                                                                             .text()));
+                    connection.disconnect(textFormatService.format(
+                                                                   user,
+                                                                   "modmdo.invite.expired"
+                                                           )
+                                                           .text());
                 }
                 return true;
             }
             if (config.getBoolean("whitelist_only_id")) {
-                return whitelistsService.getFromId(loginUsers.getUser(player)
-                                                             .getIdentifier()) != null;
+                return whitelistsService.getFromId(user.getIdentifier()) != null;
             }
-            switch (whitelistsService.get(EntityUtil.getName(player))
+            switch (whitelistsService.get(name)
                                      .getRecorde()
                                      .type()) {
                 case IDENTIFIER -> {
-                    return validIdentifierWhitelist(EntityUtil.getName(player));
+                    return validIdentifierWhitelist(name);
                 }
                 case UUID -> {
                     if (Objects.requireNonNull(player.getServer())
@@ -374,9 +341,9 @@ public class SharedVariables {
                     }
                 }
                 case MULTIPLE -> {
-                    return validIdentifierWhitelist(EntityUtil.getName(player)) || (Objects.requireNonNull(player.getServer())
-                                                                                           .isOnlineMode() && validUuidWhitelist(
-                            EntityUtil.getName(player),
+                    return validIdentifierWhitelist(name) || (Objects.requireNonNull(player.getServer())
+                                                                     .isOnlineMode() && validUuidWhitelist(
+                            name,
                             player.getUuid()
                     ));
                 }
@@ -387,7 +354,7 @@ public class SharedVariables {
         return true;
     }
 
-    public static boolean validIdentifierWhitelist(String name) {
+    public static boolean validIdentifierWhitelist(@NotNull String name) {
         return EntrustEnvironment.get(
                 () -> whitelistsService.get(name)
                                        .getRecorde()
@@ -398,7 +365,7 @@ public class SharedVariables {
         );
     }
 
-    public static boolean validUuidWhitelist(String name, UUID uuid) {
+    public static boolean validUuidWhitelist(@NotNull String name, @NotNull UUID uuid) {
         return uuid.equals(whitelistsService.get(name)
                                             .getRecorde()
                                             .getUuid());
@@ -407,12 +374,12 @@ public class SharedVariables {
     public static boolean handleBanned(ServerPlayerEntity player) {
         if (config.getBoolean("modmdo_whitelist")) {
             if (hasBan(player)) {
-                Certificate certificate = bans.get(EntityUtil.getName(player));
-                if (certificate instanceof TemporaryCertificate temp) {
-                    if (temp.isValid()) {
+                String name = EntityUtil.getName(player);
+                if (bans.get(name) instanceof TemporaryCertificate certificate) {
+                    if (certificate.isValid()) {
                         return true;
                     } else {
-                        bans.delete(EntityUtil.getName(player));
+                        bans.delete(name);
                     }
                 } else {
                     return true;
@@ -424,22 +391,21 @@ public class SharedVariables {
 
     public static boolean hasBan(ServerPlayerEntity player) {
         try {
-            switch (bans.get(EntityUtil.getName(player))
-                        .getRecorde()
-                        .type()) {
+            Certificate banned = bans.get(EntityUtil.getName(player));
+            if (banned == null) {
+                return false;
+            }
+            LoginRecorde recorde = banned.getRecorde();
+            switch (recorde.type()) {
                 case IDENTIFIER -> {
-                    if (bans.get(EntityUtil.getName(player))
-                            .getRecorde()
-                            .getUniqueId()
-                            .equals("")) {
+                    if (recorde.getUniqueId()
+                               .equals("")) {
                         return false;
                     }
                 }
                 case UUID -> {
                     if (! player.getUuid()
-                                .equals(bans.get(EntityUtil.getName(player))
-                                            .getRecorde()
-                                            .getUuid())) {
+                                .equals(recorde.getUuid())) {
                         return false;
                     }
                 }
