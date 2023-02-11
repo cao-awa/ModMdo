@@ -10,6 +10,7 @@ import com.mojang.authlib.*;
 import net.minecraft.network.*;
 import net.minecraft.server.*;
 import net.minecraft.server.network.*;
+import org.jetbrains.annotations.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -31,10 +32,10 @@ public abstract class PlayerManagerMixin {
     private MinecraftServer server;
 
     /**
-     * 当相同的玩家在线时, 禁止重复创建玩家
+     * Do not repetitive creating player
      *
      * @param profile
-     *         即将加入的玩家
+     *         Player profile
      * @param cir
      *         callback
      * @author 草二号机
@@ -43,12 +44,10 @@ public abstract class PlayerManagerMixin {
     public void createPlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         if (SharedVariables.enableRejectReconnect) {
             UUID uuid = PlayerUtil.getUUID(profile);
-            for (ServerPlayerEntity player : this.players) {
-                if (player.networkHandler.connection.getAddress() == null) {
-                    break;
-                }
-                if (player.getUuid()
-                          .equals(uuid)) {
+            ServerPlayerEntity player = getPlayer(uuid);
+            if (player != null) {
+                // Compatible for carpet dummy player
+                if (player.networkHandler.connection.getAddress() != null) {
                     if (loginUsers.hasUser(player)) {
                         SimpleCommandOperation.sendMessage(
                                 player,
@@ -74,7 +73,7 @@ public abstract class PlayerManagerMixin {
         }
 
         if (connection.isOpen()) {
-            CONNECTIONS.add(connection);
+            connections.add(connection);
         } else {
             ci.cancel();
         }
@@ -101,40 +100,12 @@ public abstract class PlayerManagerMixin {
     @Shadow
     public abstract MinecraftServer getServer();
 
+    @Shadow @Nullable public abstract ServerPlayerEntity getPlayer(String name);
+
+    @Shadow @Nullable public abstract ServerPlayerEntity getPlayer(UUID uuid);
+
     @Redirect(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V"))
     public void sendPacket(ServerPlayNetworkHandler instance, Packet<?> packet) {
         instance.sendPacket(packet);
     }
-
-    //    @Inject(method = "getAdvancementTracker", at = @At("HEAD"), cancellable = true)
-    //    public void optimizeAdvancementTracker(ServerPlayerEntity player, CallbackInfoReturnable<PlayerAdvancementTracker> cir) {
-    //        cir.setReturnValue(optimizeAdvancementTracker(player, getServer().getPlayerManager()));
-    //    }
-    //
-    //    public PlayerAdvancementTracker optimizeAdvancementTracker(ServerPlayerEntity player, PlayerManager manager) {
-    //        UUID uuid = player.getUuid();
-    //        long start = TimeUtil.millions();
-    //        TRACKER.info("Loading advancement tracker for " + uuid);
-    //        PlayerAdvancementTracker playerAdvancementTracker = advancementTrackerCaches.get(uuid.toString());
-    //        if (playerAdvancementTracker == null) {
-    //            TRACKER.info("Initializing advancement tracker for " + uuid);
-    //            File file = this.server.getSavePath(WorldSavePath.ADVANCEMENTS).toFile();
-    //            File file2 = new File(file, uuid + ".json");
-    //            playerAdvancementTracker = new PlayerAdvancementTracker(this.server.getDataFixer(), manager, this.server.getAdvancementLoader(), file2, player);
-    //            advancementTrackerCaches.put(uuid.toString(), playerAdvancementTracker);
-    //        } else {
-    //            TRACKER.info("Loading cached advancement tracker");
-    //            TRACKER.info("Updating advancements...");
-    //            playerAdvancementTracker.reload(null);
-    //        }
-    //
-    //        playerAdvancementTracker.setOwner(player);
-    //        TRACKER.info("Loaded advancement tracker for " + uuid + ", done in " + TimeUtil.processMillion(start) + "ms");
-    //        return playerAdvancementTracker;
-    //    }
-    //
-    //    @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/PlayerAdvancementTracker;clearCriteria()V"))
-    //    public void remove(PlayerAdvancementTracker instance) {
-    //
-    //    }
 }

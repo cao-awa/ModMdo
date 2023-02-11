@@ -19,6 +19,8 @@ import java.util.*;
  * Version after ModMdo v1.0.43, version id is 0.
  *
  * @author 草二号机
+ *
+ * @since 1.0.43
  */
 public final class LilacUpgrader extends CertificatesUpgrader {
     private static final Logger LOGGER = LogManager.getLogger("LilacCertificateUpgrader");

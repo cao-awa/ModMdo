@@ -40,8 +40,7 @@ public class Resource<T> {
                     } else {
                         result.add(IOUtil.read(new BufferedReader(new InputStreamReader(
                                 ResourcesLoader.getResource(
-                                        str,
-                                        getClass()
+                                        str
                                 ),
                                 StandardCharsets.UTF_8
                         ))));

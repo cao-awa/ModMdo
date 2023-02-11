@@ -26,13 +26,13 @@ public class SecureKey extends Storable {
         this.address = address;
     }
 
-    public SecureKey(@NotNull JSONObject json) {
-        this.privateKey = json.getString("private-key");
-        this.verifyKey = json.getString("verify-key");
-        if (json.containsKey("id")) {
-            this.id = json.getString("id");
-        }
-        this.address = json.getString("address");
+    public static @NotNull SecureKey load(@NotNull JSONObject json) {
+        return new SecureKey(
+                json.getString("private-key"),
+                json.containsKey("id") ? json.getString("id") : null,
+                json.getString("verify-key"),
+                json.getString("address")
+        );
     }
 
     public @NotNull String getVerifyKey() {

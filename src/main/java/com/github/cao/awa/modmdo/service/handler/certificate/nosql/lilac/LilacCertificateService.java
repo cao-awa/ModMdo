@@ -23,6 +23,7 @@ import java.util.function.*;
  * @param <T>
  *         Certificate type
  * @author 草二号机
+ *
  * @since 1.0.43
  */
 public class LilacCertificateService<T extends Certificate> extends LocalCertificateService<T> {

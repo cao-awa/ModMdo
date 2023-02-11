@@ -16,7 +16,7 @@ public class ModMdoClientInitializer implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         LOGGER.info(
-                "Loading ModMdo {} (step 2/2)",
+                "Loading ModMdo '{}' for client",
                 SharedVariables.VERSION_ID
         );
         SharedVariables.modMdoType = ModMdoType.CLIENT;
@@ -26,8 +26,7 @@ public class ModMdoClientInitializer implements ClientModInitializer {
         staticConfig.setIfNoExist(
                 "private_verify_key",
                 RandomIdentifier.randomIdentifier(
-                        16,
-                        true
+                        16
                 )
         );
 

@@ -22,11 +22,11 @@ public abstract class ClientLoginNetworkHandlerMixin {
     /**
      * Check server is ModMdo server and mark it.
      *
-     * @author 草二号机
-     * @author cao_awa
-     *
      * @param packet Login packet
      * @param ci Callback
+     *
+     * @author 草二号机
+     * @author cao_awa
      */
     @Inject(method = "onHello", at = @At("HEAD"))
     private void onHello(LoginHelloS2CPacket packet, CallbackInfo ci) {
@@ -51,14 +51,14 @@ public abstract class ClientLoginNetworkHandlerMixin {
     /**
      * Let client ignored vanilla verify when server is ModMdo server.
      *
-     * @author 草二号机
-     *
      * @param serverId ServerId
      * @param cir Callback
+     *
+     * @author 草二号机
      */
     @Inject(method = "joinServerSession", at = @At("RETURN"), cancellable = true)
     public void joinServerSession(String serverId, CallbackInfoReturnable<Text> cir) {
-        if (isModMdoServer) {
+        if (this.isModMdoServer) {
             cir.setReturnValue(null);
         }
     }

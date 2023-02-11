@@ -16,6 +16,8 @@ import static com.github.cao.awa.modmdo.storage.SharedVariables.*;
  * Version before ModMdo v1.0.43, version id is -1.
  *
  * @author 草二号机
+ *
+ * @since 1.0.43
  */
 public final class OldestUpgrader extends CertificatesUpgrader {
     private static final Logger LOGGER = LogManager.getLogger("OldestCertificateUpgrader");

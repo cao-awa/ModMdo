@@ -6,6 +6,8 @@ import com.github.cao.awa.modmdo.service.handler.certificate.nosql.*;
  * Request to upgrader, use local mode.
  *
  * @author 草二号机
+ *
+ * @since 1.0.43
  */
 public class LocalCertificatesUpgradeRequest extends CertificatesUpgradeRequest {
     private final String path;
