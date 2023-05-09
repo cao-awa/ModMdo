@@ -1,11 +1,6 @@
 # ModMdo
 A fabric mod for secure minecraft server.
 
-## Uses
-If server is offline, Client need install ModMdo, nothing more.
-
-If not offline, can use Minecraft accounts to replace ModMdo login.
-
 ## Command
 Enable ModMdo whitelist:
 
@@ -73,3 +68,6 @@ This feature let identifier unable to use when database give away.
 Server will not send these data to other ModMdo client, includes your client.
 
 The database leaking is meaningless, can be ignored.
+
+### MITM
+Preparing to use security handshake by Kalmia, pre share an EC-384 public key, and server saving the private key, middle attacker is unable to decrypt any informations.
