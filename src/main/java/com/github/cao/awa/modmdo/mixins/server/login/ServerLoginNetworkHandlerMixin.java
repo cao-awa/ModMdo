@@ -114,7 +114,7 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
      */
     @Redirect(method = "addToServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
     private void onPlayerConnect(PlayerManager manager, ClientConnection connection, ServerPlayerEntity player) {
-        if (player == null || serverUnderDdosAttack.get()) {
+        if (player == null) {
             return;
         }
 
@@ -309,9 +309,6 @@ public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginPacke
 
     @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
     public void onDisconnected0(Logger instance, String s, Object o1, Object o2) {
-        if (serverUnderDdosAttack.get()) {
-            return;
-        }
         instance.info(
                 s,
                 o1,

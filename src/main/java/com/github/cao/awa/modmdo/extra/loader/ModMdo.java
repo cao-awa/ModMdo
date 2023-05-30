@@ -116,8 +116,6 @@ public class ModMdo extends ModMdoExtra<ModMdo> {
     public void initCommand() {
         EntrustEnvironment.trys(
                 () -> {
-                    new HereCommand().register();
-                    new DimensionHereCommand().register();
                     new TestCommand().register();
                     new TemporaryCommand().register();
                     new ModMdoCommand().register();

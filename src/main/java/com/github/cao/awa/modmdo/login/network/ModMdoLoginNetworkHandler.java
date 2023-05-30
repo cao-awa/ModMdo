@@ -40,9 +40,6 @@ public class ModMdoLoginNetworkHandler extends ServerPlayPacketHandler {
     @Override
     public void onCustomPayload(CustomPayloadC2SPacket packet) {
         try {
-            if (serverUnderDdosAttack.get()) {
-                return;
-            }
             Identifier channel = EntrustEnvironment.get(
                     packet::getChannel,
                     new Identifier("")

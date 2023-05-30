@@ -97,9 +97,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
     @Redirect(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
     public void onDisconnected0(Logger instance, String s, Object o1, Object o2) {
-        if (serverUnderDdosAttack.get()) {
-            return;
-        }
         instance.info(
                 s,
                 o1,

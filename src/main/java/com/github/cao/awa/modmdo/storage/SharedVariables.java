@@ -93,8 +93,6 @@ public class SharedVariables {
     public static ModMdoTriggerBuilder triggerBuilder = new ModMdoTriggerBuilder();
     public static ModMdoVariableBuilder variableBuilder = new ModMdoVariableBuilder();
     public static JSONObject notes = new JSONObject();
-    public static Receptacle<Boolean> serverUnderDdosAttack = Receptacle.of(false);
-    public static DdosAttackRecorder ddosRecording = null;
 
     public static final Configure database = new Configure(SupplierTemplates.emptyString());
 
