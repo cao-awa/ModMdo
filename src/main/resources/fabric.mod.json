@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "modmdo",
+  "version": "${version}",
+  "name": "ModMdo",
+  "description": "A fabric mod for secure playing server.",
+  "authors": [
+    "草awa",
+    "草二号机",
+    "zhuaidadaya",
+    "InkerBot"
+  ],
+  "contact": {
+    "homepage": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
+    "sources": "https://github.com/zhuaidadaya/modMdo/tree/1.17.x",
+    "issues": "https://github.com/zhuaidadaya/ModMdo/issues"
+  },
+
+  "license": "GPL-3.0",
+  "icon": "assets/modmdo/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+        "com.github.cao.awa.modmdo.ModMdoStdInitializer"
+    ],
+    "client": [
+        "com.github.cao.awa.modmdo.ModMdoClientInitializer"
+    ],
+    "server": [
+        "com.github.cao.awa.modmdo.ModMdoServerInitializer"
+    ]
+  },
+  "mixins": [
+    "modmdo.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.11",
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

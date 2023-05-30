@@ -1,0 +1,38 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "com.github.cao.awa.modmdo.mixins",
+    "compatibilityLevel": "JAVA_16",
+    "mixins": [
+        "server.MinecraftServerMixin"
+    ],
+    "client": [
+        "client.ServerInfoMixin",
+        "client.login.ClientLoginNetworkHandlerMixin",
+        "client.play.ClientPlayNetworkHandlerMixin"
+    ],
+    "server": [
+        "block.BlockMixin",
+        "command.CommandManagerMixin",
+        "command.block.CommandBlockMixin",
+        "command.save.SaveAllCommandMixin",
+        "connection.ClientConnectionMixin",
+        "enchant.EnchantmentHelperMixin",
+        "entity.LivingEntityMixin",
+        "entity.player.ServerPlayerEntityMixin",
+        "explosion.ExplosionMixin",
+        "item.ItemEntityMixin",
+        "player.PlayerManagerMixin",
+        "server.MinecraftServerInterface",
+        "server.chunk.pos.ChunkPosMixin",
+        "server.login.ServerLoginNetworkHandlerMixin",
+        "server.network.ServerQueryNetworkHandlerMixin",
+        "server.play.ServerPlayNetworkHandlerMixin",
+        "server.world.ServerWorldMixin",
+        "tracker.DamageTrackerMixin",
+        "world.WorldMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}
